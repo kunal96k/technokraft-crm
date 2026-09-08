@@ -148,10 +148,10 @@ export const PerformanceReportPage: React.FC = () => {
       {/* Employee Performance Matrix Section */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-bold text-slate-900">
+          <h2 className="text-base font-bold text-slate-900 dark:text-white">
             Individual Employee Performance Directory
           </h2>
-          <span className="text-xs text-slate-500">
+          <span className="text-xs text-slate-500 dark:text-slate-400">
             Showing {filteredEmployees.length} active team members
           </span>
         </div>
@@ -179,7 +179,7 @@ export const PerformanceReportPage: React.FC = () => {
       {/* Employee Detail Modal/Drawer */}
       {selectedEmployeeForModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
-          <div className="bg-slate-50 rounded-2xl border border-slate-200 shadow-2xl w-full max-w-5xl max-h-[92vh] overflow-y-auto p-4 sm:p-6">
+          <div className="bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-5xl max-h-[92vh] overflow-y-auto p-4 sm:p-6">
             <EmployeePerformanceDetailView
               employee={selectedEmployeeForModal}
               onClose={() => setSelectedEmployeeForModal(null)}

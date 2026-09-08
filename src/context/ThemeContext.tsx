@@ -33,7 +33,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     } catch {
       // Fallback
     }
-    return 'Light'; // Default to Light as per user requirements
+    return 'Dark'; // Default to Dark as per user requirements
   });
 
   const [systemIsDark, setSystemIsDark] = useState<boolean>(() => {

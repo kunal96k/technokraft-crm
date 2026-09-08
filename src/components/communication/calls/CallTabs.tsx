@@ -32,7 +32,7 @@ export const CallTabs: React.FC<CallTabsProps> = ({
   ];
 
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-2">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-2">
       {/* Status / Category filter tabs */}
       <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5">
         {tabs.map((tab) => {
@@ -47,14 +47,14 @@ export const CallTabs: React.FC<CallTabsProps> = ({
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                 isActive
                   ? 'bg-[#5B4DB7] text-white shadow-2xs'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
               }`}
             >
-              <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+              <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-white' : 'text-slate-400 dark:text-slate-500'}`} />
               <span>{tab.label}</span>
               <span
                 className={`ml-1 text-[10px] font-bold px-1.5 py-0.2 rounded-full ${
-                  isActive ? 'bg-white/20 text-white' : 'bg-slate-200/80 text-slate-700'
+                  isActive ? 'bg-white/20 text-white' : 'bg-slate-200/80 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
                 }`}
               >
                 {tab.count}
@@ -65,14 +65,14 @@ export const CallTabs: React.FC<CallTabsProps> = ({
       </div>
 
       {/* View Mode Switcher (List vs. Today Timeline vs. Team Workload) */}
-      <div className="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200/70 self-start sm:self-auto shrink-0">
+      <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg border border-slate-200/70 dark:border-slate-700 self-start sm:self-auto shrink-0">
         <button
           type="button"
           onClick={() => onViewModeChange('list')}
-          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-all ${
+          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-all cursor-pointer ${
             viewMode === 'list'
-              ? 'bg-white text-slate-900 shadow-2xs font-semibold'
-              : 'text-slate-600 hover:text-slate-900'
+              ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs font-semibold'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
           }`}
           title="Table / Card View"
         >
@@ -83,10 +83,10 @@ export const CallTabs: React.FC<CallTabsProps> = ({
         <button
           type="button"
           onClick={() => onViewModeChange('timeline')}
-          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-all ${
+          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-all cursor-pointer ${
             viewMode === 'timeline'
-              ? 'bg-white text-slate-900 shadow-2xs font-semibold'
-              : 'text-slate-600 hover:text-slate-900'
+              ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs font-semibold'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
           }`}
           title="Chronological Timeline"
         >
@@ -97,10 +97,10 @@ export const CallTabs: React.FC<CallTabsProps> = ({
         <button
           type="button"
           onClick={() => onViewModeChange('team')}
-          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-all ${
+          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-all cursor-pointer ${
             viewMode === 'team'
-              ? 'bg-white text-slate-900 shadow-2xs font-semibold'
-              : 'text-slate-600 hover:text-slate-900'
+              ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs font-semibold'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
           }`}
           title="Employee Performance"
         >

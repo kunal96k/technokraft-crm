@@ -40,8 +40,8 @@ export const PerformanceKpiCards: React.FC<PerformanceKpiCardsProps> = ({
       diff: '+12%',
       isPositive: true,
       icon: Users,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
+      color: 'text-blue-600 dark:text-blue-400',
+      bgColor: 'bg-blue-50 dark:bg-blue-950/40',
     },
     {
       id: 'kpi-contacted',
@@ -50,8 +50,8 @@ export const PerformanceKpiCards: React.FC<PerformanceKpiCardsProps> = ({
       diff: '+8%',
       isPositive: true,
       icon: PhoneCall,
-      color: 'text-indigo-600',
-      bgColor: 'bg-indigo-50',
+      color: 'text-indigo-600 dark:text-indigo-400',
+      bgColor: 'bg-indigo-50 dark:bg-indigo-950/40',
     },
     {
       id: 'kpi-followups',
@@ -60,8 +60,8 @@ export const PerformanceKpiCards: React.FC<PerformanceKpiCardsProps> = ({
       diff: '+15%',
       isPositive: true,
       icon: CalendarCheck,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-50',
+      color: 'text-purple-600 dark:text-purple-400',
+      bgColor: 'bg-purple-50 dark:bg-purple-950/40',
     },
     {
       id: 'kpi-qualified',
@@ -70,8 +70,8 @@ export const PerformanceKpiCards: React.FC<PerformanceKpiCardsProps> = ({
       diff: '+10%',
       isPositive: true,
       icon: CheckCircle2,
-      color: 'text-emerald-600',
-      bgColor: 'bg-emerald-50',
+      color: 'text-emerald-600 dark:text-emerald-400',
+      bgColor: 'bg-emerald-50 dark:bg-emerald-950/40',
     },
     {
       id: 'kpi-proposals',
@@ -80,8 +80,8 @@ export const PerformanceKpiCards: React.FC<PerformanceKpiCardsProps> = ({
       diff: '+5%',
       isPositive: true,
       icon: FileText,
-      color: 'text-amber-600',
-      bgColor: 'bg-amber-50',
+      color: 'text-amber-600 dark:text-amber-400',
+      bgColor: 'bg-amber-50 dark:bg-amber-950/40',
     },
     {
       id: 'kpi-won',
@@ -90,8 +90,8 @@ export const PerformanceKpiCards: React.FC<PerformanceKpiCardsProps> = ({
       diff: '+20%',
       isPositive: true,
       icon: Trophy,
-      color: 'text-emerald-700',
-      bgColor: 'bg-emerald-100',
+      color: 'text-emerald-700 dark:text-emerald-400',
+      bgColor: 'bg-emerald-100 dark:bg-emerald-950/40',
     },
   ];
 
@@ -102,10 +102,10 @@ export const PerformanceKpiCards: React.FC<PerformanceKpiCardsProps> = ({
         return (
           <div
             key={card.id}
-            className="bg-white rounded-xl border border-slate-200 p-3.5 sm:p-4 shadow-2xs hover:shadow-xs transition-shadow flex flex-col justify-between"
+            className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-3.5 sm:p-4 shadow-2xs hover:shadow-xs transition-shadow flex flex-col justify-between"
           >
             <div className="flex items-center justify-between gap-2">
-              <span className="text-[11px] font-medium text-slate-500 truncate">
+              <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 truncate">
                 {card.label}
               </span>
               <div
@@ -116,13 +116,13 @@ export const PerformanceKpiCards: React.FC<PerformanceKpiCardsProps> = ({
             </div>
 
             <div className="mt-2.5">
-              <div className="text-xl sm:text-2xl font-bold font-mono text-slate-900 tracking-tight">
+              <div className="text-xl sm:text-2xl font-bold font-mono text-slate-900 dark:text-white tracking-tight">
                 {card.value.toLocaleString('en-IN')}
               </div>
-              <div className="flex items-center gap-1 text-[10px] text-slate-500 mt-1">
+              <div className="flex items-center gap-1 text-[10px] text-slate-500 dark:text-slate-400 mt-1">
                 <span
                   className={`inline-flex items-center font-semibold ${
-                    card.isPositive ? 'text-emerald-600' : 'text-rose-600'
+                    card.isPositive ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
                   }`}
                 >
                   {card.isPositive ? (
@@ -132,7 +132,7 @@ export const PerformanceKpiCards: React.FC<PerformanceKpiCardsProps> = ({
                   )}
                   {card.diff}
                 </span>
-                <span className="text-slate-400">vs prev.</span>
+                <span className="text-slate-400 dark:text-slate-500">vs prev.</span>
               </div>
             </div>
           </div>

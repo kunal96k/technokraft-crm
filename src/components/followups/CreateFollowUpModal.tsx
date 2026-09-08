@@ -97,22 +97,22 @@ export const CreateFollowUpModal: React.FC<CreateFollowUpModalProps> = ({
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 py-6 sm:py-8 animate-in fade-in duration-150">
       <div
         id="create-followup-modal"
-        className="relative bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-2xl flex flex-col max-h-[calc(100vh-3rem)] sm:max-h-[calc(100vh-4rem)] overflow-hidden animate-in zoom-in-95 duration-150 my-auto"
+        className="relative bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-2xl flex flex-col max-h-[calc(100vh-3rem)] sm:max-h-[calc(100vh-4rem)] overflow-hidden animate-in zoom-in-95 duration-150 my-auto"
       >
         {/* Header */}
-        <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/90 backdrop-blur-xs z-10">
+        <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/90 dark:bg-slate-950/60 backdrop-blur-xs z-10">
           <div>
-            <h3 className="text-base font-bold text-slate-900">
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">
               Schedule New Follow-up
             </h3>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-slate-500 dark:text-slate-400">
               Set customer callback, email checkpoint, or demo reminder with automatic SLA tracking.
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -122,7 +122,7 @@ export const CreateFollowUpModal: React.FC<CreateFollowUpModalProps> = ({
         <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0 overflow-hidden text-xs">
           <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4">
             {error && (
-              <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 flex items-center gap-2">
+              <div className="p-3 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/60 text-red-700 dark:text-red-300 flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 flex-shrink-0" />
                 <span>{error}</span>
               </div>
@@ -130,13 +130,13 @@ export const CreateFollowUpModal: React.FC<CreateFollowUpModalProps> = ({
 
           {/* Lead Selection */}
           <div>
-            <label className="block font-semibold text-slate-700 mb-1">
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
               Related Lead / Customer *
             </label>
             <select
               value={leadId}
               onChange={(e) => setLeadId(e.target.value)}
-              className="w-full px-3 py-2 text-xs sm:text-sm bg-white border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
+              className="w-full px-3 py-2 text-xs sm:text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
               required
             >
               {MOCK_LEADS.map((l) => (
@@ -148,28 +148,28 @@ export const CreateFollowUpModal: React.FC<CreateFollowUpModalProps> = ({
 
             {/* Auto-resolved Lead Meta Card */}
             {selectedLead && (
-              <div className="mt-2 p-3 bg-slate-50 rounded-xl border border-slate-200/80 grid grid-cols-2 sm:grid-cols-4 gap-2 text-slate-600 text-[11px]">
+              <div className="mt-2 p-3 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200/80 dark:border-slate-800 grid grid-cols-2 sm:grid-cols-4 gap-2 text-slate-600 dark:text-slate-300 text-[11px]">
                 <div>
-                  <span className="text-slate-400 block">Contact:</span>
-                  <span className="font-semibold text-slate-800 truncate block">
+                  <span className="text-slate-400 dark:text-slate-500 block">Contact:</span>
+                  <span className="font-semibold text-slate-800 dark:text-slate-200 truncate block">
                     {selectedLead.contact.name}
                   </span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block">Designation:</span>
-                  <span className="font-medium text-slate-700 truncate block">
+                  <span className="text-slate-400 dark:text-slate-500 block">Designation:</span>
+                  <span className="font-medium text-slate-700 dark:text-slate-300 truncate block">
                     {selectedLead.contact.designation || 'Key Decision Maker'}
                   </span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block">Service:</span>
-                  <span className="font-medium text-purple-700 truncate block">
+                  <span className="text-slate-400 dark:text-slate-500 block">Service:</span>
+                  <span className="font-medium text-purple-700 dark:text-purple-300 truncate block">
                     {selectedLead.service}
                   </span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block">Score:</span>
-                  <span className="font-bold text-emerald-600">
+                  <span className="text-slate-400 dark:text-slate-500 block">Score:</span>
+                  <span className="font-bold text-emerald-600 dark:text-emerald-400">
                     {selectedLead.score} / 100
                   </span>
                 </div>
@@ -180,13 +180,13 @@ export const CreateFollowUpModal: React.FC<CreateFollowUpModalProps> = ({
           {/* Follow-up Type & Priority */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Follow-up Type *
               </label>
               <select
                 value={type}
                 onChange={(e) => setType(e.target.value as FollowUpType)}
-                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
+                className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
               >
                 <option value="Call">Call</option>
                 <option value="Email">Email</option>
@@ -199,13 +199,13 @@ export const CreateFollowUpModal: React.FC<CreateFollowUpModalProps> = ({
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Priority
               </label>
               <select
                 value={priority}
                 onChange={(e) => setPriority(e.target.value as FollowUpPriority)}
-                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
+                className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
               >
                 <option value="URGENT">Urgent (Immediate SLA)</option>
                 <option value="HIGH">High</option>
@@ -218,10 +218,10 @@ export const CreateFollowUpModal: React.FC<CreateFollowUpModalProps> = ({
           {/* Purpose & Presets */}
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="font-semibold text-slate-700">
+              <label className="font-semibold text-slate-700 dark:text-slate-300">
                 Purpose / Goal *
               </label>
-              <span className="text-[10px] text-slate-400">
+              <span className="text-[10px] text-slate-400 dark:text-slate-500">
                 Choose a preset or type custom
               </span>
             </div>
@@ -230,7 +230,7 @@ export const CreateFollowUpModal: React.FC<CreateFollowUpModalProps> = ({
               value={purpose}
               onChange={(e) => setPurpose(e.target.value)}
               placeholder="e.g., Discuss technical proposal and timeline"
-              className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
+              className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
               required
             />
             {/* Presets chips */}
@@ -240,7 +240,7 @@ export const CreateFollowUpModal: React.FC<CreateFollowUpModalProps> = ({
                   key={preset}
                   type="button"
                   onClick={() => setPurpose(preset)}
-                  className="px-2 py-0.5 rounded text-[10px] bg-slate-100 hover:bg-purple-100 hover:text-purple-700 text-slate-600 transition-colors truncate max-w-xs"
+                  className="px-2 py-0.5 rounded text-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-purple-100 dark:hover:bg-purple-950/50 hover:text-purple-700 dark:hover:text-purple-300 text-slate-600 dark:text-slate-300 transition-colors truncate max-w-xs"
                 >
                   {preset}
                 </button>
@@ -251,20 +251,20 @@ export const CreateFollowUpModal: React.FC<CreateFollowUpModalProps> = ({
           {/* Schedule Date & Time */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Date *
               </label>
               <input
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
+                className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
                 required
               />
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Time *
               </label>
               <input
@@ -272,7 +272,7 @@ export const CreateFollowUpModal: React.FC<CreateFollowUpModalProps> = ({
                 value={time}
                 onChange={(e) => setTime(e.target.value)}
                 placeholder="e.g., 04:00 PM"
-                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
+                className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
                 required
               />
             </div>
@@ -281,13 +281,13 @@ export const CreateFollowUpModal: React.FC<CreateFollowUpModalProps> = ({
           {/* Assigned Rep & Reminder */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Assigned Employee *
               </label>
               <select
                 value={assignedTo}
                 onChange={(e) => setAssignedTo(e.target.value)}
-                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
+                className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
               >
                 <option value="Kunal Patil">Kunal Patil (Sales Manager)</option>
                 <option value="Shruti Raundal">Shruti Raundal (Sales Executive)</option>
@@ -298,13 +298,13 @@ export const CreateFollowUpModal: React.FC<CreateFollowUpModalProps> = ({
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Notification Reminder
               </label>
               <select
                 value={reminder}
                 onChange={(e) => setReminder(e.target.value)}
-                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
+                className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
               >
                 <option value="No reminder">No reminder</option>
                 <option value="5 minutes before">5 minutes before</option>
@@ -318,7 +318,7 @@ export const CreateFollowUpModal: React.FC<CreateFollowUpModalProps> = ({
 
           {/* Additional Notes */}
           <div>
-            <label className="block font-semibold text-slate-700 mb-1">
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
               Internal Notes / Context (Optional)
             </label>
             <textarea
@@ -326,17 +326,17 @@ export const CreateFollowUpModal: React.FC<CreateFollowUpModalProps> = ({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="e.g. Previous objections, attendees, or specific topics to raise..."
-              className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
+              className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
             />
           </div>
           </div>
 
           {/* Sticky Footer Actions */}
-          <div className="flex-shrink-0 px-6 py-3.5 bg-slate-50/90 backdrop-blur-xs border-t border-slate-100 flex items-center justify-end gap-2.5">
+          <div className="flex-shrink-0 px-6 py-3.5 bg-slate-50/90 dark:bg-slate-950/60 backdrop-blur-xs border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-2.5">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+              className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
             >
               Cancel
             </button>

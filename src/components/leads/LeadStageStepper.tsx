@@ -34,14 +34,14 @@ export const LeadStageStepper: React.FC<LeadStageStepperProps> = ({
   const currentIndex = getStageIndex(currentStatus);
 
   return (
-    <div className="bg-white border border-slate-200/90 rounded-xl p-4 sm:p-5 shadow-2xs">
+    <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-2xs">
       <div className="flex items-center justify-between mb-3">
-        <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+        <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
           Lead Pipeline Lifecycle
         </span>
-        <span className="text-xs font-medium text-slate-500">
+        <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
           Current Stage:{' '}
-          <strong className="text-[#5B4DB7] font-semibold uppercase">{currentStatus}</strong>
+          <strong className="text-[#5B4DB7] dark:text-purple-400 font-semibold uppercase">{currentStatus}</strong>
         </span>
       </div>
 
@@ -52,15 +52,15 @@ export const LeadStageStepper: React.FC<LeadStageStepperProps> = ({
           const isCurrent = idx === currentIndex;
           const isUpcoming = idx > currentIndex;
 
-          let pillClass = 'bg-slate-100 text-slate-500 border-slate-200';
-          let circleClass = 'bg-slate-200 text-slate-600';
+          let pillClass = 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700';
+          let circleClass = 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300';
 
           if (isCompleted) {
-            pillClass = 'bg-emerald-50 text-emerald-800 border-emerald-200';
+            pillClass = 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800';
             circleClass = 'bg-emerald-500 text-white';
           } else if (isCurrent) {
-            pillClass = 'bg-[#5B4DB7] text-white border-[#5B4DB7] shadow-xs ring-2 ring-purple-300/50';
-            circleClass = 'bg-white text-[#5B4DB7] font-bold';
+            pillClass = 'bg-[#5B4DB7] dark:bg-purple-600 text-white border-[#5B4DB7] dark:border-purple-600 shadow-xs ring-2 ring-purple-300/50 dark:ring-purple-400/40';
+            circleClass = 'bg-white text-[#5B4DB7] dark:text-purple-600 font-bold';
           }
 
           return (
@@ -81,7 +81,7 @@ export const LeadStageStepper: React.FC<LeadStageStepperProps> = ({
               {idx < STAGES.length - 1 && (
                 <div
                   className={`h-0.5 w-2 flex-shrink-0 ${
-                    idx < currentIndex ? 'bg-emerald-400' : 'bg-slate-200'
+                    idx < currentIndex ? 'bg-emerald-400 dark:bg-emerald-500' : 'bg-slate-200 dark:bg-slate-700'
                   }`}
                 />
               )}
@@ -103,14 +103,14 @@ export const LeadStageStepper: React.FC<LeadStageStepperProps> = ({
               onClick={() => onSelectStage && onSelectStage(stage.status)}
               className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium border flex items-center gap-1.5 transition-colors ${
                 isCurrent
-                  ? 'bg-[#5B4DB7] text-white border-[#5B4DB7]'
+                  ? 'bg-[#5B4DB7] dark:bg-purple-600 text-white border-[#5B4DB7] dark:border-purple-600'
                   : isCompleted
-                  ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                  : 'bg-slate-50 text-slate-600 border-slate-200'
+                  ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
+                  : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'
               }`}
             >
               {isCompleted ? (
-                <Check className="w-3 h-3 text-emerald-600" />
+                <Check className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
               ) : (
                 <span className="text-[10px] font-mono">{idx + 1}.</span>
               )}

@@ -26,14 +26,16 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
         className={`max-w-[85%] sm:max-w-[75%] rounded-2xl px-3.5 py-2.5 shadow-2xs text-xs leading-relaxed space-y-1.5 ${
           isEmployee
             ? 'bg-[#5B4DB7] text-white rounded-tr-xs'
-            : 'bg-white text-slate-800 border border-slate-200 rounded-tl-xs'
+            : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700 rounded-tl-xs'
         }`}
       >
         {/* Document attachment if present */}
         {message.type === 'document' && message.file && (
           <div
             className={`flex items-center gap-2 p-2 rounded-lg mb-1.5 ${
-              isEmployee ? 'bg-white/15 text-white' : 'bg-slate-50 text-slate-800 border border-slate-200'
+              isEmployee
+                ? 'bg-white/15 text-white'
+                : 'bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700'
             }`}
           >
             <FileText className="w-4 h-4 text-amber-300 flex-shrink-0" />
@@ -58,7 +60,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
         {/* Footer info: time and delivery status */}
         <div
           className={`flex items-center justify-end gap-1.5 text-[10px] pt-0.5 ${
-            isEmployee ? 'text-white/80' : 'text-slate-400'
+            isEmployee ? 'text-white/80' : 'text-slate-400 dark:text-slate-400'
           }`}
         >
           <span>{message.time}</span>

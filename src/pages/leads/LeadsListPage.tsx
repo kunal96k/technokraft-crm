@@ -221,9 +221,9 @@ export const LeadsListPage: React.FC = () => {
           <div className="flex items-center gap-2">
             <Link
               to="/leads/import"
-              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors shadow-2xs"
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-2xs"
             >
-              <Upload className="w-3.5 h-3.5 text-slate-500" />
+              <Upload className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
               <span>Import Leads</span>
             </Link>
 
@@ -240,7 +240,7 @@ export const LeadsListPage: React.FC = () => {
 
       {/* Simulated CRM Action Notice Banner */}
       {actionNotice && (
-        <div className="p-3 bg-purple-50 border border-purple-200 text-[#5B4DB7] rounded-xl text-xs font-semibold flex items-center justify-between shadow-2xs animate-in fade-in duration-150">
+        <div className="p-3 bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 text-[#5B4DB7] dark:text-purple-300 rounded-xl text-xs font-semibold flex items-center justify-between shadow-2xs animate-in fade-in duration-150">
           <div className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4" />
             <span>{actionNotice}</span>
@@ -248,7 +248,7 @@ export const LeadsListPage: React.FC = () => {
           <button
             type="button"
             onClick={() => setActionNotice(null)}
-            className="p-1 text-purple-400 hover:text-purple-700"
+            className="p-1 text-purple-400 hover:text-purple-700 dark:hover:text-purple-200"
           >
             <X className="w-4 h-4" />
           </button>
@@ -262,7 +262,7 @@ export const LeadsListPage: React.FC = () => {
       />
 
       {/* 2. Search & Filter Bar */}
-      <div className="bg-white border border-slate-200/90 rounded-xl p-3.5 sm:p-4 shadow-2xs space-y-3">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl p-3.5 sm:p-4 shadow-2xs space-y-3">
         <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
           {/* Main Search Input */}
           <div className="relative flex-1 min-w-[240px]">
@@ -272,13 +272,13 @@ export const LeadsListPage: React.FC = () => {
               value={filters.search}
               onChange={(e) => handleFilterChange('search', e.target.value)}
               placeholder="Search by company, contact, email, phone, lead ID..."
-              className="w-full pl-9 pr-8 py-2 bg-slate-50 hover:bg-slate-100/60 focus:bg-white border border-slate-300 rounded-lg text-xs text-slate-800 placeholder-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40 focus:border-[#5B4DB7]"
+              className="w-full pl-9 pr-8 py-2 bg-slate-50 dark:bg-slate-950/60 hover:bg-slate-100/60 dark:hover:bg-slate-950 focus:bg-white dark:focus:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 transition-colors focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40 focus:border-[#5B4DB7]"
             />
             {filters.search && (
               <button
                 type="button"
                 onClick={() => handleFilterChange('search', '')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 p-0.5"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -291,7 +291,7 @@ export const LeadsListPage: React.FC = () => {
             <select
               value={filters.status}
               onChange={(e) => handleFilterChange('status', e.target.value)}
-              className="px-2.5 py-2 bg-white border border-slate-300 rounded-lg text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7] cursor-pointer"
+              className="px-2.5 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7] cursor-pointer"
             >
               <option value="">Status: All</option>
               <option value="NEW">New</option>
@@ -308,7 +308,7 @@ export const LeadsListPage: React.FC = () => {
             <select
               value={filters.source}
               onChange={(e) => handleFilterChange('source', e.target.value)}
-              className="px-2.5 py-2 bg-white border border-slate-300 rounded-lg text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7] cursor-pointer"
+              className="px-2.5 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7] cursor-pointer"
             >
               <option value="">Source: All</option>
               <option value="LinkedIn">LinkedIn</option>
@@ -323,7 +323,7 @@ export const LeadsListPage: React.FC = () => {
             <select
               value={filters.service}
               onChange={(e) => handleFilterChange('service', e.target.value)}
-              className="px-2.5 py-2 bg-white border border-slate-300 rounded-lg text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7] cursor-pointer max-w-[160px] truncate"
+              className="px-2.5 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7] cursor-pointer max-w-[160px] truncate"
             >
               <option value="">Service: All</option>
               <option value="Custom Software Development">Custom Software</option>
@@ -338,7 +338,7 @@ export const LeadsListPage: React.FC = () => {
             <select
               value={filters.priority}
               onChange={(e) => handleFilterChange('priority', e.target.value)}
-              className="px-2.5 py-2 bg-white border border-slate-300 rounded-lg text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7] cursor-pointer"
+              className="px-2.5 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7] cursor-pointer"
             >
               <option value="">Priority: All</option>
               <option value="URGENT">Urgent</option>
@@ -352,7 +352,7 @@ export const LeadsListPage: React.FC = () => {
               <button
                 type="button"
                 onClick={handleResetFilters}
-                className="inline-flex items-center gap-1 px-2.5 py-2 rounded-lg text-xs font-semibold text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-colors"
+                className="inline-flex items-center gap-1 px-2.5 py-2 rounded-lg text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-transparent hover:border-rose-200 dark:hover:border-rose-800 transition-colors"
                 title="Clear all filters"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
@@ -366,9 +366,9 @@ export const LeadsListPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsFilterModalOpen(true)}
-              className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 shadow-2xs"
+              className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 shadow-2xs"
             >
-              <Filter className="w-3.5 h-3.5 text-[#5B4DB7]" />
+              <Filter className="w-3.5 h-3.5 text-[#5B4DB7] dark:text-purple-400" />
               <span>Filters</span>
               {hasActiveFilters && (
                 <span className="w-2 h-2 rounded-full bg-[#5B4DB7]" />
@@ -379,7 +379,7 @@ export const LeadsListPage: React.FC = () => {
               <button
                 type="button"
                 onClick={handleResetFilters}
-                className="p-2 text-rose-600 bg-rose-50 rounded-lg border border-rose-200"
+                className="p-2 text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 rounded-lg border border-rose-200 dark:border-rose-800"
                 title="Reset filters"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
@@ -487,25 +487,25 @@ export const LeadsListPage: React.FC = () => {
         ))}
 
         {filteredLeads.length === 0 && (
-          <div className="p-8 bg-white border border-slate-200 rounded-xl text-center text-xs text-slate-500">
+          <div className="p-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-center text-xs text-slate-500 dark:text-slate-400">
             No leads found matching current filters.
           </div>
         )}
       </div>
 
       {/* 6. Pagination Toolbar */}
-      <div className="bg-white border border-slate-200/90 rounded-xl p-3.5 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600 shadow-2xs">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl p-3.5 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600 dark:text-slate-300 shadow-2xs">
         <div className="flex items-center gap-2">
           <span>
             Showing <strong>1–{filteredLeads.length}</strong> of <strong>1,284</strong> leads
           </span>
-          <span className="text-slate-300">•</span>
+          <span className="text-slate-300 dark:text-slate-700">•</span>
           <div className="flex items-center gap-1">
             <span>Rows:</span>
             <select
               value={rowsPerPage}
               onChange={(e) => setRowsPerPage(Number(e.target.value))}
-              className="bg-slate-50 border border-slate-300 rounded px-1.5 py-0.5 text-xs text-slate-700 cursor-pointer"
+              className="bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded px-1.5 py-0.5 text-xs text-slate-700 dark:text-slate-200 cursor-pointer"
             >
               <option value={25}>25</option>
               <option value={50}>50</option>
@@ -518,7 +518,7 @@ export const LeadsListPage: React.FC = () => {
           <button
             type="button"
             disabled
-            className="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-400 cursor-not-allowed text-xs font-medium"
+            className="px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 text-slate-400 dark:text-slate-600 cursor-not-allowed text-xs font-medium"
           >
             Previous
           </button>
@@ -530,26 +530,26 @@ export const LeadsListPage: React.FC = () => {
           </button>
           <button
             type="button"
-            className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 text-xs font-medium"
+            className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 text-xs font-medium"
           >
             2
           </button>
           <button
             type="button"
-            className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 text-xs font-medium"
+            className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 text-xs font-medium"
           >
             3
           </button>
-          <span className="px-1 text-slate-400">...</span>
+          <span className="px-1 text-slate-400 dark:text-slate-600">...</span>
           <button
             type="button"
-            className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 text-xs font-medium"
+            className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 text-xs font-medium"
           >
             52
           </button>
           <button
             type="button"
-            className="px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 text-xs font-medium"
+            className="px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 text-xs font-medium"
           >
             Next
           </button>

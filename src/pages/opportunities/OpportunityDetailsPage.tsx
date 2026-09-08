@@ -308,7 +308,7 @@ export const OpportunityDetailsPage: React.FC = () => {
         <button
           type="button"
           onClick={() => navigate('/opportunities/pipeline')}
-          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-[#5B4DB7] transition-colors cursor-pointer"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-[#5B4DB7] dark:hover:text-purple-300 transition-colors cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Opportunities Pipeline</span>
@@ -318,46 +318,46 @@ export const OpportunityDetailsPage: React.FC = () => {
           {opportunity.leadCode && (
             <Link
               to={`/leads/${opportunity.leadId || opportunity.leadCode}`}
-              className="text-xs font-mono font-semibold text-[#5B4DB7] hover:underline bg-purple-50 px-2 py-1 rounded-md border border-purple-100"
+              className="text-xs font-mono font-semibold text-[#5B4DB7] dark:text-purple-300 hover:underline bg-purple-50 dark:bg-purple-950/40 px-2 py-1 rounded-md border border-purple-100 dark:border-purple-800"
             >
               Lead: {opportunity.leadCode}
             </Link>
           )}
-          <span className="text-xs font-mono font-semibold text-slate-500 bg-slate-100 px-2 py-1 rounded-md">
+          <span className="text-xs font-mono font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md">
             {opportunity.opportunityCode}
           </span>
         </div>
       </div>
 
       {/* TOP HEADER CARD */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs p-5 sm:p-6 space-y-4">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-2xs p-5 sm:p-6 space-y-4">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2.5 flex-wrap">
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                 {opportunity.companyName}
               </span>
               <OpportunityStageBadge stage={opportunity.stage} size="sm" />
-              <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+              <span className="text-xs font-medium text-slate-500 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">
                 {opportunity.service}
               </span>
             </div>
 
-            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
               {opportunity.name}
             </h1>
 
-            <div className="flex items-center gap-4 text-xs text-slate-500 pt-1 flex-wrap">
+            <div className="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400 pt-1 flex-wrap">
               <div className="flex items-center gap-1.5">
-                <User className="w-3.5 h-3.5 text-slate-400" />
+                <User className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
                 <span>
-                  Contact: <strong className="text-slate-800">{opportunity.contactName}</strong>
+                  Contact: <strong className="text-slate-800 dark:text-slate-200">{opportunity.contactName}</strong>
                 </span>
               </div>
               <div className="flex items-center gap-1.5">
-                <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                <Calendar className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
                 <span>
-                  Close: <strong className="text-slate-800">{opportunity.expectedCloseDate}</strong>
+                  Close: <strong className="text-slate-800 dark:text-slate-200">{opportunity.expectedCloseDate}</strong>
                 </span>
               </div>
               <div className="flex items-center gap-1.5">
@@ -365,31 +365,31 @@ export const OpportunityDetailsPage: React.FC = () => {
                   {opportunity.owner.name.charAt(0)}
                 </div>
                 <span>
-                  Owner: <strong className="text-slate-800">{opportunity.owner.name}</strong>
+                  Owner: <strong className="text-slate-800 dark:text-slate-200">{opportunity.owner.name}</strong>
                 </span>
               </div>
             </div>
           </div>
 
           {/* Deal Financials Highlight */}
-          <div className="flex items-center gap-4 bg-slate-50 p-3.5 rounded-xl border border-slate-200 shrink-0">
+          <div className="flex items-center gap-4 bg-slate-50 dark:bg-slate-950/60 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 shrink-0">
             <div>
-              <div className="text-[10px] uppercase font-bold text-slate-400">Deal Value</div>
-              <div className="font-mono text-xl sm:text-2xl font-black text-slate-900">
+              <div className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500">Deal Value</div>
+              <div className="font-mono text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
                 {formatCurrencyINR(opportunity.estimatedValue)}
               </div>
-              <div className="text-[10px] text-slate-500">
+              <div className="text-[10px] text-slate-500 dark:text-slate-400">
                 Weighted:{' '}
-                <strong className="font-mono text-slate-700">
+                <strong className="font-mono text-slate-700 dark:text-slate-300">
                   {formatLakhsINR((opportunity.estimatedValue * opportunity.probability) / 100)}
                 </strong>
               </div>
             </div>
 
-            <div className="h-10 w-px bg-slate-200" />
+            <div className="h-10 w-px bg-slate-200 dark:bg-slate-800" />
 
             <div className="text-right">
-              <div className="text-[10px] uppercase font-bold text-slate-400 mb-0.5">
+              <div className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 mb-0.5">
                 Probability
               </div>
               <ProbabilityIndicator probability={opportunity.probability} showBar={true} size="md" />
@@ -398,20 +398,20 @@ export const OpportunityDetailsPage: React.FC = () => {
         </div>
 
         {/* Action Buttons Toolbar */}
-        <div className="flex items-center justify-between pt-3 border-t border-slate-100 flex-wrap gap-2">
+        <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-800 flex-wrap gap-2">
           {/* Move Stage Dropdown */}
           <div className="relative">
             <button
               type="button"
               onClick={() => setShowStageDropdown(!showStageDropdown)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg text-xs font-semibold cursor-pointer transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-lg text-xs font-semibold cursor-pointer transition-colors"
             >
               <span>Move Stage: {opportunity.stage}</span>
               <ChevronDown className="w-3.5 h-3.5" />
             </button>
 
             {showStageDropdown && (
-              <div className="absolute left-0 top-full mt-1 w-48 bg-white rounded-xl border border-slate-200 shadow-xl py-1 z-30 divide-y divide-slate-100 animate-in fade-in zoom-in-95 duration-100">
+              <div className="absolute left-0 top-full mt-1 w-48 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xl py-1 z-30 divide-y divide-slate-100 dark:divide-slate-800 animate-in fade-in zoom-in-95 duration-100">
                 {stagesList.map((stg) => (
                   <button
                     key={stg}
@@ -420,12 +420,12 @@ export const OpportunityDetailsPage: React.FC = () => {
                     onClick={() => handleMoveStage(stg)}
                     className={`w-full text-left px-3.5 py-2 text-xs font-semibold flex items-center justify-between cursor-pointer ${
                       stg === opportunity.stage
-                        ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                        : 'hover:bg-slate-50 text-slate-800'
+                        ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed'
+                        : 'hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200'
                     }`}
                   >
                     <span>{stg}</span>
-                    {stg === opportunity.stage && <span className="text-[11px] text-[#5B4DB7]">Current</span>}
+                    {stg === opportunity.stage && <span className="text-[11px] text-[#5B4DB7] dark:text-purple-400">Current</span>}
                   </button>
                 ))}
               </div>
@@ -436,7 +436,7 @@ export const OpportunityDetailsPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsEditOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-lg text-xs font-semibold transition-colors cursor-pointer shadow-2xs"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-semibold transition-colors cursor-pointer shadow-2xs"
             >
               <Edit2 className="w-3.5 h-3.5" />
               <span>Edit</span>
@@ -445,7 +445,7 @@ export const OpportunityDetailsPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsFollowUpOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 hover:bg-indigo-50 hover:text-[#5B4DB7] text-slate-700 rounded-lg text-xs font-semibold transition-colors cursor-pointer shadow-2xs"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:bg-indigo-50 dark:hover:bg-purple-950/40 hover:text-[#5B4DB7] dark:hover:text-purple-300 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-semibold transition-colors cursor-pointer shadow-2xs"
             >
               <CalendarClock className="w-3.5 h-3.5" />
               <span>Add Follow-up</span>
@@ -455,7 +455,7 @@ export const OpportunityDetailsPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsProposalOpen(true)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 hover:bg-purple-100 text-[#5B4DB7] border border-purple-200 rounded-lg text-xs font-semibold transition-colors cursor-pointer shadow-2xs"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 dark:hover:bg-purple-900/60 text-[#5B4DB7] dark:text-purple-300 border border-purple-200 dark:border-purple-800 rounded-lg text-xs font-semibold transition-colors cursor-pointer shadow-2xs"
               >
                 <FileText className="w-3.5 h-3.5" />
                 <span>Create Proposal</span>
@@ -475,7 +475,7 @@ export const OpportunityDetailsPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsLostOpen(true)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-lg text-xs font-semibold transition-colors cursor-pointer shadow-2xs"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 rounded-lg text-xs font-semibold transition-colors cursor-pointer shadow-2xs"
                 >
                   <XCircle className="w-3.5 h-3.5" />
                   <span>Mark Lost</span>
@@ -498,19 +498,19 @@ export const OpportunityDetailsPage: React.FC = () => {
                       <div
                         className={`h-2 rounded-full transition-all duration-300 ${
                           isCurrent
-                            ? 'bg-[#5B4DB7]'
+                            ? 'bg-[#5B4DB7] dark:bg-purple-600'
                             : isPassed
-                            ? 'bg-purple-300'
-                            : 'bg-slate-200'
+                            ? 'bg-purple-300 dark:bg-purple-800'
+                            : 'bg-slate-200 dark:bg-slate-800'
                         }`}
                       />
                       <span
                         className={`truncate block ${
                           isCurrent
-                            ? 'text-[#5B4DB7] font-extrabold'
+                            ? 'text-[#5B4DB7] dark:text-purple-400 font-extrabold'
                             : isPassed
-                            ? 'text-slate-700'
-                            : 'text-slate-400'
+                            ? 'text-slate-700 dark:text-slate-300'
+                            : 'text-slate-400 dark:text-slate-500'
                         }`}
                       >
                         {stg}
@@ -522,22 +522,22 @@ export const OpportunityDetailsPage: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div className="p-3 bg-rose-50 rounded-xl border border-rose-200 text-xs text-rose-900 flex items-center justify-between">
+          <div className="p-3 bg-rose-50 dark:bg-rose-950/40 rounded-xl border border-rose-200 dark:border-rose-800 text-xs text-rose-900 dark:text-rose-200 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-rose-600" />
+              <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400" />
               <span>
                 Deal closed as <strong>Lost</strong> ({opportunity.lossReason || 'Budget'}).
               </span>
             </div>
             {opportunity.lossNotes && (
-              <span className="text-rose-700 italic">{opportunity.lossNotes}</span>
+              <span className="text-rose-700 dark:text-rose-300 italic">{opportunity.lossNotes}</span>
             )}
           </div>
         )}
       </div>
 
       {/* TABS NAVIGATION */}
-      <div className="flex items-center gap-2 border-b border-slate-200 overflow-x-auto no-scrollbar">
+      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 overflow-x-auto no-scrollbar">
         {[
           { id: 'overview', label: 'Overview' },
           { id: 'requirements', label: 'Requirements' },
@@ -560,8 +560,8 @@ export const OpportunityDetailsPage: React.FC = () => {
             onClick={() => setActiveTab(tab.id as any)}
             className={`px-4 py-2.5 text-xs font-bold whitespace-nowrap border-b-2 transition-all cursor-pointer ${
               activeTab === tab.id
-                ? 'border-[#5B4DB7] text-[#5B4DB7] bg-white'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
+                ? 'border-[#5B4DB7] dark:border-purple-400 text-[#5B4DB7] dark:text-purple-400 bg-white dark:bg-slate-900'
+                : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
             }`}
           >
             {tab.label}
@@ -577,52 +577,52 @@ export const OpportunityDetailsPage: React.FC = () => {
           {/* Column 1 & 2: Company & Contact & Financials */}
           <div className="lg:col-span-2 space-y-5">
             {/* Company Info Card */}
-            <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-3 shadow-2xs">
-              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                <Building2 className="w-4 h-4 text-[#5B4DB7]" />
+            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/90 dark:border-slate-800 p-5 space-y-3 shadow-2xs">
+              <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                <Building2 className="w-4 h-4 text-[#5B4DB7] dark:text-purple-400" />
                 <span>Company & Account Information</span>
               </h3>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
                 <div>
-                  <span className="text-slate-400 font-semibold block">Company Name</span>
-                  <span className="font-bold text-slate-800">{opportunity.companyName}</span>
+                  <span className="text-slate-400 dark:text-slate-500 font-semibold block">Company Name</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200">{opportunity.companyName}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 font-semibold block">Industry</span>
-                  <span className="font-medium text-slate-700">{opportunity.industry || 'IT & Tech'}</span>
+                  <span className="text-slate-400 dark:text-slate-500 font-semibold block">Industry</span>
+                  <span className="font-medium text-slate-700 dark:text-slate-300">{opportunity.industry || 'IT & Tech'}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 font-semibold block">Service Domain</span>
-                  <span className="font-medium text-slate-700">{opportunity.service}</span>
+                  <span className="text-slate-400 dark:text-slate-500 font-semibold block">Service Domain</span>
+                  <span className="font-medium text-slate-700 dark:text-slate-300">{opportunity.service}</span>
                 </div>
               </div>
             </div>
 
             {/* Key Contact Card */}
-            <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-3 shadow-2xs">
-              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                <User className="w-4 h-4 text-[#5B4DB7]" />
+            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/90 dark:border-slate-800 p-5 space-y-3 shadow-2xs">
+              <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                <User className="w-4 h-4 text-[#5B4DB7] dark:text-purple-400" />
                 <span>Primary Customer Contact</span>
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                 <div>
-                  <span className="text-slate-400 font-semibold block">Contact Name</span>
-                  <span className="font-bold text-slate-800">{opportunity.contactName}</span>
-                  <span className="text-[11px] text-slate-500 block">
+                  <span className="text-slate-400 dark:text-slate-500 font-semibold block">Contact Name</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200">{opportunity.contactName}</span>
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 block">
                     {opportunity.contactDesignation || 'Stakeholder'}
                   </span>
                 </div>
                 <div>
-                  <span className="text-slate-400 font-semibold block">Email</span>
-                  <div className="flex items-center gap-1 text-slate-700 mt-0.5">
-                    <Mail className="w-3 h-3 text-slate-400" />
+                  <span className="text-slate-400 dark:text-slate-500 font-semibold block">Email</span>
+                  <div className="flex items-center gap-1 text-slate-700 dark:text-slate-300 mt-0.5">
+                    <Mail className="w-3 h-3 text-slate-400 dark:text-slate-500" />
                     <span className="truncate">{opportunity.contactEmail || 'Not provided'}</span>
                   </div>
                 </div>
                 <div>
-                  <span className="text-slate-400 font-semibold block">Phone</span>
-                  <div className="flex items-center gap-1 text-slate-700 mt-0.5">
-                    <Phone className="w-3 h-3 text-slate-400" />
+                  <span className="text-slate-400 dark:text-slate-500 font-semibold block">Phone</span>
+                  <div className="flex items-center gap-1 text-slate-700 dark:text-slate-300 mt-0.5">
+                    <Phone className="w-3 h-3 text-slate-400 dark:text-slate-500" />
                     <span>{opportunity.contactPhone || 'Not provided'}</span>
                   </div>
                 </div>
@@ -630,41 +630,41 @@ export const OpportunityDetailsPage: React.FC = () => {
             </div>
 
             {/* Deal Financials Detailed */}
-            <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-3 shadow-2xs">
-              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                <IndianRupee className="w-4 h-4 text-[#5B4DB7]" />
+            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/90 dark:border-slate-800 p-5 space-y-3 shadow-2xs">
+              <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                <IndianRupee className="w-4 h-4 text-[#5B4DB7] dark:text-purple-400" />
                 <span>Commercial Terms & Pipeline Forecast</span>
               </h3>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs bg-slate-50 p-3.5 rounded-xl border border-slate-100">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs bg-slate-50 dark:bg-slate-950/60 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800">
                 <div>
-                  <span className="text-[10px] text-slate-400 uppercase font-bold block">
+                  <span className="text-[10px] text-slate-400 dark:text-slate-500 uppercase font-bold block">
                     Total Deal Value
                   </span>
-                  <span className="font-mono font-bold text-slate-900 text-sm">
+                  <span className="font-mono font-bold text-slate-900 dark:text-white text-sm">
                     {formatCurrencyINR(opportunity.estimatedValue)}
                   </span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-slate-400 uppercase font-bold block">
+                  <span className="text-[10px] text-slate-400 dark:text-slate-500 uppercase font-bold block">
                     Win Probability
                   </span>
-                  <span className="font-bold text-[#5B4DB7] text-sm">{opportunity.probability}%</span>
+                  <span className="font-bold text-[#5B4DB7] dark:text-purple-400 text-sm">{opportunity.probability}%</span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-slate-400 uppercase font-bold block">
+                  <span className="text-[10px] text-slate-400 dark:text-slate-500 uppercase font-bold block">
                     Weighted Value
                   </span>
-                  <span className="font-mono font-bold text-emerald-700 text-sm">
+                  <span className="font-mono font-bold text-emerald-700 dark:text-emerald-400 text-sm">
                     {formatCurrencyINR(
                       Math.round((opportunity.estimatedValue * opportunity.probability) / 100)
                     )}
                   </span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-slate-400 uppercase font-bold block">
+                  <span className="text-[10px] text-slate-400 dark:text-slate-500 uppercase font-bold block">
                     Priority
                   </span>
-                  <span className="font-bold text-slate-800 text-sm">{opportunity.priority || 'High'}</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200 text-sm">{opportunity.priority || 'High'}</span>
                 </div>
               </div>
             </div>
@@ -673,9 +673,9 @@ export const OpportunityDetailsPage: React.FC = () => {
           {/* Column 3: Team Assignment & Timelines */}
           <div className="space-y-5">
             {/* Team Assignment Card */}
-            <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-4 shadow-2xs">
-              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                <UserCheck className="w-4 h-4 text-[#5B4DB7]" />
+            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/90 dark:border-slate-800 p-5 space-y-4 shadow-2xs">
+              <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                <UserCheck className="w-4 h-4 text-[#5B4DB7] dark:text-purple-400" />
                 <span>Account Team Assignment</span>
               </h3>
 
@@ -685,19 +685,19 @@ export const OpportunityDetailsPage: React.FC = () => {
                     {opportunity.owner.avatar || opportunity.owner.name.charAt(0)}
                   </div>
                   <div>
-                    <div className="font-bold text-slate-900">{opportunity.owner.name}</div>
-                    <div className="text-[11px] text-slate-500">Sales Owner (Primary)</div>
+                    <div className="font-bold text-slate-900 dark:text-white">{opportunity.owner.name}</div>
+                    <div className="text-[11px] text-slate-500 dark:text-slate-400">Sales Owner (Primary)</div>
                   </div>
                 </div>
 
                 {opportunity.businessAnalyst && (
-                  <div className="flex items-center gap-3 pt-2 border-t border-slate-100">
-                    <div className="w-8 h-8 rounded-full bg-sky-100 text-sky-800 flex items-center justify-center text-xs font-bold">
+                  <div className="flex items-center gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
+                    <div className="w-8 h-8 rounded-full bg-sky-100 dark:bg-sky-950/60 text-sky-800 dark:text-sky-300 flex items-center justify-center text-xs font-bold">
                       BA
                     </div>
                     <div>
-                      <div className="font-bold text-slate-900">{opportunity.businessAnalyst.name}</div>
-                      <div className="text-[11px] text-slate-500">
+                      <div className="font-bold text-slate-900 dark:text-white">{opportunity.businessAnalyst.name}</div>
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400">
                         {opportunity.businessAnalyst.role || 'Business Analyst'}
                       </div>
                     </div>
@@ -705,13 +705,13 @@ export const OpportunityDetailsPage: React.FC = () => {
                 )}
 
                 {opportunity.technicalReviewer && (
-                  <div className="flex items-center gap-3 pt-2 border-t border-slate-100">
-                    <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-800 flex items-center justify-center text-xs font-bold">
+                  <div className="flex items-center gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
+                    <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-950/60 text-indigo-800 dark:text-indigo-300 flex items-center justify-center text-xs font-bold">
                       TA
                     </div>
                     <div>
-                      <div className="font-bold text-slate-900">{opportunity.technicalReviewer.name}</div>
-                      <div className="text-[11px] text-slate-500">
+                      <div className="font-bold text-slate-900 dark:text-white">{opportunity.technicalReviewer.name}</div>
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400">
                         {opportunity.technicalReviewer.role || 'Technical Reviewer'}
                       </div>
                     </div>
@@ -721,30 +721,30 @@ export const OpportunityDetailsPage: React.FC = () => {
             </div>
 
             {/* Timeline Horizons Card */}
-            <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-3 shadow-2xs text-xs">
-              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                <Clock className="w-4 h-4 text-[#5B4DB7]" />
+            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/90 dark:border-slate-800 p-5 space-y-3 shadow-2xs text-xs">
+              <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                <Clock className="w-4 h-4 text-[#5B4DB7] dark:text-purple-400" />
                 <span>Pipeline Milestone Dates</span>
               </h3>
 
               <div className="space-y-2.5">
                 <div className="flex justify-between">
-                  <span className="text-slate-400 font-medium">Created On:</span>
-                  <span className="font-bold text-slate-800">{opportunity.createdBy.date}</span>
+                  <span className="text-slate-400 dark:text-slate-500 font-medium">Created On:</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200">{opportunity.createdBy.date}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400 font-medium">Expected Close:</span>
-                  <span className="font-bold text-[#5B4DB7]">{opportunity.expectedCloseDate}</span>
+                  <span className="text-slate-400 dark:text-slate-500 font-medium">Expected Close:</span>
+                  <span className="font-bold text-[#5B4DB7] dark:text-purple-400">{opportunity.expectedCloseDate}</span>
                 </div>
                 {opportunity.wonDate && (
-                  <div className="flex justify-between text-emerald-700">
+                  <div className="flex justify-between text-emerald-700 dark:text-emerald-400">
                     <span className="font-semibold">Won On:</span>
                     <span className="font-bold">{opportunity.wonDate}</span>
                   </div>
                 )}
                 <div className="flex justify-between">
-                  <span className="text-slate-400 font-medium">Last Modified:</span>
-                  <span className="text-slate-600">
+                  <span className="text-slate-400 dark:text-slate-500 font-medium">Last Modified:</span>
+                  <span className="text-slate-600 dark:text-slate-400">
                     {new Date(opportunity.updatedAt).toLocaleDateString('en-GB', {
                       day: 'numeric',
                       month: 'short',
@@ -760,16 +760,16 @@ export const OpportunityDetailsPage: React.FC = () => {
 
       {/* TAB 2: REQUIREMENTS */}
       {activeTab === 'requirements' && (
-        <div className="bg-white rounded-xl border border-slate-200 p-5 sm:p-6 space-y-5 shadow-2xs text-xs">
-          <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-            <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-              <FileText className="w-4 h-4 text-[#5B4DB7]" />
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/90 dark:border-slate-800 p-5 sm:p-6 space-y-5 shadow-2xs text-xs">
+          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <FileText className="w-4 h-4 text-[#5B4DB7] dark:text-purple-400" />
               <span>Customer Requirements & Discovery Scope</span>
             </h3>
             <button
               type="button"
               onClick={() => setIsEditOpen(true)}
-              className="text-xs font-semibold text-[#5B4DB7] hover:underline inline-flex items-center gap-1 cursor-pointer"
+              className="text-xs font-semibold text-[#5B4DB7] dark:text-purple-400 hover:underline inline-flex items-center gap-1 cursor-pointer"
             >
               <Edit2 className="w-3 h-3" />
               <span>Edit Requirements</span>
@@ -778,67 +778,67 @@ export const OpportunityDetailsPage: React.FC = () => {
 
           <div className="space-y-4">
             <div>
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+              <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">
                 Requirement Summary
               </span>
-              <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 text-slate-800 font-medium leading-relaxed">
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 font-medium leading-relaxed">
                 {opportunity.requirement.summary || 'No summary available.'}
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">
                   Business Problem Statement
                 </span>
-                <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-slate-700">
+                <div className="p-3 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300">
                   {opportunity.requirement.problemStatement || 'Not specified.'}
                 </div>
               </div>
 
               <div>
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">
                   Expected Users / Load
                 </span>
-                <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-slate-700">
+                <div className="p-3 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300">
                   {opportunity.requirement.expectedUsers || 'Not specified.'}
                 </div>
               </div>
 
               <div>
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">
                   Estimated Timeline
                 </span>
-                <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-slate-700">
+                <div className="p-3 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300">
                   {opportunity.requirement.timeline || 'Not specified.'}
                 </div>
               </div>
 
               <div>
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">
                   Target Customer Budget
                 </span>
-                <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-slate-700 font-mono font-bold">
+                <div className="p-3 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 font-mono font-bold">
                   {opportunity.requirement.budget || 'Not specified.'}
                 </div>
               </div>
             </div>
 
             <div>
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+              <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">
                 Technical Specifications & Architecture
               </span>
-              <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 text-slate-700 leading-relaxed font-mono text-[11px]">
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 leading-relaxed font-mono text-[11px]">
                 {opportunity.requirement.technicalRequirements || 'Standard modern stack requested.'}
               </div>
             </div>
 
             {opportunity.requirement.notes && (
               <div>
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">
                   Discovery & Engagement Notes
                 </span>
-                <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-slate-700 italic">
+                <div className="p-3 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 italic">
                   {opportunity.requirement.notes}
                 </div>
               </div>
@@ -849,11 +849,11 @@ export const OpportunityDetailsPage: React.FC = () => {
 
       {/* TAB 3: PROPOSALS */}
       {activeTab === 'proposals' && (
-        <div className="bg-white rounded-xl border border-slate-200 p-5 sm:p-6 space-y-4 shadow-2xs">
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/90 dark:border-slate-800 p-5 sm:p-6 space-y-4 shadow-2xs">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-bold text-slate-900">Commercial Proposals</h3>
-              <p className="text-xs text-slate-500">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Commercial Proposals</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 Official quotation packages and contracts dispatched to {opportunity.companyName}
               </p>
             </div>
@@ -867,9 +867,9 @@ export const OpportunityDetailsPage: React.FC = () => {
             </button>
           </div>
 
-          <div className="overflow-x-auto border border-slate-200 rounded-xl">
-            <table className="w-full text-left text-xs text-slate-700">
-              <thead className="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase text-slate-500">
+          <div className="overflow-x-auto border border-slate-200 dark:border-slate-800 rounded-xl">
+            <table className="w-full text-left text-xs text-slate-700 dark:text-slate-300">
+              <thead className="bg-slate-50 dark:bg-slate-950/60 border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold uppercase text-slate-500 dark:text-slate-400">
                 <tr>
                   <th className="py-3 px-4">Proposal ID</th>
                   <th className="py-3 px-3">Amount (₹)</th>
@@ -880,32 +880,32 @@ export const OpportunityDetailsPage: React.FC = () => {
                   <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
                 {proposals.length > 0 ? (
                   proposals.map((prop) => (
                     <tr
                       key={prop.id}
                       onClick={() => setSelectedProposal(prop)}
-                      className="hover:bg-slate-50 cursor-pointer"
+                      className="hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer"
                     >
-                      <td className="py-3 px-4 font-mono font-bold text-[#5B4DB7]">
+                      <td className="py-3 px-4 font-mono font-bold text-[#5B4DB7] dark:text-purple-400">
                         {prop.proposalCode}
                       </td>
-                      <td className="py-3 px-3 font-mono font-bold text-slate-900">
+                      <td className="py-3 px-3 font-mono font-bold text-slate-900 dark:text-white">
                         {formatCurrencyINR(prop.amount)}
                       </td>
-                      <td className="py-3 px-3 text-slate-600">{prop.sentDate}</td>
-                      <td className="py-3 px-3 text-slate-600">{prop.validUntil}</td>
+                      <td className="py-3 px-3 text-slate-600 dark:text-slate-400">{prop.sentDate}</td>
+                      <td className="py-3 px-3 text-slate-600 dark:text-slate-400">{prop.validUntil}</td>
                       <td className="py-3 px-3">
                         <ProposalStatusBadge status={prop.status} size="sm" />
                       </td>
-                      <td className="py-3 px-3 text-slate-700">{prop.ownerName}</td>
+                      <td className="py-3 px-3 text-slate-700 dark:text-slate-300">{prop.ownerName}</td>
                       <td className="py-3 px-4 text-right" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-end gap-1">
                           <button
                             type="button"
                             onClick={() => setSelectedProposal(prop)}
-                            className="p-1.5 text-slate-400 hover:text-slate-700 rounded hover:bg-slate-100"
+                            className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
                             title="View"
                           >
                             <Eye className="w-3.5 h-3.5" />
@@ -913,7 +913,7 @@ export const OpportunityDetailsPage: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => showToast(`Downloading ${prop.proposalCode}.pdf...`)}
-                            className="p-1.5 text-slate-400 hover:text-slate-700 rounded hover:bg-slate-100"
+                            className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
                             title="Download PDF"
                           >
                             <Download className="w-3.5 h-3.5" />
@@ -924,7 +924,7 @@ export const OpportunityDetailsPage: React.FC = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={7} className="py-8 text-center text-slate-400 text-xs">
+                    <td colSpan={7} className="py-8 text-center text-slate-400 dark:text-slate-500 text-xs">
                       No proposals generated yet for this opportunity. Click "Create Proposal" above.
                     </td>
                   </tr>
@@ -937,11 +937,11 @@ export const OpportunityDetailsPage: React.FC = () => {
 
       {/* TAB 4: FOLLOW-UPS */}
       {activeTab === 'followups' && (
-        <div className="bg-white rounded-xl border border-slate-200 p-5 sm:p-6 space-y-4 shadow-2xs">
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/90 dark:border-slate-800 p-5 sm:p-6 space-y-4 shadow-2xs">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-bold text-slate-900">Follow-ups & Next Actions</h3>
-              <p className="text-xs text-slate-500">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Follow-ups & Next Actions</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 Scheduled client touchpoints, calls, technical demos, and status checks
               </p>
             </div>
@@ -960,27 +960,27 @@ export const OpportunityDetailsPage: React.FC = () => {
               opportunity.followUps.map((fu) => (
                 <div
                   key={fu.id}
-                  className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+                  className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
                 >
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="font-bold text-slate-900">{fu.type}</span>
+                      <span className="font-bold text-slate-900 dark:text-white">{fu.type}</span>
                       <span
                         className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                           fu.status === 'Completed'
-                            ? 'bg-emerald-100 text-emerald-800'
-                            : 'bg-amber-100 text-amber-800'
+                            ? 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
+                            : 'bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800'
                         }`}
                       >
                         {fu.status}
                       </span>
                     </div>
-                    <p className="text-slate-700">{fu.notes}</p>
-                    <span className="text-[11px] text-slate-400">Assigned: {fu.assignedTo}</span>
+                    <p className="text-slate-700 dark:text-slate-300">{fu.notes}</p>
+                    <span className="text-[11px] text-slate-400 dark:text-slate-500">Assigned: {fu.assignedTo}</span>
                   </div>
 
-                  <div className="flex items-center gap-2 font-mono text-xs text-slate-600 bg-white px-3 py-1.5 rounded-lg border border-slate-200 shrink-0">
-                    <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                  <div className="flex items-center gap-2 font-mono text-xs text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 shrink-0">
+                    <Calendar className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
                     <span>
                       {fu.date} • {fu.time}
                     </span>
@@ -988,7 +988,7 @@ export const OpportunityDetailsPage: React.FC = () => {
                 </div>
               ))
             ) : (
-              <div className="p-8 text-center text-slate-400 text-xs border border-dashed border-slate-200 rounded-xl">
+              <div className="p-8 text-center text-slate-400 dark:text-slate-500 text-xs border border-dashed border-slate-200 dark:border-slate-800 rounded-xl">
                 No follow-ups recorded yet. Click "Add Follow-up" to schedule a client meeting or call.
               </div>
             )}
@@ -998,30 +998,30 @@ export const OpportunityDetailsPage: React.FC = () => {
 
       {/* TAB 5: ACTIVITIES */}
       {activeTab === 'activities' && (
-        <div className="bg-white rounded-xl border border-slate-200 p-5 sm:p-6 space-y-4 shadow-2xs">
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/90 dark:border-slate-800 p-5 sm:p-6 space-y-4 shadow-2xs">
           <div>
-            <h3 className="text-sm font-bold text-slate-900">Activity History & Audit Trail</h3>
-            <p className="text-xs text-slate-500">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white">Activity History & Audit Trail</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
               Complete timeline of deal progression, stage movements, and commercial transactions
             </p>
           </div>
 
-          <div className="space-y-4 relative before:absolute before:inset-0 before:left-4 before:w-0.5 before:bg-slate-200">
+          <div className="space-y-4 relative before:absolute before:inset-0 before:left-4 before:w-0.5 before:bg-slate-200 dark:before:bg-slate-800">
             {opportunity.activities.map((act) => (
               <div key={act.id} className="relative flex items-start gap-4 text-xs">
-                <div className="w-8 h-8 rounded-full bg-white border-2 border-[#5B4DB7] text-[#5B4DB7] flex items-center justify-center font-bold z-10 shrink-0 shadow-2xs">
+                <div className="w-8 h-8 rounded-full bg-white dark:bg-slate-900 border-2 border-[#5B4DB7] dark:border-purple-400 text-[#5B4DB7] dark:text-purple-300 flex items-center justify-center font-bold z-10 shrink-0 shadow-2xs">
                   {act.type === 'WON' ? '🏆' : act.type === 'LOST' ? '✕' : '•'}
                 </div>
-                <div className="flex-1 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                <div className="flex-1 bg-slate-50 dark:bg-slate-950/60 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800">
                   <div className="flex items-center justify-between gap-2">
-                    <h4 className="font-bold text-slate-900">{act.title}</h4>
-                    <span className="font-mono text-[11px] text-slate-400 whitespace-nowrap">
+                    <h4 className="font-bold text-slate-900 dark:text-white">{act.title}</h4>
+                    <span className="font-mono text-[11px] text-slate-400 dark:text-slate-500 whitespace-nowrap">
                       {act.date} • {act.time}
                     </span>
                   </div>
-                  {act.notes && <p className="text-slate-600 mt-1">{act.notes}</p>}
-                  <div className="text-[10px] text-slate-400 mt-1.5 font-medium">
-                    Logged by: <strong>{act.employeeName}</strong>
+                  {act.notes && <p className="text-slate-600 dark:text-slate-300 mt-1">{act.notes}</p>}
+                  <div className="text-[10px] text-slate-400 dark:text-slate-500 mt-1.5 font-medium">
+                    Logged by: <strong className="text-slate-700 dark:text-slate-300">{act.employeeName}</strong>
                   </div>
                 </div>
               </div>

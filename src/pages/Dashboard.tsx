@@ -35,9 +35,9 @@ export const DashboardPage: React.FC = () => {
           <>
             <button
               type="button"
-              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors shadow-2xs"
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-2xs"
             >
-              <Download className="w-3.5 h-3.5 text-slate-500" />
+              <Download className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
               <span>Export</span>
             </button>
             <Link
@@ -52,22 +52,22 @@ export const DashboardPage: React.FC = () => {
       />
 
       {/* CRM Shell Architectural Validation Banner */}
-      <div className="bg-white border border-slate-200/90 rounded-xl p-5 sm:p-6 shadow-xs">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-100 pb-5">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl p-5 sm:p-6 shadow-xs">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-5">
           <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-xl bg-purple-50 text-[#5B4DB7] flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950/40 text-[#5B4DB7] dark:text-purple-300 flex items-center justify-center flex-shrink-0">
               <Layers className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-base font-bold text-slate-900">
+                <h2 className="text-base font-bold text-slate-900 dark:text-white">
                   TechnoKraft B2B CRM Application Shell
                 </h2>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
                   Production Ready
                 </span>
               </div>
-              <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-2xl">
                 The layout shell is designed for high-density B2B operations. It features a collapsible navigation drawer, dynamic breadcrumbs, global CRM search modal, quick-add dropdown, notification center, and role-based access control.
               </p>
             </div>
@@ -81,25 +81,25 @@ export const DashboardPage: React.FC = () => {
               onClick={() =>
                 setSidebarTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))
               }
-              className="inline-flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 transition-colors shadow-2xs"
+              className="inline-flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors shadow-2xs"
               title="Toggle sidebar between Dark Navy and White (Screenshot Parity)"
             >
               {sidebarTheme === 'dark' ? (
                 <>
-                  <Moon className="w-3.5 h-3.5 text-purple-600" />
+                  <Moon className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
                   <span>Sidebar: Navy Dark</span>
                 </>
               ) : (
                 <>
-                  <Sun className="w-3.5 h-3.5 text-amber-500" />
+                  <Sun className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
                   <span>Sidebar: Light</span>
                 </>
               )}
             </button>
 
             {/* Role indicator pill */}
-            <div className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg bg-slate-100 text-slate-700 border border-slate-200">
-              <ShieldCheck className="w-3.5 h-3.5 text-[#5B4DB7]" />
+            <div className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+              <ShieldCheck className="w-3.5 h-3.5 text-[#5B4DB7] dark:text-purple-400" />
               <span>Role: {currentUser.role}</span>
             </div>
           </div>
@@ -107,42 +107,42 @@ export const DashboardPage: React.FC = () => {
 
         {/* Feature Checkpoints Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-5">
-          <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200/70">
-            <div className="flex items-center gap-2 text-slate-900 font-semibold text-xs mb-1">
-              <SidebarIcon className="w-4 h-4 text-[#5B4DB7]" />
+          <div className="p-3.5 rounded-lg bg-slate-50 dark:bg-slate-950/60 border border-slate-200/70 dark:border-slate-800">
+            <div className="flex items-center gap-2 text-slate-900 dark:text-white font-semibold text-xs mb-1">
+              <SidebarIcon className="w-4 h-4 text-[#5B4DB7] dark:text-purple-400" />
               <h3>Responsive Sidebar</h3>
             </div>
-            <p className="text-[12px] text-slate-500 leading-relaxed">
+            <p className="text-[12px] text-slate-500 dark:text-slate-400 leading-relaxed">
               250px expanded, 76px icon collapse with hover tooltips, and 280px off-canvas drawer on mobile.
             </p>
           </div>
 
-          <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200/70">
-            <div className="flex items-center gap-2 text-slate-900 font-semibold text-xs mb-1">
-              <Search className="w-4 h-4 text-[#5B4DB7]" />
+          <div className="p-3.5 rounded-lg bg-slate-50 dark:bg-slate-950/60 border border-slate-200/70 dark:border-slate-800">
+            <div className="flex items-center gap-2 text-slate-900 dark:text-white font-semibold text-xs mb-1">
+              <Search className="w-4 h-4 text-[#5B4DB7] dark:text-purple-400" />
               <h3>Global Search (Ctrl+K)</h3>
             </div>
-            <p className="text-[12px] text-slate-500 leading-relaxed">
+            <p className="text-[12px] text-slate-500 dark:text-slate-400 leading-relaxed">
               Keyboard shortcut activated dialog indexing Leads, Companies, Contacts, Tasks, and Proposals.
             </p>
           </div>
 
-          <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200/70">
-            <div className="flex items-center gap-2 text-slate-900 font-semibold text-xs mb-1">
-              <ShieldCheck className="w-4 h-4 text-[#5B4DB7]" />
+          <div className="p-3.5 rounded-lg bg-slate-50 dark:bg-slate-950/60 border border-slate-200/70 dark:border-slate-800">
+            <div className="flex items-center gap-2 text-slate-900 dark:text-white font-semibold text-xs mb-1">
+              <ShieldCheck className="w-4 h-4 text-[#5B4DB7] dark:text-purple-400" />
               <h3>RBAC Navigation</h3>
             </div>
-            <p className="text-[12px] text-slate-500 leading-relaxed">
+            <p className="text-[12px] text-slate-500 dark:text-slate-400 leading-relaxed">
               Dynamically hides or reveals modules (Employees, Settings) based on the current user's profile role.
             </p>
           </div>
 
-          <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200/70">
-            <div className="flex items-center gap-2 text-slate-900 font-semibold text-xs mb-1">
-              <Maximize2 className="w-4 h-4 text-[#5B4DB7]" />
+          <div className="p-3.5 rounded-lg bg-slate-50 dark:bg-slate-950/60 border border-slate-200/70 dark:border-slate-800">
+            <div className="flex items-center gap-2 text-slate-900 dark:text-white font-semibold text-xs mb-1">
+              <Maximize2 className="w-4 h-4 text-[#5B4DB7] dark:text-purple-400" />
               <h3>Overflow Guard</h3>
             </div>
-            <p className="text-[12px] text-slate-500 leading-relaxed">
+            <p className="text-[12px] text-slate-500 dark:text-slate-400 leading-relaxed">
               Main content uses flex min-w-0 container ensuring zero page-level horizontal overflow across all viewports.
             </p>
           </div>
@@ -152,91 +152,91 @@ export const DashboardPage: React.FC = () => {
       {/* Module Slots Demonstration (Placeholder layout showing how future tables/charts will fit) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         {/* Placeholder Module Slot 1 */}
-        <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs flex flex-col justify-between">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-xs flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                 Module Slot 1
               </span>
-              <span className="text-xs font-medium text-[#5B4DB7]">Lead Pipeline</span>
+              <span className="text-xs font-medium text-[#5B4DB7] dark:text-purple-400">Lead Pipeline</span>
             </div>
-            <h3 className="text-base font-bold text-slate-900">
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">
               Future KPI & Metrics Slot
             </h3>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
               Reserved container for summary stats, pipeline conversion charts, and team targets.
             </p>
           </div>
-          <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
+          <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-400 dark:text-slate-500">
             <span>Container status: Ready</span>
-            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+            <CheckCircle2 className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
           </div>
         </div>
 
         {/* Placeholder Module Slot 2 */}
-        <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs flex flex-col justify-between">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-xs flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                 Module Slot 2
               </span>
-              <span className="text-xs font-medium text-[#5B4DB7]">Communication</span>
+              <span className="text-xs font-medium text-[#5B4DB7] dark:text-purple-400">Communication</span>
             </div>
-            <h3 className="text-base font-bold text-slate-900">
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">
               Future Activity Feed Slot
             </h3>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
               Reserved container for WhatsApp messages, automated email follow-ups, and call logs.
             </p>
           </div>
-          <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
+          <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-400 dark:text-slate-500">
             <span>Container status: Ready</span>
-            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+            <CheckCircle2 className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
           </div>
         </div>
 
         {/* Placeholder Module Slot 3 */}
-        <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs flex flex-col justify-between">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-xs flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                 Module Slot 3
               </span>
-              <span className="text-xs font-medium text-[#5B4DB7]">Activity & Tasks</span>
+              <span className="text-xs font-medium text-[#5B4DB7] dark:text-purple-400">Activity & Tasks</span>
             </div>
-            <h3 className="text-base font-bold text-slate-900">
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">
               Future Follow-ups & Calendar
             </h3>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
               Reserved container for client meetings, daily tasks, and proposal dispatch deadlines.
             </p>
           </div>
-          <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
+          <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-400 dark:text-slate-500">
             <span>Container status: Ready</span>
-            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+            <CheckCircle2 className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
           </div>
         </div>
       </div>
 
       {/* Demonstration of Wide Table Container Handling with Internal Horizontal Scroll */}
-      <div className="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden">
-        <div className="p-4 sm:p-5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xs overflow-hidden">
+        <div className="p-4 sm:p-5 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
-            <h3 className="text-sm font-bold text-slate-900">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white">
               Table Layout Container Test (Internal Horizontal Scroll Safety)
             </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               Demonstrates that wide B2B CRM tables scroll safely within their own container without causing whole-page overflow.
             </p>
           </div>
-          <span className="text-xs font-medium text-slate-400">
+          <span className="text-xs font-medium text-slate-400 dark:text-slate-500">
             Scroll horizontally on small viewports →
           </span>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-slate-600 min-w-[700px]">
-            <thead className="bg-slate-50/80 text-slate-500 uppercase text-[10px] tracking-wider border-b border-slate-200">
+          <table className="w-full text-left text-xs text-slate-600 dark:text-slate-300 min-w-[700px]">
+            <thead className="bg-slate-50/80 dark:bg-slate-950/60 text-slate-500 dark:text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-200 dark:border-slate-800">
               <tr>
                 <th className="py-3 px-4 font-semibold">Lead ID</th>
                 <th className="py-3 px-4 font-semibold">Company / Client</th>
@@ -247,37 +247,37 @@ export const DashboardPage: React.FC = () => {
                 <th className="py-3 px-4 font-semibold">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
-              <tr className="hover:bg-slate-50/60 transition-colors">
-                <td className="py-3 px-4 font-mono font-medium text-slate-900">#TK-1082</td>
-                <td className="py-3 px-4 font-semibold text-slate-800">ABC Technologies</td>
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+              <tr className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors">
+                <td className="py-3 px-4 font-mono font-medium text-slate-900 dark:text-white">#TK-1082</td>
+                <td className="py-3 px-4 font-semibold text-slate-800 dark:text-slate-200">ABC Technologies</td>
                 <td className="py-3 px-4">Kunal Patil</td>
                 <td className="py-3 px-4">
-                  <span className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 font-medium text-[11px]">
+                  <span className="px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 font-medium text-[11px] border border-blue-200/60 dark:border-blue-800/60">
                     Proposal
                   </span>
                 </td>
-                <td className="py-3 px-4 font-semibold text-slate-900">₹42.5 L</td>
+                <td className="py-3 px-4 font-semibold text-slate-900 dark:text-white">₹42.5 L</td>
                 <td className="py-3 px-4">Manager (Sales)</td>
                 <td className="py-3 px-4">
-                  <span className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 font-medium text-[11px]">
+                  <span className="px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 font-medium text-[11px] border border-amber-200/60 dark:border-amber-800/60">
                     Pending Follow-up
                   </span>
                 </td>
               </tr>
-              <tr className="hover:bg-slate-50/60 transition-colors">
-                <td className="py-3 px-4 font-mono font-medium text-slate-900">#TK-1083</td>
-                <td className="py-3 px-4 font-semibold text-slate-800">XYZ Solutions Ltd</td>
+              <tr className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors">
+                <td className="py-3 px-4 font-mono font-medium text-slate-900 dark:text-white">#TK-1083</td>
+                <td className="py-3 px-4 font-semibold text-slate-800 dark:text-slate-200">XYZ Solutions Ltd</td>
                 <td className="py-3 px-4">Shruti Raundal</td>
                 <td className="py-3 px-4">
-                  <span className="px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 font-medium text-[11px]">
+                  <span className="px-2 py-0.5 rounded-full bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 font-medium text-[11px] border border-purple-200/60 dark:border-purple-800/60">
                     Interested
                   </span>
                 </td>
-                <td className="py-3 px-4 font-semibold text-slate-900">₹18.0 L</td>
+                <td className="py-3 px-4 font-semibold text-slate-900 dark:text-white">₹18.0 L</td>
                 <td className="py-3 px-4">Shruti Raundal</td>
                 <td className="py-3 px-4">
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-medium text-[11px]">
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 font-medium text-[11px] border border-emerald-200/60 dark:border-emerald-800/60">
                     Meeting Confirmed
                   </span>
                 </td>

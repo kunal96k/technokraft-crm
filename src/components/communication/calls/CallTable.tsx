@@ -34,17 +34,17 @@ export const CallTable: React.FC<CallTableProps> = ({
   onCreateOpportunity,
 }) => {
   return (
-    <div className="bg-white border border-slate-200/90 rounded-xl shadow-2xs overflow-hidden">
+    <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl shadow-2xs overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-xs text-slate-700">
-          <thead className="bg-slate-50/80 text-slate-500 font-semibold border-b border-slate-200 uppercase text-[11px] tracking-wider">
+        <table className="w-full text-left text-xs text-slate-700 dark:text-slate-300">
+          <thead className="bg-slate-50/80 dark:bg-slate-950/60 text-slate-500 dark:text-slate-400 font-semibold border-b border-slate-200 dark:border-slate-800 uppercase text-[11px] tracking-wider">
             <tr>
               <th className="py-3.5 pl-4 pr-2 w-10">
                 <input
                   type="checkbox"
                   checked={isAllSelected}
                   onChange={onSelectAll}
-                  className="w-4 h-4 rounded text-[#5B4DB7] focus:ring-[#5B4DB7] border-slate-300 cursor-pointer"
+                  className="w-4 h-4 rounded text-[#5B4DB7] focus:ring-[#5B4DB7] border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 cursor-pointer"
                   aria-label="Select all calls"
                 />
               </th>
@@ -60,7 +60,7 @@ export const CallTable: React.FC<CallTableProps> = ({
               <th className="py-3.5 pr-4 pl-2 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
             {calls.map((call) => {
               const isSelected = selectedIds.includes(call.id);
 
@@ -68,8 +68,8 @@ export const CallTable: React.FC<CallTableProps> = ({
                 <tr
                   key={call.id}
                   onClick={() => onView(call)}
-                  className={`hover:bg-slate-50/80 transition-colors cursor-pointer group ${
-                    isSelected ? 'bg-purple-50/30' : ''
+                  className={`hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group ${
+                    isSelected ? 'bg-purple-50/30 dark:bg-purple-950/20' : ''
                   }`}
                 >
                   {/* Checkbox */}
@@ -83,25 +83,25 @@ export const CallTable: React.FC<CallTableProps> = ({
                       type="checkbox"
                       checked={isSelected}
                       onChange={() => onToggleSelect(call.id)}
-                      className="w-4 h-4 rounded text-[#5B4DB7] focus:ring-[#5B4DB7] border-slate-300 cursor-pointer"
+                      className="w-4 h-4 rounded text-[#5B4DB7] focus:ring-[#5B4DB7] border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 cursor-pointer"
                       aria-label={`Select call for ${call.companyName}`}
                     />
                   </td>
 
                   {/* Date/Time */}
                   <td className="py-3 px-3 whitespace-nowrap">
-                    <div className="font-semibold text-slate-900 font-mono text-[11px]">
+                    <div className="font-semibold text-slate-900 dark:text-white font-mono text-[11px]">
                       {call.date}
                     </div>
-                    <div className="text-[11px] text-slate-500 font-mono">{call.time}</div>
+                    <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">{call.time}</div>
                   </td>
 
                   {/* Company */}
                   <td className="py-3 px-3">
-                    <div className="font-bold text-slate-900 group-hover:text-[#5B4DB7] transition-colors line-clamp-1 max-w-[180px]">
+                    <div className="font-bold text-slate-900 dark:text-white group-hover:text-[#5B4DB7] dark:group-hover:text-purple-400 transition-colors line-clamp-1 max-w-[180px]">
                       {call.companyName}
                     </div>
-                    <div className="flex items-center gap-1.5 text-[11px] text-slate-500 font-mono">
+                    <div className="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400 font-mono">
                       <span>{call.leadCode}</span>
                       <button
                         type="button"
@@ -109,7 +109,7 @@ export const CallTable: React.FC<CallTableProps> = ({
                           e.stopPropagation();
                           onOpenLead(call.leadId);
                         }}
-                        className="text-slate-400 hover:text-[#5B4DB7]"
+                        className="text-slate-400 hover:text-[#5B4DB7] dark:hover:text-purple-400"
                         title="Open Lead"
                       >
                         <ExternalLink className="w-3 h-3" />
@@ -119,12 +119,12 @@ export const CallTable: React.FC<CallTableProps> = ({
 
                   {/* Contact */}
                   <td className="py-3 px-3 whitespace-nowrap">
-                    <div className="font-semibold text-slate-800">{call.contactName}</div>
-                    <div className="text-[11px] text-slate-500">{call.contactDesignation}</div>
+                    <div className="font-semibold text-slate-800 dark:text-slate-200">{call.contactName}</div>
+                    <div className="text-[11px] text-slate-500 dark:text-slate-400">{call.contactDesignation}</div>
                   </td>
 
                   {/* Phone */}
-                  <td className="py-3 px-3 whitespace-nowrap font-mono text-[11px] text-slate-600">
+                  <td className="py-3 px-3 whitespace-nowrap font-mono text-[11px] text-slate-600 dark:text-slate-300">
                     {call.contactPhone}
                   </td>
 
@@ -134,7 +134,7 @@ export const CallTable: React.FC<CallTableProps> = ({
                   </td>
 
                   {/* Duration */}
-                  <td className="py-3 px-3 whitespace-nowrap font-mono text-[11px] text-slate-700">
+                  <td className="py-3 px-3 whitespace-nowrap font-mono text-[11px] text-slate-700 dark:text-slate-300">
                     {call.duration || '—'}
                   </td>
 
@@ -146,10 +146,10 @@ export const CallTable: React.FC<CallTableProps> = ({
                   {/* Employee */}
                   <td className="py-3 px-3 whitespace-nowrap">
                     <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-purple-100 text-[#5B4DB7] font-bold text-[10px] flex items-center justify-center shrink-0">
+                      <div className="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-950/80 text-[#5B4DB7] dark:text-purple-300 font-bold text-[10px] flex items-center justify-center shrink-0">
                         {call.employeeAvatar}
                       </div>
-                      <span className="text-slate-700 font-medium">{call.employeeName}</span>
+                      <span className="text-slate-700 dark:text-slate-300 font-medium">{call.employeeName}</span>
                     </div>
                   </td>
 
@@ -167,7 +167,7 @@ export const CallTable: React.FC<CallTableProps> = ({
                       <button
                         type="button"
                         onClick={() => onAddFollowUp(call)}
-                        className="p-1.5 rounded-lg text-slate-500 hover:text-[#5B4DB7] hover:bg-purple-50 transition-colors"
+                        className="p-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-[#5B4DB7] dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/50 transition-colors"
                         title="Add Follow-up"
                       >
                         <CalendarPlus className="w-4 h-4" />

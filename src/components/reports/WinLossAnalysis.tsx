@@ -8,53 +8,53 @@ interface WinLossAnalysisProps {
 
 export const WinLossAnalysis: React.FC<WinLossAnalysisProps> = ({ data }) => {
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-4 sm:p-5 shadow-2xs space-y-4">
-      <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 sm:p-5 shadow-2xs space-y-4">
+      <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
+          <div className="w-6 h-6 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center">
             <XCircle className="w-3.5 h-3.5" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-slate-900">Win / Loss Velocity & Root Causes</h3>
-            <p className="text-[11px] text-slate-500">Commercial conversion rates and categorized churn reasons</p>
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white">Win / Loss Velocity & Root Causes</h3>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">Commercial conversion rates and categorized churn reasons</p>
           </div>
         </div>
-        <span className="text-[10px] font-bold uppercase text-slate-400">Decision Outcome</span>
+        <span className="text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500">Decision Outcome</span>
       </div>
 
       {/* High-level Status Split */}
       <div className="grid grid-cols-4 gap-2 text-center">
-        <div className="bg-emerald-50 border border-emerald-100 rounded-lg p-2.5">
-          <div className="text-[10px] font-bold uppercase text-emerald-800">Won Deals</div>
-          <div className="text-lg font-bold font-mono text-emerald-700">{data.wonCount}</div>
+        <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-800 rounded-lg p-2.5">
+          <div className="text-[10px] font-bold uppercase text-emerald-800 dark:text-emerald-300">Won Deals</div>
+          <div className="text-lg font-bold font-mono text-emerald-700 dark:text-emerald-400">{data.wonCount}</div>
         </div>
-        <div className="bg-rose-50 border border-rose-100 rounded-lg p-2.5">
-          <div className="text-[10px] font-bold uppercase text-rose-800">Lost Deals</div>
-          <div className="text-lg font-bold font-mono text-rose-700">{data.lostCount}</div>
+        <div className="bg-rose-50 dark:bg-rose-950/40 border border-rose-100 dark:border-rose-800 rounded-lg p-2.5">
+          <div className="text-[10px] font-bold uppercase text-rose-800 dark:text-rose-300">Lost Deals</div>
+          <div className="text-lg font-bold font-mono text-rose-700 dark:text-rose-400">{data.lostCount}</div>
         </div>
-        <div className="bg-blue-50 border border-blue-100 rounded-lg p-2.5">
-          <div className="text-[10px] font-bold uppercase text-blue-800">Open Opps</div>
-          <div className="text-lg font-bold font-mono text-blue-700">{data.openCount}</div>
+        <div className="bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-800 rounded-lg p-2.5">
+          <div className="text-[10px] font-bold uppercase text-blue-800 dark:text-blue-300">Open Opps</div>
+          <div className="text-lg font-bold font-mono text-blue-700 dark:text-blue-400">{data.openCount}</div>
         </div>
-        <div className="bg-purple-50 border border-purple-100 rounded-lg p-2.5">
-          <div className="text-[10px] font-bold uppercase text-purple-800">Win Rate</div>
-          <div className="text-lg font-bold font-mono text-[#5B4DB7]">{data.winRate}%</div>
+        <div className="bg-purple-50 dark:bg-purple-950/40 border border-purple-100 dark:border-purple-800 rounded-lg p-2.5">
+          <div className="text-[10px] font-bold uppercase text-purple-800 dark:text-purple-300">Win Rate</div>
+          <div className="text-lg font-bold font-mono text-[#5B4DB7] dark:text-purple-300">{data.winRate}%</div>
         </div>
       </div>
 
       {/* Loss Reasons Breakdown Table and Visual Bars */}
       <div className="space-y-2 pt-1">
-        <div className="text-xs font-bold text-slate-700">Lost Opportunity Root Causes:</div>
+        <div className="text-xs font-bold text-slate-700 dark:text-slate-300">Lost Opportunity Root Causes:</div>
         <div className="space-y-2">
           {data.lossReasons.map((lr) => (
             <div key={lr.reason} className="space-y-1">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-slate-700 font-medium">{lr.reason}</span>
-                <span className="font-mono font-bold text-slate-900">
+                <span className="text-slate-700 dark:text-slate-300 font-medium">{lr.reason}</span>
+                <span className="font-mono font-bold text-slate-900 dark:text-white">
                   {lr.count} ({lr.percentage}%)
                 </span>
               </div>
-              <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+              <div className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-rose-500 rounded-full"
                   style={{ width: `${lr.percentage}%` }}

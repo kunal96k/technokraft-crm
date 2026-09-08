@@ -171,22 +171,22 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
       />
 
       {/* Modal Card / Mobile Sheet */}
-      <div className="relative w-full max-w-2xl bg-white sm:rounded-2xl shadow-2xl flex flex-col max-h-screen sm:max-h-[92vh] z-10 animate-in fade-in zoom-in-95 duration-200">
+      <div className="relative w-full max-w-2xl bg-white dark:bg-slate-900 sm:rounded-2xl shadow-2xl flex flex-col max-h-screen sm:max-h-[92vh] z-10 animate-in fade-in zoom-in-95 duration-200 border border-slate-200 dark:border-slate-800">
         {/* Header */}
-        <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between shrink-0 bg-slate-50/50 sm:rounded-t-2xl">
+        <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0 bg-slate-50/70 dark:bg-slate-950/60 sm:rounded-t-2xl">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 flex items-center justify-center">
               <Phone className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="font-bold text-slate-900 text-base">Log Call Record</h3>
-              <p className="text-xs text-slate-500">Record call details, outcome, and follow-up</p>
+              <h3 className="font-bold text-slate-900 dark:text-white text-base">Log Call Record</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Record call details, outcome, and follow-up</p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 min-h-[44px] min-w-[44px] flex items-center justify-center cursor-pointer"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 min-h-[44px] min-w-[44px] flex items-center justify-center cursor-pointer transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -195,14 +195,14 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
         {/* Scrollable Form Body */}
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 space-y-4 text-xs">
           {errorMessage && (
-            <div className="p-3 bg-red-50 text-red-700 border border-red-200 rounded-lg font-medium text-xs">
+            <div className="p-3 bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800 rounded-lg font-medium text-xs">
               {errorMessage}
             </div>
           )}
 
           {/* 1. RELATED LEAD (CRITICAL REQUIREMENT) */}
           <div className="space-y-2">
-            <label className="block font-bold text-slate-900 text-xs">
+            <label className="block font-bold text-slate-900 dark:text-white text-xs">
               Related Lead <span className="text-rose-500">*</span>
             </label>
 
@@ -210,33 +210,33 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
             <div className="relative">
               <div
                 onClick={() => setIsLeadDropdownOpen(!isLeadDropdownOpen)}
-                className="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-slate-800 flex items-center justify-between cursor-pointer hover:border-slate-400 min-h-[44px]"
+                className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 flex items-center justify-between cursor-pointer hover:border-slate-400 dark:hover:border-slate-600 min-h-[44px]"
               >
                 {selectedLead ? (
                   <div className="flex items-center gap-2">
-                    <Building2 className="w-4 h-4 text-[#5B4DB7]" />
-                    <span className="font-bold text-slate-900">{selectedLead.company.name}</span>
-                    <span className="font-mono text-[11px] text-slate-500">
+                    <Building2 className="w-4 h-4 text-[#5B4DB7] dark:text-purple-400" />
+                    <span className="font-bold text-slate-900 dark:text-white">{selectedLead.company.name}</span>
+                    <span className="font-mono text-[11px] text-slate-500 dark:text-slate-400">
                       ({selectedLead.leadCode})
                     </span>
                   </div>
                 ) : (
-                  <span className="text-slate-400">Search or select a lead...</span>
+                  <span className="text-slate-400 dark:text-slate-500">Search or select a lead...</span>
                 )}
-                <ChevronDown className="w-4 h-4 text-slate-400" />
+                <ChevronDown className="w-4 h-4 text-slate-400 dark:text-slate-500" />
               </div>
 
               {isLeadDropdownOpen && (
-                <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-20 max-h-56 overflow-y-auto divide-y divide-slate-100">
-                  <div className="p-2 sticky top-0 bg-white border-b border-slate-100">
+                <div className="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl z-20 max-h-56 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-700">
+                  <div className="p-2 sticky top-0 bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700">
                     <div className="relative">
-                      <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+                      <Search className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 absolute left-2.5 top-1/2 -translate-y-1/2" />
                       <input
                         type="text"
                         value={leadSearch}
                         onChange={(e) => setLeadSearch(e.target.value)}
                         placeholder="Search by company, code, contact..."
-                        className="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs"
+                        className="w-full pl-8 pr-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
                         autoFocus
                       />
                     </div>
@@ -245,19 +245,19 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
                     <div
                       key={lead.id}
                       onClick={() => applyLead(lead)}
-                      className="p-2.5 hover:bg-purple-50/50 cursor-pointer flex items-center justify-between text-xs"
+                      className="p-2.5 hover:bg-purple-50/50 dark:hover:bg-slate-700/50 cursor-pointer flex items-center justify-between text-xs"
                     >
                       <div>
-                        <p className="font-bold text-slate-900">{lead.company.name}</p>
-                        <p className="text-[11px] text-slate-500">
+                        <p className="font-bold text-slate-900 dark:text-white">{lead.company.name}</p>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400">
                           {lead.contact.name} • {lead.contact.designation}
                         </p>
                       </div>
                       <div className="text-right">
-                        <span className="font-mono text-[10px] text-slate-400 block">
+                        <span className="font-mono text-[10px] text-slate-400 dark:text-slate-500 block">
                           {lead.leadCode}
                         </span>
-                        <span className="text-[10px] font-semibold text-[#5B4DB7]">
+                        <span className="text-[10px] font-semibold text-[#5B4DB7] dark:text-purple-400">
                           Score: {lead.score}
                         </span>
                       </div>
@@ -269,26 +269,26 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
 
             {/* Selected Lead Meta Box */}
             {selectedLead && (
-              <div className="p-3 bg-purple-50/60 border border-purple-200/80 rounded-xl grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+              <div className="p-3 bg-purple-50/60 dark:bg-slate-950/60 border border-purple-200/80 dark:border-slate-800 rounded-xl grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
                 <div>
-                  <span className="text-slate-400 text-[10px] block">Contact</span>
-                  <span className="font-bold text-slate-800">{selectedLead.contact.name}</span>
+                  <span className="text-slate-400 dark:text-slate-500 text-[10px] block">Contact</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200">{selectedLead.contact.name}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 text-[10px] block">Designation</span>
-                  <span className="font-semibold text-slate-700">
+                  <span className="text-slate-400 dark:text-slate-500 text-[10px] block">Designation</span>
+                  <span className="font-semibold text-slate-700 dark:text-slate-300">
                     {selectedLead.contact.designation}
                   </span>
                 </div>
                 <div>
-                  <span className="text-slate-400 text-[10px] block">Service</span>
-                  <span className="font-semibold text-slate-700 line-clamp-1">
+                  <span className="text-slate-400 dark:text-slate-500 text-[10px] block">Service</span>
+                  <span className="font-semibold text-slate-700 dark:text-slate-300 line-clamp-1">
                     {selectedLead.service}
                   </span>
                 </div>
                 <div>
-                  <span className="text-slate-400 text-[10px] block">Lead Status & Score</span>
-                  <span className="font-bold text-[#5B4DB7]">
+                  <span className="text-slate-400 dark:text-slate-500 text-[10px] block">Lead Status & Score</span>
+                  <span className="font-bold text-[#5B4DB7] dark:text-purple-300">
                     {selectedLead.status} • {selectedLead.score}/100
                   </span>
                 </div>
@@ -299,7 +299,7 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
           {/* 2. CONTACT PERSON & PHONE */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Contact Person <span className="text-rose-500">*</span>
               </label>
               <div className="relative">
@@ -309,21 +309,21 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
                   required
                   value={contactName}
                   onChange={(e) => setContactName(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs min-h-[44px]"
+                  className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-slate-100 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
                   placeholder="e.g. Nikita Patil"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Phone Number</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Phone Number</label>
               <div className="relative">
                 <Phone className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
                   value={contactPhone}
                   onChange={(e) => setContactPhone(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs font-mono min-h-[44px]"
+                  className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-mono text-slate-900 dark:text-slate-100 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
                   placeholder="+91 98230 45612"
                 />
               </div>
@@ -333,13 +333,13 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
           {/* 3. CALL DIRECTION, DATE, TIME, DURATION */}
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Call Type <span className="text-rose-500">*</span>
               </label>
               <select
                 value={callType}
                 onChange={(e) => setCallType(e.target.value as CallType)}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs font-medium min-h-[44px]"
+                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-medium text-slate-900 dark:text-slate-100 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
               >
                 <option value="outbound">Outbound (We Called)</option>
                 <option value="inbound">Inbound (They Called)</option>
@@ -348,28 +348,28 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Date</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Date</label>
               <input
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs font-mono min-h-[44px]"
+                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-mono text-slate-900 dark:text-slate-100 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
               />
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Time</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Time</label>
               <input
                 type="text"
                 value={time}
                 onChange={(e) => setTime(e.target.value)}
                 placeholder="11:30 AM"
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs font-mono min-h-[44px]"
+                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-mono text-slate-900 dark:text-slate-100 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
               />
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Duration</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Duration</label>
               <div className="flex items-center gap-1">
                 <input
                   type="number"
@@ -378,7 +378,7 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
                   value={durationMinutes}
                   onChange={(e) => setDurationMinutes(e.target.value)}
                   placeholder="Min"
-                  className="w-1/2 px-2 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs font-mono text-center min-h-[44px]"
+                  className="w-1/2 px-2 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-mono text-center text-slate-900 dark:text-slate-100 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
                 />
                 <span className="text-slate-400 font-bold">m</span>
                 <input
@@ -388,7 +388,7 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
                   value={durationSeconds}
                   onChange={(e) => setDurationSeconds(e.target.value)}
                   placeholder="Sec"
-                  className="w-1/2 px-2 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs font-mono text-center min-h-[44px]"
+                  className="w-1/2 px-2 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-mono text-center text-slate-900 dark:text-slate-100 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
                 />
                 <span className="text-slate-400 font-bold">s</span>
               </div>
@@ -398,14 +398,14 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
           {/* 4. CALL RESULT & EMPLOYEE */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block font-bold text-slate-900 mb-1">
+              <label className="block font-bold text-slate-900 dark:text-white mb-1">
                 Call Result <span className="text-rose-500">*</span>
               </label>
               <select
                 required
                 value={result}
                 onChange={(e) => setResult(e.target.value as CallResult)}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs font-bold text-[#5B4DB7] min-h-[44px] focus:ring-2 focus:ring-[#5B4DB7]"
+                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-bold text-[#5B4DB7] dark:text-purple-300 min-h-[44px] focus:ring-2 focus:ring-[#5B4DB7]"
               >
                 <option value="Interested">Interested</option>
                 <option value="Requirement Received">Requirement Received ✦</option>
@@ -421,11 +421,11 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Called By (Employee)</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Called By (Employee)</label>
               <select
                 value={assignedEmployee}
                 onChange={(e) => setAssignedEmployee(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs font-medium min-h-[44px]"
+                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-medium text-slate-900 dark:text-slate-100 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
               >
                 <option value="Kunal Patil">Kunal Patil (Sales Manager)</option>
                 <option value="Shruti Raundal">Shruti Raundal (Senior Sales Executive)</option>
@@ -438,10 +438,10 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
 
           {/* OPPORTUNITY NOTICE BANNER */}
           {isOpportunityEligible && (
-            <div className="p-3 bg-amber-50 border border-amber-200/90 rounded-xl flex items-center justify-between gap-2 animate-in fade-in">
+            <div className="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200/90 dark:border-amber-800/80 rounded-xl flex items-center justify-between gap-2 animate-in fade-in">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-amber-600 shrink-0" />
-                <span className="text-xs text-amber-900 font-medium">
+                <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                <span className="text-xs text-amber-900 dark:text-amber-200 font-medium">
                   High-intent call result! You can spawn an Opportunity from this requirement.
                 </span>
               </div>
@@ -456,7 +456,7 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
                       service: selectedLead.service,
                     })
                   }
-                  className="px-2.5 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold shrink-0 min-h-[36px]"
+                  className="px-2.5 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold shrink-0 min-h-[36px] transition-colors cursor-pointer"
                 >
                   Create Opportunity
                 </button>
@@ -466,20 +466,20 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
 
           {/* 5. NOTES */}
           <div>
-            <label className="block font-semibold text-slate-700 mb-1">Call Notes</label>
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Call Notes</label>
             <textarea
               rows={3}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="e.g. Customer is interested in ERP solution. Requested proposal by tomorrow..."
-              className="w-full p-3 bg-slate-50 border border-slate-300 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
+              className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
             />
           </div>
 
           {/* 6. NEXT ACTION (CONNECTS CALLS -> FOLLOW-UPS) */}
-          <div className="pt-2 border-t border-slate-200 space-y-3">
+          <div className="pt-2 border-t border-slate-200 dark:border-slate-800 space-y-3">
             <div>
-              <label className="block font-bold text-slate-900 mb-1">Next Action</label>
+              <label className="block font-bold text-slate-900 dark:text-white mb-1">Next Action</label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {[
                   { id: 'none' as NextActionType, label: 'No next action' },
@@ -489,10 +489,10 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
                 ].map((act) => (
                   <label
                     key={act.id}
-                    className={`flex items-center gap-2 p-2.5 rounded-lg border cursor-pointer min-h-[44px] ${
+                    className={`flex items-center gap-2 p-2.5 rounded-lg border cursor-pointer min-h-[44px] transition-colors ${
                       nextAction === act.id
-                        ? 'border-[#5B4DB7] bg-purple-50 text-[#5B4DB7] font-semibold'
-                        : 'border-slate-200 hover:bg-slate-50 text-slate-700'
+                        ? 'border-[#5B4DB7] dark:border-purple-500 bg-purple-50 dark:bg-purple-950/40 text-[#5B4DB7] dark:text-purple-300 font-semibold'
+                        : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/60 text-slate-700 dark:text-slate-300'
                     }`}
                   >
                     <input
@@ -511,35 +511,35 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
 
             {/* Follow-up subfields if 'Create Follow-up' selected */}
             {nextAction === 'followup' && (
-              <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-3 animate-in fade-in">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800">
-                  <CalendarPlus className="w-3.5 h-3.5 text-[#5B4DB7]" />
+              <div className="p-3 bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 rounded-xl space-y-3 animate-in fade-in">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800 dark:text-slate-200">
+                  <CalendarPlus className="w-3.5 h-3.5 text-[#5B4DB7] dark:text-purple-400" />
                   <span>Scheduled Follow-up Details</span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-4 gap-2.5">
                   <div>
-                    <label className="block text-[11px] font-medium text-slate-600 mb-1">Date</label>
+                    <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1">Date</label>
                     <input
                       type="date"
                       value={followUpDate}
                       onChange={(e) => setFollowUpDate(e.target.value)}
-                      className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs min-h-[44px]"
+                      className="w-full px-2.5 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-slate-100 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-medium text-slate-600 mb-1">Time</label>
+                    <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1">Time</label>
                     <input
                       type="text"
                       value={followUpTime}
                       onChange={(e) => setFollowUpTime(e.target.value)}
                       placeholder="11:00 AM"
-                      className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs min-h-[44px]"
+                      className="w-full px-2.5 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-mono text-slate-900 dark:text-slate-100 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-medium text-slate-600 mb-1">Type</label>
+                    <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1">Type</label>
                     <select
                       value={followUpType}
                       onChange={(e) =>
@@ -547,7 +547,7 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
                           e.target.value as 'Call' | 'Email' | 'Meeting' | 'Demo' | 'Document'
                         )
                       }
-                      className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs min-h-[44px]"
+                      className="w-full px-2.5 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-medium text-slate-900 dark:text-slate-100 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
                     >
                       <option value="Email">Email Follow-up</option>
                       <option value="Call">Call Follow-up</option>
@@ -558,13 +558,13 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-medium text-slate-600 mb-1">
+                    <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1">
                       Assigned To
                     </label>
                     <select
                       value={followUpAssignedTo}
                       onChange={(e) => setFollowUpAssignedTo(e.target.value)}
-                      className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs min-h-[44px]"
+                      className="w-full px-2.5 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-medium text-slate-900 dark:text-slate-100 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
                     >
                       <option value="Kunal Patil">Kunal Patil</option>
                       <option value="Shruti Raundal">Shruti Raundal</option>
@@ -579,17 +579,17 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
           </div>
 
           {/* Bottom actions (At least 44px tall for touch target compliance) */}
-          <div className="pt-4 border-t border-slate-200 flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2.5">
+          <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2.5">
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 border border-slate-300 rounded-xl text-slate-700 font-semibold hover:bg-slate-100 min-h-[44px] flex items-center justify-center cursor-pointer order-2 sm:order-1"
+              className="px-5 py-2.5 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl text-slate-700 dark:text-slate-200 font-semibold hover:bg-slate-100 dark:hover:bg-slate-700 min-h-[44px] flex items-center justify-center cursor-pointer order-2 sm:order-1 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-6 py-2.5 bg-[#5B4DB7] hover:bg-[#4E41A2] text-white rounded-xl font-semibold shadow-md min-h-[44px] flex items-center justify-center gap-2 cursor-pointer order-1 sm:order-2"
+              className="px-6 py-2.5 bg-[#5B4DB7] hover:bg-[#4E41A2] text-white rounded-xl font-semibold shadow-md min-h-[44px] flex items-center justify-center gap-2 cursor-pointer order-1 sm:order-2 transition-colors"
             >
               <CheckCircle2 className="w-4 h-4" />
               <span>Log Call</span>

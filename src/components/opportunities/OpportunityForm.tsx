@@ -228,19 +228,19 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-0 sm:p-4 overflow-y-auto">
-      <div className="bg-white w-full h-full sm:h-auto sm:max-w-3xl sm:max-h-[90vh] sm:rounded-2xl shadow-2xl flex flex-col animate-in fade-in zoom-in-95 duration-150 my-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-0 sm:p-4 overflow-y-auto">
+      <div className="bg-white dark:bg-slate-900 w-full h-full sm:h-auto sm:max-w-3xl sm:max-h-[90vh] sm:rounded-2xl shadow-2xl flex flex-col border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-150 my-auto">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/70 sm:rounded-t-2xl">
+        <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/70 dark:bg-slate-950/60 sm:rounded-t-2xl">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-[#5B4DB7]">
+            <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-100 dark:border-indigo-800 flex items-center justify-center text-[#5B4DB7] dark:text-purple-300">
               <Briefcase className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-slate-900">
+              <h2 className="text-base font-bold text-slate-900 dark:text-white">
                 {initialOpportunity ? 'Edit Opportunity' : 'New Sales Opportunity'}
               </h2>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 TechnoKraft Services B2B Pipeline Qualification & Deal Scoping
               </p>
             </div>
@@ -248,34 +248,34 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-200/60 rounded-lg transition-colors cursor-pointer"
+            className="p-1.5 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Scrollable Form Body */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6 text-xs text-slate-700">
+        <div className="flex-1 overflow-y-auto p-6 space-y-6 text-xs text-slate-700 dark:text-slate-300">
           {/* SECTION 1: LEAD & COMPANY */}
-          <div className="bg-slate-50/70 p-4 rounded-xl border border-slate-200/80 space-y-3">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-              <h3 className="font-bold text-slate-900 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
-                <Building2 className="w-3.5 h-3.5 text-[#5B4DB7]" />
+          <div className="bg-slate-50/70 dark:bg-slate-950/60 p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 space-y-3">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
+              <h3 className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                <Building2 className="w-3.5 h-3.5 text-[#5B4DB7] dark:text-purple-400" />
                 <span>Section 1: Lead & Company Information</span>
               </h3>
-              <span className="text-[10px] text-slate-400 font-medium">* Required</span>
+              <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">* Required</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {/* Related Lead Selector */}
               <div>
-                <label className="block font-bold text-slate-700 mb-1">
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Related Lead <span className="text-rose-500">*</span>
                 </label>
                 <select
                   value={selectedLeadId}
                   onChange={(e) => handleLeadChange(e.target.value)}
-                  className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] focus:outline-none cursor-pointer"
+                  className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] dark:focus:ring-purple-400 focus:outline-none cursor-pointer"
                 >
                   <option value="">-- Choose Existing Qualified Lead --</option>
                   {MOCK_LEADS.map((l) => (
@@ -284,14 +284,14 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
                     </option>
                   ))}
                 </select>
-                <p className="text-[10px] text-slate-400 mt-0.5">
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">
                   Selecting a lead automatically populates company, contact, and requirement data.
                 </p>
               </div>
 
               {/* Company Name */}
               <div>
-                <label className="block font-bold text-slate-700 mb-1">
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Company Name <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -300,13 +300,13 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
                   placeholder="e.g. ABC Technologies Pvt Ltd"
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
-                  className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] focus:outline-none"
+                  className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] dark:focus:ring-purple-400 focus:outline-none"
                 />
               </div>
 
               {/* Contact Name */}
               <div>
-                <label className="block font-bold text-slate-700 mb-1">
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Primary Contact Person <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -315,53 +315,53 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
                   placeholder="e.g. Nikita Patil"
                   value={contactName}
                   onChange={(e) => setContactName(e.target.value)}
-                  className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] focus:outline-none"
+                  className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] dark:focus:ring-purple-400 focus:outline-none"
                 />
               </div>
 
               {/* Designation */}
               <div>
-                <label className="block font-bold text-slate-700 mb-1">Designation</label>
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Designation</label>
                 <input
                   type="text"
                   placeholder="e.g. Chief Technology Officer (CTO)"
                   value={contactDesignation}
                   onChange={(e) => setContactDesignation(e.target.value)}
-                  className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] focus:outline-none"
+                  className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] dark:focus:ring-purple-400 focus:outline-none"
                 />
               </div>
 
               {/* Email */}
               <div>
-                <label className="block font-bold text-slate-700 mb-1">Email Address</label>
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Email Address</label>
                 <input
                   type="email"
                   placeholder="e.g. nikita.patil@abctechnologies.in"
                   value={contactEmail}
                   onChange={(e) => setContactEmail(e.target.value)}
-                  className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] focus:outline-none"
+                  className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] dark:focus:ring-purple-400 focus:outline-none"
                 />
               </div>
 
               {/* Phone */}
               <div>
-                <label className="block font-bold text-slate-700 mb-1">Phone Number</label>
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Phone Number</label>
                 <input
                   type="tel"
                   placeholder="e.g. +91 98230 45612"
                   value={contactPhone}
                   onChange={(e) => setContactPhone(e.target.value)}
-                  className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] focus:outline-none"
+                  className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] dark:focus:ring-purple-400 focus:outline-none"
                 />
               </div>
             </div>
           </div>
 
           {/* SECTION 2: OPPORTUNITY INFORMATION */}
-          <div className="bg-slate-50/70 p-4 rounded-xl border border-slate-200/80 space-y-3">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-              <h3 className="font-bold text-slate-900 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
-                <Briefcase className="w-3.5 h-3.5 text-[#5B4DB7]" />
+          <div className="bg-slate-50/70 dark:bg-slate-950/60 p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 space-y-3">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
+              <h3 className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                <Briefcase className="w-3.5 h-3.5 text-[#5B4DB7] dark:text-purple-400" />
                 <span>Section 2: Opportunity & Deal Information</span>
               </h3>
             </div>
@@ -369,7 +369,7 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {/* Opportunity Name */}
               <div className="sm:col-span-2">
-                <label className="block font-bold text-slate-700 mb-1">
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Opportunity Name <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -378,19 +378,19 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
                   placeholder="e.g. Custom ERP Development"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] focus:outline-none"
+                  className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] dark:focus:ring-purple-400 focus:outline-none"
                 />
               </div>
 
               {/* Service */}
               <div>
-                <label className="block font-bold text-slate-700 mb-1">
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Service <span className="text-rose-500">*</span>
                 </label>
                 <select
                   value={service}
                   onChange={(e) => setService(e.target.value as OpportunityService)}
-                  className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] focus:outline-none"
+                  className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] dark:focus:ring-purple-400 focus:outline-none"
                 >
                   {services.map((svc) => (
                     <option key={svc} value={svc}>
@@ -402,13 +402,13 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
 
               {/* Sales Stage */}
               <div>
-                <label className="block font-bold text-slate-700 mb-1">
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Sales Stage <span className="text-rose-500">*</span>
                 </label>
                 <select
                   value={stage}
                   onChange={(e) => setStage(e.target.value as OpportunityStage)}
-                  className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] focus:outline-none"
+                  className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] dark:focus:ring-purple-400 focus:outline-none"
                 >
                   {stages.map((stg) => (
                     <option key={stg} value={stg}>
@@ -420,7 +420,7 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
 
               {/* Estimated Value (INR) */}
               <div>
-                <label className="block font-bold text-slate-700 mb-1">
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Estimated Value (₹ INR) <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -429,9 +429,9 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
                   placeholder="e.g. 800000"
                   value={estimatedValue}
                   onChange={(e) => setEstimatedValue(e.target.value)}
-                  className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs font-mono font-bold focus:ring-2 focus:ring-[#5B4DB7] focus:outline-none"
+                  className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg p-2 text-xs font-mono font-bold focus:ring-2 focus:ring-[#5B4DB7] dark:focus:ring-purple-400 focus:outline-none"
                 />
-                <p className="text-[10px] text-slate-400 mt-0.5">
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">
                   e.g. 800000 = ₹8,00,000 (8 Lakhs)
                 </p>
               </div>
@@ -439,8 +439,8 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
               {/* Probability */}
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="font-bold text-slate-700">Probability %</label>
-                  <span className="font-mono font-bold text-[#5B4DB7]">{probability}%</span>
+                  <label className="font-bold text-slate-700 dark:text-slate-300">Probability %</label>
+                  <span className="font-mono font-bold text-[#5B4DB7] dark:text-purple-400">{probability}%</span>
                 </div>
                 <input
                   type="range"
@@ -449,9 +449,9 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
                   step="5"
                   value={probability}
                   onChange={(e) => setProbability(Number(e.target.value))}
-                  className="w-full accent-[#5B4DB7] cursor-pointer"
+                  className="w-full accent-[#5B4DB7] dark:accent-purple-400 cursor-pointer"
                 />
-                <div className="flex justify-between text-[10px] text-slate-400">
+                <div className="flex justify-between text-[10px] text-slate-400 dark:text-slate-500">
                   <span>0%</span>
                   <span>50%</span>
                   <span>100%</span>
@@ -460,22 +460,22 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
 
               {/* Expected Close Date */}
               <div>
-                <label className="block font-bold text-slate-700 mb-1">Expected Close Date</label>
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Expected Close Date</label>
                 <input
                   type="date"
                   value={expectedCloseDate}
                   onChange={(e) => setExpectedCloseDate(e.target.value)}
-                  className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] focus:outline-none"
+                  className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] dark:focus:ring-purple-400 focus:outline-none"
                 />
               </div>
 
               {/* Priority */}
               <div>
-                <label className="block font-bold text-slate-700 mb-1">Priority</label>
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Priority</label>
                 <select
                   value={priority}
                   onChange={(e) => setPriority(e.target.value as OpportunityPriority)}
-                  className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] focus:outline-none"
+                  className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] dark:focus:ring-purple-400 focus:outline-none"
                 >
                   <option value="Low">Low</option>
                   <option value="Medium">Medium</option>
@@ -487,101 +487,101 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
           </div>
 
           {/* SECTION 3: REQUIREMENT */}
-          <div className="bg-slate-50/70 p-4 rounded-xl border border-slate-200/80 space-y-3">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-              <h3 className="font-bold text-slate-900 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
-                <FileText className="w-3.5 h-3.5 text-[#5B4DB7]" />
+          <div className="bg-slate-50/70 dark:bg-slate-950/60 p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 space-y-3">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
+              <h3 className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                <FileText className="w-3.5 h-3.5 text-[#5B4DB7] dark:text-purple-400" />
                 <span>Section 3: Customer Requirements & Scope</span>
               </h3>
             </div>
 
             <div className="space-y-3">
               <div>
-                <label className="block font-bold text-slate-700 mb-1">Requirement Summary</label>
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Requirement Summary</label>
                 <textarea
                   rows={2}
                   placeholder="Summary of the customer's project scope and business objectives..."
                   value={requirementSummary}
                   onChange={(e) => setRequirementSummary(e.target.value)}
-                  className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] focus:outline-none"
+                  className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] dark:focus:ring-purple-400 focus:outline-none"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">Business Problem</label>
+                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Business Problem</label>
                   <input
                     type="text"
                     placeholder="Pain points or operational bottlenecks..."
                     value={businessProblem}
                     onChange={(e) => setBusinessProblem(e.target.value)}
-                    className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] focus:outline-none"
+                    className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] dark:focus:ring-purple-400 focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">Expected Users</label>
+                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Expected Users</label>
                   <input
                     type="text"
                     placeholder="e.g. 500 internal employees + 10,000 customers"
                     value={expectedUsers}
                     onChange={(e) => setExpectedUsers(e.target.value)}
-                    className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] focus:outline-none"
+                    className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] dark:focus:ring-purple-400 focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">Estimated Timeline</label>
+                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Estimated Timeline</label>
                   <input
                     type="text"
                     placeholder="e.g. 3 to 4 months"
                     value={timeline}
                     onChange={(e) => setTimeline(e.target.value)}
-                    className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] focus:outline-none"
+                    className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] dark:focus:ring-purple-400 focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">Target Budget</label>
+                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Target Budget</label>
                   <input
                     type="text"
                     placeholder="e.g. ₹8,00,000 - ₹10,00,000"
                     value={budget}
                     onChange={(e) => setBudget(e.target.value)}
-                    className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] focus:outline-none"
+                    className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] dark:focus:ring-purple-400 focus:outline-none"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 mb-1">Technical Requirements</label>
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Technical Requirements</label>
                 <textarea
                   rows={2}
                   placeholder="Tech stack preferences, third-party integrations, compliance (e.g. Node, React, AWS, HIPAA, ABDM)..."
                   value={technicalRequirements}
                   onChange={(e) => setTechnicalRequirements(e.target.value)}
-                  className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] focus:outline-none"
+                  className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] dark:focus:ring-purple-400 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 mb-1">Internal Notes</label>
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Internal Notes</label>
                 <input
                   type="text"
                   placeholder="Additional context from sales/technical discovery..."
                   value={requirementNotes}
                   onChange={(e) => setRequirementNotes(e.target.value)}
-                  className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] focus:outline-none"
+                  className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] dark:focus:ring-purple-400 focus:outline-none"
                 />
               </div>
             </div>
           </div>
 
           {/* SECTION 4: ASSIGNMENT */}
-          <div className="bg-slate-50/70 p-4 rounded-xl border border-slate-200/80 space-y-3">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-              <h3 className="font-bold text-slate-900 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
-                <UserCheck className="w-3.5 h-3.5 text-[#5B4DB7]" />
+          <div className="bg-slate-50/70 dark:bg-slate-950/60 p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 space-y-3">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
+              <h3 className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                <UserCheck className="w-3.5 h-3.5 text-[#5B4DB7] dark:text-purple-400" />
                 <span>Section 4: Team Assignment</span>
               </h3>
             </div>
@@ -589,13 +589,13 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {/* Sales Owner * */}
               <div>
-                <label className="block font-bold text-slate-700 mb-1">
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Sales Owner <span className="text-rose-500">*</span>
                 </label>
                 <select
                   value={ownerName}
                   onChange={(e) => setOwnerName(e.target.value)}
-                  className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] focus:outline-none cursor-pointer"
+                  className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] dark:focus:ring-purple-400 focus:outline-none cursor-pointer"
                 >
                   <option value="Kunal Patil">Kunal Patil (Sales Manager)</option>
                   <option value="Shruti Raundal">Shruti Raundal (Account Exec)</option>
@@ -606,11 +606,11 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
 
               {/* Business Analyst */}
               <div>
-                <label className="block font-bold text-slate-700 mb-1">Business Analyst</label>
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Business Analyst</label>
                 <select
                   value={businessAnalystName}
                   onChange={(e) => setBusinessAnalystName(e.target.value)}
-                  className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] focus:outline-none cursor-pointer"
+                  className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] dark:focus:ring-purple-400 focus:outline-none cursor-pointer"
                 >
                   <option value="">None</option>
                   <option value="Pranav Jejurkar">Pranav Jejurkar (Sr BA)</option>
@@ -620,11 +620,11 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
 
               {/* Technical Reviewer */}
               <div>
-                <label className="block font-bold text-slate-700 mb-1">Technical Reviewer</label>
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Technical Reviewer</label>
                 <select
                   value={technicalReviewerName}
                   onChange={(e) => setTechnicalReviewerName(e.target.value)}
-                  className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] focus:outline-none cursor-pointer"
+                  className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] dark:focus:ring-purple-400 focus:outline-none cursor-pointer"
                 >
                   <option value="">None</option>
                   <option value="Vikram Malhotra">Vikram Malhotra (Solutions Architect)</option>
@@ -636,11 +636,11 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
         </div>
 
         {/* Form Buttons */}
-        <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between sm:rounded-b-2xl">
+        <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 flex items-center justify-between sm:rounded-b-2xl">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg text-xs font-semibold hover:bg-slate-100 transition-colors cursor-pointer"
+            className="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-semibold hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer"
           >
             Cancel
           </button>
@@ -649,7 +649,7 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
             <button
               type="button"
               onClick={() => handleSubmit(true)}
-              className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+              className="px-4 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
             >
               Save Draft
             </button>

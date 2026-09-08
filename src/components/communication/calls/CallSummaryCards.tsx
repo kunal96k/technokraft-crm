@@ -19,9 +19,9 @@ export const CallSummaryCards: React.FC<CallSummaryCardsProps> = ({
       label: 'Calls Today',
       value: stats.callsToday,
       icon: PhoneCall,
-      accent: 'text-indigo-600',
-      bgHover: 'hover:border-indigo-300',
-      bgActive: activeTab === 'today' ? 'ring-2 ring-indigo-500 bg-indigo-50/40' : 'bg-white',
+      accent: 'text-indigo-600 dark:text-indigo-400',
+      bgHover: 'hover:border-indigo-400 dark:hover:border-indigo-500',
+      bgActive: activeTab === 'today' ? 'ring-2 ring-indigo-500 bg-indigo-50/40 dark:bg-indigo-950/30 border-indigo-500' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800',
       badge: 'Active Day',
     },
     {
@@ -29,9 +29,9 @@ export const CallSummaryCards: React.FC<CallSummaryCardsProps> = ({
       label: 'Scheduled',
       value: stats.scheduled,
       icon: CalendarClock,
-      accent: 'text-blue-600',
-      bgHover: 'hover:border-blue-300',
-      bgActive: activeTab === 'scheduled' ? 'ring-2 ring-blue-500 bg-blue-50/40' : 'bg-white',
+      accent: 'text-blue-600 dark:text-blue-400',
+      bgHover: 'hover:border-blue-400 dark:hover:border-blue-500',
+      bgActive: activeTab === 'scheduled' ? 'ring-2 ring-blue-500 bg-blue-50/40 dark:bg-blue-950/30 border-blue-500' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800',
       badge: 'Pipeline',
     },
     {
@@ -39,9 +39,9 @@ export const CallSummaryCards: React.FC<CallSummaryCardsProps> = ({
       label: 'Completed',
       value: stats.completed,
       icon: CheckCircle2,
-      accent: 'text-emerald-600',
-      bgHover: 'hover:border-emerald-300',
-      bgActive: activeTab === 'completed' ? 'ring-2 ring-emerald-500 bg-emerald-50/40' : 'bg-white',
+      accent: 'text-emerald-600 dark:text-emerald-400',
+      bgHover: 'hover:border-emerald-400 dark:hover:border-emerald-500',
+      bgActive: activeTab === 'completed' ? 'ring-2 ring-emerald-500 bg-emerald-50/40 dark:bg-emerald-950/30 border-emerald-500' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800',
       badge: 'Delivered',
     },
     {
@@ -49,9 +49,9 @@ export const CallSummaryCards: React.FC<CallSummaryCardsProps> = ({
       label: 'Missed',
       value: stats.missed,
       icon: PhoneMissed,
-      accent: 'text-rose-600',
-      bgHover: 'hover:border-rose-300',
-      bgActive: activeTab === 'missed' ? 'ring-2 ring-rose-500 bg-rose-50/40' : 'bg-white',
+      accent: 'text-rose-600 dark:text-rose-400',
+      bgHover: 'hover:border-rose-400 dark:hover:border-rose-500',
+      bgActive: activeTab === 'missed' ? 'ring-2 ring-rose-500 bg-rose-50/40 dark:bg-rose-950/30 border-rose-500' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800',
       badge: 'Attention',
     },
     {
@@ -59,9 +59,9 @@ export const CallSummaryCards: React.FC<CallSummaryCardsProps> = ({
       label: 'Follow-up Required',
       value: stats.followUpRequired,
       icon: ClockAlert,
-      accent: 'text-amber-600',
-      bgHover: 'hover:border-amber-300',
-      bgActive: 'bg-white',
+      accent: 'text-amber-600 dark:text-amber-400',
+      bgHover: 'hover:border-amber-400 dark:hover:border-amber-500',
+      bgActive: 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800',
       badge: 'Actions',
     },
   ];
@@ -70,29 +70,28 @@ export const CallSummaryCards: React.FC<CallSummaryCardsProps> = ({
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
       {cards.map((card) => {
         const Icon = card.icon;
-        const isSelected = activeTab === card.id && card.label !== 'Follow-up Required';
 
         return (
           <button
             key={card.label}
             type="button"
             onClick={() => onSelectTab(card.id)}
-            className={`p-3 sm:p-3.5 rounded-xl border border-slate-200/90 text-left transition-all cursor-pointer shadow-2xs ${card.bgActive} ${card.bgHover} hover:shadow-xs group`}
+            className={`p-3 sm:p-3.5 rounded-xl border text-left transition-all cursor-pointer shadow-2xs ${card.bgActive} ${card.bgHover} hover:shadow-xs group`}
           >
             <div className="flex items-center justify-between gap-1.5 mb-1.5">
-              <span className="text-[11px] font-medium text-slate-500 line-clamp-1 group-hover:text-slate-700">
+              <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 line-clamp-1 group-hover:text-slate-700 dark:group-hover:text-slate-200">
                 {card.label}
               </span>
-              <div className={`p-1.5 rounded-lg bg-slate-50 group-hover:bg-white border border-slate-100/80 ${card.accent}`}>
+              <div className={`p-1.5 rounded-lg bg-slate-50 dark:bg-slate-800 group-hover:bg-white dark:group-hover:bg-slate-700 border border-slate-100/80 dark:border-slate-700/80 ${card.accent}`}>
                 <Icon className="w-3.5 h-3.5" />
               </div>
             </div>
 
             <div className="flex items-baseline justify-between">
-              <span className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
+              <span className="text-xl sm:text-2xl font-bold font-mono tracking-tight text-slate-900 dark:text-white">
                 {card.value}
               </span>
-              <span className="text-[10px] font-semibold text-slate-400 bg-slate-100/70 px-1.5 py-0.5 rounded">
+              <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 bg-slate-100/70 dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-200/50 dark:border-slate-700">
                 {card.badge}
               </span>
             </div>

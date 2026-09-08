@@ -57,19 +57,19 @@ export const ReportDateRange: React.FC<ReportDateRangeProps> = ({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors shadow-2xs cursor-pointer"
+        className="inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-2xs cursor-pointer"
       >
-        <Calendar className="w-3.5 h-3.5 text-[#5B4DB7]" />
+        <Calendar className="w-3.5 h-3.5 text-[#5B4DB7] dark:text-purple-400" />
         <span>Date: {currentPreset.label}</span>
-        <span className="text-[11px] text-slate-400 font-normal hidden md:inline">
+        <span className="text-[11px] text-slate-400 dark:text-slate-500 font-normal hidden md:inline">
           ({currentPreset.periodText})
         </span>
-        <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+        <ChevronDown className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 sm:right-0 sm:left-auto top-full mt-1.5 w-64 bg-white rounded-xl border border-slate-200 shadow-xl py-2 z-40 animate-in fade-in zoom-in-95 duration-150 divide-y divide-slate-100">
-          <div className="px-3 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+        <div className="absolute left-0 sm:right-0 sm:left-auto top-full mt-1.5 w-64 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xl py-2 z-40 animate-in fade-in zoom-in-95 duration-150 divide-y divide-slate-100 dark:divide-slate-700">
+          <div className="px-3 py-1 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
             Select Reporting Window
           </div>
           <div className="py-1">
@@ -85,39 +85,39 @@ export const ReportDateRange: React.FC<ReportDateRangeProps> = ({
                 }}
                 className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between cursor-pointer transition-colors ${
                   selected === preset.id
-                    ? 'bg-purple-50 text-[#5B4DB7] font-semibold'
-                    : 'text-slate-700 hover:bg-slate-50'
+                    ? 'bg-purple-50 dark:bg-purple-950/40 text-[#5B4DB7] dark:text-purple-300 font-semibold'
+                    : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
                 }`}
               >
                 <div>
                   <div className="font-medium">{preset.label}</div>
-                  <div className="text-[10px] text-slate-400">{preset.periodText}</div>
+                  <div className="text-[10px] text-slate-400 dark:text-slate-500">{preset.periodText}</div>
                 </div>
-                {selected === preset.id && <Check className="w-3.5 h-3.5 text-[#5B4DB7]" />}
+                {selected === preset.id && <Check className="w-3.5 h-3.5 text-[#5B4DB7] dark:text-purple-400" />}
               </button>
             ))}
           </div>
 
           {selected === 'Custom Range' && (
-            <div className="p-3 bg-slate-50 space-y-2">
-              <div className="text-[11px] font-semibold text-slate-700">Custom Date Range</div>
+            <div className="p-3 bg-slate-50 dark:bg-slate-900/80 space-y-2">
+              <div className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">Custom Date Range</div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-[10px] text-slate-500 font-medium mb-1">From</label>
+                  <label className="block text-[10px] text-slate-500 dark:text-slate-400 font-medium mb-1">From</label>
                   <input
                     type="date"
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
-                    className="w-full text-xs px-2 py-1 bg-white border border-slate-200 rounded text-slate-800"
+                    className="w-full text-xs px-2 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-800 dark:text-slate-100"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] text-slate-500 font-medium mb-1">To</label>
+                  <label className="block text-[10px] text-slate-500 dark:text-slate-400 font-medium mb-1">To</label>
                   <input
                     type="date"
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
-                    className="w-full text-xs px-2 py-1 bg-white border border-slate-200 rounded text-slate-800"
+                    className="w-full text-xs px-2 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-800 dark:text-slate-100"
                   />
                 </div>
               </div>

@@ -22,18 +22,18 @@ export const LeadFiltersModal: React.FC<LeadFiltersModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/50 backdrop-blur-xs">
-      <div className="w-full sm:max-w-lg bg-white rounded-t-2xl sm:rounded-2xl shadow-xl border border-slate-200 overflow-hidden flex flex-col max-h-[85vh] animate-in slide-in-from-bottom sm:zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/60 backdrop-blur-xs">
+      <div className="w-full sm:max-w-lg bg-white dark:bg-slate-900 rounded-t-2xl sm:rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col max-h-[85vh] animate-in slide-in-from-bottom sm:zoom-in-95 duration-200">
         {/* Header */}
-        <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
+        <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-[#5B4DB7]" />
-            <h3 className="text-sm font-bold text-slate-900">Filter Leads</h3>
+            <Filter className="w-4 h-4 text-[#5B4DB7] dark:text-purple-400" />
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white">Filter Leads</h3>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+            className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
             aria-label="Close filters"
           >
             <X className="w-5 h-5" />
@@ -44,11 +44,11 @@ export const LeadFiltersModal: React.FC<LeadFiltersModalProps> = ({
         <div className="p-5 overflow-y-auto space-y-4 text-xs">
           {/* Status */}
           <div>
-            <label className="block font-semibold text-slate-700 mb-1.5">Lead Status</label>
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Lead Status</label>
             <select
               value={filters.status}
               onChange={(e) => onChangeFilter('status', e.target.value)}
-              className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
+              className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
             >
               <option value="">All Statuses</option>
               <option value="NEW">New</option>
@@ -68,11 +68,11 @@ export const LeadFiltersModal: React.FC<LeadFiltersModalProps> = ({
 
           {/* Lead Source */}
           <div>
-            <label className="block font-semibold text-slate-700 mb-1.5">Lead Source</label>
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Lead Source</label>
             <select
               value={filters.source}
               onChange={(e) => onChangeFilter('source', e.target.value)}
-              className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
+              className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
             >
               <option value="">All Sources</option>
               <option value="LinkedIn">LinkedIn</option>
@@ -88,11 +88,11 @@ export const LeadFiltersModal: React.FC<LeadFiltersModalProps> = ({
 
           {/* Service */}
           <div>
-            <label className="block font-semibold text-slate-700 mb-1.5">Interested Service</label>
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Interested Service</label>
             <select
               value={filters.service}
               onChange={(e) => onChangeFilter('service', e.target.value)}
-              className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
+              className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
             >
               <option value="">All TechnoKraft Services</option>
               <option value="Custom Software Development">Custom Software Development</option>
@@ -109,11 +109,11 @@ export const LeadFiltersModal: React.FC<LeadFiltersModalProps> = ({
 
           {/* Assigned Employee */}
           <div>
-            <label className="block font-semibold text-slate-700 mb-1.5">Assigned To</label>
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Assigned To</label>
             <select
               value={filters.assignedTo}
               onChange={(e) => onChangeFilter('assignedTo', e.target.value)}
-              className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
+              className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
             >
               <option value="">All Employees</option>
               <option value="Kunal Patil">Kunal Patil (Sales Manager)</option>
@@ -125,11 +125,11 @@ export const LeadFiltersModal: React.FC<LeadFiltersModalProps> = ({
 
           {/* Priority */}
           <div>
-            <label className="block font-semibold text-slate-700 mb-1.5">Priority</label>
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Priority</label>
             <select
               value={filters.priority}
               onChange={(e) => onChangeFilter('priority', e.target.value)}
-              className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
+              className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
             >
               <option value="">All Priorities</option>
               <option value="URGENT">Urgent</option>
@@ -141,11 +141,11 @@ export const LeadFiltersModal: React.FC<LeadFiltersModalProps> = ({
 
           {/* Date Range */}
           <div>
-            <label className="block font-semibold text-slate-700 mb-1.5">Created Date</label>
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Created Date</label>
             <select
               value={filters.dateRange}
               onChange={(e) => onChangeFilter('dateRange', e.target.value)}
-              className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
+              className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
             >
               <option value="">All Time</option>
               <option value="today">Today</option>
@@ -157,11 +157,11 @@ export const LeadFiltersModal: React.FC<LeadFiltersModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="px-5 py-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-3">
+        <div className="px-5 py-3.5 bg-slate-50 dark:bg-slate-950/60 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
           <button
             type="button"
             onClick={onResetFilters}
-            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>Reset All</span>
@@ -171,7 +171,7 @@ export const LeadFiltersModal: React.FC<LeadFiltersModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-3.5 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors shadow-2xs"
+              className="px-3.5 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-2xs"
             >
               Cancel
             </button>

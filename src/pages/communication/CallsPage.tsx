@@ -318,8 +318,8 @@ export const CallsPage: React.FC = () => {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">Calls</h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Calls</h1>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
             Track customer and lead calls and their outcomes.
           </p>
         </div>
@@ -329,9 +329,9 @@ export const CallsPage: React.FC = () => {
           <button
             type="button"
             onClick={() => setIsScheduleModalOpen(true)}
-            className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-semibold text-xs flex items-center gap-1.5 shadow-2xs transition-colors min-h-[44px] cursor-pointer"
+            className="px-3.5 py-2 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 font-semibold text-xs flex items-center gap-1.5 shadow-2xs transition-colors min-h-[44px] cursor-pointer"
           >
-            <CalendarClock className="w-4 h-4 text-slate-500" />
+            <CalendarClock className="w-4 h-4 text-slate-500 dark:text-slate-400" />
             <span>Schedule Call</span>
           </button>
 
@@ -383,17 +383,17 @@ export const CallsPage: React.FC = () => {
 
       {/* Error state fallback */}
       {isError && (
-        <div className="p-8 text-center bg-rose-50 border border-rose-200 rounded-xl space-y-3">
+        <div className="p-8 text-center bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/50 rounded-xl space-y-3">
           <AlertCircle className="w-8 h-8 text-rose-500 mx-auto" />
-          <h3 className="text-sm font-bold text-rose-900">Unable to load calls.</h3>
-          <p className="text-xs text-rose-600">Please check your connection and retry.</p>
+          <h3 className="text-sm font-bold text-rose-900 dark:text-rose-200">Unable to load calls.</h3>
+          <p className="text-xs text-rose-600 dark:text-rose-300">Please check your connection and retry.</p>
           <button
             type="button"
             onClick={() => {
               setIsError(false);
               setCalls(getStoredCalls());
             }}
-            className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-semibold inline-flex items-center gap-1.5"
+            className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer min-h-[44px]"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>Try Again</span>
@@ -448,14 +448,14 @@ export const CallsPage: React.FC = () => {
                 </>
               ) : (
                 /* Empty States */
-                <div className="bg-white border border-slate-200/90 rounded-2xl p-10 text-center space-y-3 shadow-2xs">
-                  <div className="w-12 h-12 rounded-full bg-purple-50 text-[#5B4DB7] flex items-center justify-center mx-auto">
+                <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-10 text-center space-y-3 shadow-2xs">
+                  <div className="w-12 h-12 rounded-full bg-purple-50 dark:bg-purple-950/80 text-[#5B4DB7] dark:text-purple-300 flex items-center justify-center mx-auto">
                     <Phone className="w-6 h-6" />
                   </div>
                   {filters.tab === 'scheduled' ? (
                     <>
-                      <h3 className="text-sm font-bold text-slate-900">No calls scheduled.</h3>
-                      <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                      <h3 className="text-sm font-bold text-slate-900 dark:text-white">No calls scheduled.</h3>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
                         There are no upcoming outbound or inbound calls on your schedule.
                       </p>
                       <button
@@ -469,8 +469,8 @@ export const CallsPage: React.FC = () => {
                     </>
                   ) : (
                     <>
-                      <h3 className="text-sm font-bold text-slate-900">No calls recorded yet.</h3>
-                      <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                      <h3 className="text-sm font-bold text-slate-900 dark:text-white">No calls recorded yet.</h3>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
                         No call logs match the selected filter criteria. Start by logging customer conversations.
                       </p>
                       <div className="flex items-center justify-center gap-2 pt-1">
@@ -486,7 +486,7 @@ export const CallsPage: React.FC = () => {
                           <button
                             type="button"
                             onClick={handleResetFilters}
-                            className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold cursor-pointer min-h-[44px]"
+                            className="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-semibold cursor-pointer min-h-[44px] transition-colors"
                           >
                             Reset Filters
                           </button>

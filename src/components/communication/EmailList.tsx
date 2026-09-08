@@ -54,9 +54,9 @@ export const EmailList: React.FC<EmailListProps> = ({
   const allSelected = emails.length > 0 && selectedIds.length === emails.length;
 
   return (
-    <div className="flex flex-col h-full bg-white rounded-xl border border-slate-200 overflow-hidden shadow-xs">
+    <div className="flex flex-col h-full bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs">
       {/* Category Navigation Tabs (Inside the email workspace) */}
-      <div className="flex items-center px-2 pt-2 border-b border-slate-200 bg-slate-50/70 overflow-x-auto scrollbar-none">
+      <div className="flex items-center px-2 pt-2 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/60 overflow-x-auto scrollbar-none">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -69,8 +69,8 @@ export const EmailList: React.FC<EmailListProps> = ({
               onClick={() => onSelectTab(tab.id)}
               className={`flex items-center gap-1.5 px-3.5 py-2.5 text-xs font-semibold border-b-2 transition-all whitespace-nowrap ${
                 isActive
-                  ? 'border-[#5B4DB7] text-[#5B4DB7] bg-white rounded-t-lg'
-                  : 'border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-100/60 rounded-t-lg'
+                  ? 'border-[#5B4DB7] text-[#5B4DB7] dark:text-purple-400 bg-white dark:bg-slate-900 rounded-t-lg'
+                  : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/60 dark:hover:bg-slate-800/60 rounded-t-lg'
               }`}
             >
               <Icon className="w-3.5 h-3.5" />
@@ -78,8 +78,8 @@ export const EmailList: React.FC<EmailListProps> = ({
               <span
                 className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
                   isActive
-                    ? 'bg-purple-100 text-[#5B4DB7]'
-                    : 'bg-slate-200/80 text-slate-600'
+                    ? 'bg-purple-100 dark:bg-purple-950/80 text-[#5B4DB7] dark:text-purple-300'
+                    : 'bg-slate-200/80 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
                 }`}
               >
                 {count}
@@ -90,12 +90,12 @@ export const EmailList: React.FC<EmailListProps> = ({
       </div>
 
       {/* Bulk Operations Toolbar Bar */}
-      <div className="flex items-center justify-between px-3.5 py-2 border-b border-slate-100 bg-slate-50/40 text-xs text-slate-600">
+      <div className="flex items-center justify-between px-3.5 py-2 border-b border-slate-100 dark:border-slate-800/60 bg-slate-50/40 dark:bg-slate-950/40 text-xs text-slate-600 dark:text-slate-400">
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={onToggleSelectAll}
-            className="flex items-center gap-1.5 text-slate-700 hover:text-slate-900 font-medium"
+            className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-medium"
             title="Select all currently visible emails"
           >
             {allSelected ? (
@@ -106,7 +106,7 @@ export const EmailList: React.FC<EmailListProps> = ({
             <span className="text-[11px]">Select All</span>
           </button>
           {selectedIds.length > 0 && (
-            <span className="text-[11px] font-semibold text-[#5B4DB7] bg-purple-50 px-2 py-0.5 rounded-md border border-purple-200">
+            <span className="text-[11px] font-semibold text-[#5B4DB7] dark:text-purple-300 bg-purple-50 dark:bg-purple-950/50 px-2 py-0.5 rounded-md border border-purple-200 dark:border-purple-800">
               {selectedIds.length} selected
             </span>
           )}
@@ -126,7 +126,7 @@ export const EmailList: React.FC<EmailListProps> = ({
             <button
               type="button"
               onClick={onBulkDelete}
-              className="p-1 text-slate-400 hover:text-rose-600 rounded-md hover:bg-rose-50"
+              className="p-1 text-slate-400 hover:text-rose-600 rounded-md hover:bg-rose-50 dark:hover:bg-rose-950/40"
               title="Delete selected emails"
             >
               <Trash2 className="w-3.5 h-3.5" />
@@ -136,7 +136,7 @@ export const EmailList: React.FC<EmailListProps> = ({
       </div>
 
       {/* Email List Content Area */}
-      <div className="flex-1 overflow-y-auto divide-y divide-slate-100">
+      <div className="flex-1 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/80">
         {isLoading ? (
           <div className="p-4 space-y-3">
             {[1, 2, 3, 4, 5].map((n) => (

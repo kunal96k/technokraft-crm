@@ -159,7 +159,7 @@ export const AddLeadPage: React.FC = () => {
         actions={
           <Link
             to="/leads"
-            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors shadow-2xs"
+            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-2xs cursor-pointer"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>Cancel & Return</span>
@@ -169,8 +169,8 @@ export const AddLeadPage: React.FC = () => {
 
       {/* Success Notification */}
       {successMessage && (
-        <div className="p-4 bg-emerald-50 border border-emerald-300 text-emerald-900 rounded-xl text-xs font-semibold flex items-center gap-2.5 shadow-2xs animate-in fade-in">
-          <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+        <div className="p-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200 rounded-xl text-xs font-semibold flex items-center gap-2.5 shadow-2xs animate-in fade-in">
+          <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
           <span>{successMessage}</span>
         </div>
       )}
@@ -192,21 +192,21 @@ export const AddLeadPage: React.FC = () => {
       {/* Main Multi-Section Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* SECTION 1: COMPANY INFORMATION */}
-        <div className="bg-white border border-slate-200/90 rounded-xl p-5 sm:p-6 shadow-2xs space-y-4">
-          <div className="flex items-center gap-2.5 border-b border-slate-100 pb-3">
-            <div className="w-8 h-8 rounded-lg bg-purple-50 text-[#5B4DB7] flex items-center justify-center flex-shrink-0">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl p-5 sm:p-6 shadow-2xs space-y-4">
+          <div className="flex items-center gap-2.5 border-b border-slate-100 dark:border-slate-800 pb-3">
+            <div className="w-8 h-8 rounded-lg bg-purple-50 dark:bg-purple-950/40 text-[#5B4DB7] dark:text-purple-300 flex items-center justify-center flex-shrink-0">
               <Building2 className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-slate-900">1. Company Information</h2>
-              <p className="text-xs text-slate-500">Corporate client profile and location details</p>
+              <h2 className="text-sm font-bold text-slate-900 dark:text-white">1. Company Information</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Corporate client profile and location details</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
             {/* Company Name (Required) */}
             <div className="md:col-span-2">
-              <label className="block font-semibold text-slate-700 mb-1">
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Company Name <span className="text-rose-500">*</span>
               </label>
               <input
@@ -214,8 +214,8 @@ export const AddLeadPage: React.FC = () => {
                 value={companyName}
                 onChange={(e) => handleCompanyNameChange(e.target.value)}
                 placeholder="e.g. Apex Enterprise Solutions Pvt Ltd"
-                className={`w-full px-3 py-2.5 bg-slate-50 focus:bg-white border rounded-lg text-xs text-slate-900 transition-colors focus:outline-none focus:ring-2 focus:ring-[#5B4DB7] ${
-                  errors.companyName ? 'border-rose-400 bg-rose-50/20' : 'border-slate-300'
+                className={`w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-800 border rounded-lg text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-colors focus:outline-none focus:ring-2 focus:ring-[#5B4DB7] ${
+                  errors.companyName ? 'border-rose-400 bg-rose-50/20 dark:bg-rose-950/20' : 'border-slate-300 dark:border-slate-700'
                 }`}
               />
               {errors.companyName && (
@@ -225,23 +225,23 @@ export const AddLeadPage: React.FC = () => {
 
             {/* Website */}
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Website URL</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Website URL</label>
               <input
                 type="text"
                 value={website}
                 onChange={(e) => setWebsite(e.target.value)}
                 placeholder="e.g. apexsolutions.com"
-                className="w-full px-3 py-2.5 bg-slate-50 focus:bg-white border border-slate-300 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
+                className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
               />
             </div>
 
             {/* Industry */}
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Industry Sector</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Industry Sector</label>
               <select
                 value={industry}
                 onChange={(e) => setIndustry(e.target.value)}
-                className="w-full px-3 py-2.5 bg-slate-50 focus:bg-white border border-slate-300 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
+                className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
               >
                 <option value="">Select Industry</option>
                 <option value="IT & Software">IT & Software</option>
@@ -258,11 +258,11 @@ export const AddLeadPage: React.FC = () => {
 
             {/* Company Size */}
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Company Size</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Company Size</label>
               <select
                 value={companySize}
                 onChange={(e) => setCompanySize(e.target.value)}
-                className="w-full px-3 py-2.5 bg-slate-50 focus:bg-white border border-slate-300 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
+                className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
               >
                 <option value="">Select Employee Count</option>
                 <option value="1-50 employees">1-50 employees (Startup)</option>
@@ -275,69 +275,69 @@ export const AddLeadPage: React.FC = () => {
             {/* City & State */}
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">City</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">City</label>
                 <input
                   type="text"
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
                   placeholder="e.g. Pune"
-                  className="w-full px-3 py-2.5 bg-slate-50 focus:bg-white border border-slate-300 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
+                  className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
                 />
               </div>
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">State</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">State</label>
                 <input
                   type="text"
                   value={state}
                   onChange={(e) => setState(e.target.value)}
                   placeholder="e.g. Maharashtra"
-                  className="w-full px-3 py-2.5 bg-slate-50 focus:bg-white border border-slate-300 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
+                  className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
                 />
               </div>
             </div>
 
             {/* Company LinkedIn */}
             <div className="md:col-span-2">
-              <label className="block font-semibold text-slate-700 mb-1">Company LinkedIn Profile</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Company LinkedIn Profile</label>
               <input
                 type="text"
                 value={companyLinkedIn}
                 onChange={(e) => setCompanyLinkedIn(e.target.value)}
                 placeholder="e.g. linkedin.com/company/apex-solutions"
-                className="w-full px-3 py-2.5 bg-slate-50 focus:bg-white border border-slate-300 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
+                className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
               />
             </div>
 
             {/* Company Description */}
             <div className="md:col-span-2">
-              <label className="block font-semibold text-slate-700 mb-1">Company Background</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Company Background</label>
               <textarea
                 rows={2}
                 value={companyDescription}
                 onChange={(e) => setCompanyDescription(e.target.value)}
                 placeholder="Brief business summary or market positioning..."
-                className="w-full px-3 py-2 bg-slate-50 focus:bg-white border border-slate-300 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
+                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
               />
             </div>
           </div>
         </div>
 
         {/* SECTION 2: CONTACT PERSON INFORMATION */}
-        <div className="bg-white border border-slate-200/90 rounded-xl p-5 sm:p-6 shadow-2xs space-y-4">
-          <div className="flex items-center gap-2.5 border-b border-slate-100 pb-3">
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl p-5 sm:p-6 shadow-2xs space-y-4">
+          <div className="flex items-center gap-2.5 border-b border-slate-100 dark:border-slate-800 pb-3">
+            <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0">
               <Phone className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-slate-900">2. Primary Contact Person</h2>
-              <p className="text-xs text-slate-500">Key stakeholder or decision maker details</p>
+              <h2 className="text-sm font-bold text-slate-900 dark:text-white">2. Primary Contact Person</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Key stakeholder or decision maker details</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
             {/* Contact Name (Required) */}
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Contact Person Name <span className="text-rose-500">*</span>
               </label>
               <input
@@ -348,8 +348,8 @@ export const AddLeadPage: React.FC = () => {
                   if (errors.contactPerson) setErrors((prev) => ({ ...prev, contactPerson: '' }));
                 }}
                 placeholder="e.g. Kunal Patil"
-                className={`w-full px-3 py-2.5 bg-slate-50 focus:bg-white border rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7] ${
-                  errors.contactPerson ? 'border-rose-400 bg-rose-50/20' : 'border-slate-300'
+                className={`w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-800 border rounded-lg text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7] ${
+                  errors.contactPerson ? 'border-rose-400 bg-rose-50/20 dark:bg-rose-950/20' : 'border-slate-300 dark:border-slate-700'
                 }`}
               />
               {errors.contactPerson && (
@@ -359,19 +359,19 @@ export const AddLeadPage: React.FC = () => {
 
             {/* Designation */}
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Designation / Role</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Designation / Role</label>
               <input
                 type="text"
                 value={designation}
                 onChange={(e) => setDesignation(e.target.value)}
                 placeholder="e.g. Chief Technology Officer / IT Director"
-                className="w-full px-3 py-2.5 bg-slate-50 focus:bg-white border border-slate-300 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
+                className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
               />
             </div>
 
             {/* Email (Required) */}
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Corporate Email <span className="text-rose-500">*</span>
               </label>
               <input
@@ -379,8 +379,8 @@ export const AddLeadPage: React.FC = () => {
                 value={email}
                 onChange={(e) => handleEmailChange(e.target.value)}
                 placeholder="e.g. kunal.patil@apexsolutions.com"
-                className={`w-full px-3 py-2.5 bg-slate-50 focus:bg-white border rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7] ${
-                  errors.email ? 'border-rose-400 bg-rose-50/20' : 'border-slate-300'
+                className={`w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-800 border rounded-lg text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7] ${
+                  errors.email ? 'border-rose-400 bg-rose-50/20 dark:bg-rose-950/20' : 'border-slate-300 dark:border-slate-700'
                 }`}
               />
               {errors.email && (
@@ -390,7 +390,7 @@ export const AddLeadPage: React.FC = () => {
 
             {/* Phone (Required) */}
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Phone / Mobile Number <span className="text-rose-500">*</span>
               </label>
               <input
@@ -401,8 +401,8 @@ export const AddLeadPage: React.FC = () => {
                   if (errors.phone) setErrors((prev) => ({ ...prev, phone: '' }));
                 }}
                 placeholder="e.g. +91 98230 11223"
-                className={`w-full px-3 py-2.5 bg-slate-50 focus:bg-white border rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7] ${
-                  errors.phone ? 'border-rose-400 bg-rose-50/20' : 'border-slate-300'
+                className={`w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-800 border rounded-lg text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7] ${
+                  errors.phone ? 'border-rose-400 bg-rose-50/20 dark:bg-rose-950/20' : 'border-slate-300 dark:border-slate-700'
                 }`}
               />
               {errors.phone && (
@@ -412,52 +412,52 @@ export const AddLeadPage: React.FC = () => {
 
             {/* Alternate Phone */}
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Alternate Phone / Direct Desk</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Alternate Phone / Direct Desk</label>
               <input
                 type="tel"
                 value={alternatePhone}
                 onChange={(e) => setAlternatePhone(e.target.value)}
                 placeholder="e.g. +91 20 6712 3456"
-                className="w-full px-3 py-2.5 bg-slate-50 focus:bg-white border border-slate-300 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
+                className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
               />
             </div>
 
             {/* Contact LinkedIn */}
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">LinkedIn Profile</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">LinkedIn Profile</label>
               <input
                 type="text"
                 value={contactLinkedIn}
                 onChange={(e) => setContactLinkedIn(e.target.value)}
                 placeholder="e.g. linkedin.com/in/kunal-patil-cto"
-                className="w-full px-3 py-2.5 bg-slate-50 focus:bg-white border border-slate-300 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
+                className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
               />
             </div>
           </div>
         </div>
 
         {/* SECTION 3: LEAD INFORMATION & SERVICE */}
-        <div className="bg-white border border-slate-200/90 rounded-xl p-5 sm:p-6 shadow-2xs space-y-4">
-          <div className="flex items-center gap-2.5 border-b border-slate-100 pb-3">
-            <div className="w-8 h-8 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center flex-shrink-0">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl p-5 sm:p-6 shadow-2xs space-y-4">
+          <div className="flex items-center gap-2.5 border-b border-slate-100 dark:border-slate-800 pb-3">
+            <div className="w-8 h-8 rounded-lg bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-400 flex items-center justify-center flex-shrink-0">
               <Layers className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-slate-900">3. Lead Classification & Service</h2>
-              <p className="text-xs text-slate-500">TechnoKraft offering, source channel, and qualification parameters</p>
+              <h2 className="text-sm font-bold text-slate-900 dark:text-white">3. Lead Classification & Service</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">TechnoKraft offering, source channel, and qualification parameters</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
             {/* Lead Source */}
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Lead Source <span className="text-rose-500">*</span>
               </label>
               <select
                 value={leadSource}
                 onChange={(e) => setLeadSource(e.target.value as LeadSource)}
-                className="w-full px-3 py-2.5 bg-slate-50 focus:bg-white border border-slate-300 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
+                className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
               >
                 <option value="LinkedIn">LinkedIn Outreach</option>
                 <option value="Cold Calling">Cold Calling</option>
@@ -474,13 +474,13 @@ export const AddLeadPage: React.FC = () => {
 
             {/* Interested Service */}
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Interested Service <span className="text-rose-500">*</span>
               </label>
               <select
                 value={service}
                 onChange={(e) => setService(e.target.value as TechnoKraftService)}
-                className="w-full px-3 py-2.5 bg-slate-50 focus:bg-white border border-slate-300 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
+                className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
               >
                 <option value="Custom Software Development">Custom Software Development</option>
                 <option value="Web Development">Web Application Development</option>
@@ -497,11 +497,11 @@ export const AddLeadPage: React.FC = () => {
 
             {/* Initial Status */}
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Initial Status</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Initial Status</label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value as LeadStatus)}
-                className="w-full px-3 py-2.5 bg-slate-50 focus:bg-white border border-slate-300 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
+                className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7] dark:focus:ring-purple-400"
               >
                 <option value="NEW">New</option>
                 <option value="CONTACTED">Contacted</option>
@@ -513,11 +513,11 @@ export const AddLeadPage: React.FC = () => {
 
             {/* Priority */}
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Priority Level</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Priority Level</label>
               <select
                 value={priority}
                 onChange={(e) => setPriority(e.target.value as LeadPriority)}
-                className="w-full px-3 py-2.5 bg-slate-50 focus:bg-white border border-slate-300 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
+                className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7] dark:focus:ring-purple-400"
               >
                 <option value="URGENT">Urgent (Immediate follow-up)</option>
                 <option value="HIGH">High Priority</option>
@@ -529,10 +529,10 @@ export const AddLeadPage: React.FC = () => {
             {/* Lead Score Slider */}
             <div className="md:col-span-2">
               <div className="flex items-center justify-between mb-1">
-                <label className="font-semibold text-slate-700">
-                  Initial Lead Score: <strong className="text-[#5B4DB7]">{leadScore} / 100</strong>
+                <label className="font-semibold text-slate-700 dark:text-slate-300">
+                  Initial Lead Score: <strong className="text-[#5B4DB7] dark:text-purple-400">{leadScore} / 100</strong>
                 </label>
-                <span className="text-[11px] text-slate-500">
+                <span className="text-[11px] text-slate-500 dark:text-slate-400">
                   {leadScore >= 81 ? '🔥 Very Hot' : leadScore >= 61 ? '⚡ Hot' : 'Warm'}
                 </span>
               </div>
@@ -542,101 +542,101 @@ export const AddLeadPage: React.FC = () => {
                 max={100}
                 value={leadScore}
                 onChange={(e) => setLeadScore(Number(e.target.value))}
-                className="w-full accent-[#5B4DB7] cursor-pointer"
+                className="w-full accent-[#5B4DB7] dark:accent-purple-400 cursor-pointer"
               />
             </div>
           </div>
         </div>
 
         {/* SECTION 4: BUSINESS REQUIREMENT */}
-        <div className="bg-white border border-slate-200/90 rounded-xl p-5 sm:p-6 shadow-2xs space-y-4">
-          <div className="flex items-center gap-2.5 border-b border-slate-100 pb-3">
-            <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center flex-shrink-0">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl p-5 sm:p-6 shadow-2xs space-y-4">
+          <div className="flex items-center gap-2.5 border-b border-slate-100 dark:border-slate-800 pb-3">
+            <div className="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800/60 flex items-center justify-center flex-shrink-0">
               <FileText className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-slate-900">4. Business Requirements & Scope</h2>
-              <p className="text-xs text-slate-500">Project requirements, budget expectations, and target timeline</p>
+              <h2 className="text-sm font-bold text-slate-900 dark:text-white">4. Business Requirements & Scope</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Project requirements, budget expectations, and target timeline</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
             <div className="md:col-span-2">
-              <label className="block font-semibold text-slate-700 mb-1">Requirement Summary</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Requirement Summary</label>
               <textarea
                 rows={3}
                 value={requirementSummary}
                 onChange={(e) => setRequirementSummary(e.target.value)}
                 placeholder="Summarize the core technical deliverable or business software needed..."
-                className="w-full px-3 py-2 bg-slate-50 focus:bg-white border border-slate-300 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
+                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7] dark:focus:ring-purple-400 placeholder-slate-400 dark:placeholder-slate-500"
               />
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Budget Range (INR)</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Budget Range (INR)</label>
               <input
                 type="text"
                 value={budgetRange}
                 onChange={(e) => setBudgetRange(e.target.value)}
                 placeholder="e.g. ₹20L - ₹35L"
-                className="w-full px-3 py-2.5 bg-slate-50 focus:bg-white border border-slate-300 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
+                className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7] dark:focus:ring-purple-400 placeholder-slate-400 dark:placeholder-slate-500"
               />
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Expected Delivery Timeline</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Expected Delivery Timeline</label>
               <input
                 type="text"
                 value={expectedTimeline}
                 onChange={(e) => setExpectedTimeline(e.target.value)}
                 placeholder="e.g. 3 to 4 months"
-                className="w-full px-3 py-2.5 bg-slate-50 focus:bg-white border border-slate-300 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
+                className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7] dark:focus:ring-purple-400 placeholder-slate-400 dark:placeholder-slate-500"
               />
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Current Tech Stack (If Any)</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Current Tech Stack (If Any)</label>
               <input
                 type="text"
                 value={currentTech}
                 onChange={(e) => setCurrentTech(e.target.value)}
                 placeholder="e.g. Java Spring, MySQL, React"
-                className="w-full px-3 py-2.5 bg-slate-50 focus:bg-white border border-slate-300 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
+                className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7] dark:focus:ring-purple-400 placeholder-slate-400 dark:placeholder-slate-500"
               />
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Estimated Users / Scale</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Estimated Users / Scale</label>
               <input
                 type="text"
                 value={numberOfUsers}
                 onChange={(e) => setNumberOfUsers(e.target.value)}
                 placeholder="e.g. 500 internal agents or 50,000 public users"
-                className="w-full px-3 py-2.5 bg-slate-50 focus:bg-white border border-slate-300 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
+                className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7] dark:focus:ring-purple-400 placeholder-slate-400 dark:placeholder-slate-500"
               />
             </div>
           </div>
         </div>
 
         {/* SECTION 5: ASSIGNMENT & NEXT FOLLOW-UP */}
-        <div className="bg-white border border-slate-200/90 rounded-xl p-5 sm:p-6 shadow-2xs space-y-4">
-          <div className="flex items-center gap-2.5 border-b border-slate-100 pb-3">
-            <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center flex-shrink-0">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl p-5 sm:p-6 shadow-2xs space-y-4">
+          <div className="flex items-center gap-2.5 border-b border-slate-100 dark:border-slate-800 pb-3">
+            <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800/60 flex items-center justify-center flex-shrink-0">
               <UserCheck className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-slate-900">5. Internal Team Assignment</h2>
-              <p className="text-xs text-slate-500">Allocate lead ownership and schedule the immediate follow-up task</p>
+              <h2 className="text-sm font-bold text-slate-900 dark:text-white">5. Internal Team Assignment</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Allocate lead ownership and schedule the immediate follow-up task</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Assigned Sales Executive</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Assigned Sales Executive</label>
               <select
                 value={assignedEmployee}
                 onChange={(e) => setAssignedEmployee(e.target.value)}
-                className="w-full px-3 py-2.5 bg-slate-50 focus:bg-white border border-slate-300 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
+                className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7] dark:focus:ring-purple-400"
               >
                 <option value="Kunal Patil">Kunal Patil (Sales Manager)</option>
                 <option value="Shruti Raundal">Shruti Raundal (Sales Executive)</option>
@@ -645,11 +645,11 @@ export const AddLeadPage: React.FC = () => {
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Assigned Business Analyst (BA)</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Assigned Business Analyst (BA)</label>
               <select
                 value={assignedBA}
                 onChange={(e) => setAssignedBA(e.target.value)}
-                className="w-full px-3 py-2.5 bg-slate-50 focus:bg-white border border-slate-300 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
+                className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7] dark:focus:ring-purple-400"
               >
                 <option value="Pranav Jejurkar">Pranav Jejurkar (Senior BA)</option>
                 <option value="Rohan Joshi">Rohan Joshi (BA - Cloud/Tech)</option>
@@ -658,51 +658,51 @@ export const AddLeadPage: React.FC = () => {
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Next Follow-up Date</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Next Follow-up Date</label>
               <input
                 type="date"
                 value={followUpDate}
                 onChange={(e) => setFollowUpDate(e.target.value)}
-                className="w-full px-3 py-2.5 bg-slate-50 focus:bg-white border border-slate-300 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
+                className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7] dark:focus:ring-purple-400"
               />
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Next Follow-up Time</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Next Follow-up Time</label>
               <input
                 type="time"
                 value={followUpTime}
                 onChange={(e) => setFollowUpTime(e.target.value)}
-                className="w-full px-3 py-2.5 bg-slate-50 focus:bg-white border border-slate-300 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
+                className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7] dark:focus:ring-purple-400"
               />
             </div>
           </div>
         </div>
 
         {/* SECTION 6: ATTACHMENTS */}
-        <div className="bg-white border border-slate-200/90 rounded-xl p-5 sm:p-6 shadow-2xs space-y-4">
-          <div className="flex items-center gap-2.5 border-b border-slate-100 pb-3">
-            <div className="w-8 h-8 rounded-lg bg-purple-50 text-[#5B4DB7] flex items-center justify-center flex-shrink-0">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl p-5 sm:p-6 shadow-2xs space-y-4">
+          <div className="flex items-center gap-2.5 border-b border-slate-100 dark:border-slate-800 pb-3">
+            <div className="w-8 h-8 rounded-lg bg-purple-50 dark:bg-purple-950/40 text-[#5B4DB7] dark:text-purple-300 border border-purple-200 dark:border-purple-800/60 flex items-center justify-center flex-shrink-0">
               <Paperclip className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-slate-900">6. RFP & Scope Attachments</h2>
-              <p className="text-xs text-slate-500">Attach client briefs, NDA, technical diagrams, or RFP documents</p>
+              <h2 className="text-sm font-bold text-slate-900 dark:text-white">6. RFP & Scope Attachments</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Attach client briefs, NDA, technical diagrams, or RFP documents</p>
             </div>
           </div>
 
           <div
             onDragOver={(e) => e.preventDefault()}
             onDrop={handleFileDrop}
-            className="border-2 border-dashed border-slate-300 hover:border-[#5B4DB7] rounded-xl p-6 text-center bg-slate-50/70 transition-colors cursor-pointer"
+            className="border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-[#5B4DB7] dark:hover:border-purple-400 rounded-xl p-6 text-center bg-slate-50/70 dark:bg-slate-950/40 transition-colors cursor-pointer"
           >
             <div className="max-w-xs mx-auto space-y-2">
-              <UploadCloud className="w-8 h-8 text-[#5B4DB7] mx-auto" />
+              <UploadCloud className="w-8 h-8 text-[#5B4DB7] dark:text-purple-400 mx-auto" />
               <div>
-                <p className="text-xs font-semibold text-slate-800">
+                <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">
                   Drag & drop files here, or click to browse
                 </p>
-                <p className="text-[11px] text-slate-400 mt-0.5">
+                <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
                   Supported formats: PDF, DOCX, XLSX, PNG, JPG (up to 25 MB)
                 </p>
               </div>
@@ -714,17 +714,17 @@ export const AddLeadPage: React.FC = () => {
               {attachments.map((file, idx) => (
                 <div
                   key={idx}
-                  className="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs"
+                  className="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-lg text-xs"
                 >
                   <div className="flex items-center gap-2">
-                    <File className="w-4 h-4 text-[#5B4DB7]" />
-                    <span className="font-medium text-slate-800">{file.name}</span>
-                    <span className="text-slate-400">({file.size})</span>
+                    <File className="w-4 h-4 text-[#5B4DB7] dark:text-purple-400" />
+                    <span className="font-medium text-slate-800 dark:text-slate-200">{file.name}</span>
+                    <span className="text-slate-400 dark:text-slate-500">({file.size})</span>
                   </div>
                   <button
                     type="button"
                     onClick={() => setAttachments((prev) => prev.filter((_, i) => i !== idx))}
-                    className="p-1 text-slate-400 hover:text-rose-600"
+                    className="p-1 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -735,10 +735,10 @@ export const AddLeadPage: React.FC = () => {
         </div>
 
         {/* BOTTOM FORM ACTIONS */}
-        <div className="bg-white border border-slate-200/90 rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-2xs">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-2xs">
           <Link
             to="/leads"
-            className="w-full sm:w-auto px-4 py-2.5 text-center text-xs font-semibold text-slate-600 hover:text-slate-900 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+            className="w-full sm:w-auto px-4 py-2.5 text-center text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-slate-300 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
           >
             Cancel
           </Link>
@@ -747,14 +747,14 @@ export const AddLeadPage: React.FC = () => {
             <button
               type="button"
               onClick={handleSaveDraft}
-              className="flex-1 sm:flex-none px-4 py-2.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-300 rounded-lg transition-colors shadow-2xs"
+              className="flex-1 sm:flex-none px-4 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 rounded-lg transition-colors shadow-2xs"
             >
               Save as Draft
             </button>
 
             <button
               type="submit"
-              className="flex-1 sm:flex-none px-6 py-2.5 text-xs font-semibold text-white bg-[#5B4DB7] hover:bg-[#4E41A2] rounded-lg transition-colors shadow-xs"
+              className="flex-1 sm:flex-none px-6 py-2.5 text-xs font-semibold text-white bg-[#5B4DB7] hover:bg-[#4E41A2] dark:bg-purple-600 dark:hover:bg-purple-700 rounded-lg transition-colors shadow-xs"
             >
               Create Lead
             </button>

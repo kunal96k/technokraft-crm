@@ -36,7 +36,7 @@ export const LeadTable: React.FC<LeadTableProps> = ({
     <button
       type="button"
       onClick={() => onSort(field)}
-      className="inline-flex items-center gap-1 font-semibold hover:text-slate-900 transition-colors uppercase tracking-wider text-[11px]"
+      className="inline-flex items-center gap-1 font-semibold hover:text-slate-900 dark:hover:text-white transition-colors uppercase tracking-wider text-[11px]"
     >
       <span>{label}</span>
       <ArrowUpDown
@@ -46,9 +46,9 @@ export const LeadTable: React.FC<LeadTableProps> = ({
   );
 
   return (
-    <div className="w-full overflow-x-auto rounded-xl border border-slate-200/90 bg-white shadow-2xs">
-      <table className="w-full text-left text-xs text-slate-600 border-collapse min-w-[1050px]">
-        <thead className="bg-slate-50/90 text-slate-500 border-b border-slate-200/90 select-none">
+    <div className="w-full overflow-x-auto rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xs">
+      <table className="w-full text-left text-xs text-slate-600 dark:text-slate-300 border-collapse min-w-[1050px]">
+        <thead className="bg-slate-50/90 dark:bg-slate-950/60 text-slate-500 dark:text-slate-400 border-b border-slate-200/90 dark:border-slate-800 select-none">
           <tr>
             <th className="w-10 py-3.5 pl-4 pr-2">
               <input
@@ -58,7 +58,7 @@ export const LeadTable: React.FC<LeadTableProps> = ({
                   if (input) input.indeterminate = isPartiallySelected;
                 }}
                 onChange={onToggleSelectAll}
-                className="w-4 h-4 rounded border-slate-300 text-[#5B4DB7] focus:ring-[#5B4DB7] cursor-pointer"
+                className="w-4 h-4 rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-[#5B4DB7] focus:ring-[#5B4DB7] cursor-pointer"
                 aria-label="Select all leads"
               />
             </th>
@@ -76,7 +76,7 @@ export const LeadTable: React.FC<LeadTableProps> = ({
           </tr>
         </thead>
 
-        <tbody className="divide-y divide-slate-100 font-sans">
+        <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 font-sans">
           {leads.map((lead) => {
             const isSelected = selectedIds.includes(lead.id);
 
@@ -85,7 +85,7 @@ export const LeadTable: React.FC<LeadTableProps> = ({
                 key={lead.id}
                 onClick={() => navigate(`/leads/${lead.id}`)}
                 className={`cursor-pointer transition-colors group ${
-                  isSelected ? 'bg-purple-50/40 hover:bg-purple-50/60' : 'hover:bg-slate-50/80'
+                  isSelected ? 'bg-purple-50/40 dark:bg-purple-950/30 hover:bg-purple-50/60 dark:hover:bg-purple-950/40' : 'hover:bg-slate-50/80 dark:hover:bg-slate-800/50'
                 }`}
               >
                 {/* Checkbox */}
@@ -100,25 +100,25 @@ export const LeadTable: React.FC<LeadTableProps> = ({
                     type="checkbox"
                     checked={isSelected}
                     onChange={() => onToggleSelect(lead.id)}
-                    className="w-4 h-4 rounded border-slate-300 text-[#5B4DB7] focus:ring-[#5B4DB7] cursor-pointer"
+                    className="w-4 h-4 rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-[#5B4DB7] focus:ring-[#5B4DB7] cursor-pointer"
                     aria-label={`Select lead ${lead.leadCode}`}
                   />
                 </td>
 
                 {/* Lead ID */}
                 <td className="py-3 px-3 whitespace-nowrap">
-                  <span className="font-mono font-medium text-slate-800 text-[11.5px] bg-slate-100 px-2 py-0.5 rounded border border-slate-200/60 group-hover:border-purple-200 group-hover:bg-purple-50/50 transition-colors">
+                  <span className="font-mono font-medium text-slate-800 dark:text-slate-200 text-[11.5px] bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-200/60 dark:border-slate-700 group-hover:border-purple-200 dark:group-hover:border-purple-800 group-hover:bg-purple-50/50 dark:group-hover:bg-purple-950/40 transition-colors">
                     {lead.leadCode}
                   </span>
                 </td>
 
                 {/* Company Name & Website */}
                 <td className="py-3 px-3">
-                  <div className="font-semibold text-slate-900 text-xs hover:text-[#5B4DB7] transition-colors leading-tight">
+                  <div className="font-semibold text-slate-900 dark:text-white text-xs hover:text-[#5B4DB7] dark:hover:text-purple-400 transition-colors leading-tight">
                     {lead.company.name}
                   </div>
                   {lead.company.website && (
-                    <div className="flex items-center gap-1 text-[11px] text-slate-400 mt-0.5 font-normal">
+                    <div className="flex items-center gap-1 text-[11px] text-slate-400 dark:text-slate-500 mt-0.5 font-normal">
                       <Globe className="w-3 h-3 flex-shrink-0" />
                       <span className="truncate max-w-[160px]">{lead.company.website}</span>
                     </div>
@@ -127,23 +127,23 @@ export const LeadTable: React.FC<LeadTableProps> = ({
 
                 {/* Contact Person & Designation */}
                 <td className="py-3 px-3">
-                  <div className="font-medium text-slate-800 text-xs leading-tight">
+                  <div className="font-medium text-slate-800 dark:text-slate-200 text-xs leading-tight">
                     {lead.contact.name}
                   </div>
-                  <div className="text-[11px] text-slate-400 mt-0.5 truncate max-w-[150px]">
+                  <div className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5 truncate max-w-[150px]">
                     {lead.contact.designation}
                   </div>
                 </td>
 
                 {/* Service */}
                 <td className="py-3 px-3">
-                  <span className="inline-block px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-[11px] font-medium border border-slate-200/70 truncate max-w-[160px]">
+                  <span className="inline-block px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[11px] font-medium border border-slate-200/70 dark:border-slate-700 truncate max-w-[160px]">
                     {lead.service}
                   </span>
                 </td>
 
                 {/* Lead Source */}
-                <td className="py-3 px-2.5 whitespace-nowrap text-[11.5px] text-slate-600">
+                <td className="py-3 px-2.5 whitespace-nowrap text-[11.5px] text-slate-600 dark:text-slate-300">
                   {lead.source}
                 </td>
 
@@ -165,10 +165,10 @@ export const LeadTable: React.FC<LeadTableProps> = ({
                 {/* Assigned To */}
                 <td className="py-3 px-3 whitespace-nowrap">
                   <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-full bg-purple-100 text-[#5B4DB7] text-[10px] font-bold flex items-center justify-center flex-shrink-0">
+                    <div className="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-950/80 text-[#5B4DB7] dark:text-purple-300 text-[10px] font-bold flex items-center justify-center flex-shrink-0">
                       {lead.assignedEmployee.avatar}
                     </div>
-                    <span className="text-xs font-medium text-slate-800 truncate max-w-[110px]">
+                    <span className="text-xs font-medium text-slate-800 dark:text-slate-200 truncate max-w-[110px]">
                       {lead.assignedEmployee.name}
                     </span>
                   </div>
@@ -180,8 +180,8 @@ export const LeadTable: React.FC<LeadTableProps> = ({
                     <div
                       className={`inline-flex items-center gap-1.5 text-[11px] font-medium ${
                         lead.nextFollowUp.isOverdue
-                          ? 'text-rose-600 font-semibold'
-                          : 'text-slate-700'
+                          ? 'text-rose-600 dark:text-rose-400 font-semibold'
+                          : 'text-slate-700 dark:text-slate-300'
                       }`}
                     >
                       {lead.nextFollowUp.isOverdue ? (
@@ -192,7 +192,7 @@ export const LeadTable: React.FC<LeadTableProps> = ({
                       <span>{lead.nextFollowUp.displayString}</span>
                     </div>
                   ) : (
-                    <span className="text-slate-400 text-[11px] italic">Not scheduled</span>
+                    <span className="text-slate-400 dark:text-slate-500 text-[11px] italic">Not scheduled</span>
                   )}
                 </td>
 
@@ -209,7 +209,7 @@ export const LeadTable: React.FC<LeadTableProps> = ({
 
           {leads.length === 0 && (
             <tr>
-              <td colSpan={12} className="py-12 text-center text-slate-400 text-xs">
+              <td colSpan={12} className="py-12 text-center text-slate-400 dark:text-slate-500 text-xs">
                 No leads found matching current filters.
               </td>
             </tr>

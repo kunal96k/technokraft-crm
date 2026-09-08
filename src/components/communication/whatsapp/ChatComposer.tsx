@@ -35,23 +35,23 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
   };
 
   return (
-    <div className="p-3 border-t border-slate-200 bg-white">
-      <div className="flex items-end gap-2 bg-slate-50 border border-slate-300 rounded-2xl p-1.5 focus-within:ring-2 focus-within:ring-[#5B4DB7]/30 focus-within:border-[#5B4DB7] transition-all">
+    <div className="p-3 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+      <div className="flex items-end gap-2 bg-slate-50 dark:bg-slate-950/60 border border-slate-300 dark:border-slate-800 rounded-2xl p-1.5 focus-within:ring-2 focus-within:ring-[#5B4DB7]/30 focus-within:border-[#5B4DB7] transition-all">
         {/* Quick Action Buttons */}
         <div className="flex items-center gap-1 pl-1 pb-1">
           <button
             type="button"
             onClick={onOpenTemplates}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-[#5B4DB7] hover:bg-purple-50 transition-colors"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-[#5B4DB7] hover:bg-purple-50 dark:hover:bg-purple-950/50 transition-colors"
             title="Choose Quick Business Template"
           >
-            <Sparkles className="w-4 h-4 text-[#5B4DB7]" />
+            <Sparkles className="w-4 h-4 text-[#5B4DB7] dark:text-purple-400" />
           </button>
 
           <button
             type="button"
             onClick={onAttachFile}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors"
             title="Attach Document or Proposal"
           >
             <Paperclip className="w-4 h-4" />
@@ -66,7 +66,7 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
           onChange={(e) => setText(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Type a message (Press Enter to send, Shift+Enter for newline)..."
-          className="flex-1 bg-transparent text-xs py-2 px-2 text-slate-800 placeholder:text-slate-400 focus:outline-none resize-none max-h-32 leading-relaxed"
+          className="flex-1 bg-transparent text-xs py-2 px-2 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none resize-none max-h-32 leading-relaxed"
           disabled={disabled}
         />
 

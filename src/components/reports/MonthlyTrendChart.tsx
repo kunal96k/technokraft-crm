@@ -18,18 +18,18 @@ interface MonthlyTrendChartProps {
 
 export const MonthlyTrendChart: React.FC<MonthlyTrendChartProps> = ({ data }) => {
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-4 sm:p-5 shadow-2xs space-y-4">
-      <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 sm:p-5 shadow-2xs space-y-4">
+      <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center">
+          <div className="w-6 h-6 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 flex items-center justify-center">
             <Calendar className="w-3.5 h-3.5" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-slate-900">Monthly Progression Trend (H1 2026)</h3>
-            <p className="text-[11px] text-slate-500">Leads Generated vs Qualified vs Won Deals trajectory</p>
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white">Monthly Progression Trend (H1 2026)</h3>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">Leads Generated vs Qualified vs Won Deals trajectory</p>
           </div>
         </div>
-        <span className="text-[10px] font-bold uppercase text-slate-400">Quarterly Cohort</span>
+        <span className="text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500">Quarterly Cohort</span>
       </div>
 
       <div className="w-full h-64 sm:h-72">

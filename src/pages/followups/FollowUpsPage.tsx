@@ -450,9 +450,9 @@ export const FollowUpsPage: React.FC = () => {
           {/* Desktop Table View */}
           <div className="hidden md:block">
             {filteredFollowUps.length === 0 ? (
-              <div className="bg-white border border-slate-200 rounded-xl p-12 text-center text-xs text-slate-500">
-                <CalendarClock className="w-10 h-10 text-slate-300 mx-auto mb-2" />
-                <p className="font-semibold text-slate-800 text-sm">
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-12 text-center text-xs text-slate-500 dark:text-slate-400">
+                <CalendarClock className="w-10 h-10 text-slate-300 dark:text-slate-600 mx-auto mb-2" />
+                <p className="font-semibold text-slate-800 dark:text-slate-100 text-sm">
                   No Follow-ups Found
                 </p>
                 <p className="mt-1">Try adjusting your filters or search keywords.</p>
@@ -478,8 +478,8 @@ export const FollowUpsPage: React.FC = () => {
           {/* Mobile Card List View */}
           <div className="md:hidden space-y-3">
             {filteredFollowUps.length === 0 ? (
-              <div className="bg-white border border-slate-200 rounded-xl p-8 text-center text-xs text-slate-500">
-                <p className="font-semibold text-slate-800">No Follow-ups Found</p>
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-8 text-center text-xs text-slate-500 dark:text-slate-400">
+                <p className="font-semibold text-slate-800 dark:text-slate-100">No Follow-ups Found</p>
                 <p className="mt-1">Try adjusting your filters.</p>
               </div>
             ) : (
@@ -502,7 +502,7 @@ export const FollowUpsPage: React.FC = () => {
 
       {/* Optional Team Workload Section if Team View is toggled */}
       {isTeamView && (
-        <div className="pt-4 border-t border-slate-200">
+        <div className="pt-4 border-t border-slate-200 dark:border-slate-800">
           <TeamPerformanceView
             performanceData={MOCK_EMPLOYEE_PERFORMANCE}
             onSelectEmployee={(empName) => handleFilterChange('assignedTo', empName)}
@@ -511,13 +511,13 @@ export const FollowUpsPage: React.FC = () => {
       )}
 
       {/* Pagination Footer */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 pt-2 border-t border-slate-100">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400 pt-2 border-t border-slate-100 dark:border-slate-800">
         <div>
           Showing <strong>1 to {filteredFollowUps.length}</strong> of{' '}
           <strong>{followUps.length}</strong> total records
         </div>
         <div className="flex items-center gap-1">
-          <span className="text-slate-400">Rows per page: 25</span>
+          <span className="text-slate-400 dark:text-slate-500">Rows per page: 25</span>
         </div>
       </div>
 
