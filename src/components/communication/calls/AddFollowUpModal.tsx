@@ -18,7 +18,7 @@ export const AddFollowUpModal: React.FC<AddFollowUpModalProps> = ({
   const [date, setDate] = useState('2026-09-09');
   const [time, setTime] = useState('11:00 AM');
   const [type, setType] = useState<'Call' | 'Email' | 'Meeting' | 'Demo' | 'Document'>('Email');
-  const [assignedTo, setAssignedTo] = useState(call.employeeName || 'Rahul Patil');
+  const [assignedTo, setAssignedTo] = useState(call.employeeName || 'Kunal Patil');
   const [notes, setNotes] = useState('');
 
   if (!isOpen) return null;
@@ -129,7 +129,7 @@ export const AddFollowUpModal: React.FC<AddFollowUpModalProps> = ({
                 onChange={(e) => setAssignedTo(e.target.value)}
                 className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs min-h-[44px]"
               >
-                <option value="Rahul Patil">Rahul Patil</option>
+                <option value="Kunal Patil">Kunal Patil</option>
                 <option value="Priya Shah">Priya Shah</option>
                 <option value="Amit Mehta">Amit Mehta</option>
                 <option value="Sneha Kulkarni">Sneha Kulkarni</option>

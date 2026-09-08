@@ -467,7 +467,7 @@ export const LeadDetailsPage: React.FC = () => {
                 type="text"
                 value={newNote}
                 onChange={(e) => setNewNote(e.target.value)}
-                placeholder="e.g. Spoke with Rahul Sharma. Will send revised NDA tomorrow morning..."
+                placeholder="e.g. Spoke with Nikita Patil. Will send revised NDA tomorrow morning..."
                 className="flex-1 px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
               />
               <button
@@ -629,7 +629,7 @@ export const LeadDetailsPage: React.FC = () => {
                 Dear {lead.contact.name}, Thank you for your time on our discovery call today. Attached is the preliminary architecture overview and similar cloud orchestration case studies delivered by TechnoKraft Services.
               </p>
               <div className="pt-2 text-[11px] text-slate-400">
-                From: rahul.patil@technokraft.com → To: {lead.contact.email}
+                From: kunal.patil@technokraft.com → To: {lead.contact.email}
               </div>
             </div>
           </div>

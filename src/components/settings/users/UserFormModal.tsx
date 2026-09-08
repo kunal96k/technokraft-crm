@@ -190,7 +190,7 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                     setName(e.target.value);
                     if (errors.name) setErrors((prev) => ({ ...prev, name: '' }));
                   }}
-                  placeholder="e.g. Rahul Patil"
+                  placeholder="e.g. Kunal Patil"
                   className={`w-full px-3 py-2 text-xs rounded-lg border bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 ${
                     errors.name
                       ? 'border-rose-300 focus:ring-rose-500/20'
@@ -230,7 +230,7 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                   setEmail(e.target.value);
                   if (errors.email) setErrors((prev) => ({ ...prev, email: '' }));
                 }}
-                placeholder="e.g. rahul.patil@technokraftservices.com"
+                placeholder="e.g. kunal.patil@technokraftservices.com"
                 className={`w-full pl-8 pr-3 py-2 text-xs rounded-lg border bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 ${
                   errors.email
                     ? 'border-rose-300 focus:ring-rose-500/20'

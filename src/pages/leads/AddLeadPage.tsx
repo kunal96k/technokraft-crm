@@ -44,7 +44,7 @@ export const AddLeadPage: React.FC = () => {
   const [service, setService] = useState<TechnoKraftService>('Custom Software Development');
   const [status, setStatus] = useState<LeadStatus>('NEW');
   const [priority, setPriority] = useState<LeadPriority>('HIGH');
-  const [assignedEmployee, setAssignedEmployee] = useState('Rahul Patil');
+  const [assignedEmployee, setAssignedEmployee] = useState('Kunal Patil');
   const [leadScore, setLeadScore] = useState(75);
 
   // Business Requirement
@@ -76,7 +76,7 @@ export const AddLeadPage: React.FC = () => {
     if (
       comp.toLowerCase().includes('abc tech') ||
       comp.toLowerCase().includes('abctechnologies') ||
-      mail.toLowerCase().includes('rahul.sharma@abctechnologies')
+      mail.toLowerCase().includes('nikita.patil@abctechnologies')
     ) {
       setShowDuplicateWarning(true);
     }
@@ -180,7 +180,7 @@ export const AddLeadPage: React.FC = () => {
         <DuplicateLeadAlert
           existingLeadCode="LD-2026-00125"
           existingCompanyName="ABC Technologies Pvt Ltd"
-          existingEmail="rahul.sharma@abctechnologies.in"
+          existingEmail="nikita.patil@abctechnologies.in"
           onDismiss={() => setShowDuplicateWarning(false)}
           onMergeLater={() => {
             setShowDuplicateWarning(false);
@@ -347,7 +347,7 @@ export const AddLeadPage: React.FC = () => {
                   setContactPerson(e.target.value);
                   if (errors.contactPerson) setErrors((prev) => ({ ...prev, contactPerson: '' }));
                 }}
-                placeholder="e.g. Rahul Patil"
+                placeholder="e.g. Kunal Patil"
                 className={`w-full px-3 py-2.5 bg-slate-50 focus:bg-white border rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7] ${
                   errors.contactPerson ? 'border-rose-400 bg-rose-50/20' : 'border-slate-300'
                 }`}
@@ -378,7 +378,7 @@ export const AddLeadPage: React.FC = () => {
                 type="email"
                 value={email}
                 onChange={(e) => handleEmailChange(e.target.value)}
-                placeholder="e.g. rahul.patil@apexsolutions.com"
+                placeholder="e.g. kunal.patil@apexsolutions.com"
                 className={`w-full px-3 py-2.5 bg-slate-50 focus:bg-white border rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7] ${
                   errors.email ? 'border-rose-400 bg-rose-50/20' : 'border-slate-300'
                 }`}
@@ -429,7 +429,7 @@ export const AddLeadPage: React.FC = () => {
                 type="text"
                 value={contactLinkedIn}
                 onChange={(e) => setContactLinkedIn(e.target.value)}
-                placeholder="e.g. linkedin.com/in/rahul-patil-cto"
+                placeholder="e.g. linkedin.com/in/kunal-patil-cto"
                 className="w-full px-3 py-2.5 bg-slate-50 focus:bg-white border border-slate-300 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
               />
             </div>
@@ -638,7 +638,7 @@ export const AddLeadPage: React.FC = () => {
                 onChange={(e) => setAssignedEmployee(e.target.value)}
                 className="w-full px-3 py-2.5 bg-slate-50 focus:bg-white border border-slate-300 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
               >
-                <option value="Rahul Patil">Rahul Patil (Sales Manager)</option>
+                <option value="Kunal Patil">Kunal Patil (Sales Manager)</option>
                 <option value="Priya Sharma">Priya Sharma (Sales Executive)</option>
                 <option value="Sneha Kulkarni">Sneha Kulkarni (Sales Executive)</option>
               </select>

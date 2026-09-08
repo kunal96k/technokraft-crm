@@ -159,7 +159,7 @@ export const CompleteFollowUpModal: React.FC<CompleteFollowUpModalProps> = ({
               rows={3}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="e.g. Spoke with Rahul; reviewed architectural diagram. Agreed on moving to POC demo..."
+              placeholder="e.g. Spoke with Nikita; reviewed architectural diagram. Agreed on moving to POC demo..."
               className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
             />
           </div>

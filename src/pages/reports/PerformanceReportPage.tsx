@@ -43,7 +43,7 @@ export const PerformanceReportPage: React.FC = () => {
       return false;
     }
     if (selectedScope === 'My Performance') {
-      return emp.name === 'Rahul Patil'; // simulate current logged in rep
+      return emp.name === 'Kunal Patil'; // simulate current logged in rep
     }
     if (selectedScope === 'My Team') {
       return emp.team === 'Enterprise Sales';

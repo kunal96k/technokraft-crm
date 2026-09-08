@@ -24,7 +24,7 @@ export const WhatsAppTemplateModal: React.FC<WhatsAppTemplateModalProps> = ({
       .replace(/{{company_name}}/g, conversation?.companyName || 'Company')
       .replace(/{{service}}/g, conversation?.service || 'IT Services')
       .replace(/{{lead_id}}/g, conversation?.leadCode || 'LD-XXXX')
-      .replace(/{{employee_name}}/g, conversation?.assignedEmployee || 'Rahul Patil');
+      .replace(/{{employee_name}}/g, conversation?.assignedEmployee || 'Kunal Patil');
   };
 
   return (

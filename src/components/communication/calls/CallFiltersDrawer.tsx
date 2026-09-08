@@ -75,7 +75,7 @@ export const CallFiltersDrawer: React.FC<CallFiltersDrawerProps> = ({
               className="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-slate-800 text-xs focus:ring-2 focus:ring-[#5B4DB7] min-h-[44px]"
             >
               <option value="all">All Employees</option>
-              <option value="Rahul Patil">Rahul Patil (Sales Manager)</option>
+              <option value="Kunal Patil">Kunal Patil (Sales Manager)</option>
               <option value="Priya Shah">Priya Shah (Senior Sales Executive)</option>
               <option value="Amit Mehta">Amit Mehta (Business Analyst)</option>
               <option value="Sneha Kulkarni">Sneha Kulkarni (Sales Executive)</option>

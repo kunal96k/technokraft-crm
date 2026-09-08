@@ -22,7 +22,7 @@ export const CreateOpportunityModal: React.FC<CreateOpportunityModalProps> = ({
   const [dealValue, setDealValue] = useState('₹45,00,000');
   const [stage, setStage] = useState('Requirement Analysis');
   const [expectedCloseDate, setExpectedCloseDate] = useState('2026-10-15');
-  const [owner, setOwner] = useState(call.employeeName || 'Rahul Patil');
+  const [owner, setOwner] = useState(call.employeeName || 'Kunal Patil');
   const [opportunityNotes, setOpportunityNotes] = useState(call.notes || '');
 
   if (!isOpen) return null;
@@ -140,7 +140,7 @@ export const CreateOpportunityModal: React.FC<CreateOpportunityModalProps> = ({
                 onChange={(e) => setOwner(e.target.value)}
                 className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs min-h-[44px]"
               >
-                <option value="Rahul Patil">Rahul Patil (Sales Manager)</option>
+                <option value="Kunal Patil">Kunal Patil (Sales Manager)</option>
                 <option value="Priya Shah">Priya Shah (Senior Sales Executive)</option>
                 <option value="Amit Mehta">Amit Mehta (Business Analyst)</option>
                 <option value="Sneha Kulkarni">Sneha Kulkarni (Sales Executive)</option>

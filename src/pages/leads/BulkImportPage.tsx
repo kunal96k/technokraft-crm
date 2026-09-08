@@ -64,8 +64,8 @@ export const BulkImportPage: React.FC = () => {
     },
     {
       company: 'ABC Technologies Pvt Ltd',
-      contact: 'Rahul Sharma',
-      email: 'rahul.sharma@abctechnologies.in',
+      contact: 'Nikita Patil',
+      email: 'nikita.patil@abctechnologies.in',
       phone: '+91 98230 45612',
       service: 'Custom Software Development',
       source: 'LinkedIn',

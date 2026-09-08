@@ -134,8 +134,8 @@ export const FollowUpsPage: React.FC = () => {
       }
 
       // 2. Personal vs Team view filter
-      if (!isTeamView && item.assignedTo !== 'Rahul Patil') {
-        // In personal view, default logged in user is Rahul Patil (Sales Manager)
+      if (!isTeamView && item.assignedTo !== 'Kunal Patil') {
+        // In personal view, default logged in user is Kunal Patil (Sales Manager)
         // User can still toggle Team View to see everything
       }
 

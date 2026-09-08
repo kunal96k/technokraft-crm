@@ -25,7 +25,7 @@ export const CreateFollowUpModal: React.FC<CreateFollowUpModalProps> = ({
   const [purpose, setPurpose] = React.useState('');
   const [date, setDate] = React.useState('2026-09-07');
   const [time, setTime] = React.useState('04:30 PM');
-  const [assignedTo, setAssignedTo] = React.useState('Rahul Patil');
+  const [assignedTo, setAssignedTo] = React.useState('Kunal Patil');
   const [priority, setPriority] = React.useState<FollowUpPriority>('HIGH');
   const [reminder, setReminder] = React.useState('15 minutes before');
   const [notes, setNotes] = React.useState('');
@@ -288,7 +288,7 @@ export const CreateFollowUpModal: React.FC<CreateFollowUpModalProps> = ({
                 onChange={(e) => setAssignedTo(e.target.value)}
                 className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
               >
-                <option value="Rahul Patil">Rahul Patil (Sales Manager)</option>
+                <option value="Kunal Patil">Kunal Patil (Sales Manager)</option>
                 <option value="Priya Shah">Priya Shah (Sales Executive)</option>
                 <option value="Amit Mehta">Amit Mehta (Business Analyst)</option>
                 <option value="Sneha Kulkarni">Sneha Kulkarni (Tech Lead)</option>

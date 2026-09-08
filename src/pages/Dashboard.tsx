@@ -251,7 +251,7 @@ export const DashboardPage: React.FC = () => {
               <tr className="hover:bg-slate-50/60 transition-colors">
                 <td className="py-3 px-4 font-mono font-medium text-slate-900">#TK-1082</td>
                 <td className="py-3 px-4 font-semibold text-slate-800">ABC Technologies</td>
-                <td className="py-3 px-4">Rahul Patil</td>
+                <td className="py-3 px-4">Kunal Patil</td>
                 <td className="py-3 px-4">
                   <span className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 font-medium text-[11px]">
                     Proposal

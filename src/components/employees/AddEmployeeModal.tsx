@@ -196,7 +196,7 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                   onBlur={handleNameBlur}
-                  placeholder="e.g. Rahul"
+                  placeholder="e.g. Kunal"
                   className="w-full text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500/50 outline-none"
                 />
               </div>
@@ -238,7 +238,7 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
                   type="email"
                   value={personalEmail}
                   onChange={(e) => setPersonalEmail(e.target.value)}
-                  placeholder="rahul.personal@gmail.com"
+                  placeholder="kunal.personal@gmail.com"
                   className="w-full text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500/50 outline-none"
                 />
               </div>

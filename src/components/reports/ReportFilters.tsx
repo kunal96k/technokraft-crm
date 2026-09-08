@@ -22,7 +22,7 @@ interface ReportFiltersProps {
 
 const EMPLOYEES = [
   'All Employees',
-  'Rahul Patil',
+  'Kunal Patil',
   'Priya Shah',
   'Amit Mehta',
   'Sneha Kulkarni',

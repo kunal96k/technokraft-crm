@@ -17,7 +17,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   const [taskName, setTaskName] = React.useState('');
   const [description, setDescription] = React.useState('');
   const [leadId, setLeadId] = React.useState(MOCK_LEADS[0]?.id || '');
-  const [assignedTo, setAssignedTo] = React.useState('Rahul Patil');
+  const [assignedTo, setAssignedTo] = React.useState('Kunal Patil');
   const [priority, setPriority] = React.useState<TaskPriority>('MEDIUM');
   const [dueDate, setDueDate] = React.useState('2026-09-08');
   const [dueTime, setDueTime] = React.useState('05:00 PM');
@@ -184,7 +184,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
                 onChange={(e) => setAssignedTo(e.target.value)}
                 className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
               >
-                <option value="Rahul Patil">Rahul Patil (Sales Manager)</option>
+                <option value="Kunal Patil">Kunal Patil (Sales Manager)</option>
                 <option value="Priya Shah">Priya Shah (Sales Executive)</option>
                 <option value="Amit Mehta">Amit Mehta (Business Analyst)</option>
                 <option value="Sneha Kulkarni">Sneha Kulkarni (Tech Lead)</option>

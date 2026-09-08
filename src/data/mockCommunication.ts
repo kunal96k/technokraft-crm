@@ -187,11 +187,11 @@ export const MOCK_EMAILS: EmailRecord[] = [
     leadId: 'lead-1',
     leadCode: 'LD-2026-00125',
     companyName: 'ABC Technologies Pvt Ltd',
-    recipientName: 'Rahul Sharma',
-    recipientEmail: 'rahul.sharma@abctechnologies.in',
+    recipientName: 'Nikita Patil',
+    recipientEmail: 'nikita.patil@abctechnologies.in',
     cc: ['tech-team@abctechnologies.in'],
     subject: 'Custom Software Development Proposal — Cloud Management Portal',
-    body: `Dear Rahul,
+    body: `Dear Nikita,
 
 Thank you for discussing your software requirements with TechnoKraft Services.
 
@@ -206,11 +206,11 @@ Key Modules Included:
 Please find the detailed proposal attached (PDF). Let us know your thoughts and when we can schedule a walkthrough with your technical committee.
 
 Regards,
-Rahul Patil
+Kunal Patil
 Sales Manager | TechnoKraft Services LLP`,
     status: 'sent',
-    senderName: 'Rahul Patil',
-    senderEmail: 'rahul.patil@technokraft.com',
+    senderName: 'Kunal Patil',
+    senderEmail: 'kunal.patil@technokraft.com',
     date: 'Today',
     time: '11:42 AM',
     timestamp: '2026-09-07T11:42:00',
@@ -281,11 +281,11 @@ We will conduct a 30-minute demonstration covering:
 The meeting invite has been sent. Looking forward to our call.
 
 Regards,
-Rahul Patil
+Kunal Patil
 Sales Manager | TechnoKraft Services LLP`,
     status: 'scheduled',
-    senderName: 'Rahul Patil',
-    senderEmail: 'rahul.patil@technokraft.com',
+    senderName: 'Kunal Patil',
+    senderEmail: 'kunal.patil@technokraft.com',
     date: 'Today',
     time: '04:30 PM',
     timestamp: '2026-09-07T16:30:00',
@@ -353,8 +353,8 @@ However, the recipient mail exchange server returned a 550 Mailbox Unreachable e
 Regards,
 Automated Delivery Daemon / TechnoKraft CRM`,
     status: 'failed',
-    senderName: 'Rahul Patil',
-    senderEmail: 'rahul.patil@technokraft.com',
+    senderName: 'Kunal Patil',
+    senderEmail: 'kunal.patil@technokraft.com',
     date: '05 Sep 2026',
     time: '02:15 PM',
     timestamp: '2026-09-05T14:15:00',
@@ -372,10 +372,10 @@ Automated Delivery Daemon / TechnoKraft CRM`,
     leadId: 'lead-1',
     leadCode: 'LD-2026-00125',
     companyName: 'ABC Technologies Pvt Ltd',
-    recipientName: 'Rahul Sharma',
-    recipientEmail: 'rahul.sharma@abctechnologies.in',
+    recipientName: 'Nikita Patil',
+    recipientEmail: 'nikita.patil@abctechnologies.in',
     subject: 'TechnoKraft Services LLP — Introduction & Custom Software Capabilities',
-    body: `Dear Rahul,
+    body: `Dear Nikita,
 
 Thank you for connecting with TechnoKraft Services LLP. We are an enterprise software engineering and cloud consulting firm specializing in Custom Software Development for forward-thinking organizations.
 
@@ -384,11 +384,11 @@ Based on our preliminary review of ABC Technologies Pvt Ltd, we believe our engi
 Would you be open for a brief 15-minute introductory call this week to discuss your current challenges and potential synergies?
 
 Regards,
-Rahul Patil
+Kunal Patil
 TechnoKraft Services LLP`,
     status: 'delivered',
-    senderName: 'Rahul Patil',
-    senderEmail: 'rahul.patil@technokraft.com',
+    senderName: 'Kunal Patil',
+    senderEmail: 'kunal.patil@technokraft.com',
     date: '02 Sep 2026',
     time: '09:30 AM',
     timestamp: '2026-09-02T09:30:00',
@@ -409,7 +409,7 @@ export const MOCK_WHATSAPP_CONVERSATIONS: WhatsAppConversation[] = [
     id: 'wa-conv-1',
     leadId: 'lead-1',
     leadCode: 'LD-2026-00125',
-    contactName: 'Rahul Sharma',
+    contactName: 'Nikita Patil',
     contactPhone: '+91 98230 45612',
     contactDesignation: 'Chief Technology Officer (CTO)',
     companyName: 'ABC Technologies Pvt Ltd',
@@ -417,7 +417,7 @@ export const MOCK_WHATSAPP_CONVERSATIONS: WhatsAppConversation[] = [
     service: 'Custom Software Development',
     leadStatus: 'INTERESTED',
     leadScore: 82,
-    assignedEmployee: 'Rahul Patil',
+    assignedEmployee: 'Kunal Patil',
     nextFollowUp: 'Today, 04:00 PM',
     unreadCount: 2,
     lastMessage: 'Yes, please send the proposal and cloud cost estimates.',
@@ -426,8 +426,8 @@ export const MOCK_WHATSAPP_CONVERSATIONS: WhatsAppConversation[] = [
       {
         id: 'msg-1',
         sender: 'contact',
-        senderName: 'Rahul Sharma',
-        text: 'Hello Rahul, we are interested in developing a custom ERP and billing orchestration system.',
+        senderName: 'Nikita Patil',
+        text: 'Hello Kunal, we are interested in developing a custom ERP and billing orchestration system.',
         timestamp: '2026-09-07T10:32:00',
         time: '10:32 AM',
         status: 'read',
@@ -436,8 +436,8 @@ export const MOCK_WHATSAPP_CONVERSATIONS: WhatsAppConversation[] = [
       {
         id: 'msg-2',
         sender: 'employee',
-        senderName: 'Rahul Patil',
-        text: 'Thank you Rahul. TechnoKraft specializes in multi-tenant cloud portals. Could you please share your timeline constraints and current database stack?',
+        senderName: 'Kunal Patil',
+        text: 'Thank you Nikita. TechnoKraft specializes in multi-tenant cloud portals. Could you please share your timeline constraints and current database stack?',
         timestamp: '2026-09-07T10:35:00',
         time: '10:35 AM',
         status: 'read',
@@ -446,7 +446,7 @@ export const MOCK_WHATSAPP_CONVERSATIONS: WhatsAppConversation[] = [
       {
         id: 'msg-3',
         sender: 'contact',
-        senderName: 'Rahul Sharma',
+        senderName: 'Nikita Patil',
         text: 'We are on AWS and PostgreSQL right now. Need delivery in 3-4 months before our Q4 audit.',
         timestamp: '2026-09-07T10:38:00',
         time: '10:38 AM',
@@ -456,7 +456,7 @@ export const MOCK_WHATSAPP_CONVERSATIONS: WhatsAppConversation[] = [
       {
         id: 'msg-4',
         sender: 'employee',
-        senderName: 'Rahul Patil',
+        senderName: 'Kunal Patil',
         text: 'Understood. We have built similar architectures handling 100K+ monthly invoices. I am preparing the formal proposal and can dispatch it via email within an hour.',
         timestamp: '2026-09-07T10:40:00',
         time: '10:40 AM',
@@ -466,7 +466,7 @@ export const MOCK_WHATSAPP_CONVERSATIONS: WhatsAppConversation[] = [
       {
         id: 'msg-5',
         sender: 'contact',
-        senderName: 'Rahul Sharma',
+        senderName: 'Nikita Patil',
         text: 'Yes, please send the proposal and cloud cost estimates.',
         timestamp: '2026-09-07T10:42:00',
         time: '10:42 AM',
@@ -547,7 +547,7 @@ export const MOCK_WHATSAPP_CONVERSATIONS: WhatsAppConversation[] = [
     service: 'Web Development',
     leadStatus: 'PROPOSAL SENT',
     leadScore: 91,
-    assignedEmployee: 'Rahul Patil',
+    assignedEmployee: 'Kunal Patil',
     nextFollowUp: '09 Sep 2026, 03:00 PM',
     unreadCount: 0,
     lastMessage: 'Received the portal demo link. Reviewing with our warehouse head.',
@@ -556,7 +556,7 @@ export const MOCK_WHATSAPP_CONVERSATIONS: WhatsAppConversation[] = [
       {
         id: 'msg-31',
         sender: 'employee',
-        senderName: 'Rahul Patil',
+        senderName: 'Kunal Patil',
         text: 'Hello Vikram sir, here is the preview link for the distributor portal prototype we discussed.',
         timestamp: '2026-09-05T11:00:00',
         time: '11:00 AM',
@@ -648,7 +648,7 @@ export const MOCK_WHATSAPP_TEMPLATES: WhatsAppTemplate[] = [
 export function resolveTemplateText(
   text: string,
   lead?: Lead | null,
-  employeeName: string = 'Rahul Patil'
+  employeeName: string = 'Kunal Patil'
 ): string {
   if (!lead) {
     return text

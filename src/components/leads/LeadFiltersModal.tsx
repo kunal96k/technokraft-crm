@@ -116,7 +116,7 @@ export const LeadFiltersModal: React.FC<LeadFiltersModalProps> = ({
               className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
             >
               <option value="">All Employees</option>
-              <option value="Rahul Patil">Rahul Patil (Sales Manager)</option>
+              <option value="Kunal Patil">Kunal Patil (Sales Manager)</option>
               <option value="Priya Sharma">Priya Sharma (Sales Executive)</option>
               <option value="Sneha Kulkarni">Sneha Kulkarni (Sales Executive)</option>
               <option value="Amit Shah">Amit Shah (Senior BA)</option>

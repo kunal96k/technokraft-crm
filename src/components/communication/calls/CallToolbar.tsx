@@ -91,7 +91,7 @@ export const CallToolbar: React.FC<CallToolbarProps> = ({
             className="px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-medium text-slate-700 hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
           >
             <option value="all">Employee: All</option>
-            <option value="Rahul Patil">Rahul Patil</option>
+            <option value="Kunal Patil">Kunal Patil</option>
             <option value="Priya Shah">Priya Shah</option>
             <option value="Amit Mehta">Amit Mehta</option>
             <option value="Sneha Kulkarni">Sneha Kulkarni</option>

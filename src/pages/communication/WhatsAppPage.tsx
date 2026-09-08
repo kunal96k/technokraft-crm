@@ -37,7 +37,7 @@ export const WhatsAppPage: React.FC = () => {
     const newMessage: WhatsAppMessage = {
       id: `msg-${Date.now()}`,
       sender: 'employee',
-      senderName: 'Rahul Patil',
+      senderName: 'Kunal Patil',
       text,
       timestamp: new Date().toISOString(),
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -64,7 +64,7 @@ export const WhatsAppPage: React.FC = () => {
     const newDocMessage: WhatsAppMessage = {
       id: `msg-doc-${Date.now()}`,
       sender: 'employee',
-      senderName: 'Rahul Patil',
+      senderName: 'Kunal Patil',
       text: `Attached file: ${filename}`,
       timestamp: new Date().toISOString(),
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),

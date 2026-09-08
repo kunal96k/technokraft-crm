@@ -82,7 +82,7 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
 
   // SECTION 4: Assignment
   const [ownerName, setOwnerName] = useState(
-    initialOpportunity?.owner.name || 'Rahul Patil'
+    initialOpportunity?.owner.name || 'Kunal Patil'
   );
   const [businessAnalystName, setBusinessAnalystName] = useState(
     initialOpportunity?.businessAnalyst?.name || 'Amit Shah'
@@ -182,7 +182,7 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
           }
         : undefined,
       createdBy: initialOpportunity?.createdBy || {
-        name: 'Rahul Patil',
+        name: 'Kunal Patil',
         date: '07 Sep 2026',
       },
       activities: initialOpportunity?.activities || [
@@ -312,7 +312,7 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Rahul Sharma"
+                  placeholder="e.g. Nikita Patil"
                   value={contactName}
                   onChange={(e) => setContactName(e.target.value)}
                   className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] focus:outline-none"
@@ -336,7 +336,7 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
                 <label className="block font-bold text-slate-700 mb-1">Email Address</label>
                 <input
                   type="email"
-                  placeholder="e.g. rahul.sharma@abctechnologies.in"
+                  placeholder="e.g. nikita.patil@abctechnologies.in"
                   value={contactEmail}
                   onChange={(e) => setContactEmail(e.target.value)}
                   className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] focus:outline-none"
@@ -597,7 +597,7 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
                   onChange={(e) => setOwnerName(e.target.value)}
                   className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] focus:outline-none cursor-pointer"
                 >
-                  <option value="Rahul Patil">Rahul Patil (Sales Manager)</option>
+                  <option value="Kunal Patil">Kunal Patil (Sales Manager)</option>
                   <option value="Priya Sharma">Priya Sharma (Account Exec)</option>
                   <option value="Sneha Kulkarni">Sneha Kulkarni (Inside Sales)</option>
                   <option value="Rohan Deshmukh">Rohan Deshmukh (Sales Director)</option>

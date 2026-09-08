@@ -172,8 +172,8 @@ export const INITIAL_USERS: CrmUser[] = [
   {
     id: 'user-01',
     employeeId: 'EMP-0012',
-    name: 'Rahul Patil',
-    email: 'rahul.patil@technokraftservices.com',
+    name: 'Kunal Patil',
+    email: 'kunal.patil@technokraftservices.com',
     avatar: 'RP',
     role: 'Sales Executive',
     department: 'Sales',
@@ -621,7 +621,7 @@ export const INITIAL_EMAIL_CONFIG: EmailConfigData = {
   encryption: 'TLS',
   username: 'support@technokraftservices.com',
   passwordMasked: '••••••••••••',
-  signatureText: `Regards,\n\nRahul Patil\nSales Executive\nTechnoKraft Services LLP\nWebsite: https://technokraftservices.com\nPhone: +91 98230 45678`,
+  signatureText: `Regards,\n\nKunal Patil\nSales Executive\nTechnoKraft Services LLP\nWebsite: https://technokraftservices.com\nPhone: +91 98230 45678`,
 };
 
 export const INITIAL_APPEARANCE_CONFIG: AppearanceConfigData = {

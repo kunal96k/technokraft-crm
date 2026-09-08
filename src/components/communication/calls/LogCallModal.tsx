@@ -49,14 +49,14 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
   const [durationSeconds, setDurationSeconds] = useState('34');
   const [result, setResult] = useState<CallResult>('Interested');
   const [notes, setNotes] = useState('');
-  const [assignedEmployee, setAssignedEmployee] = useState('Rahul Patil');
+  const [assignedEmployee, setAssignedEmployee] = useState('Kunal Patil');
 
   // Next action
   const [nextAction, setNextAction] = useState<NextActionType>('none');
   const [followUpDate, setFollowUpDate] = useState('2026-09-09');
   const [followUpTime, setFollowUpTime] = useState('11:00 AM');
   const [followUpType, setFollowUpType] = useState<'Call' | 'Email' | 'Meeting' | 'Demo' | 'Document'>('Email');
-  const [followUpAssignedTo, setFollowUpAssignedTo] = useState('Rahul Patil');
+  const [followUpAssignedTo, setFollowUpAssignedTo] = useState('Kunal Patil');
 
   // Error state
   const [errorMessage, setErrorMessage] = useState('');
@@ -123,7 +123,7 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
       employeeId: 'emp-1',
       employeeName: assignedEmployee,
       employeeRole:
-        assignedEmployee === 'Rahul Patil'
+        assignedEmployee === 'Kunal Patil'
           ? 'Sales Manager'
           : assignedEmployee === 'Priya Shah'
           ? 'Senior Sales Executive'
@@ -310,7 +310,7 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
                   value={contactName}
                   onChange={(e) => setContactName(e.target.value)}
                   className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs min-h-[44px]"
-                  placeholder="e.g. Rahul Sharma"
+                  placeholder="e.g. Nikita Patil"
                 />
               </div>
             </div>
@@ -427,7 +427,7 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
                 onChange={(e) => setAssignedEmployee(e.target.value)}
                 className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs font-medium min-h-[44px]"
               >
-                <option value="Rahul Patil">Rahul Patil (Sales Manager)</option>
+                <option value="Kunal Patil">Kunal Patil (Sales Manager)</option>
                 <option value="Priya Shah">Priya Shah (Senior Sales Executive)</option>
                 <option value="Amit Mehta">Amit Mehta (Business Analyst)</option>
                 <option value="Sneha Kulkarni">Sneha Kulkarni (Sales Executive)</option>
@@ -566,7 +566,7 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
                       onChange={(e) => setFollowUpAssignedTo(e.target.value)}
                       className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs min-h-[44px]"
                     >
-                      <option value="Rahul Patil">Rahul Patil</option>
+                      <option value="Kunal Patil">Kunal Patil</option>
                       <option value="Priya Shah">Priya Shah</option>
                       <option value="Amit Mehta">Amit Mehta</option>
                       <option value="Sneha Kulkarni">Sneha Kulkarni</option>

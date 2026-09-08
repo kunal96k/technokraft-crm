@@ -16,13 +16,13 @@ export const EmailVariablePreview: React.FC<EmailVariablePreviewProps> = ({
   const [copiedVar, setCopiedVar] = React.useState<string | null>(null);
 
   const variables = [
-    { tag: '{{contact_name}}', label: 'Contact', value: lead?.contact?.name || 'Rahul Sharma' },
+    { tag: '{{contact_name}}', label: 'Contact', value: lead?.contact?.name || 'Nikita Patil' },
     { tag: '{{company_name}}', label: 'Company', value: lead?.company?.name || 'ABC Technologies Pvt Ltd' },
     { tag: '{{designation}}', label: 'Designation', value: lead?.contact?.designation || 'CTO' },
     { tag: '{{service}}', label: 'Service', value: lead?.service || 'Custom Software Development' },
     { tag: '{{lead_id}}', label: 'Lead ID', value: lead?.leadCode || 'LD-2026-00125' },
     { tag: '{{requirement}}', label: 'Requirement', value: lead?.requirement?.summary ? lead.requirement.summary.slice(0, 45) + '...' : 'Multi-tenant cloud billing portal...' },
-    { tag: '{{employee_name}}', label: 'Sender', value: lead?.assignedEmployee?.name || 'Rahul Patil' },
+    { tag: '{{employee_name}}', label: 'Sender', value: lead?.assignedEmployee?.name || 'Kunal Patil' },
   ];
 
   const handleCopy = (tag: string) => {

@@ -36,7 +36,7 @@ export const ScheduleCallModal: React.FC<ScheduleCallModalProps> = ({
   const [contactPhone, setContactPhone] = useState('');
   const [date, setDate] = useState('2026-09-09');
   const [time, setTime] = useState('11:00 AM');
-  const [assignedEmployee, setAssignedEmployee] = useState('Rahul Patil');
+  const [assignedEmployee, setAssignedEmployee] = useState('Kunal Patil');
   const [purpose, setPurpose] = useState('Discuss proposal');
   const [reminder, setReminder] = useState('15 minutes before');
   const [notes, setNotes] = useState('');
@@ -93,7 +93,7 @@ export const ScheduleCallModal: React.FC<ScheduleCallModalProps> = ({
       employeeId: 'emp-1',
       employeeName: assignedEmployee,
       employeeRole:
-        assignedEmployee === 'Rahul Patil'
+        assignedEmployee === 'Kunal Patil'
           ? 'Sales Manager'
           : assignedEmployee === 'Priya Shah'
           ? 'Senior Sales Executive'
@@ -229,7 +229,7 @@ export const ScheduleCallModal: React.FC<ScheduleCallModalProps> = ({
                 value={contactName}
                 onChange={(e) => setContactName(e.target.value)}
                 className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs min-h-[44px]"
-                placeholder="Rahul Sharma"
+                placeholder="Nikita Patil"
               />
             </div>
 
@@ -278,7 +278,7 @@ export const ScheduleCallModal: React.FC<ScheduleCallModalProps> = ({
                 onChange={(e) => setAssignedEmployee(e.target.value)}
                 className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs font-medium min-h-[44px]"
               >
-                <option value="Rahul Patil">Rahul Patil (Sales Manager)</option>
+                <option value="Kunal Patil">Kunal Patil (Sales Manager)</option>
                 <option value="Priya Shah">Priya Shah (Senior Sales Executive)</option>
                 <option value="Amit Mehta">Amit Mehta (Business Analyst)</option>
                 <option value="Sneha Kulkarni">Sneha Kulkarni (Sales Executive)</option>

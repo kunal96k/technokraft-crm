@@ -35,11 +35,11 @@ export const formatLakhsINR = (amount: number): string => {
 export const MOCK_EMPLOYEES: EmployeePerformanceRecord[] = [
   {
     id: 'emp-1',
-    name: 'Rahul Patil',
-    avatar: 'RP',
+    name: 'Kunal Patil',
+    avatar: 'KP',
     role: 'Sales Executive',
     team: 'Enterprise Sales',
-    email: 'rahul.patil@technokraft.com',
+    email: 'kunal.patil@technokraft.com',
     phone: '+91 98230 45612',
     leadsAssigned: 42,
     leadsContacted: 38,
@@ -329,7 +329,7 @@ export const MOCK_TEAM_SUMMARY: TeamPerformanceSummary = {
 };
 
 export const MOCK_TOP_PERFORMERS = [
-  { rank: 1, name: 'Rahul Patil', role: 'Sales Executive', achievementRate: 92, wonDeals: 3, revenue: 780000, avatar: 'RP' },
+  { rank: 1, name: 'Kunal Patil', role: 'Sales Executive', achievementRate: 92, wonDeals: 3, revenue: 780000, avatar: 'KP' },
   { rank: 2, name: 'Priya Shah', role: 'Sales Executive', achievementRate: 89, wonDeals: 2, revenue: 730000, avatar: 'PS' },
   { rank: 3, name: 'Amit Mehta', role: 'Business Analyst', achievementRate: 86, wonDeals: 2, revenue: 620000, avatar: 'AM' },
 ];
@@ -409,7 +409,7 @@ export const MOCK_STALE_LEADS: StaleLeadStat[] = [
     count: 24,
     description: 'Leads with last salesperson activity between 3 to 6 days ago',
     leadsSample: [
-      { leadCode: 'LD-2026-00142', companyName: 'Apex Logistics Ltd', ownerName: 'Rahul Patil', lastContactDate: '04 Sep 2026', daysInactive: 3 },
+      { leadCode: 'LD-2026-00142', companyName: 'Apex Logistics Ltd', ownerName: 'Kunal Patil', lastContactDate: '04 Sep 2026', daysInactive: 3 },
       { leadCode: 'LD-2026-00143', companyName: 'Sunbeam Tech', ownerName: 'Priya Shah', lastContactDate: '04 Sep 2026', daysInactive: 3 },
       { leadCode: 'LD-2026-00145', companyName: 'Delta Pharma', ownerName: 'Amit Mehta', lastContactDate: '03 Sep 2026', daysInactive: 4 },
     ],
@@ -437,7 +437,7 @@ export const MOCK_STALE_LEADS: StaleLeadStat[] = [
 export const MOCK_OVERDUE_FOLLOWUPS: OverdueFollowUpStat[] = [
   { employeeName: 'Amit Mehta', employeeRole: 'Business Analyst', employeeAvatar: 'AM', overdueCount: 4, pendingTotal: 12, earliestDueDate: '05 Sep 2026' },
   { employeeName: 'Rohan Patil', employeeRole: 'Sales Executive', employeeAvatar: 'RP', overdueCount: 3, pendingTotal: 8, earliestDueDate: '06 Sep 2026' },
-  { employeeName: 'Rahul Patil', employeeRole: 'Sales Executive', employeeAvatar: 'RP', overdueCount: 2, pendingTotal: 14, earliestDueDate: '06 Sep 2026' },
+  { employeeName: 'Kunal Patil', employeeRole: 'Sales Executive', employeeAvatar: 'KP', overdueCount: 2, pendingTotal: 14, earliestDueDate: '06 Sep 2026' },
   { employeeName: 'Priya Shah', employeeRole: 'Sales Executive', employeeAvatar: 'PS', overdueCount: 1, pendingTotal: 10, earliestDueDate: '07 Sep 2026' },
   { employeeName: 'Sneha Kulkarni', employeeRole: 'Sales Executive', employeeAvatar: 'SK', overdueCount: 0, pendingTotal: 9, earliestDueDate: 'None' },
 ];

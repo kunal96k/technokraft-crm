@@ -108,7 +108,7 @@ export const PipelinePage: React.FC = () => {
           id: `act-${Date.now()}`,
           date: '07 Sep 2026',
           time: '04:15 PM',
-          employeeName: 'Rahul Patil',
+          employeeName: 'Kunal Patil',
           type: 'STAGE_CHANGE' as const,
           title: `Moved from ${opp.stage} to ${newStage}`,
           notes: `Stage updated with recalculated win probability of ${prob}%.`,
