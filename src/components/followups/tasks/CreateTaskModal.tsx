@@ -61,19 +61,19 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 py-6 sm:py-8 animate-in fade-in duration-150">
       <div
         id="create-task-modal"
-        className="relative bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-lg flex flex-col max-h-[calc(100vh-3rem)] sm:max-h-[calc(100vh-4rem)] overflow-hidden animate-in zoom-in-95 duration-150 my-auto"
+        className="relative bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-lg flex flex-col max-h-[calc(100vh-3rem)] sm:max-h-[calc(100vh-4rem)] overflow-hidden animate-in zoom-in-95 duration-150 my-auto"
       >
         {/* Header */}
-        <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/90 backdrop-blur-xs z-10">
+        <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/90 dark:bg-slate-950/60 backdrop-blur-xs z-10">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-purple-100 text-[#5B4DB7] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-950/80 text-[#5B4DB7] dark:text-purple-300 flex items-center justify-center">
               <CheckSquare className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-slate-900">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">
                 Create Team Task
               </h3>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 Internal action item, document preparation or client deliverable.
               </p>
             </div>
@@ -81,7 +81,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -91,132 +91,132 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
         <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0 overflow-hidden text-xs">
           <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4">
             {error && (
-              <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 flex items-center gap-2">
+              <div className="p-3 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 flex-shrink-0" />
                 <span>{error}</span>
               </div>
             )}
 
-          {/* Task Name */}
-          <div>
-            <label className="block font-semibold text-slate-700 mb-1">
-              Task Title *
-            </label>
-            <input
-              type="text"
-              value={taskName}
-              onChange={(e) => setTaskName(e.target.value)}
-              placeholder="e.g. Verify multi-tenant billing API specs"
-              className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
-              required
-            />
-          </div>
-
-          {/* Description */}
-          <div>
-            <label className="block font-semibold text-slate-700 mb-1">
-              Task Description
-            </label>
-            <textarea
-              rows={2}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Scope of work or checklist items..."
-              className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
-            />
-          </div>
-
-          {/* Related Lead Selection */}
-          <div>
-            <label className="block font-semibold text-slate-700 mb-1">
-              Related Lead / Account (Optional)
-            </label>
-            <select
-              value={leadId}
-              onChange={(e) => setLeadId(e.target.value)}
-              className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
-            >
-              <option value="">None (General Internal Task)</option>
-              {MOCK_LEADS.map((l) => (
-                <option key={l.id} value={l.id}>
-                  {l.company.name} ({l.leadCode})
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Due Date & Time */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Task Name */}
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">
-                Due Date *
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                Task Title *
               </label>
               <input
-                type="date"
-                value={dueDate}
-                onChange={(e) => setDueDate(e.target.value)}
-                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
+                type="text"
+                value={taskName}
+                onChange={(e) => setTaskName(e.target.value)}
+                placeholder="e.g. Verify multi-tenant billing API specs"
+                className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
                 required
               />
             </div>
 
+            {/* Description */}
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">
-                Due Time
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                Task Description
               </label>
-              <input
-                type="text"
-                value={dueTime}
-                onChange={(e) => setDueTime(e.target.value)}
-                placeholder="e.g. 05:00 PM"
-                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
+              <textarea
+                rows={2}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Scope of work or checklist items..."
+                className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
               />
             </div>
-          </div>
 
-          {/* Assignee & Priority */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Related Lead Selection */}
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">
-                Assigned Employee *
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                Related Lead / Account (Optional)
               </label>
               <select
-                value={assignedTo}
-                onChange={(e) => setAssignedTo(e.target.value)}
-                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
+                value={leadId}
+                onChange={(e) => setLeadId(e.target.value)}
+                className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40 cursor-pointer"
               >
-                <option value="Kunal Patil">Kunal Patil (Sales Manager)</option>
-                <option value="Shruti Raundal">Shruti Raundal (Sales Executive)</option>
-                <option value="Pranav Jejurkar">Pranav Jejurkar (Business Analyst)</option>
-                <option value="Ankush Pandit">Ankush Pandit (Tech Lead)</option>
-                <option value="Rohan Patil">Rohan Patil (Sales Executive)</option>
+                <option value="">None (General Internal Task)</option>
+                {MOCK_LEADS.map((l) => (
+                  <option key={l.id} value={l.id}>
+                    {l.company.name} ({l.leadCode})
+                  </option>
+                ))}
               </select>
             </div>
 
-            <div>
-              <label className="block font-semibold text-slate-700 mb-1">
-                Priority
-              </label>
-              <select
-                value={priority}
-                onChange={(e) => setPriority(e.target.value as TaskPriority)}
-                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
-              >
-                <option value="URGENT">Urgent</option>
-                <option value="HIGH">High</option>
-                <option value="MEDIUM">Medium</option>
-                <option value="LOW">Low</option>
-              </select>
+            {/* Due Date & Time */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  Due Date *
+                </label>
+                <input
+                  type="date"
+                  value={dueDate}
+                  onChange={(e) => setDueDate(e.target.value)}
+                  className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  Due Time
+                </label>
+                <input
+                  type="text"
+                  value={dueTime}
+                  onChange={(e) => setDueTime(e.target.value)}
+                  placeholder="e.g. 05:00 PM"
+                  className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
+                />
+              </div>
             </div>
-          </div>
+
+            {/* Assignee & Priority */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  Assigned Employee *
+                </label>
+                <select
+                  value={assignedTo}
+                  onChange={(e) => setAssignedTo(e.target.value)}
+                  className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40 cursor-pointer"
+                >
+                  <option value="Kunal Patil">Kunal Patil (Sales Manager)</option>
+                  <option value="Shruti Raundal">Shruti Raundal (Sales Executive)</option>
+                  <option value="Pranav Jejurkar">Pranav Jejurkar (Business Analyst)</option>
+                  <option value="Ankush Pandit">Ankush Pandit (Tech Lead)</option>
+                  <option value="Rohan Patil">Rohan Patil (Sales Executive)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  Priority
+                </label>
+                <select
+                  value={priority}
+                  onChange={(e) => setPriority(e.target.value as TaskPriority)}
+                  className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40 cursor-pointer"
+                >
+                  <option value="URGENT">Urgent</option>
+                  <option value="HIGH">High</option>
+                  <option value="MEDIUM">Medium</option>
+                  <option value="LOW">Low</option>
+                </select>
+              </div>
+            </div>
           </div>
 
           {/* Sticky Footer Actions */}
-          <div className="flex-shrink-0 px-6 py-3.5 bg-slate-50/90 backdrop-blur-xs border-t border-slate-100 flex items-center justify-end gap-2.5">
+          <div className="flex-shrink-0 px-6 py-3.5 bg-slate-50/90 dark:bg-slate-950/60 backdrop-blur-xs border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-2.5">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+              className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors cursor-pointer"
             >
               Cancel
             </button>

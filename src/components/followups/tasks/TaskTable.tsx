@@ -29,28 +29,28 @@ export const TaskTable: React.FC<TaskTableProps> = ({
     switch (status) {
       case 'COMPLETED':
         return (
-          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-            <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
+            <CheckCircle2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
             Done
           </span>
         );
       case 'IN_PROGRESS':
         return (
-          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
-            <PlayCircle className="w-3 h-3 text-blue-600" />
+          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/40 px-2 py-0.5 rounded border border-blue-200 dark:border-blue-800">
+            <PlayCircle className="w-3 h-3 text-blue-600 dark:text-blue-400" />
             In Progress
           </span>
         );
       case 'OVERDUE':
         return (
-          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-red-700 bg-red-50 px-2 py-0.5 rounded border border-red-200">
-            <AlertTriangle className="w-3 h-3 text-red-600" />
+          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-950/40 px-2 py-0.5 rounded border border-red-200 dark:border-red-800">
+            <AlertTriangle className="w-3 h-3 text-red-600 dark:text-red-400" />
             Overdue
           </span>
         );
       case 'CANCELLED':
         return (
-          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">
             <XCircle className="w-3 h-3" />
             Cancelled
           </span>
@@ -58,8 +58,8 @@ export const TaskTable: React.FC<TaskTableProps> = ({
       case 'TODO':
       default:
         return (
-          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-            <Clock className="w-3 h-3 text-amber-600" />
+          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-800">
+            <Clock className="w-3 h-3 text-amber-600 dark:text-amber-400" />
             To Do
           </span>
         );
@@ -67,9 +67,9 @@ export const TaskTable: React.FC<TaskTableProps> = ({
   };
 
   return (
-    <div className="overflow-x-auto bg-white border border-slate-200 rounded-xl shadow-2xs">
-      <table className="w-full text-left text-xs text-slate-600">
-        <thead className="bg-slate-50/80 text-slate-700 font-semibold border-b border-slate-200 select-none">
+    <div className="overflow-x-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xs">
+      <table className="w-full text-left text-xs text-slate-600 dark:text-slate-300">
+        <thead className="bg-slate-50/80 dark:bg-slate-950/60 text-slate-700 dark:text-slate-300 font-semibold border-b border-slate-200 dark:border-slate-800 select-none">
           <tr>
             <th className="py-3 px-3 w-8 text-center">Status</th>
             <th className="py-3 px-3 min-w-[240px]">Task Name & Scope</th>
@@ -80,15 +80,15 @@ export const TaskTable: React.FC<TaskTableProps> = ({
             <th className="py-3 px-3 text-right min-w-[100px]">Action</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-100">
+        <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
           {tasks.map((task) => {
             const isCompleted = task.status === 'COMPLETED';
 
             return (
               <tr
                 key={task.id}
-                className={`hover:bg-slate-50/80 transition-colors ${
-                  isCompleted ? 'bg-slate-50/40 opacity-75' : ''
+                className={`hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors ${
+                  isCompleted ? 'bg-slate-50/40 dark:bg-slate-950/30 opacity-75' : ''
                 }`}
               >
                 {/* Fast Toggle Checkbox */}
@@ -101,10 +101,10 @@ export const TaskTable: React.FC<TaskTableProps> = ({
                         isCompleted ? 'TODO' : 'COMPLETED'
                       )
                     }
-                    className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${
+                    className={`w-5 h-5 rounded border flex items-center justify-center transition-colors cursor-pointer ${
                       isCompleted
                         ? 'bg-emerald-600 border-emerald-600 text-white'
-                        : 'border-slate-300 hover:border-[#5B4DB7] text-transparent hover:text-slate-300'
+                        : 'border-slate-300 dark:border-slate-700 hover:border-[#5B4DB7] dark:hover:border-purple-400 text-transparent hover:text-slate-300'
                     }`}
                     title={isCompleted ? 'Mark To Do' : 'Mark Completed'}
                   >
@@ -115,14 +115,14 @@ export const TaskTable: React.FC<TaskTableProps> = ({
                 {/* Task Name & Scope */}
                 <td className="py-3 px-3">
                   <span
-                    className={`font-semibold text-slate-900 block ${
-                      isCompleted ? 'line-through text-slate-400' : ''
+                    className={`font-semibold text-slate-900 dark:text-white block ${
+                      isCompleted ? 'line-through text-slate-400 dark:text-slate-500' : ''
                     }`}
                   >
                     {task.taskName}
                   </span>
                   {task.description && (
-                    <p className="text-[11px] text-slate-500 line-clamp-1 mt-0.5">
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">
                       {task.description}
                     </p>
                   )}
@@ -132,29 +132,29 @@ export const TaskTable: React.FC<TaskTableProps> = ({
                 <td className="py-3 px-3">
                   {task.companyName ? (
                     <div>
-                      <span className="font-mono text-[10px] text-slate-400 block">
+                      <span className="font-mono text-[10px] text-slate-400 dark:text-slate-500 block">
                         {task.leadCode}
                       </span>
                       <Link
                         to={`/leads/${task.leadId}`}
-                        className="font-medium text-slate-800 hover:text-[#5B4DB7] flex items-center gap-1"
+                        className="font-medium text-slate-800 dark:text-slate-200 hover:text-[#5B4DB7] dark:hover:text-purple-400 flex items-center gap-1 transition-colors"
                       >
                         <span className="truncate">{task.companyName}</span>
-                        <ExternalLink className="w-2.5 h-2.5 text-slate-400" />
+                        <ExternalLink className="w-2.5 h-2.5 text-slate-400 dark:text-slate-500" />
                       </Link>
                     </div>
                   ) : (
-                    <span className="text-slate-400 italic">Internal Team</span>
+                    <span className="text-slate-400 dark:text-slate-500 italic">Internal Team</span>
                   )}
                 </td>
 
                 {/* Assigned To */}
                 <td className="py-3 px-3">
                   <div className="flex items-center gap-1.5">
-                    <span className="w-6 h-6 rounded-full bg-purple-100 text-[#5B4DB7] text-[10px] font-bold flex items-center justify-center">
+                    <span className="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-950/80 text-[#5B4DB7] dark:text-purple-300 text-[10px] font-bold flex items-center justify-center">
                       {task.assignedAvatar || task.assignedTo.substring(0, 2).toUpperCase()}
                     </span>
-                    <span className="truncate text-slate-700">{task.assignedTo}</span>
+                    <span className="truncate text-slate-700 dark:text-slate-300">{task.assignedTo}</span>
                   </div>
                 </td>
 
@@ -165,12 +165,12 @@ export const TaskTable: React.FC<TaskTableProps> = ({
 
                 {/* Due Date & Time */}
                 <td className="py-3 px-3">
-                  <div className="flex items-center gap-1 font-medium text-slate-800">
-                    <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                  <div className="flex items-center gap-1 font-medium text-slate-800 dark:text-slate-200">
+                    <Calendar className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
                     <span>{task.dueDate}</span>
                   </div>
                   {task.dueTime && (
-                    <span className="text-[10px] text-slate-500 block">
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 block">
                       {task.dueTime}
                     </span>
                   )}
@@ -184,7 +184,7 @@ export const TaskTable: React.FC<TaskTableProps> = ({
                       <button
                         type="button"
                         onClick={() => onToggleStatus(task.id, 'COMPLETED')}
-                        className="p-1 text-slate-400 hover:text-emerald-600 rounded"
+                        className="p-1 text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 rounded cursor-pointer transition-colors"
                         title="Mark Complete"
                       >
                         <CheckCircle2 className="w-4 h-4" />

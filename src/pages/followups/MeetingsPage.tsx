@@ -149,43 +149,43 @@ export const MeetingsPage: React.FC = () => {
 
       {/* 4 Summary Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="p-4 bg-white border border-slate-200 rounded-xl shadow-2xs">
+        <div className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500">Today's Sessions</span>
-            <Calendar className="w-4 h-4 text-purple-600" />
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Today's Sessions</span>
+            <Calendar className="w-4 h-4 text-purple-600 dark:text-purple-400" />
           </div>
-          <div className="text-2xl font-bold text-slate-900 mt-1">{todayCount}</div>
+          <div className="text-2xl font-bold text-slate-900 dark:text-white mt-1">{todayCount}</div>
         </div>
 
-        <div className="p-4 bg-white border border-slate-200 rounded-xl shadow-2xs">
+        <div className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500">Upcoming</span>
-            <Clock className="w-4 h-4 text-blue-600" />
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Upcoming</span>
+            <Clock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
           </div>
-          <div className="text-2xl font-bold text-slate-900 mt-1">{upcomingCount}</div>
+          <div className="text-2xl font-bold text-slate-900 dark:text-white mt-1">{upcomingCount}</div>
         </div>
 
-        <div className="p-4 bg-white border border-slate-200 rounded-xl shadow-2xs">
+        <div className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500">Completed</span>
-            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Completed</span>
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
           </div>
-          <div className="text-2xl font-bold text-emerald-600 mt-1">{completedCount}</div>
+          <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">{completedCount}</div>
         </div>
 
-        <div className="p-4 bg-white border border-slate-200 rounded-xl shadow-2xs">
+        <div className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500">Video Calls</span>
-            <Video className="w-4 h-4 text-indigo-600" />
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Video Calls</span>
+            <Video className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
           </div>
-          <div className="text-2xl font-bold text-slate-900 mt-1">{onlineCount}</div>
+          <div className="text-2xl font-bold text-slate-900 dark:text-white mt-1">{onlineCount}</div>
         </div>
       </div>
 
       {/* Toolbar & Tabs */}
-      <div className="bg-white border border-slate-200 rounded-xl p-3 shadow-2xs space-y-3">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 shadow-2xs space-y-3">
         {/* Tabs */}
-        <div className="flex items-center gap-1 border-b border-slate-100 pb-2">
+        <div className="flex items-center gap-1 border-b border-slate-100 dark:border-slate-800 pb-2">
           {[
             { key: 'all', label: 'All Meetings' },
             { key: 'today', label: "Today's Schedule" },
@@ -196,10 +196,10 @@ export const MeetingsPage: React.FC = () => {
               key={tab.key}
               type="button"
               onClick={() => setActiveTab(tab.key as any)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
                 activeTab === tab.key
-                  ? 'bg-purple-50 text-[#5B4DB7]'
-                  : 'text-slate-600 hover:bg-slate-50'
+                  ? 'bg-purple-50 dark:bg-purple-950/60 text-[#5B4DB7] dark:text-purple-300'
+                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               {tab.label}
@@ -210,13 +210,13 @@ export const MeetingsPage: React.FC = () => {
         {/* Filter inputs */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
           <div className="relative w-full sm:w-80">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search company, agenda, attendee, or host..."
-              className="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
+              className="w-full pl-9 pr-3 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40 transition-colors"
             />
           </div>
 
@@ -224,7 +224,7 @@ export const MeetingsPage: React.FC = () => {
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
-              className="px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-700"
+              className="px-2.5 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 cursor-pointer"
             >
               <option value="ALL">All Meeting Types</option>
               <option value="Discovery Call">Discovery Call</option>
@@ -238,7 +238,7 @@ export const MeetingsPage: React.FC = () => {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-700"
+              className="px-2.5 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 cursor-pointer"
             >
               <option value="ALL">All Statuses</option>
               <option value="Scheduled">Scheduled</option>
@@ -255,7 +255,7 @@ export const MeetingsPage: React.FC = () => {
                   setStatusFilter('ALL');
                   setSearchQuery('');
                 }}
-                className="text-purple-700 hover:underline text-xs font-semibold px-2 py-1"
+                className="text-purple-700 dark:text-purple-400 hover:underline text-xs font-semibold px-2 py-1 cursor-pointer"
               >
                 Reset
               </button>
