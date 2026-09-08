@@ -90,11 +90,11 @@ export const MOCK_EMPLOYEES: EmployeePerformanceRecord[] = [
   },
   {
     id: 'emp-2',
-    name: 'Priya Shah',
-    avatar: 'PS',
+    name: 'Shruti Raundal',
+    avatar: 'SR',
     role: 'Sales Executive',
     team: 'Inside Sales',
-    email: 'priya.shah@technokraft.com',
+    email: 'shruti.raundal@technokraft.com',
     phone: '+91 98450 12389',
     leadsAssigned: 38,
     leadsContacted: 35,
@@ -145,11 +145,11 @@ export const MOCK_EMPLOYEES: EmployeePerformanceRecord[] = [
   },
   {
     id: 'emp-3',
-    name: 'Amit Mehta',
-    avatar: 'AM',
+    name: 'Pranav Jejurkar',
+    avatar: 'PJ',
     role: 'Business Analyst',
     team: 'Solutions & BA',
-    email: 'amit.mehta@technokraft.com',
+    email: 'pranav.jejurkar@technokraft.com',
     phone: '+91 97123 90812',
     leadsAssigned: 45,
     leadsContacted: 40,
@@ -200,11 +200,11 @@ export const MOCK_EMPLOYEES: EmployeePerformanceRecord[] = [
   },
   {
     id: 'emp-4',
-    name: 'Sneha Kulkarni',
-    avatar: 'SK',
+    name: 'Ankush Pandit',
+    avatar: 'AP',
     role: 'Sales Executive',
     team: 'Enterprise Sales',
-    email: 'sneha.kulkarni@technokraft.com',
+    email: 'ankush.pandit@technokraft.com',
     phone: '+91 99345 88120',
     leadsAssigned: 34,
     leadsContacted: 32,
@@ -330,8 +330,8 @@ export const MOCK_TEAM_SUMMARY: TeamPerformanceSummary = {
 
 export const MOCK_TOP_PERFORMERS = [
   { rank: 1, name: 'Kunal Patil', role: 'Sales Executive', achievementRate: 92, wonDeals: 3, revenue: 780000, avatar: 'KP' },
-  { rank: 2, name: 'Priya Shah', role: 'Sales Executive', achievementRate: 89, wonDeals: 2, revenue: 730000, avatar: 'PS' },
-  { rank: 3, name: 'Amit Mehta', role: 'Business Analyst', achievementRate: 86, wonDeals: 2, revenue: 620000, avatar: 'AM' },
+  { rank: 2, name: 'Shruti Raundal', role: 'Sales Executive', achievementRate: 89, wonDeals: 2, revenue: 730000, avatar: 'SR' },
+  { rank: 3, name: 'Pranav Jejurkar', role: 'Business Analyst', achievementRate: 86, wonDeals: 2, revenue: 620000, avatar: 'PJ' },
 ];
 
 export const MOCK_LEAD_FUNNEL_STATS: FunnelStageStat[] = [
@@ -410,8 +410,8 @@ export const MOCK_STALE_LEADS: StaleLeadStat[] = [
     description: 'Leads with last salesperson activity between 3 to 6 days ago',
     leadsSample: [
       { leadCode: 'LD-2026-00142', companyName: 'Apex Logistics Ltd', ownerName: 'Kunal Patil', lastContactDate: '04 Sep 2026', daysInactive: 3 },
-      { leadCode: 'LD-2026-00143', companyName: 'Sunbeam Tech', ownerName: 'Priya Shah', lastContactDate: '04 Sep 2026', daysInactive: 3 },
-      { leadCode: 'LD-2026-00145', companyName: 'Delta Pharma', ownerName: 'Amit Mehta', lastContactDate: '03 Sep 2026', daysInactive: 4 },
+      { leadCode: 'LD-2026-00143', companyName: 'Sunbeam Tech', ownerName: 'Shruti Raundal', lastContactDate: '04 Sep 2026', daysInactive: 3 },
+      { leadCode: 'LD-2026-00145', companyName: 'Delta Pharma', ownerName: 'Pranav Jejurkar', lastContactDate: '03 Sep 2026', daysInactive: 4 },
     ],
   },
   {
@@ -419,7 +419,7 @@ export const MOCK_STALE_LEADS: StaleLeadStat[] = [
     count: 12,
     description: 'Leads with no logged communication or notes for a full week',
     leadsSample: [
-      { leadCode: 'LD-2026-00130', companyName: 'Nova FinTech Corp', ownerName: 'Sneha Kulkarni', lastContactDate: '31 Aug 2026', daysInactive: 7 },
+      { leadCode: 'LD-2026-00130', companyName: 'Nova FinTech Corp', ownerName: 'Ankush Pandit', lastContactDate: '31 Aug 2026', daysInactive: 7 },
       { leadCode: 'LD-2026-00132', companyName: 'Omicron Engineering', ownerName: 'Rohan Patil', lastContactDate: '30 Aug 2026', daysInactive: 8 },
     ],
   },
@@ -429,15 +429,15 @@ export const MOCK_STALE_LEADS: StaleLeadStat[] = [
     description: 'High risk cold leads requiring immediate management reassignment',
     leadsSample: [
       { leadCode: 'LD-2026-00118', companyName: 'Kaveri Textiles Pune', ownerName: 'Rohan Patil', lastContactDate: '24 Aug 2026', daysInactive: 14 },
-      { leadCode: 'LD-2026-00115', companyName: 'Urban AgriTech', ownerName: 'Amit Mehta', lastContactDate: '22 Aug 2026', daysInactive: 16 },
+      { leadCode: 'LD-2026-00115', companyName: 'Urban AgriTech', ownerName: 'Pranav Jejurkar', lastContactDate: '22 Aug 2026', daysInactive: 16 },
     ],
   },
 ];
 
 export const MOCK_OVERDUE_FOLLOWUPS: OverdueFollowUpStat[] = [
-  { employeeName: 'Amit Mehta', employeeRole: 'Business Analyst', employeeAvatar: 'AM', overdueCount: 4, pendingTotal: 12, earliestDueDate: '05 Sep 2026' },
+  { employeeName: 'Pranav Jejurkar', employeeRole: 'Business Analyst', employeeAvatar: 'PJ', overdueCount: 4, pendingTotal: 12, earliestDueDate: '05 Sep 2026' },
   { employeeName: 'Rohan Patil', employeeRole: 'Sales Executive', employeeAvatar: 'RP', overdueCount: 3, pendingTotal: 8, earliestDueDate: '06 Sep 2026' },
   { employeeName: 'Kunal Patil', employeeRole: 'Sales Executive', employeeAvatar: 'KP', overdueCount: 2, pendingTotal: 14, earliestDueDate: '06 Sep 2026' },
-  { employeeName: 'Priya Shah', employeeRole: 'Sales Executive', employeeAvatar: 'PS', overdueCount: 1, pendingTotal: 10, earliestDueDate: '07 Sep 2026' },
-  { employeeName: 'Sneha Kulkarni', employeeRole: 'Sales Executive', employeeAvatar: 'SK', overdueCount: 0, pendingTotal: 9, earliestDueDate: 'None' },
+  { employeeName: 'Shruti Raundal', employeeRole: 'Sales Executive', employeeAvatar: 'SR', overdueCount: 1, pendingTotal: 10, earliestDueDate: '07 Sep 2026' },
+  { employeeName: 'Ankush Pandit', employeeRole: 'Sales Executive', employeeAvatar: 'AP', overdueCount: 0, pendingTotal: 9, earliestDueDate: 'None' },
 ];

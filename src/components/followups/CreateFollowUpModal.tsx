@@ -289,9 +289,9 @@ export const CreateFollowUpModal: React.FC<CreateFollowUpModalProps> = ({
                 className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
               >
                 <option value="Kunal Patil">Kunal Patil (Sales Manager)</option>
-                <option value="Priya Shah">Priya Shah (Sales Executive)</option>
-                <option value="Amit Mehta">Amit Mehta (Business Analyst)</option>
-                <option value="Sneha Kulkarni">Sneha Kulkarni (Tech Lead)</option>
+                <option value="Shruti Raundal">Shruti Raundal (Sales Executive)</option>
+                <option value="Pranav Jejurkar">Pranav Jejurkar (Business Analyst)</option>
+                <option value="Ankush Pandit">Ankush Pandit (Tech Lead)</option>
                 <option value="Rohan Patil">Rohan Patil (Sales Executive)</option>
               </select>
             </div>

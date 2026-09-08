@@ -267,7 +267,7 @@ export const SAMPLE_NOTIFICATIONS = [
   {
     id: 'n-4',
     title: 'Requirement document received',
-    description: 'Sneha Kulkarni uploaded RFP for NextGen Pvt Ltd',
+    description: 'Ankush Pandit uploaded RFP for NextGen Pvt Ltd',
     time: '3 hours ago',
     unread: false,
     type: 'requirement' as const,

@@ -124,7 +124,7 @@ export const FollowUpTable: React.FC<FollowUpTableProps> = ({
                 </button>
                 {showBulkAssignDropdown && (
                   <div className="absolute right-0 top-full mt-1 w-44 bg-white border border-slate-200 rounded-lg shadow-lg z-30 py-1 text-xs">
-                    {['Kunal Patil', 'Priya Shah', 'Amit Mehta', 'Sneha Kulkarni', 'Rohan Patil'].map((emp) => (
+                    {['Kunal Patil', 'Shruti Raundal', 'Pranav Jejurkar', 'Ankush Pandit', 'Rohan Patil'].map((emp) => (
                       <button
                         key={emp}
                         type="button"

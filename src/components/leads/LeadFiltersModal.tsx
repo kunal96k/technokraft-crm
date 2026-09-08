@@ -117,9 +117,9 @@ export const LeadFiltersModal: React.FC<LeadFiltersModalProps> = ({
             >
               <option value="">All Employees</option>
               <option value="Kunal Patil">Kunal Patil (Sales Manager)</option>
-              <option value="Priya Sharma">Priya Sharma (Sales Executive)</option>
-              <option value="Sneha Kulkarni">Sneha Kulkarni (Sales Executive)</option>
-              <option value="Amit Shah">Amit Shah (Senior BA)</option>
+              <option value="Shruti Raundal">Shruti Raundal (Sales Executive)</option>
+              <option value="Ankush Pandit">Ankush Pandit (Sales Executive)</option>
+              <option value="Pranav Jejurkar">Pranav Jejurkar (Senior BA)</option>
             </select>
           </div>
 

@@ -95,7 +95,7 @@ export const ScheduleCallModal: React.FC<ScheduleCallModalProps> = ({
       employeeRole:
         assignedEmployee === 'Kunal Patil'
           ? 'Sales Manager'
-          : assignedEmployee === 'Priya Shah'
+          : assignedEmployee === 'Shruti Raundal'
           ? 'Senior Sales Executive'
           : 'Business Analyst',
       employeeAvatar: assignedEmployee
@@ -279,9 +279,9 @@ export const ScheduleCallModal: React.FC<ScheduleCallModalProps> = ({
                 className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs font-medium min-h-[44px]"
               >
                 <option value="Kunal Patil">Kunal Patil (Sales Manager)</option>
-                <option value="Priya Shah">Priya Shah (Senior Sales Executive)</option>
-                <option value="Amit Mehta">Amit Mehta (Business Analyst)</option>
-                <option value="Sneha Kulkarni">Sneha Kulkarni (Sales Executive)</option>
+                <option value="Shruti Raundal">Shruti Raundal (Senior Sales Executive)</option>
+                <option value="Pranav Jejurkar">Pranav Jejurkar (Business Analyst)</option>
+                <option value="Ankush Pandit">Ankush Pandit (Sales Executive)</option>
                 <option value="Rohan Patil">Rohan Patil (Enterprise BDM)</option>
               </select>
             </div>

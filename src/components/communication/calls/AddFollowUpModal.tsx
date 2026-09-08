@@ -130,9 +130,9 @@ export const AddFollowUpModal: React.FC<AddFollowUpModalProps> = ({
                 className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs min-h-[44px]"
               >
                 <option value="Kunal Patil">Kunal Patil</option>
-                <option value="Priya Shah">Priya Shah</option>
-                <option value="Amit Mehta">Amit Mehta</option>
-                <option value="Sneha Kulkarni">Sneha Kulkarni</option>
+                <option value="Shruti Raundal">Shruti Raundal</option>
+                <option value="Pranav Jejurkar">Pranav Jejurkar</option>
+                <option value="Ankush Pandit">Ankush Pandit</option>
                 <option value="Rohan Patil">Rohan Patil</option>
               </select>
             </div>

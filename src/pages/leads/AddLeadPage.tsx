@@ -57,7 +57,7 @@ export const AddLeadPage: React.FC = () => {
   const [additionalNotes, setAdditionalNotes] = useState('');
 
   // Assignment
-  const [assignedBA, setAssignedBA] = useState('Amit Shah');
+  const [assignedBA, setAssignedBA] = useState('Pranav Jejurkar');
   const [followUpDate, setFollowUpDate] = useState('2026-09-08');
   const [followUpTime, setFollowUpTime] = useState('11:00');
 
@@ -639,8 +639,8 @@ export const AddLeadPage: React.FC = () => {
                 className="w-full px-3 py-2.5 bg-slate-50 focus:bg-white border border-slate-300 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
               >
                 <option value="Kunal Patil">Kunal Patil (Sales Manager)</option>
-                <option value="Priya Sharma">Priya Sharma (Sales Executive)</option>
-                <option value="Sneha Kulkarni">Sneha Kulkarni (Sales Executive)</option>
+                <option value="Shruti Raundal">Shruti Raundal (Sales Executive)</option>
+                <option value="Ankush Pandit">Ankush Pandit (Sales Executive)</option>
               </select>
             </div>
 
@@ -651,7 +651,7 @@ export const AddLeadPage: React.FC = () => {
                 onChange={(e) => setAssignedBA(e.target.value)}
                 className="w-full px-3 py-2.5 bg-slate-50 focus:bg-white border border-slate-300 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
               >
-                <option value="Amit Shah">Amit Shah (Senior BA)</option>
+                <option value="Pranav Jejurkar">Pranav Jejurkar (Senior BA)</option>
                 <option value="Rohan Joshi">Rohan Joshi (BA - Cloud/Tech)</option>
                 <option value="Unassigned">Assign Later</option>
               </select>

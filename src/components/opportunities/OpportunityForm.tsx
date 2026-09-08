@@ -85,7 +85,7 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
     initialOpportunity?.owner.name || 'Kunal Patil'
   );
   const [businessAnalystName, setBusinessAnalystName] = useState(
-    initialOpportunity?.businessAnalyst?.name || 'Amit Shah'
+    initialOpportunity?.businessAnalyst?.name || 'Pranav Jejurkar'
   );
   const [technicalReviewerName, setTechnicalReviewerName] = useState(
     initialOpportunity?.technicalReviewer?.name || 'Vikram Malhotra'
@@ -598,8 +598,8 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
                   className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] focus:outline-none cursor-pointer"
                 >
                   <option value="Kunal Patil">Kunal Patil (Sales Manager)</option>
-                  <option value="Priya Sharma">Priya Sharma (Account Exec)</option>
-                  <option value="Sneha Kulkarni">Sneha Kulkarni (Inside Sales)</option>
+                  <option value="Shruti Raundal">Shruti Raundal (Account Exec)</option>
+                  <option value="Ankush Pandit">Ankush Pandit (Inside Sales)</option>
                   <option value="Rohan Deshmukh">Rohan Deshmukh (Sales Director)</option>
                 </select>
               </div>
@@ -613,7 +613,7 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
                   className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-[#5B4DB7] focus:outline-none cursor-pointer"
                 >
                   <option value="">None</option>
-                  <option value="Amit Shah">Amit Shah (Sr BA)</option>
+                  <option value="Pranav Jejurkar">Pranav Jejurkar (Sr BA)</option>
                   <option value="Ananya Roy">Ananya Roy (Technical BA)</option>
                 </select>
               </div>

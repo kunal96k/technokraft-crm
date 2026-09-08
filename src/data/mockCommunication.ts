@@ -231,7 +231,7 @@ Sales Manager | TechnoKraft Services LLP`,
     leadId: 'lead-2',
     leadCode: 'LD-2026-00148',
     companyName: 'Global IT Solutions',
-    recipientName: 'Priya Shah',
+    recipientName: 'Shruti Raundal',
     recipientEmail: 'priya.shah@globalitsol.com',
     subject: 'Requirement clarification on Cloud / DevOps migration',
     body: `Dear Priya,
@@ -243,11 +243,11 @@ Our senior DevOps architect has reviewed your current on-premise footprint. We w
 We have scheduled our discovery follow-up for tomorrow. Looking forward to your response.
 
 Regards,
-Sneha Kulkarni
+Ankush Pandit
 Senior Account Executive | TechnoKraft Services LLP`,
     status: 'reply_received',
-    senderName: 'Sneha Kulkarni',
-    senderEmail: 'sneha.kulkarni@technokraft.com',
+    senderName: 'Ankush Pandit',
+    senderEmail: 'ankush.pandit@technokraft.com',
     date: 'Today',
     time: '10:15 AM',
     timestamp: '2026-09-07T10:15:00',
@@ -320,11 +320,11 @@ Draft Notes:
 (Draft saved - pending review with technical team lead prior to dispatch).
 
 Regards,
-Sneha Kulkarni
+Ankush Pandit
 Senior Account Executive | TechnoKraft Services LLP`,
     status: 'draft',
-    senderName: 'Sneha Kulkarni',
-    senderEmail: 'sneha.kulkarni@technokraft.com',
+    senderName: 'Ankush Pandit',
+    senderEmail: 'ankush.pandit@technokraft.com',
     date: 'Yesterday',
     time: '05:20 PM',
     timestamp: '2026-09-06T17:20:00',
@@ -479,7 +479,7 @@ export const MOCK_WHATSAPP_CONVERSATIONS: WhatsAppConversation[] = [
     id: 'wa-conv-2',
     leadId: 'lead-2',
     leadCode: 'LD-2026-00148',
-    contactName: 'Priya Shah',
+    contactName: 'Shruti Raundal',
     contactPhone: '+91 97654 32189',
     contactDesignation: 'VP of Engineering',
     companyName: 'Global IT Solutions',
@@ -487,7 +487,7 @@ export const MOCK_WHATSAPP_CONVERSATIONS: WhatsAppConversation[] = [
     service: 'Cloud / DevOps',
     leadStatus: 'QUALIFIED',
     leadScore: 78,
-    assignedEmployee: 'Sneha Kulkarni',
+    assignedEmployee: 'Ankush Pandit',
     nextFollowUp: 'Tomorrow, 11:30 AM',
     unreadCount: 0,
     lastMessage: "Let's schedule a Zoom meeting for tomorrow at 11:30 AM.",
@@ -496,8 +496,8 @@ export const MOCK_WHATSAPP_CONVERSATIONS: WhatsAppConversation[] = [
       {
         id: 'msg-21',
         sender: 'employee',
-        senderName: 'Sneha Kulkarni',
-        text: 'Hi Priya, Sneha from TechnoKraft Services here. Following up on your cloud DevOps audit request.',
+        senderName: 'Ankush Pandit',
+        text: 'Hi Shruti, Ankush from TechnoKraft Services here. Following up on your cloud DevOps audit request.',
         timestamp: '2026-09-06T14:10:00',
         time: '02:10 PM',
         status: 'read',
@@ -506,8 +506,8 @@ export const MOCK_WHATSAPP_CONVERSATIONS: WhatsAppConversation[] = [
       {
         id: 'msg-22',
         sender: 'contact',
-        senderName: 'Priya Shah',
-        text: 'Hi Sneha! Yes, our infrastructure team reviewed your credentials. We want to do an automated security scan first.',
+        senderName: 'Shruti Raundal',
+        text: 'Hi Ankush! Yes, our infrastructure team reviewed your credentials. We want to do an automated security scan first.',
         timestamp: '2026-09-06T14:25:00',
         time: '02:25 PM',
         status: 'read',
@@ -516,7 +516,7 @@ export const MOCK_WHATSAPP_CONVERSATIONS: WhatsAppConversation[] = [
       {
         id: 'msg-23',
         sender: 'contact',
-        senderName: 'Priya Shah',
+        senderName: 'Shruti Raundal',
         text: "Let's schedule a Zoom meeting for tomorrow at 11:30 AM.",
         timestamp: '2026-09-06T14:30:00',
         time: '02:30 PM',
@@ -526,7 +526,7 @@ export const MOCK_WHATSAPP_CONVERSATIONS: WhatsAppConversation[] = [
       {
         id: 'msg-24',
         sender: 'employee',
-        senderName: 'Sneha Kulkarni',
+        senderName: 'Ankush Pandit',
         text: 'Confirmed Priya! Calendar invitation sent to priya.shah@globalitsol.com with the agenda attached.',
         timestamp: '2026-09-06T14:35:00',
         time: '02:35 PM',
@@ -587,7 +587,7 @@ export const MOCK_WHATSAPP_CONVERSATIONS: WhatsAppConversation[] = [
     service: 'AI / ML',
     leadStatus: 'NEGOTIATION',
     leadScore: 74,
-    assignedEmployee: 'Sneha Kulkarni',
+    assignedEmployee: 'Ankush Pandit',
     nextFollowUp: '10 Sep 2026, 02:00 PM',
     unreadCount: 1,
     lastMessage: 'Can you include HIPAA compliance audit certification in the contract?',

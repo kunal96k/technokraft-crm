@@ -187,8 +187,8 @@ export const INITIAL_USERS: CrmUser[] = [
   {
     id: 'user-02',
     employeeId: 'EMP-0008',
-    name: 'Priya Shah',
-    email: 'priya.shah@technokraftservices.com',
+    name: 'Shruti Raundal',
+    email: 'shruti.raundal@technokraftservices.com',
     avatar: 'PS',
     role: 'Sales Executive',
     department: 'Sales',
@@ -202,8 +202,8 @@ export const INITIAL_USERS: CrmUser[] = [
   {
     id: 'user-03',
     employeeId: 'EMP-0004',
-    name: 'Amit Mehta',
-    email: 'amit.mehta@technokraftservices.com',
+    name: 'Pranav Jejurkar',
+    email: 'pranav.jejurkar@technokraftservices.com',
     avatar: 'AM',
     role: 'Sales Executive',
     department: 'Sales',
@@ -232,8 +232,8 @@ export const INITIAL_USERS: CrmUser[] = [
   {
     id: 'user-05',
     employeeId: 'EMP-0005',
-    name: 'Sneha Kulkarni',
-    email: 'sneha.kulkarni@technokraftservices.com',
+    name: 'Ankush Pandit',
+    email: 'ankush.pandit@technokraftservices.com',
     avatar: 'SK',
     role: 'Business Analyst',
     department: 'Business Analysis',

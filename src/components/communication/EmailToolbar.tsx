@@ -85,7 +85,7 @@ export const EmailToolbar: React.FC<EmailToolbarProps> = ({
             >
               <option value="">All Senders</option>
               <option value="Kunal Patil">Kunal Patil</option>
-              <option value="Sneha Kulkarni">Sneha Kulkarni</option>
+              <option value="Ankush Pandit">Ankush Pandit</option>
             </select>
           </div>
 
@@ -192,7 +192,7 @@ export const EmailToolbar: React.FC<EmailToolbarProps> = ({
                 >
                   <option value="">All Senders</option>
                   <option value="Kunal Patil">Kunal Patil</option>
-                  <option value="Sneha Kulkarni">Sneha Kulkarni</option>
+                  <option value="Ankush Pandit">Ankush Pandit</option>
                 </select>
               </div>
             </div>

@@ -92,9 +92,9 @@ export const CallToolbar: React.FC<CallToolbarProps> = ({
           >
             <option value="all">Employee: All</option>
             <option value="Kunal Patil">Kunal Patil</option>
-            <option value="Priya Shah">Priya Shah</option>
-            <option value="Amit Mehta">Amit Mehta</option>
-            <option value="Sneha Kulkarni">Sneha Kulkarni</option>
+            <option value="Shruti Raundal">Shruti Raundal</option>
+            <option value="Pranav Jejurkar">Pranav Jejurkar</option>
+            <option value="Ankush Pandit">Ankush Pandit</option>
             <option value="Rohan Patil">Rohan Patil</option>
           </select>
 

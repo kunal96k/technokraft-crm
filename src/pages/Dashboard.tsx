@@ -268,14 +268,14 @@ export const DashboardPage: React.FC = () => {
               <tr className="hover:bg-slate-50/60 transition-colors">
                 <td className="py-3 px-4 font-mono font-medium text-slate-900">#TK-1083</td>
                 <td className="py-3 px-4 font-semibold text-slate-800">XYZ Solutions Ltd</td>
-                <td className="py-3 px-4">Priya Sharma</td>
+                <td className="py-3 px-4">Shruti Raundal</td>
                 <td className="py-3 px-4">
                   <span className="px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 font-medium text-[11px]">
                     Interested
                   </span>
                 </td>
                 <td className="py-3 px-4 font-semibold text-slate-900">₹18.0 L</td>
-                <td className="py-3 px-4">Priya Sharma</td>
+                <td className="py-3 px-4">Shruti Raundal</td>
                 <td className="py-3 px-4">
                   <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-medium text-[11px]">
                     Meeting Confirmed
