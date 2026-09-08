@@ -1,11 +1,12 @@
-import React from 'react';
-import { PanelLeftClose, PanelLeftOpen, Sun, Moon } from 'lucide-react';
+import React, { useState } from 'react';
+import { PanelLeftClose, PanelLeftOpen, LogOut } from 'lucide-react';
 import { BrandLogo } from '../common/BrandLogo';
 import { SidebarSection } from './SidebarSection';
 import { SidebarItem } from './SidebarItem';
 import { NAVIGATION_CONFIG, canViewModule } from '../../config/navigation';
 import { UserRole } from '../../types/navigation';
 import { useTheme } from '../../context/ThemeContext';
+import { ConfirmationDialog } from '../settings/ConfirmationDialog';
 
 interface SidebarProps {
   collapsed: boolean;
@@ -22,7 +23,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   className = '',
   theme,
 }) => {
-  const { resolvedTheme, toggleTheme } = useTheme();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const { resolvedTheme } = useTheme();
   // If theme prop is explicitly passed, use it; otherwise synchronize with global theme
   const activeTheme = theme || (resolvedTheme === 'Dark' ? 'dark' : 'light');
   const isDark = activeTheme === 'dark';
@@ -147,18 +149,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </div>
               </div>
 
-              {/* Quick theme toggle inside footer */}
+              {/* Logout button */}
               <button
                 type="button"
-                onClick={toggleTheme}
-                title={isDark ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
+                onClick={() => setShowLogoutConfirm(true)}
+                title="Log Out"
+                aria-label="Log Out"
                 className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
                   isDark
-                    ? 'hover:bg-slate-800 text-amber-400'
-                    : 'hover:bg-slate-100 text-slate-500'
+                    ? 'hover:bg-rose-950/50 text-slate-400 hover:text-rose-400'
+                    : 'hover:bg-rose-50 text-slate-400 hover:text-rose-600'
                 }`}
               >
-                {isDark ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
+                <LogOut className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
@@ -166,19 +169,34 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <div className="flex flex-col items-center gap-2 py-1">
             <button
               type="button"
-              onClick={toggleTheme}
-              title={isDark ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
+              onClick={() => setShowLogoutConfirm(true)}
+              title="Log Out"
+              aria-label="Log Out"
               className={`p-2 rounded-lg transition-colors cursor-pointer ${
                 isDark
-                  ? 'hover:bg-slate-800 text-amber-400'
-                  : 'hover:bg-slate-200 text-slate-600'
+                  ? 'hover:bg-rose-950/50 text-slate-400 hover:text-rose-400'
+                  : 'hover:bg-rose-50 text-slate-400 hover:text-rose-600'
               }`}
             >
-              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              <LogOut className="w-4 h-4" />
             </button>
           </div>
         )}
       </div>
+
+      <ConfirmationDialog
+        isOpen={showLogoutConfirm}
+        title="Log Out of TechnoKraft CRM"
+        description="Are you sure you want to end your current session? You will be redirected to the sign-in screen."
+        confirmLabel="Log Out"
+        cancelLabel="Cancel"
+        isDangerous={true}
+        onConfirm={() => {
+          setShowLogoutConfirm(false);
+          window.location.href = '/dashboard';
+        }}
+        onCancel={() => setShowLogoutConfirm(false)}
+      />
     </aside>
   );
 };
