@@ -1,0 +1,6 @@
+{
+  "name": "TechnoKraft CRM",
+  "description": "Internal B2B CRM and Lead Management System for TechnoKraft Services LLP",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
