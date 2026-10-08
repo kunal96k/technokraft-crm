@@ -11,6 +11,9 @@ export const ActivityStatus: React.FC<ActivityStatusProps> = ({
   employees,
   onSelectEmployee,
 }) => {
+  if (!employees || employees.length === 0) {
+    return null;
+  }
   return (
     <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 sm:p-5 shadow-2xs space-y-3.5">
       <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">

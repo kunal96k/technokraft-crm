@@ -10,6 +10,7 @@ import {
   MoreVertical,
   ArrowUpDown,
   Calendar,
+  Trash2,
 } from 'lucide-react';
 import { OpportunityRecord, OpportunityStage } from '../../types/opportunities';
 import { OpportunityStageBadge } from './OpportunityStageBadge';
@@ -24,6 +25,7 @@ interface OpportunityListProps {
   onCreateProposal?: (opp: OpportunityRecord) => void;
   onMarkWon?: (opp: OpportunityRecord) => void;
   onMarkLost?: (opp: OpportunityRecord) => void;
+  onDelete?: (opp: OpportunityRecord) => void;
 }
 
 export const OpportunityList: React.FC<OpportunityListProps> = ({
@@ -34,6 +36,7 @@ export const OpportunityList: React.FC<OpportunityListProps> = ({
   onCreateProposal,
   onMarkWon,
   onMarkLost,
+  onDelete,
 }) => {
   const navigate = useNavigate();
   const [sortField, setSortField] = useState<'value' | 'prob' | 'date'>('value');
@@ -216,6 +219,14 @@ export const OpportunityList: React.FC<OpportunityListProps> = ({
                           <FileText className="w-3.5 h-3.5" />
                         </button>
                       )}
+                      <button
+                        type="button"
+                        onClick={() => onDelete?.(opp)}
+                        title="Delete Opportunity"
+                        className="p-1.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-md transition-colors cursor-pointer"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -291,6 +302,13 @@ export const OpportunityList: React.FC<OpportunityListProps> = ({
                     Proposal
                   </button>
                 )}
+                <button
+                  type="button"
+                  onClick={() => onDelete?.(opp)}
+                  className="p-1.5 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 rounded-md text-xs font-semibold cursor-pointer"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
               </div>
             </div>
           ))

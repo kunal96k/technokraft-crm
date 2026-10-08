@@ -16,6 +16,8 @@ import {
   Target,
   Calendar,
   ExternalLink,
+  KeyRound,
+  Trash2,
 } from 'lucide-react';
 import { Employee } from '../../types/employees';
 import { EmployeeStatusBadge, WorkStatusBadge } from './EmployeeStatusBadge';
@@ -30,6 +32,8 @@ interface EmployeeDetailsProps {
   onEdit: (employee: Employee) => void;
   onDeactivate: (employee: Employee) => void;
   onActivate: (employee: Employee) => void;
+  onResetPassword?: (employee: Employee) => void;
+  onDelete?: (employee: Employee) => void;
   isModalOrDrawer?: boolean;
 }
 
@@ -39,6 +43,8 @@ export const EmployeeDetails: React.FC<EmployeeDetailsProps> = ({
   onEdit,
   onDeactivate,
   onActivate,
+  onResetPassword,
+  onDelete,
   isModalOrDrawer = true,
 }) => {
   const navigate = useNavigate();
@@ -88,6 +94,17 @@ export const EmployeeDetails: React.FC<EmployeeDetailsProps> = ({
               <span>Edit</span>
             </button>
 
+            {onResetPassword && (
+              <button
+                type="button"
+                onClick={() => onResetPassword(employee)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/60 hover:bg-indigo-100 transition-colors"
+              >
+                <KeyRound className="w-3.5 h-3.5" />
+                <span>Reset Password</span>
+              </button>
+            )}
+
             <button
               type="button"
               onClick={() => navigate(`/reports/performance/${employee.id}`)}
@@ -114,6 +131,18 @@ export const EmployeeDetails: React.FC<EmployeeDetailsProps> = ({
               >
                 <UserCheck className="w-3.5 h-3.5" />
                 <span>Activate</span>
+              </button>
+            )}
+
+            {onDelete && (
+              <button
+                type="button"
+                onClick={() => onDelete(employee)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 border border-rose-200 dark:border-rose-900/40 transition-colors"
+                title="Soft delete employee from directory"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Delete</span>
               </button>
             )}
 
@@ -211,7 +240,12 @@ export const EmployeeDetails: React.FC<EmployeeDetailsProps> = ({
 
       {/* Main Content Body */}
       <div className="p-5 flex-1 overflow-y-auto">
-        {activeTab === 'overview' && <EmployeeOverview employee={employee} />}
+        {activeTab === 'overview' && (
+          <EmployeeOverview
+            employee={employee}
+            onResetPassword={onResetPassword}
+          />
+        )}
         {activeTab === 'activity' && <EmployeeActivity employee={employee} />}
         {activeTab === 'targets' && <EmployeeTargets employee={employee} />}
         {activeTab === 'attendance' && (

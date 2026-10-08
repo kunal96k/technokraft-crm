@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { CallRecord } from '../../../types/calls';
 import { Lead } from '../../../types/leads';
 import { X, Sparkles, Building2, User, IndianRupee, Calendar, CheckCircle2 } from 'lucide-react';
+import { EmployeeSelect } from '../../common/EmployeeSelect';
 
 interface CreateOpportunityModalProps {
   isOpen: boolean;
@@ -22,7 +23,7 @@ export const CreateOpportunityModal: React.FC<CreateOpportunityModalProps> = ({
   const [dealValue, setDealValue] = useState('₹45,00,000');
   const [stage, setStage] = useState('Requirement Analysis');
   const [expectedCloseDate, setExpectedCloseDate] = useState('2026-10-15');
-  const [owner, setOwner] = useState(call.employeeName || 'Kunal Patil');
+  const [owner, setOwner] = useState(call.employeeName || '');
   const [opportunityNotes, setOpportunityNotes] = useState(call.notes || '');
 
   if (!isOpen) return null;
@@ -64,7 +65,7 @@ export const CreateOpportunityModal: React.FC<CreateOpportunityModalProps> = ({
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 space-y-4 text-xs">
+        <form id="create-opportunity-form" onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 space-y-4 text-xs">
           {/* Origin Card */}
           <div className="p-3 bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 rounded-xl space-y-1">
             <div className="flex items-center justify-between">
@@ -135,17 +136,12 @@ export const CreateOpportunityModal: React.FC<CreateOpportunityModalProps> = ({
 
             <div>
               <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Opportunity Owner</label>
-              <select
+              <EmployeeSelect
                 value={owner}
                 onChange={(e) => setOwner(e.target.value)}
+                placeholder="Select Opportunity Owner"
                 className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-medium text-slate-900 dark:text-slate-100 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
-              >
-                <option value="Kunal Patil">Kunal Patil (Sales Manager)</option>
-                <option value="Shruti Raundal">Shruti Raundal (Senior Sales Executive)</option>
-                <option value="Pranav Jejurkar">Pranav Jejurkar (Business Analyst)</option>
-                <option value="Ankush Pandit">Ankush Pandit (Sales Executive)</option>
-                <option value="Rohan Patil">Rohan Patil (Enterprise BDM)</option>
-              </select>
+              />
             </div>
           </div>
 
@@ -159,25 +155,26 @@ export const CreateOpportunityModal: React.FC<CreateOpportunityModalProps> = ({
               className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
             />
           </div>
-
-          {/* Actions */}
-          <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2.5">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-5 py-2.5 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl text-slate-700 dark:text-slate-200 font-semibold hover:bg-slate-100 dark:hover:bg-slate-700 min-h-[44px] flex items-center justify-center cursor-pointer order-2 sm:order-1 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-6 py-2.5 bg-[#5B4DB7] hover:bg-[#4E41A2] text-white rounded-xl font-semibold shadow-md min-h-[44px] flex items-center justify-center gap-2 cursor-pointer order-1 sm:order-2 transition-colors"
-            >
-              <CheckCircle2 className="w-4 h-4" />
-              <span>Create Opportunity</span>
-            </button>
-          </div>
         </form>
+
+        {/* Fixed Pinned Bottom Actions */}
+        <div className="p-4 sm:px-6 sm:py-3.5 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end gap-2.5 shrink-0 bg-slate-50/90 dark:bg-slate-900/95 backdrop-blur-xs">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-5 py-2.5 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl text-slate-700 dark:text-slate-200 text-xs font-semibold hover:bg-slate-100 dark:hover:bg-slate-700 min-h-[42px] flex items-center justify-center cursor-pointer transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            form="create-opportunity-form"
+            className="px-6 py-2.5 bg-[#5B4DB7] hover:bg-[#4E41A2] text-white text-xs rounded-xl font-semibold shadow-md min-h-[42px] flex items-center justify-center gap-2 cursor-pointer transition-colors"
+          >
+            <CheckCircle2 className="w-4 h-4" />
+            <span>Create Opportunity</span>
+          </button>
+        </div>
       </div>
     </div>
   );

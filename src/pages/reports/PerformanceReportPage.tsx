@@ -1,192 +1,151 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ReportHeader } from '../../components/reports/ReportHeader';
 import { ReportDateRange } from '../../components/reports/ReportDateRange';
 import { ReportFilters } from '../../components/reports/ReportFilters';
 import { PerformanceKpiCards } from '../../components/reports/PerformanceKpiCards';
-import { EmployeePerformanceTable } from '../../components/reports/EmployeePerformanceTable';
-import { EmployeePerformanceCard } from '../../components/reports/EmployeePerformanceCard';
 import { TargetAchievementCard } from '../../components/reports/TargetAchievementCard';
-import { TeamPerformance } from '../../components/reports/TeamPerformance';
+import { EmployeePerformanceTable } from '../../components/reports/EmployeePerformanceTable';
 import { TopPerformers } from '../../components/reports/TopPerformers';
+import { TeamPerformance } from '../../components/reports/TeamPerformance';
+import { EmployeeActivityChart } from '../../components/reports/EmployeeActivityChart';
 import { ActivityStatus } from '../../components/reports/ActivityStatus';
 import { ActivityConversionAnalysis } from '../../components/reports/ActivityConversionAnalysis';
-import { EmployeePerformanceDetailView } from '../../components/reports/EmployeePerformanceDetailView';
-import {
-  MOCK_EMPLOYEES,
-  MOCK_TEAM_SUMMARY,
-} from '../../data/mockReports';
 import {
   DateRangePreset,
   RoleScope,
-  EmployeePerformanceRecord,
+  PerformanceReportResponse,
 } from '../../types/reports';
+import {
+  fetchPerformanceReport,
+  downloadReportFile,
+} from '../../services/reportService';
+import { Loader2 } from 'lucide-react';
 
 export const PerformanceReportPage: React.FC = () => {
-  const navigate = useNavigate();
-
-  // Filter States
   const [dateRange, setDateRange] = useState<DateRangePreset>('This Month');
   const [selectedEmployee, setSelectedEmployee] = useState('All Employees');
   const [selectedTeam, setSelectedTeam] = useState('All Teams');
-  const [selectedScope, setSelectedScope] = useState<RoleScope>('All Employees');
-  const [selectedEmployeeForModal, setSelectedEmployeeForModal] =
-    useState<EmployeePerformanceRecord | null>(null);
+  const [selectedScope, setSelectedScope] = useState<RoleScope>('Company Overview');
   const [exportToast, setExportToast] = useState<string | null>(null);
 
-  // Filter employees
-  const filteredEmployees = MOCK_EMPLOYEES.filter((emp) => {
-    if (selectedEmployee !== 'All Employees' && emp.name !== selectedEmployee) {
-      return false;
-    }
-    if (selectedTeam !== 'All Teams' && emp.team !== selectedTeam) {
-      return false;
-    }
-    if (selectedScope === 'My Performance') {
-      return emp.name === 'Kunal Patil'; // simulate current logged in rep
-    }
-    if (selectedScope === 'My Team') {
-      return emp.team === 'Enterprise Sales';
-    }
-    return true;
-  });
+  const [performanceData, setPerformanceData] = useState<PerformanceReportResponse | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const handleResetFilters = () => {
-    setSelectedEmployee('All Employees');
-    setSelectedTeam('All Teams');
-    setSelectedScope('All Employees');
-    setDateRange('This Month');
+  const loadData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const data = await fetchPerformanceReport({
+        dateRange,
+        employee: selectedEmployee !== 'All Employees' ? selectedEmployee : undefined,
+        team: selectedTeam !== 'All Teams' ? selectedTeam : undefined,
+        scope: selectedScope,
+      });
+      setPerformanceData(data);
+    } catch (err) {
+      console.error('Failed to load performance report:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [dateRange, selectedEmployee, selectedTeam, selectedScope]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  const handleExport = async (format: 'PDF' | 'Excel' | 'CSV') => {
+    try {
+      await downloadReportFile(format, 'Performance', {
+        dateRange,
+        employee: selectedEmployee,
+        team: selectedTeam,
+        scope: selectedScope,
+      });
+      setExportToast(`✓ ${format} exported successfully!`);
+      setTimeout(() => setExportToast(null), 3000);
+    } catch {
+      setExportToast(`✕ Failed to export ${format}`);
+      setTimeout(() => setExportToast(null), 3000);
+    }
   };
 
-  const handleExport = (format: 'PDF' | 'Excel' | 'CSV') => {
-    setExportToast(`Generating ${format} export for ${dateRange}...`);
-    setTimeout(() => setExportToast(null), 3500);
-  };
-
-  const handleSelectEmployee = (emp: EmployeePerformanceRecord) => {
-    setSelectedEmployeeForModal(emp);
+  const employees = performanceData?.employees || [];
+  const kpis = performanceData?.kpis || {
+    totalLeadsHandled: 0,
+    totalWonDeals: 0,
+    wonRevenueINR: 0,
+    avgConversionRate: 0,
+    totalCallsLogged: 0,
+    totalEmailsSent: 0,
+    followUpsCompleted: 0,
+    avgResponseTimeHours: 0,
   };
 
   return (
-    <div className="space-y-6 pb-12">
-      {/* Toast Alert for Simulated Exports */}
+    <div className="space-y-6">
+      {/* Toast Notification */}
       {exportToast && (
-        <div className="fixed bottom-5 right-5 z-50 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl border border-slate-800 flex items-center gap-3 text-xs font-semibold animate-in fade-in slide-in-from-bottom-2">
-          <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+        <div className="fixed bottom-5 right-5 z-50 bg-slate-900 dark:bg-slate-800 text-white text-xs font-semibold px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2 border border-slate-700 animate-in fade-in slide-in-from-bottom duration-200">
           <span>{exportToast}</span>
         </div>
       )}
 
-      {/* Page Header */}
+      {/* Report Header */}
       <ReportHeader
-        title="Performance Report"
-        subtitle="Track employee activity, productivity and target achievement."
-        breadcrumbs={[
-          { label: 'Home', path: '/dashboard' },
-          { label: 'Reports', path: '/reports/performance' },
-          { label: 'Performance Report' },
-        ]}
-        actions={
-          <ReportDateRange selected={dateRange} onChange={setDateRange} />
-        }
+        title="Employee Performance & Target Analysis"
+        description="Monitor individual team output, pipeline conversions, target achievements, and commercial revenue generation"
         onExport={handleExport}
+        onRefresh={loadData}
+        isRefreshing={isLoading}
       />
 
-      {/* Global Filter Bar */}
+      {/* Date Range Selector */}
+      <ReportDateRange selected={dateRange} onChange={setDateRange} />
+
+      {/* Filters Strip */}
       <ReportFilters
         selectedEmployee={selectedEmployee}
-        onEmployeeChange={setSelectedEmployee}
         selectedTeam={selectedTeam}
-        onTeamChange={setSelectedTeam}
         selectedScope={selectedScope}
+        onEmployeeChange={setSelectedEmployee}
+        onTeamChange={setSelectedTeam}
         onScopeChange={setSelectedScope}
-        onReset={handleResetFilters}
       />
 
-      {/* KPI Cards (6 Cards) */}
-      <PerformanceKpiCards
-        employees={filteredEmployees}
-        selectedEmployeeName={selectedEmployee}
-      />
-
-      {/* Team Performance Summary (Shown for Management / Admin / Team views) */}
-      {selectedScope !== 'My Performance' && (
-        <TeamPerformance
-          summary={MOCK_TEAM_SUMMARY}
-          selectedTeam={selectedTeam}
-        />
-      )}
-
-      {/* Desktop 2-Column: Target Achievement + (Top Performers & Activity Status) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-7">
-          <TargetAchievementCard
-            employees={filteredEmployees.length > 0 ? filteredEmployees : MOCK_EMPLOYEES}
-            selectedEmployeeName={selectedEmployee}
-          />
+      {isLoading && !performanceData ? (
+        <div className="p-20 flex flex-col items-center justify-center text-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
+          <Loader2 className="w-9 h-9 text-[#5B4DB7] animate-spin mb-3" />
+          <p className="text-xs font-semibold text-slate-600 dark:text-slate-300">
+            Calculating employee performance metrics...
+          </p>
         </div>
-        <div className="lg:col-span-5 space-y-6">
-          <TopPerformers
-            onSelectEmployeeName={(name) => {
-              const found = MOCK_EMPLOYEES.find((e) => e.name === name);
-              if (found) setSelectedEmployeeForModal(found);
-            }}
-          />
-          <ActivityStatus
-            employees={filteredEmployees.slice(0, 4)}
-            onSelectEmployee={handleSelectEmployee}
-          />
-        </div>
-      </div>
+      ) : (
+        <>
+          {/* KPI Cards */}
+          <PerformanceKpiCards kpis={kpis} />
 
-      {/* Activity → Conversion Yield Matrix */}
-      <ActivityConversionAnalysis
-        employees={filteredEmployees}
-        onSelectEmployee={handleSelectEmployee}
-      />
-
-      {/* Employee Performance Matrix Section */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-base font-bold text-slate-900 dark:text-white">
-            Individual Employee Performance Directory
-          </h2>
-          <span className="text-xs text-slate-500 dark:text-slate-400">
-            Showing {filteredEmployees.length} active team members
-          </span>
-        </div>
-
-        {/* Desktop Table (hidden on mobile) */}
-        <div className="hidden md:block">
-          <EmployeePerformanceTable
-            employees={filteredEmployees}
-            onSelectEmployee={handleSelectEmployee}
-          />
-        </div>
-
-        {/* Mobile Cards View (shown only on mobile) */}
-        <div className="md:hidden space-y-3">
-          {filteredEmployees.map((emp) => (
-            <EmployeePerformanceCard
-              key={emp.id}
-              employee={emp}
-              onSelect={handleSelectEmployee}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* Employee Detail Modal/Drawer */}
-      {selectedEmployeeForModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
-          <div className="bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-5xl max-h-[92vh] overflow-y-auto p-4 sm:p-6">
-            <EmployeePerformanceDetailView
-              employee={selectedEmployeeForModal}
-              onClose={() => setSelectedEmployeeForModal(null)}
-              isModal={true}
-            />
+          {/* Top Performers and Target Achievement */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+            <div className="lg:col-span-2">
+              <TargetAchievementCard
+                achievementRate={performanceData?.targetAchievementRate || 85}
+                targetRevenue={performanceData?.targetRevenue || 5000000}
+                achievedRevenue={kpis.wonRevenueINR}
+              />
+            </div>
+            <div>
+              <TopPerformers employees={employees} />
+            </div>
           </div>
-        </div>
+
+          {/* Activity Breakdown & Conversion */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            <EmployeeActivityChart employees={employees} />
+            <ActivityConversionAnalysis />
+          </div>
+
+          {/* Employee Performance Detailed Table */}
+          <EmployeePerformanceTable employees={employees} />
+        </>
       )}
     </div>
   );

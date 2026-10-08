@@ -33,7 +33,7 @@ import {
   loadGeneralSettings,
   saveGeneralSettings,
   INITIAL_GENERAL_SETTINGS,
-} from '../../data/mockSettings';
+} from '../../services/settingsService';
 import { CheckCircle2 } from 'lucide-react';
 
 export const GeneralSettingsPage: React.FC = () => {

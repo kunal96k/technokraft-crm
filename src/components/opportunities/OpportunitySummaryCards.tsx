@@ -1,6 +1,6 @@
 import React from 'react';
 import { Target, CheckCircle2, FileText, Handshake, IndianRupee } from 'lucide-react';
-import { formatLakhsINR } from '../../data/mockOpportunities';
+import { formatLakhsINR } from '../../utils/currencyFormatters';
 
 interface OpportunitySummaryCardsProps {
   totalCount: number;

@@ -9,21 +9,24 @@ import {
   Mail,
   Paperclip,
   CheckCircle2,
+  AlertCircle,
+  Loader2,
   ChevronDown,
   ChevronUp,
   Sliders,
 } from 'lucide-react';
-import { MOCK_LEADS } from '../../data/mockLeads';
 import {
-  MOCK_EMAIL_TEMPLATES,
   resolveTemplateText,
-} from '../../data/mockCommunication';
+} from '../../services/emailService';
 import {
   EmailAttachment,
   EmailRecord,
   EmailTemplate,
 } from '../../types/communication';
 import { Lead } from '../../types/leads';
+import { sendB2BEmail } from '../../services/leadService';
+import { fetchEmailTemplates } from '../../services/emailService';
+import { LeadSearchSelect } from '../common/LeadSearchSelect';
 import { EmailTemplateSelector } from './EmailTemplateSelector';
 import { EmailVariablePreview } from './EmailVariablePreview';
 import { AttachmentUploader } from './AttachmentUploader';
@@ -34,6 +37,7 @@ interface EmailComposerModalProps {
   onClose: () => void;
   onSendEmail: (newEmail: EmailRecord) => void;
   onSaveDraft?: (draftEmail: EmailRecord) => void;
+  initialLead?: Lead | null;
   defaultLeadId?: string;
   defaultRecipientEmail?: string;
   defaultSubject?: string;
@@ -45,26 +49,30 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
   onClose,
   onSendEmail,
   onSaveDraft,
+  initialLead,
   defaultLeadId,
   defaultRecipientEmail,
   defaultSubject,
   defaultBody,
 }) => {
   // Selected CRM Lead
-  const [selectedLeadId, setSelectedLeadId] = useState<string>(defaultLeadId || 'lead-1');
-  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+  const [selectedLeadId, setSelectedLeadId] = useState<string>(
+    defaultLeadId || (initialLead?.id ? String(initialLead.id) : '')
+  );
+  const [selectedLead, setSelectedLead] = useState<Lead | null>(initialLead || null);
 
   // Email form fields
-  const [recipientEmail, setRecipientEmail] = useState('');
-  const [recipientName, setRecipientName] = useState('');
+  const [recipientEmail, setRecipientEmail] = useState(defaultRecipientEmail || initialLead?.contact?.email || '');
+  const [recipientName, setRecipientName] = useState(initialLead?.contact?.name || '');
   const [showCcBcc, setShowCcBcc] = useState(false);
   const [ccInput, setCcInput] = useState('');
   const [bccInput, setBccInput] = useState('');
-  const [subject, setSubject] = useState('');
-  const [body, setBody] = useState('');
+  const [subject, setSubject] = useState(defaultSubject || '');
+  const [body, setBody] = useState(defaultBody || '');
 
   // Template state
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('tpl-1');
+  const [availableTemplates, setAvailableTemplates] = useState<EmailTemplate[]>([]);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
 
   // Attachments
   const [attachments, setAttachments] = useState<EmailAttachment[]>([]);
@@ -72,49 +80,53 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
   // Schedule Modal
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
 
-  // Status feedback toast
+  // Status feedback & loading
+  const [isSending, setIsSending] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState<'success' | 'error'>('success');
 
-  // Sync lead selection
+  // Load templates
   useEffect(() => {
-    const lead = MOCK_LEADS.find((l) => l.id === selectedLeadId) || MOCK_LEADS[0];
-    setSelectedLead(lead || null);
+    fetchEmailTemplates().then((tpls) => {
+      if (tpls && tpls.length > 0) {
+        setAvailableTemplates(tpls);
+      }
+    });
+  }, []);
 
-    if (lead) {
-      setRecipientEmail(defaultRecipientEmail || lead.contact?.email || '');
-      setRecipientName(lead.contact?.name || '');
+  // Sync when initialLead or defaultRecipientEmail changes
+  useEffect(() => {
+    if (initialLead) {
+      setSelectedLead(initialLead);
+      setSelectedLeadId(String(initialLead.id));
+      setRecipientEmail(defaultRecipientEmail || initialLead.contact?.email || '');
+      setRecipientName(initialLead.contact?.name || '');
     }
-  }, [selectedLeadId, defaultRecipientEmail]);
+  }, [initialLead, defaultRecipientEmail]);
 
   // Apply default template or custom defaults on first load
   useEffect(() => {
     if (defaultSubject) setSubject(defaultSubject);
     if (defaultBody) setBody(defaultBody);
-
-    if (!defaultSubject && !defaultBody && selectedLead) {
-      const defaultTpl = MOCK_EMAIL_TEMPLATES[0];
-      setSubject(resolveTemplateText(defaultTpl.subject, selectedLead));
-      setBody(resolveTemplateText(defaultTpl.body, selectedLead));
-    }
-  }, [selectedLead]);
+  }, [defaultSubject, defaultBody]);
 
   if (!isOpen) return null;
 
-  const handleLeadChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newLeadId = e.target.value;
+  const handleLeadSelected = (newLeadId: string, newLead: Lead | null) => {
     setSelectedLeadId(newLeadId);
-    const newLead = MOCK_LEADS.find((l) => l.id === newLeadId);
+    setSelectedLead(newLead);
     if (newLead) {
-      setSelectedLead(newLead);
       setRecipientEmail(newLead.contact?.email || '');
       setRecipientName(newLead.contact?.name || '');
 
-      // Re-apply selected template with new lead variables
-      const currentTpl = MOCK_EMAIL_TEMPLATES.find((t) => t.id === selectedTemplateId);
-      if (currentTpl) {
-        setSubject(resolveTemplateText(currentTpl.subject, newLead));
-        setBody(resolveTemplateText(currentTpl.body, newLead));
+      // Re-apply selected template with new lead variables if one is selected
+      if (selectedTemplateId) {
+        const currentTpl = availableTemplates.find((t) => t.id === selectedTemplateId);
+        if (currentTpl) {
+          setSubject(resolveTemplateText(currentTpl.subject, newLead));
+          setBody(resolveTemplateText(currentTpl.body, newLead));
+        }
       }
     }
   };
@@ -127,7 +139,8 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
 
   const handleInsertVariable = (variableTag: string) => {
     const resolved = resolveTemplateText(variableTag, selectedLead);
-    setBody((prev) => `${prev} ${resolved}`);
+    if (!resolved) return;
+    setBody((prev) => (prev ? `${prev} ${resolved}` : resolved));
   };
 
   const handleAddAttachment = (att: EmailAttachment) => {
@@ -138,138 +151,220 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
     setAttachments((prev) => prev.filter((a) => a.id !== id));
   };
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!recipientEmail || !subject) {
       alert('Please fill in the recipient email and subject.');
       return;
     }
 
-    const newRecord: EmailRecord = {
-      id: `email-${Date.now()}`,
-      leadId: selectedLead?.id || 'lead-custom',
-      leadCode: selectedLead?.leadCode || 'LD-2026-CUSTOM',
-      companyName: selectedLead?.company?.name || 'Client Company',
-      recipientName: recipientName || 'Valued Client',
-      recipientEmail,
-      cc: ccInput ? ccInput.split(',').map((s) => s.trim()) : undefined,
-      bcc: bccInput ? bccInput.split(',').map((s) => s.trim()) : undefined,
-      subject,
-      body,
-      status: 'sent',
-      senderName: 'Kunal Patil',
-      senderEmail: 'kunal.patil@technokraft.com',
-      date: 'Today',
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      timestamp: new Date().toISOString(),
-      attachments,
-      tracking: {
-        sent: true,
-        delivered: true,
-        opened: false,
-        replied: false,
-      },
-    };
+    setIsSending(true);
+    try {
+      const res = await sendB2BEmail({
+        leadId: selectedLead?.id,
+        leadCode: selectedLead?.leadCode,
+        recipientEmail,
+        recipientName: recipientName || selectedLead?.contact?.name || 'Valued Client',
+        cc: ccInput ? ccInput.split(',').map((s) => s.trim()).filter(Boolean) : undefined,
+        bcc: bccInput ? bccInput.split(',').map((s) => s.trim()).filter(Boolean) : undefined,
+        subject,
+        body,
+        senderName: 'TechnoKraft Services',
+        senderEmail: 'info@technokraftservices.com',
+        status: 'sent',
+      });
 
-    onSendEmail(newRecord);
-    setToastMessage(`✓ Email dispatched successfully to ${recipientEmail}`);
-    setShowToast(true);
-    setTimeout(() => {
-      setShowToast(false);
-      onClose();
-    }, 1200);
+      if (res.success) {
+        const newRecord: EmailRecord = {
+          id: res.emailId || `email-${Date.now()}`,
+          leadId: selectedLead?.id || 'lead-custom',
+          leadCode: selectedLead?.leadCode || 'LD-2026-CUSTOM',
+          companyName: selectedLead?.company?.name || 'Client Company',
+          recipientName: recipientName || 'Valued Client',
+          recipientEmail,
+          cc: ccInput ? ccInput.split(',').map((s) => s.trim()).filter(Boolean) : undefined,
+          bcc: bccInput ? bccInput.split(',').map((s) => s.trim()).filter(Boolean) : undefined,
+          subject,
+          body,
+          status: 'sent',
+          senderName: 'TechnoKraft Services',
+          senderEmail: 'info@technokraftservices.com',
+          date: 'Today',
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          timestamp: new Date().toISOString(),
+          attachments,
+          tracking: {
+            sent: true,
+            delivered: true,
+            opened: false,
+            replied: false,
+          },
+        };
+
+        onSendEmail(newRecord);
+        setToastType('success');
+        setToastMessage(`✓ Email dispatched successfully via SMTP to ${recipientEmail}`);
+        setShowToast(true);
+        window.dispatchEvent(new Event('crm-leads-updated'));
+        setTimeout(() => {
+          setShowToast(false);
+          onClose();
+        }, 1200);
+      } else {
+        setToastType('error');
+        setToastMessage(`Email dispatch failed: ${res.message || res.error || 'Server error'}`);
+        setShowToast(true);
+      }
+    } catch (err: any) {
+      console.error('Email send error:', err);
+      setToastType('error');
+      setToastMessage(`Email error: ${err?.message || 'Failed to dispatch email'}`);
+      setShowToast(true);
+    } finally {
+      setIsSending(false);
+    }
   };
 
-  const handleConfirmSchedule = (dateStr: string, timeStr: string) => {
-    const newRecord: EmailRecord = {
-      id: `email-${Date.now()}`,
-      leadId: selectedLead?.id || 'lead-custom',
-      leadCode: selectedLead?.leadCode || 'LD-2026-CUSTOM',
-      companyName: selectedLead?.company?.name || 'Client Company',
-      recipientName: recipientName || 'Valued Client',
-      recipientEmail,
-      subject,
-      body,
-      status: 'scheduled',
-      senderName: 'Kunal Patil',
-      senderEmail: 'kunal.patil@technokraft.com',
-      date: dateStr,
-      time: timeStr,
-      timestamp: new Date().toISOString(),
-      scheduledFor: `${dateStr}, ${timeStr}`,
-      attachments,
-      tracking: {
-        sent: false,
-        delivered: false,
-        opened: false,
-        replied: false,
-      },
-    };
+  const handleConfirmSchedule = async (dateStr: string, timeStr: string) => {
+    setIsSending(true);
+    try {
+      const res = await sendB2BEmail({
+        leadId: selectedLead?.id,
+        leadCode: selectedLead?.leadCode,
+        recipientEmail,
+        recipientName: recipientName || selectedLead?.contact?.name || 'Valued Client',
+        subject,
+        body,
+        senderName: 'TechnoKraft Services',
+        senderEmail: 'info@technokraftservices.com',
+        status: 'scheduled',
+        scheduledFor: `${dateStr}, ${timeStr}`,
+      });
 
-    onSendEmail(newRecord);
-    setToastMessage(`✓ Email scheduled for delivery on ${dateStr} at ${timeStr}`);
-    setShowToast(true);
-    setTimeout(() => {
-      setShowToast(false);
-      onClose();
-    }, 1200);
+      const newRecord: EmailRecord = {
+        id: res.emailId || `email-${Date.now()}`,
+        leadId: selectedLead?.id || 'lead-custom',
+        leadCode: selectedLead?.leadCode || 'LD-2026-CUSTOM',
+        companyName: selectedLead?.company?.name || 'Client Company',
+        recipientName: recipientName || 'Valued Client',
+        recipientEmail,
+        subject,
+        body,
+        status: 'scheduled',
+        senderName: 'TechnoKraft Services',
+        senderEmail: 'info@technokraftservices.com',
+        date: dateStr,
+        time: timeStr,
+        timestamp: new Date().toISOString(),
+        scheduledFor: `${dateStr}, ${timeStr}`,
+        attachments,
+        tracking: {
+          sent: false,
+          delivered: false,
+          opened: false,
+          replied: false,
+        },
+      };
+
+      onSendEmail(newRecord);
+      setToastType('success');
+      setToastMessage(`✓ Email scheduled for delivery on ${dateStr} at ${timeStr}`);
+      setShowToast(true);
+      window.dispatchEvent(new Event('crm-leads-updated'));
+      setTimeout(() => {
+        setShowToast(false);
+        onClose();
+      }, 1200);
+    } catch (err: any) {
+      setToastType('error');
+      setToastMessage(`Schedule error: ${err?.message || 'Failed to schedule email'}`);
+      setShowToast(true);
+    } finally {
+      setIsSending(false);
+    }
   };
 
-  const handleDraft = () => {
-    const draftRecord: EmailRecord = {
-      id: `email-draft-${Date.now()}`,
-      leadId: selectedLead?.id || 'lead-custom',
-      leadCode: selectedLead?.leadCode || 'LD-2026-CUSTOM',
-      companyName: selectedLead?.company?.name || 'Client Company',
-      recipientName: recipientName || 'Draft Recipient',
-      recipientEmail,
-      subject: subject || '(Untitled Draft)',
-      body,
-      status: 'draft',
-      senderName: 'Kunal Patil',
-      senderEmail: 'kunal.patil@technokraft.com',
-      date: 'Today',
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      timestamp: new Date().toISOString(),
-      attachments,
-      tracking: {
-        sent: false,
-        delivered: false,
-        opened: false,
-        replied: false,
-      },
-    };
+  const handleDraft = async () => {
+    setIsSending(true);
+    try {
+      const res = await sendB2BEmail({
+        leadId: selectedLead?.id,
+        leadCode: selectedLead?.leadCode,
+        recipientEmail: recipientEmail || 'draft@lead.local',
+        recipientName: recipientName || 'Draft Recipient',
+        subject: subject || '(Untitled Draft)',
+        body,
+        senderName: 'TechnoKraft Services',
+        senderEmail: 'info@technokraftservices.com',
+        status: 'draft',
+      });
 
-    onSendEmail(draftRecord);
-    setToastMessage('✓ Draft saved to local workspace');
-    setShowToast(true);
-    setTimeout(() => {
-      setShowToast(false);
-      onClose();
-    }, 1200);
+      const draftRecord: EmailRecord = {
+        id: res.emailId || `email-draft-${Date.now()}`,
+        leadId: selectedLead?.id || 'lead-custom',
+        leadCode: selectedLead?.leadCode || 'LD-2026-CUSTOM',
+        companyName: selectedLead?.company?.name || 'Client Company',
+        recipientName: recipientName || 'Draft Recipient',
+        recipientEmail,
+        subject: subject || '(Untitled Draft)',
+        body,
+        status: 'draft',
+        senderName: 'TechnoKraft Services',
+        senderEmail: 'info@technokraftservices.com',
+        date: 'Today',
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        timestamp: new Date().toISOString(),
+        attachments,
+        tracking: {
+          sent: false,
+          delivered: false,
+          opened: false,
+          replied: false,
+        },
+      };
+
+      if (onSaveDraft) {
+        onSaveDraft(draftRecord);
+      } else {
+        onSendEmail(draftRecord);
+      }
+      setToastType('success');
+      setToastMessage('✓ Draft saved successfully');
+      setShowToast(true);
+      setTimeout(() => {
+        setShowToast(false);
+        onClose();
+      }, 1200);
+    } catch (err: any) {
+      setToastType('error');
+      setToastMessage(`Draft error: ${err?.message || 'Failed to save draft'}`);
+      setShowToast(true);
+    } finally {
+      setIsSending(false);
+    }
   };
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/60 backdrop-blur-xs overflow-y-auto animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/70 backdrop-blur-xs overflow-y-auto animate-in fade-in duration-150"
       role="dialog"
       aria-modal="true"
       aria-label="Compose Business Email"
     >
       <div
-        className="w-full max-w-4xl max-h-[96vh] bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden text-slate-800"
+        className="w-full max-w-4xl max-h-[90vh] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden text-slate-800 dark:text-slate-100 transition-colors"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-200 bg-slate-50/80">
+        <div className="flex-shrink-0 flex items-center justify-between px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/70">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-purple-50 text-[#5B4DB7] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-purple-50 dark:bg-purple-950/60 text-[#5B4DB7] dark:text-purple-400 flex items-center justify-center border border-purple-200/50 dark:border-purple-800/50">
               <Mail className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-slate-900">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">
                 Compose B2B Email
               </h3>
-              <p className="text-[11px] text-slate-500">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
                 Associated with CRM Lead & Contact records
               </p>
             </div>
@@ -279,7 +374,7 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors cursor-pointer"
               aria-label="Close composer"
             >
               <X className="w-4 h-4" />
@@ -288,49 +383,18 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
         </div>
 
         {/* Scrollable Form Body */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
+        <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-5 space-y-4">
           {/* CRM Lead Selector Bar */}
-          <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
-            <div className="flex items-center justify-between text-xs font-semibold text-slate-700">
-              <div className="flex items-center gap-1.5">
-                <Building className="w-3.5 h-3.5 text-[#5B4DB7]" />
-                <span>Select Target CRM Lead</span>
-              </div>
-              <span className="text-[11px] text-slate-400">
-                Auto-fills recipient contact & company data
-              </span>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-[11px] font-medium text-slate-500 mb-1">
-                  Company / Lead Record
-                </label>
-                <select
-                  value={selectedLeadId}
-                  onChange={handleLeadChange}
-                  className="w-full text-xs font-medium px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
-                >
-                  {MOCK_LEADS.map((l) => (
-                    <option key={l.id} value={l.id}>
-                      {l.company.name} ({l.leadCode}) — {l.service}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-medium text-slate-500 mb-1">
-                  Primary Contact Person
-                </label>
-                <div className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs text-slate-800 font-medium">
-                  <UserCheck className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
-                  <span className="truncate">
-                    {selectedLead?.contact?.name} ({selectedLead?.contact?.designation})
-                  </span>
-                </div>
-              </div>
-            </div>
+          <div className="p-3.5 bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 rounded-xl space-y-2">
+            <LeadSearchSelect
+              label="Select Target CRM Lead / Client"
+              value={selectedLeadId}
+              initialLead={selectedLead}
+              onChange={handleLeadSelected}
+              placeholder="Search by company, contact, phone, email, or lead code (10K+ leads)..."
+              showMetaPreview={true}
+              helperText="Selecting a client auto-fills recipient contact & company data in email templates"
+            />
           </div>
 
           {/* Template Selector & Dynamic Variables Bar */}
@@ -344,9 +408,9 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
               <button
                 type="button"
                 onClick={() => setShowCcBcc(!showCcBcc)}
-                className="inline-flex items-center gap-1.5 text-xs font-medium text-[#5B4DB7] hover:underline mb-2"
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-[#5B4DB7] dark:text-purple-400 hover:underline mb-2 cursor-pointer"
               >
-                <span>{showCcBcc ? 'Hide CC / BCC' : '+ Add CC / BCC'}</span>
+                <span>{showCcBcc ? 'Hide CC / BCC' : 'Add CC / BCC'}</span>
                 {showCcBcc ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
               </button>
             </div>
@@ -361,13 +425,13 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
           {/* Recipient inputs */}
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-slate-600 w-12 text-right">To:</span>
+              <span className="text-xs font-semibold text-slate-600 dark:text-slate-300 w-12 text-right">To:</span>
               <input
                 type="email"
                 value={recipientEmail}
                 onChange={(e) => setRecipientEmail(e.target.value)}
                 placeholder="recipient@example.com"
-                className="flex-1 text-xs px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
+                className="flex-1 text-xs px-3 py-2 bg-white dark:bg-slate-850 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40 dark:focus:ring-purple-400/40"
                 required
               />
             </div>
@@ -375,37 +439,37 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
             {showCcBcc && (
               <>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold text-slate-600 w-12 text-right">CC:</span>
+                  <span className="text-xs font-semibold text-slate-600 dark:text-slate-300 w-12 text-right">CC:</span>
                   <input
                     type="text"
                     value={ccInput}
                     onChange={(e) => setCcInput(e.target.value)}
                     placeholder="account-manager@technokraft.com, tech@client.com"
-                    className="flex-1 text-xs px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
+                    className="flex-1 text-xs px-3 py-2 bg-white dark:bg-slate-850 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40 dark:focus:ring-purple-400/40"
                   />
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold text-slate-600 w-12 text-right">BCC:</span>
+                  <span className="text-xs font-semibold text-slate-600 dark:text-slate-300 w-12 text-right">BCC:</span>
                   <input
                     type="text"
                     value={bccInput}
                     onChange={(e) => setBccInput(e.target.value)}
                     placeholder="crm-archive@technokraft.com"
-                    className="flex-1 text-xs px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
+                    className="flex-1 text-xs px-3 py-2 bg-white dark:bg-slate-850 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40 dark:focus:ring-purple-400/40"
                   />
                 </div>
               </>
             )}
 
             <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-slate-600 w-12 text-right">Subject:</span>
+              <span className="text-xs font-semibold text-slate-600 dark:text-slate-300 w-12 text-right">Subject:</span>
               <input
                 type="text"
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
                 placeholder="Business subject line..."
-                className="flex-1 text-xs font-medium px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
+                className="flex-1 text-xs font-medium px-3 py-2 bg-white dark:bg-slate-850 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40 dark:focus:ring-purple-400/40"
                 required
               />
             </div>
@@ -413,7 +477,7 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
 
           {/* Email Body TextArea */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
               Message Body
             </label>
             <textarea
@@ -421,7 +485,7 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
               value={body}
               onChange={(e) => setBody(e.target.value)}
               placeholder="Draft your personalized email here..."
-              className="w-full text-xs leading-relaxed p-3.5 bg-white border border-slate-300 rounded-xl text-slate-800 font-sans focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
+              className="w-full text-xs leading-relaxed p-3.5 bg-white dark:bg-slate-850 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 font-sans focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40 dark:focus:ring-purple-400/40"
             />
           </div>
 
@@ -434,8 +498,8 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
         </div>
 
         {/* Action Buttons Bar */}
-        <div className="px-5 py-3.5 border-t border-slate-200 bg-slate-50/90 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-2 text-xs text-slate-500">
+        <div className="flex-shrink-0 px-5 py-3.5 border-t border-slate-200 dark:border-slate-800 bg-slate-50/90 dark:bg-slate-950/80 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
             <span>Sent via TechnoKraft Enterprise Mail System</span>
           </div>
 
@@ -443,28 +507,40 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
             <button
               type="button"
               onClick={handleDraft}
-              className="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 rounded-lg transition-colors shadow-2xs"
+              disabled={isSending}
+              className="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg transition-colors shadow-2xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Save className="w-3.5 h-3.5 text-slate-500" />
+              <Save className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
               <span>Save Draft</span>
             </button>
 
             <button
               type="button"
               onClick={() => setIsScheduleModalOpen(true)}
-              className="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-amber-800 bg-amber-50 border border-amber-300 hover:bg-amber-100 rounded-lg transition-colors shadow-2xs"
+              disabled={isSending}
+              className="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/50 border border-amber-300 dark:border-amber-800/80 hover:bg-amber-100 dark:hover:bg-amber-900/60 rounded-lg transition-colors shadow-2xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Clock className="w-3.5 h-3.5 text-amber-600" />
+              <Clock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
               <span>Schedule</span>
             </button>
 
             <button
               type="button"
               onClick={handleSend}
-              className="inline-flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-[#5B4DB7] hover:bg-[#4E41A2] rounded-lg shadow-xs transition-colors"
+              disabled={isSending}
+              className="inline-flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-[#5B4DB7] hover:bg-[#4E41A2] dark:bg-purple-600 dark:hover:bg-purple-700 rounded-lg shadow-xs transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Send className="w-3.5 h-3.5 stroke-[2.5]" />
-              <span>Send Email</span>
+              {isSending ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Sending...</span>
+                </>
+              ) : (
+                <>
+                  <Send className="w-3.5 h-3.5 stroke-[2.5]" />
+                  <span>Send Email</span>
+                </>
+              )}
             </button>
           </div>
         </div>
@@ -479,8 +555,16 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
 
       {/* Toast Notification */}
       {showToast && (
-        <div className="fixed bottom-6 right-6 z-60 bg-slate-900 text-white text-xs px-4 py-3 rounded-xl shadow-xl flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2 duration-150">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+        <div
+          className={`fixed bottom-6 right-6 z-60 text-white text-xs px-4 py-3 rounded-xl shadow-xl flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2 duration-150 ${
+            toastType === 'error' ? 'bg-rose-600' : 'bg-slate-900'
+          }`}
+        >
+          {toastType === 'error' ? (
+            <AlertCircle className="w-4 h-4 text-rose-200 flex-shrink-0" />
+          ) : (
+            <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+          )}
           <span>{toastMessage}</span>
         </div>
       )}

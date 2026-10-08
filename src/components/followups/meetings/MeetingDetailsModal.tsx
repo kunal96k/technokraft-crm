@@ -12,8 +12,11 @@ import {
   User,
   Building2,
   FileText,
+  Trash2,
+  CalendarX,
 } from 'lucide-react';
 import { MeetingRecord } from '../../../types/followUps';
+import { ConfirmationModal } from '../../common/ConfirmationModal';
 
 interface MeetingDetailsModalProps {
   isOpen: boolean;
@@ -21,6 +24,7 @@ interface MeetingDetailsModalProps {
   onClose: () => void;
   onOpenComplete: (meeting: MeetingRecord) => void;
   onCancelMeeting: (meetingId: string) => void;
+  onDeleteMeeting?: (meetingId: string) => void;
 }
 
 export const MeetingDetailsModal: React.FC<MeetingDetailsModalProps> = ({
@@ -29,7 +33,10 @@ export const MeetingDetailsModal: React.FC<MeetingDetailsModalProps> = ({
   onClose,
   onOpenComplete,
   onCancelMeeting,
+  onDeleteMeeting,
 }) => {
+  const [confirmAction, setConfirmAction] = React.useState<'cancel' | 'delete' | null>(null);
+
   if (!isOpen || !meeting) return null;
 
   return (
@@ -161,18 +168,26 @@ export const MeetingDetailsModal: React.FC<MeetingDetailsModalProps> = ({
 
         {/* Footer actions */}
         <div className="px-6 py-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 flex items-center justify-between gap-2">
-          {meeting.status !== 'Cancelled' && (
+          <div className="flex items-center gap-3">
+            {meeting.status !== 'Cancelled' && (
+              <button
+                type="button"
+                onClick={() => setConfirmAction('cancel')}
+                className="text-xs font-semibold text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 flex items-center gap-1 cursor-pointer"
+              >
+                <CalendarX className="w-3.5 h-3.5" />
+                <span>Cancel Meeting</span>
+              </button>
+            )}
             <button
               type="button"
-              onClick={() => {
-                onCancelMeeting(meeting.id);
-                onClose();
-              }}
-              className="text-xs font-medium text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
+              onClick={() => setConfirmAction('delete')}
+              className="text-xs font-medium text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 flex items-center gap-1 cursor-pointer"
             >
-              Cancel Meeting
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>Delete</span>
             </button>
-          )}
+          </div>
 
           <div className="flex items-center gap-2 ml-auto">
             {meeting.status !== 'Completed' && (
@@ -182,7 +197,7 @@ export const MeetingDetailsModal: React.FC<MeetingDetailsModalProps> = ({
                   onClose();
                   onOpenComplete(meeting);
                 }}
-                className="px-4 py-1.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-xs"
+                className="px-4 py-1.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-xs cursor-pointer transition-colors"
               >
                 Complete & Log Minutes
               </button>
@@ -190,13 +205,56 @@ export const MeetingDetailsModal: React.FC<MeetingDetailsModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-3 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800 rounded-lg"
+              className="px-3 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800 rounded-lg cursor-pointer transition-colors"
             >
               Close
             </button>
           </div>
         </div>
       </div>
+
+      {/* Confirmation Modal */}
+      {confirmAction && (
+        <ConfirmationModal
+          isOpen={true}
+          title={
+            confirmAction === 'cancel'
+              ? 'Cancel Scheduled Meeting?'
+              : 'Delete Meeting Permanently?'
+          }
+          message={
+            confirmAction === 'cancel'
+              ? `Are you sure you want to cancel the scheduled meeting with ${meeting.companyName}? The meeting will be marked as Cancelled in the CRM.`
+              : `Are you sure you want to permanently delete this meeting with ${meeting.companyName}? This action cannot be reversed.`
+          }
+          confirmLabel={
+            confirmAction === 'cancel' ? 'Yes, Cancel Meeting' : 'Yes, Delete Meeting'
+          }
+          cancelLabel="Keep Meeting"
+          variant={confirmAction === 'cancel' ? 'warning' : 'danger'}
+          iconType={confirmAction === 'cancel' ? 'cancel-meeting' : 'trash'}
+          itemDetails={[
+            { label: 'Client / Company', value: meeting.companyName },
+            { label: 'Meeting Title', value: meeting.title },
+            { label: 'Date & Time', value: `${meeting.date} (${meeting.startTime})` },
+            { label: 'Host', value: meeting.assignedEmployee },
+          ]}
+          onConfirm={() => {
+            if (confirmAction === 'cancel') {
+              onCancelMeeting(meeting.id);
+            } else if (confirmAction === 'delete') {
+              if (onDeleteMeeting) {
+                onDeleteMeeting(meeting.id);
+              } else {
+                onCancelMeeting(meeting.id);
+              }
+            }
+            setConfirmAction(null);
+            onClose();
+          }}
+          onCancel={() => setConfirmAction(null)}
+        />
+      )}
     </div>
   );
 };

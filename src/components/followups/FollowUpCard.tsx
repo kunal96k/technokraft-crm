@@ -17,6 +17,8 @@ import { FollowUpRecord } from '../../types/followUps';
 import { FollowUpStatusBadge } from './FollowUpStatusBadge';
 import { FollowUpPriorityBadge } from './FollowUpPriorityBadge';
 import { FollowUpTypeBadge } from './FollowUpTypeBadge';
+import { FollowUpActionMenu } from './FollowUpActionMenu';
+import { formatDisplayDate, formatISTTime } from '../../utils/dateUtils';
 
 interface FollowUpCardProps {
   followUp: FollowUpRecord;
@@ -37,23 +39,6 @@ export const FollowUpCard: React.FC<FollowUpCardProps> = ({
   onOpenReschedule,
   onCancel,
 }) => {
-  const [showMenu, setShowMenu] = React.useState(false);
-  const menuRef = React.useRef<HTMLDivElement>(null);
-
-  React.useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setShowMenu(false);
-      }
-    };
-    if (showMenu) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showMenu]);
-
   const isOverdue = followUp.status === 'OVERDUE' || (followUp.daysOverdue && followUp.daysOverdue > 0);
 
   return (
@@ -82,72 +67,13 @@ export const FollowUpCard: React.FC<FollowUpCardProps> = ({
 
         <div className="flex items-center gap-1.5">
           <FollowUpStatusBadge status={followUp.status} size="sm" />
-          <div className="relative" ref={menuRef}>
-            <button
-              type="button"
-              onClick={() => setShowMenu(!showMenu)}
-              className="p-1 rounded-md text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
-            >
-              <MoreVertical className="w-4 h-4" />
-            </button>
-
-            {showMenu && (
-              <div className="absolute right-0 top-full mt-1 w-44 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg z-20 py-1 text-xs">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowMenu(false);
-                    onOpenDetails(followUp);
-                  }}
-                  className="w-full text-left px-3 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200"
-                >
-                  View Details
-                </button>
-                {followUp.status !== 'COMPLETED' && (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowMenu(false);
-                        onOpenComplete(followUp);
-                      }}
-                      className="w-full text-left px-3 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-700 text-emerald-700 dark:text-emerald-300 font-medium"
-                    >
-                      Complete Follow-up
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowMenu(false);
-                        onOpenReschedule(followUp);
-                      }}
-                      className="w-full text-left px-3 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-700 text-purple-700 dark:text-purple-300"
-                    >
-                      Reschedule
-                    </button>
-                  </>
-                )}
-                <Link
-                  to={`/leads/${followUp.leadId}`}
-                  className="block px-3 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200"
-                >
-                  Open Lead Record
-                </Link>
-                {followUp.status !== 'CANCELLED' && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowMenu(false);
-                      onCancel(followUp.id);
-                    }}
-                    className="w-full text-left px-3 py-1.5 hover:bg-red-50 dark:hover:bg-red-950/40 text-red-600 dark:text-red-400 border-t border-slate-100 dark:border-slate-700 mt-1"
-                  >
-                    Cancel Follow-up
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
+          <FollowUpActionMenu
+            followUp={followUp}
+            onOpenDetails={onOpenDetails}
+            onOpenComplete={onOpenComplete}
+            onOpenReschedule={onOpenReschedule}
+            onCancel={onCancel}
+          />
         </div>
       </div>
 
@@ -181,12 +107,12 @@ export const FollowUpCard: React.FC<FollowUpCardProps> = ({
 
         <div className="flex items-center justify-end gap-1.5 font-medium text-slate-700 dark:text-slate-200">
           <Clock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
-          <span>{followUp.time}</span>
+          <span>{formatISTTime(followUp.time)}</span>
         </div>
 
         <div className="flex items-center gap-1.5">
           <Calendar className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
-          <span>{followUp.date}</span>
+          <span>{formatDisplayDate(followUp.date)}</span>
         </div>
 
         <div className="flex items-center justify-end gap-1.5">

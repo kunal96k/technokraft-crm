@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ReportHeader } from '../../components/reports/ReportHeader';
 import { ReportDateRange } from '../../components/reports/ReportDateRange';
 import { ReportFilters } from '../../components/reports/ReportFilters';
@@ -14,18 +14,27 @@ import { StaleLeadAnalysis } from '../../components/reports/StaleLeadAnalysis';
 import { OverdueFollowupAnalysis } from '../../components/reports/OverdueFollowupAnalysis';
 import { EmployeeComparison } from '../../components/reports/EmployeeComparison';
 import {
-  MOCK_LEAD_FUNNEL_STATS,
-  MOCK_LEAD_SOURCES,
-  MOCK_SERVICES,
-  MOCK_MONTHLY_TRENDS,
-  MOCK_PIPELINE_STAGES,
-  MOCK_WIN_LOSS,
-  MOCK_COMMUNICATIONS,
-  MOCK_STALE_LEADS,
-  MOCK_OVERDUE_FOLLOWUPS,
-  MOCK_EMPLOYEES,
-} from '../../data/mockReports';
-import { DateRangePreset, RoleScope } from '../../types/reports';
+  DateRangePreset,
+  RoleScope,
+  AnalyticsReportResponse,
+  EmployeePerformanceRecord,
+  EmployeeFunnel,
+  WinLossStat,
+} from '../../types/reports';
+import {
+  fetchAnalyticsReport,
+  fetchPerformanceReport,
+  downloadReportFile,
+} from '../../services/reportService';
+import { Loader2, RefreshCw } from 'lucide-react';
+
+const DEFAULT_WIN_LOSS: WinLossStat = {
+  wonCount: 0,
+  lostCount: 0,
+  openCount: 0,
+  winRate: 0,
+  lossReasons: [],
+};
 
 export const AnalyticsPage: React.FC = () => {
   // Global Analytics Filters
@@ -38,6 +47,53 @@ export const AnalyticsPage: React.FC = () => {
   const [selectedStatus, setSelectedStatus] = useState('All Statuses');
   const [exportToast, setExportToast] = useState<string | null>(null);
 
+  // Live Backend State
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsReportResponse | null>(null);
+  const [employees, setEmployees] = useState<EmployeePerformanceRecord[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  const loadAnalyticsData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const [analyticsRes, perfRes] = await Promise.all([
+        fetchAnalyticsReport({
+          dateRange,
+          employee: selectedEmployee,
+          team: selectedTeam,
+          scope: selectedScope,
+          source: selectedSource,
+          service: selectedService,
+          status: selectedStatus,
+        }),
+        fetchPerformanceReport({
+          dateRange,
+          employee: selectedEmployee,
+          team: selectedTeam,
+          scope: selectedScope,
+        }),
+      ]);
+
+      setAnalyticsData(analyticsRes);
+      setEmployees(perfRes.employees || []);
+    } catch (err) {
+      console.error('Failed to load CRM analytics data:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [
+    dateRange,
+    selectedEmployee,
+    selectedTeam,
+    selectedScope,
+    selectedSource,
+    selectedService,
+    selectedStatus,
+  ]);
+
+  useEffect(() => {
+    loadAnalyticsData();
+  }, [loadAnalyticsData]);
+
   const handleResetFilters = () => {
     setDateRange('This Month');
     setSelectedEmployee('All Employees');
@@ -48,25 +104,62 @@ export const AnalyticsPage: React.FC = () => {
     setSelectedStatus('All Statuses');
   };
 
-  const handleExport = (format: 'PDF' | 'Excel' | 'CSV') => {
-    setExportToast(`Generating ${format} dossier for CRM Analytics...`);
-    setTimeout(() => setExportToast(null), 3500);
+  const handleExport = async (format: 'PDF' | 'Excel' | 'CSV') => {
+    setExportToast(`Generating ${format} report for CRM Analytics...`);
+    try {
+      await downloadReportFile(format, 'Analytics', {
+        dateRange,
+        employee: selectedEmployee,
+        team: selectedTeam,
+        scope: selectedScope,
+      });
+      setExportToast(`✓ ${format} downloaded successfully!`);
+    } catch (err) {
+      console.error('Export failed:', err);
+      setExportToast(`Exporting ${format} failed. Please try again.`);
+    } finally {
+      setTimeout(() => setExportToast(null), 3500);
+    }
   };
 
-  // Filter sources & services if filtered
-  const filteredSources =
-    selectedSource === 'All Sources'
-      ? MOCK_LEAD_SOURCES
-      : MOCK_LEAD_SOURCES.filter((s) => s.source === selectedSource);
+  // Convert conversion funnel stages into structured EmployeeFunnel object
+  let leadsCount = 0;
+  let contactedCount = 0;
+  let interestedCount = 0;
+  let qualifiedCount = 0;
+  let proposalCount = 0;
+  let wonCount = 0;
 
-  const filteredServices =
-    selectedService === 'All Services'
-      ? MOCK_SERVICES
-      : MOCK_SERVICES.filter((s) => s.service === selectedService);
+  if (analyticsData?.conversionFunnel && analyticsData.conversionFunnel.length >= 6) {
+    leadsCount = analyticsData.conversionFunnel[0].count;
+    contactedCount = analyticsData.conversionFunnel[1].count;
+    interestedCount = analyticsData.conversionFunnel[2].count;
+    qualifiedCount = analyticsData.conversionFunnel[3].count;
+    proposalCount = analyticsData.conversionFunnel[4].count;
+    wonCount = analyticsData.conversionFunnel[5].count;
+  }
+
+  const funnelData: EmployeeFunnel = {
+    leads: leadsCount,
+    contacted: contactedCount,
+    interested: interestedCount,
+    qualified: qualifiedCount,
+    proposal: proposalCount,
+    won: wonCount,
+  };
+
+  const totalLeads = funnelData.leads;
+  const interested = funnelData.interested;
+  const qualified = funnelData.qualified;
+  const won = funnelData.won;
+  const proposals = funnelData.proposal;
+  const opportunities = (analyticsData?.pipelineStages || []).reduce((sum, s) => sum + s.count, 0);
+  const pipelineValue = (analyticsData?.pipelineStages || []).reduce((sum, s) => sum + s.value, 0);
+  const winRate = analyticsData?.winLoss?.winRate || 0;
 
   return (
     <div className="space-y-6 pb-12">
-      {/* Toast Alert for Simulated Exports */}
+      {/* Toast Alert for Exports */}
       {exportToast && (
         <div className="fixed bottom-5 right-5 z-50 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl border border-slate-800 flex items-center gap-3 text-xs font-semibold animate-in fade-in slide-in-from-bottom-2">
           <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
@@ -84,7 +177,17 @@ export const AnalyticsPage: React.FC = () => {
           { label: 'CRM Analytics' },
         ]}
         actions={
-          <ReportDateRange selected={dateRange} onChange={setDateRange} />
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={loadAnalyticsData}
+              title="Refresh Analytics"
+              className="p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg transition-colors cursor-pointer"
+            >
+              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-[#5B4DB7]' : ''}`} />
+            </button>
+            <ReportDateRange selected={dateRange} onChange={setDateRange} />
+          </div>
         }
         onExport={handleExport}
       />
@@ -107,49 +210,62 @@ export const AnalyticsPage: React.FC = () => {
         isAnalytics={true}
       />
 
-      {/* 8 Analytics KPI Cards */}
-      <AnalyticsKpiCards />
+      {isLoading && !analyticsData ? (
+        <div className="p-16 flex flex-col items-center justify-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
+          <Loader2 className="w-8 h-8 text-[#5B4DB7] animate-spin mb-3" />
+          <p className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+            Aggregating CRM analytics and revenue intelligence from database...
+          </p>
+        </div>
+      ) : (
+        <>
+          {/* 8 Analytics KPI Cards */}
+          <AnalyticsKpiCards
+            totalLeads={totalLeads}
+            interested={interested}
+            qualified={qualified}
+            opportunities={opportunities}
+            proposals={proposals}
+            won={won}
+            pipelineValue={pipelineValue}
+            winRate={winRate}
+          />
 
-      {/* 2-Column Section 1: Lead Funnel & Lead Source Attribution */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <ConversionFunnel
-          funnel={{
-            leads: 1284,
-            contacted: 910,
-            interested: 320,
-            qualified: 145,
-            proposal: 72,
-            won: 18,
-          }}
-          title="Lead Funnel & Progression Velocity"
-          subtitle="Top-of-funnel generation through commercial contract execution"
-        />
-        <LeadSourceAnalytics sources={filteredSources} />
-      </div>
+          {/* 2-Column Section 1: Lead Funnel & Lead Source Attribution */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <ConversionFunnel
+              funnel={funnelData}
+              title="Lead Funnel & Progression Velocity"
+              subtitle="Top-of-funnel generation through commercial contract execution"
+            />
+            <LeadSourceAnalytics sources={analyticsData?.leadSources || []} />
+          </div>
 
-      {/* 2-Column Section 2: Pipeline Analytics & Service Analytics */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <PipelineAnalytics stages={MOCK_PIPELINE_STAGES} />
-        <ServiceAnalytics services={filteredServices} />
-      </div>
+          {/* 2-Column Section 2: Pipeline Analytics & Service Analytics */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <PipelineAnalytics stages={analyticsData?.pipelineStages || []} />
+            <ServiceAnalytics services={analyticsData?.services || []} />
+          </div>
 
-      {/* 2-Column Section 3: Monthly Trends & Win/Loss Analysis */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <MonthlyTrendChart data={MOCK_MONTHLY_TRENDS} />
-        <WinLossAnalysis data={MOCK_WIN_LOSS} />
-      </div>
+          {/* 2-Column Section 3: Monthly Trends & Win/Loss Analysis */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <MonthlyTrendChart data={analyticsData?.monthlyTrends || []} />
+            <WinLossAnalysis data={analyticsData?.winLoss || DEFAULT_WIN_LOSS} />
+          </div>
 
-      {/* Communication & Multichannel Engagement */}
-      <CommunicationAnalytics stats={MOCK_COMMUNICATIONS} />
+          {/* Communication & Multichannel Engagement */}
+          <CommunicationAnalytics stats={analyticsData?.communications || []} />
 
-      {/* Operational Bottlenecks: Stale Leads & Overdue Follow-ups */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <StaleLeadAnalysis stats={MOCK_STALE_LEADS} />
-        <OverdueFollowupAnalysis stats={MOCK_OVERDUE_FOLLOWUPS} />
-      </div>
+          {/* Operational Bottlenecks: Stale Leads & Overdue Follow-ups */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <StaleLeadAnalysis stats={analyticsData?.staleLeads || []} />
+            <OverdueFollowupAnalysis stats={analyticsData?.overdueFollowUps || []} />
+          </div>
 
-      {/* Representative Benchmark & Comparison */}
-      <EmployeeComparison employees={MOCK_EMPLOYEES} />
+          {/* Representative Benchmark & Comparison */}
+          {employees.length > 0 && <EmployeeComparison employees={employees} />}
+        </>
+      )}
     </div>
   );
 };

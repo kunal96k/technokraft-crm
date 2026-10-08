@@ -10,21 +10,45 @@ import {
   PlayCircle,
   XCircle,
   MoreVertical,
+  Trash2,
 } from 'lucide-react';
 import { TaskRecord, TaskStatus } from '../../../types/followUps';
 import { FollowUpPriorityBadge } from '../FollowUpPriorityBadge';
+import { FollowUpEmptyState } from '../FollowUpEmptyState';
+import { ConfirmationModal } from '../../common/ConfirmationModal';
+import { formatDisplayDate, formatISTTime } from '../../../utils/dateUtils';
 
 interface TaskTableProps {
   tasks: TaskRecord[];
   onToggleStatus: (taskId: string, newStatus: TaskStatus) => void;
   onDeleteTask?: (taskId: string) => void;
+  onAction?: () => void;
+  onResetFilters?: () => void;
+  hasFilters?: boolean;
+  statusFilter?: string;
 }
 
 export const TaskTable: React.FC<TaskTableProps> = ({
   tasks,
   onToggleStatus,
   onDeleteTask,
+  onAction,
+  onResetFilters,
+  hasFilters,
+  statusFilter,
 }) => {
+  const [taskToDelete, setTaskToDelete] = React.useState<TaskRecord | null>(null);
+  if (tasks.length === 0) {
+    return (
+      <FollowUpEmptyState
+        module="tasks"
+        tab={statusFilter}
+        hasFilters={hasFilters}
+        onAction={onAction}
+        onResetFilters={onResetFilters}
+      />
+    );
+  }
   const getStatusBadge = (status: TaskStatus) => {
     switch (status) {
       case 'COMPLETED':
@@ -167,11 +191,11 @@ export const TaskTable: React.FC<TaskTableProps> = ({
                 <td className="py-3 px-3">
                   <div className="flex items-center gap-1 font-medium text-slate-800 dark:text-slate-200">
                     <Calendar className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
-                    <span>{task.dueDate}</span>
+                    <span>{formatDisplayDate(task.dueDate)}</span>
                   </div>
                   {task.dueTime && (
                     <span className="text-[10px] text-slate-500 dark:text-slate-400 block">
-                      {task.dueTime}
+                      {formatISTTime(task.dueTime)}
                     </span>
                   )}
                 </td>
@@ -190,6 +214,16 @@ export const TaskTable: React.FC<TaskTableProps> = ({
                         <CheckCircle2 className="w-4 h-4" />
                       </button>
                     )}
+                    {onDeleteTask && (
+                      <button
+                        type="button"
+                        onClick={() => setTaskToDelete(task)}
+                        className="p-1 text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 rounded cursor-pointer transition-colors"
+                        title="Delete Task"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
                   </div>
                 </td>
               </tr>
@@ -197,6 +231,32 @@ export const TaskTable: React.FC<TaskTableProps> = ({
           })}
         </tbody>
       </table>
+
+      {/* Confirmation Modal for Task Deletion */}
+      {taskToDelete && (
+        <ConfirmationModal
+          isOpen={true}
+          title="Delete Task Record?"
+          message={`Are you sure you want to permanently delete task "${taskToDelete.taskName}"? This action cannot be reversed.`}
+          confirmLabel="Yes, Delete Task"
+          cancelLabel="Keep Task"
+          variant="danger"
+          iconType="trash"
+          itemDetails={[
+            { label: 'Task Name', value: taskToDelete.taskName },
+            { label: 'Related Lead', value: taskToDelete.companyName || 'Internal' },
+            { label: 'Due Date', value: `${taskToDelete.dueDate} (${taskToDelete.dueTime})` },
+            { label: 'Assigned To', value: taskToDelete.assignedTo },
+          ]}
+          onConfirm={() => {
+            if (onDeleteTask) {
+              onDeleteTask(taskToDelete.id);
+            }
+            setTaskToDelete(null);
+          }}
+          onCancel={() => setTaskToDelete(null)}
+        />
+      )}
     </div>
   );
 };

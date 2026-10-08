@@ -15,11 +15,20 @@ import { FollowUpTypeBadge } from './FollowUpTypeBadge';
 import { FollowUpPriorityBadge } from './FollowUpPriorityBadge';
 import { FollowUpStatusBadge } from './FollowUpStatusBadge';
 
+import {
+  getTodayIST_YYYYMMDD,
+  getTomorrowIST_YYYYMMDD,
+  formatISTDate,
+  formatISTTime,
+} from '../../utils/dateUtils';
+import { FollowUpEmptyState } from './FollowUpEmptyState';
+
 interface UpcomingGroupedViewProps {
   followUps: FollowUpRecord[];
   onOpenDetails: (item: FollowUpRecord) => void;
   onOpenComplete: (item: FollowUpRecord) => void;
   onOpenReschedule: (item: FollowUpRecord) => void;
+  onAction?: () => void;
 }
 
 export const UpcomingGroupedView: React.FC<UpcomingGroupedViewProps> = ({
@@ -27,24 +36,47 @@ export const UpcomingGroupedView: React.FC<UpcomingGroupedViewProps> = ({
   onOpenDetails,
   onOpenComplete,
   onOpenReschedule,
+  onAction,
 }) => {
-  // Groupings: Tomorrow (2026-09-08), This Week (09-09 to 09-13), Later (09-14+)
-  const tomorrowItems = followUps.filter((f) => f.date === '2026-09-08');
-  const thisWeekItems = followUps.filter(
-    (f) => f.date > '2026-09-08' && f.date <= '2026-09-13'
+  if (followUps.length === 0) {
+    return (
+      <FollowUpEmptyState
+        module="followups"
+        tab="upcoming"
+        onAction={onAction}
+      />
+    );
+  }
+  // Dynamic groupings: Tomorrow, This Week, Next Week & Beyond strictly in IST
+  const todayISO = getTodayIST_YYYYMMDD();
+  const tomorrowISO = getTomorrowIST_YYYYMMDD();
+
+  const [tY, tM, tD] = todayISO.split('-').map(Number);
+  const endOfWeekDate = new Date(tY, tM - 1, tD + 7);
+  const endOfWeekISO = `${endOfWeekDate.getFullYear()}-${String(endOfWeekDate.getMonth() + 1).padStart(2, '0')}-${String(endOfWeekDate.getDate()).padStart(2, '0')}`;
+
+  const tomorrowFormatted = formatISTDate(tomorrowISO, 'medium');
+
+  const tomorrowItems = followUps.filter(
+    (f) => f.date === tomorrowISO || f.date?.toLowerCase() === 'tomorrow'
   );
-  const nextWeekItems = followUps.filter((f) => f.date > '2026-09-13');
+  const thisWeekItems = followUps.filter(
+    (f) => f.date && f.date > tomorrowISO && f.date <= endOfWeekISO
+  );
+  const nextWeekItems = followUps.filter(
+    (f) => f.date && (f.date > endOfWeekISO || (!f.date.includes('-') && f.date.toLowerCase() !== 'tomorrow'))
+  );
 
   const groups = [
     {
       id: 'tomorrow',
-      title: 'Tomorrow — Tuesday, 08 September 2026',
+      title: `Tomorrow — ${tomorrowFormatted}`,
       badge: `${tomorrowItems.length} follow-ups`,
       items: tomorrowItems,
     },
     {
       id: 'this-week',
-      title: 'This Week (09 Sep – 13 Sep 2026)',
+      title: 'This Week (Next 7 Days)',
       badge: `${thisWeekItems.length} follow-ups`,
       items: thisWeekItems,
     },
@@ -87,7 +119,7 @@ export const UpcomingGroupedView: React.FC<UpcomingGroupedViewProps> = ({
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-1.5">
                         <span className="text-xs font-semibold font-mono text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/60 px-2 py-0.5 rounded">
-                          {item.time}
+                          {formatISTTime(item.time)}
                         </span>
                         <FollowUpTypeBadge type={item.type} />
                       </div>

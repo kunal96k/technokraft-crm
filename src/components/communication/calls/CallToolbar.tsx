@@ -1,5 +1,6 @@
 import React from 'react';
 import { CallFiltersState } from '../../../types/calls';
+import { EmployeeSelect } from '../../common/EmployeeSelect';
 import {
   Search,
   X,
@@ -85,18 +86,13 @@ export const CallToolbar: React.FC<CallToolbarProps> = ({
           </select>
 
           {/* Employee */}
-          <select
-            value={filters.employee}
-            onChange={(e) => onFilterChange('employee', e.target.value)}
-            className="px-2.5 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-lg text-xs font-medium text-slate-700 dark:text-slate-200 hover:border-slate-400 dark:hover:border-slate-700 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7] cursor-pointer"
-          >
-            <option value="all">Employee: All</option>
-            <option value="Kunal Patil">Kunal Patil</option>
-            <option value="Shruti Raundal">Shruti Raundal</option>
-            <option value="Pranav Jejurkar">Pranav Jejurkar</option>
-            <option value="Ankush Pandit">Ankush Pandit</option>
-            <option value="Rohan Patil">Rohan Patil</option>
-          </select>
+          <EmployeeSelect
+            value={filters.employee === 'all' ? '' : filters.employee}
+            onChange={(e) => onFilterChange('employee', e.target.value || 'all')}
+            placeholder="Employee: All"
+            showRoleInLabel={false}
+            className="px-2.5 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-lg text-xs font-medium text-slate-700 dark:text-slate-200 hover:border-slate-400 dark:hover:border-slate-700 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7] cursor-pointer max-w-[170px]"
+          />
 
           {/* Call Type */}
           <select

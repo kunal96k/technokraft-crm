@@ -1,12 +1,21 @@
 import React from 'react';
-import { Trophy, TrendingUp } from 'lucide-react';
-import { MOCK_TOP_PERFORMERS, formatLakhsINR } from '../../data/mockReports';
+import { Trophy } from 'lucide-react';
+import { TopPerformer } from '../../types/reports';
+import { formatLakhsINR } from '../../utils/currencyFormatters';
 
 interface TopPerformersProps {
+  performers?: TopPerformer[];
   onSelectEmployeeName?: (name: string) => void;
 }
 
-export const TopPerformers: React.FC<TopPerformersProps> = ({ onSelectEmployeeName }) => {
+export const TopPerformers: React.FC<TopPerformersProps> = ({
+  performers = [],
+  onSelectEmployeeName,
+}) => {
+  if (!performers || performers.length === 0) {
+    return null;
+  }
+
   return (
     <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 sm:p-5 shadow-2xs space-y-3.5">
       <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
@@ -23,7 +32,7 @@ export const TopPerformers: React.FC<TopPerformersProps> = ({ onSelectEmployeeNa
       </div>
 
       <div className="space-y-2.5">
-        {MOCK_TOP_PERFORMERS.map((rep) => {
+        {performers.map((rep) => {
           const medalBg =
             rep.rank === 1
               ? 'bg-amber-100 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-700'
@@ -33,7 +42,7 @@ export const TopPerformers: React.FC<TopPerformersProps> = ({ onSelectEmployeeNa
 
           return (
             <div
-              key={rep.name}
+              key={rep.name || rep.id}
               onClick={() => onSelectEmployeeName && onSelectEmployeeName(rep.name)}
               className="flex items-center justify-between p-2.5 rounded-lg border border-slate-100 dark:border-slate-800 hover:border-purple-200 dark:hover:border-purple-800 hover:bg-purple-50/30 dark:hover:bg-purple-950/20 transition-all cursor-pointer"
             >
@@ -48,16 +57,16 @@ export const TopPerformers: React.FC<TopPerformersProps> = ({ onSelectEmployeeNa
                     {rep.name}
                   </div>
                   <div className="text-[10px] text-slate-500 dark:text-slate-400">
-                    {rep.role} • {rep.wonDeals} deals ({formatLakhsINR(rep.revenue)})
+                    {rep.role} • {rep.dealsWon} deals ({formatLakhsINR(rep.wonRevenue)})
                   </div>
                 </div>
               </div>
 
               <div className="text-right">
                 <div className="text-xs font-bold font-mono text-emerald-700 dark:text-emerald-400">
-                  {rep.achievementRate}% Target
+                  {rep.targetAchievementRate}% Target
                 </div>
-                <div className="text-[10px] text-slate-400 dark:text-slate-500">On Track</div>
+                <div className="text-[10px] text-slate-400 dark:text-slate-500">{rep.badge || 'On Track'}</div>
               </div>
             </div>
           );
@@ -66,3 +75,4 @@ export const TopPerformers: React.FC<TopPerformersProps> = ({ onSelectEmployeeNa
     </div>
   );
 };
+

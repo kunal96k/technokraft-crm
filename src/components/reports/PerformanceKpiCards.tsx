@@ -32,13 +32,17 @@ export const PerformanceKpiCards: React.FC<PerformanceKpiCardsProps> = ({
   const totalProposals = filtered.reduce((acc, e) => acc + e.proposals, 0);
   const totalWon = filtered.reduce((acc, e) => acc + e.won, 0);
 
+  const contactedRate = totalAssigned > 0 ? Math.round((totalContacted / totalAssigned) * 100) : 0;
+  const qualifiedRate = totalContacted > 0 ? Math.round((totalQualified / totalContacted) * 100) : 0;
+  const proposalRate = totalQualified > 0 ? Math.round((totalProposals / totalQualified) * 100) : 0;
+  const winRate = totalAssigned > 0 ? ((totalWon / totalAssigned) * 100).toFixed(1) : '0.0';
+
   const cards = [
     {
       id: 'kpi-assigned',
       label: 'Leads Assigned',
       value: totalAssigned,
-      diff: '+12%',
-      isPositive: true,
+      subtext: `${filtered.length} reps assigned`,
       icon: Users,
       color: 'text-blue-600 dark:text-blue-400',
       bgColor: 'bg-blue-50 dark:bg-blue-950/40',
@@ -47,8 +51,7 @@ export const PerformanceKpiCards: React.FC<PerformanceKpiCardsProps> = ({
       id: 'kpi-contacted',
       label: 'Leads Contacted',
       value: totalContacted,
-      diff: '+8%',
-      isPositive: true,
+      subtext: `${contactedRate}% contact rate`,
       icon: PhoneCall,
       color: 'text-indigo-600 dark:text-indigo-400',
       bgColor: 'bg-indigo-50 dark:bg-indigo-950/40',
@@ -57,8 +60,7 @@ export const PerformanceKpiCards: React.FC<PerformanceKpiCardsProps> = ({
       id: 'kpi-followups',
       label: 'Follow-ups Completed',
       value: totalFollowUps,
-      diff: '+15%',
-      isPositive: true,
+      subtext: `${totalFollowUps} logged actions`,
       icon: CalendarCheck,
       color: 'text-purple-600 dark:text-purple-400',
       bgColor: 'bg-purple-50 dark:bg-purple-950/40',
@@ -67,8 +69,7 @@ export const PerformanceKpiCards: React.FC<PerformanceKpiCardsProps> = ({
       id: 'kpi-qualified',
       label: 'Qualified Leads',
       value: totalQualified,
-      diff: '+10%',
-      isPositive: true,
+      subtext: `${qualifiedRate}% qual. rate`,
       icon: CheckCircle2,
       color: 'text-emerald-600 dark:text-emerald-400',
       bgColor: 'bg-emerald-50 dark:bg-emerald-950/40',
@@ -77,8 +78,7 @@ export const PerformanceKpiCards: React.FC<PerformanceKpiCardsProps> = ({
       id: 'kpi-proposals',
       label: 'Proposals Sent',
       value: totalProposals,
-      diff: '+5%',
-      isPositive: true,
+      subtext: `${proposalRate}% quote rate`,
       icon: FileText,
       color: 'text-amber-600 dark:text-amber-400',
       bgColor: 'bg-amber-50 dark:bg-amber-950/40',
@@ -87,8 +87,7 @@ export const PerformanceKpiCards: React.FC<PerformanceKpiCardsProps> = ({
       id: 'kpi-won',
       label: 'Won Deals',
       value: totalWon,
-      diff: '+20%',
-      isPositive: true,
+      subtext: `${winRate}% conversion`,
       icon: Trophy,
       color: 'text-emerald-700 dark:text-emerald-400',
       bgColor: 'bg-emerald-100 dark:bg-emerald-950/40',
@@ -119,20 +118,8 @@ export const PerformanceKpiCards: React.FC<PerformanceKpiCardsProps> = ({
               <div className="text-xl sm:text-2xl font-bold font-mono text-slate-900 dark:text-white tracking-tight">
                 {card.value.toLocaleString('en-IN')}
               </div>
-              <div className="flex items-center gap-1 text-[10px] text-slate-500 dark:text-slate-400 mt-1">
-                <span
-                  className={`inline-flex items-center font-semibold ${
-                    card.isPositive ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
-                  }`}
-                >
-                  {card.isPositive ? (
-                    <TrendingUp className="w-2.5 h-2.5 mr-0.5" />
-                  ) : (
-                    <TrendingDown className="w-2.5 h-2.5 mr-0.5" />
-                  )}
-                  {card.diff}
-                </span>
-                <span className="text-slate-400 dark:text-slate-500">vs prev.</span>
+              <div className="text-[10px] text-slate-400 dark:text-slate-500 font-medium truncate mt-1">
+                {card.subtext}
               </div>
             </div>
           </div>

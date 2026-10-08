@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { CallRecord } from '../../types/calls';
-import { getStoredCalls, saveStoredCalls } from '../../data/mockCalls';
-import { MOCK_LEADS } from '../../data/mockLeads';
+import { fetchCallById, updateCallApi, completeCallApi } from '../../services/callService';
+import { Lead } from '../../types/leads';
+import { fetchLeadById } from '../../services/leadService';
 import { CallStatusBadge } from '../../components/communication/calls/CallStatusBadge';
 import { CallResultBadge } from '../../components/communication/calls/CallResultBadge';
 import { CallTypeBadge } from '../../components/communication/calls/CallTypeBadge';
@@ -33,22 +34,38 @@ export const CallDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const [calls, setCalls] = useState<CallRecord[]>([]);
   const [call, setCall] = useState<CallRecord | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [relatedLead, setRelatedLead] = useState<Lead | null>(null);
   const [isFollowUpModalOpen, setIsFollowUpModalOpen] = useState(false);
   const [isOpportunityModalOpen, setIsOpportunityModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
 
   useEffect(() => {
-    const loaded = getStoredCalls();
-    setCalls(loaded);
-    const found = loaded.find((c) => c.id === id || c.callCode === id);
-    if (found) {
-      setCall(found);
-    } else if (loaded.length > 0) {
-      setCall(loaded[0]);
+    if (id) {
+      setIsLoading(true);
+      fetchCallById(id)
+        .then((fetched) => {
+          setCall(fetched);
+        })
+        .catch((err) => {
+          console.error('Failed to load call details:', err);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
     }
   }, [id]);
+
+  useEffect(() => {
+    if (call?.leadId) {
+      fetchLeadById(call.leadId)
+        .then((lead) => setRelatedLead(lead))
+        .catch(() => setRelatedLead(null));
+    } else {
+      setRelatedLead(null);
+    }
+  }, [call?.leadId]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -70,24 +87,26 @@ export const CallDetailsPage: React.FC = () => {
     );
   }
 
-  // Find linked lead
-  const relatedLead = MOCK_LEADS.find((l) => l.id === call.leadId || l.leadCode === call.leadCode);
-
-  const handleUpdateFollowUp = (updated: CallRecord) => {
-    const updatedList = calls.map((c) => (c.id === updated.id ? updated : c));
-    setCalls(updatedList);
-    setCall(updated);
-    saveStoredCalls(updatedList);
-    showToast('Follow-up scheduled successfully!');
+  const handleUpdateFollowUp = async (updated: CallRecord) => {
+    try {
+      const saved = await updateCallApi(updated.id, updated);
+      setCall(saved);
+      showToast('Follow-up scheduled successfully!');
+    } catch (err) {
+      console.error('Failed updating follow-up:', err);
+      showToast('Error saving follow-up.');
+    }
   };
 
-  const handleOpportunityCreated = (name: string) => {
-    const updated = { ...call, opportunityCreated: true };
-    const updatedList = calls.map((c) => (c.id === call.id ? updated : c));
-    setCalls(updatedList);
-    setCall(updated);
-    saveStoredCalls(updatedList);
-    showToast(`Opportunity "${name}" created successfully!`);
+  const handleOpportunityCreated = async (name: string) => {
+    try {
+      const updated = { ...call, opportunityCreated: true };
+      const saved = await updateCallApi(call.id, updated);
+      setCall(saved);
+      showToast(`Opportunity "${name}" created successfully!`);
+    } catch (err) {
+      console.error('Failed updating opportunity state:', err);
+    }
   };
 
   const isOpportunityEligible =
@@ -276,7 +295,7 @@ export const CallDetailsPage: React.FC = () => {
                 onClick={() => setIsFollowUpModalOpen(true)}
                 className="text-xs text-[#5B4DB7] dark:text-purple-400 font-semibold hover:underline cursor-pointer"
               >
-                {call.nextFollowUp ? 'Reschedule' : '+ Set Follow-up'}
+                {call.nextFollowUp ? 'Reschedule' : 'Set Follow-up'}
               </button>
             </div>
 
@@ -316,7 +335,7 @@ export const CallDetailsPage: React.FC = () => {
                   onClick={() => setIsFollowUpModalOpen(true)}
                   className="px-3 py-1.5 bg-[#5B4DB7] hover:bg-[#4E41A2] text-white rounded-lg font-semibold text-xs cursor-pointer"
                 >
-                  + Add Next Follow-up
+                  Add Next Follow-up
                 </button>
               </div>
             )}

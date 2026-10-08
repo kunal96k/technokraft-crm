@@ -7,12 +7,16 @@ import {
   CallSummaryStats,
 } from '../../types/calls';
 import {
-  INITIAL_CALL_STATS,
-  getStoredCalls,
-  saveStoredCalls,
-} from '../../data/mockCalls';
-import { MOCK_LEADS } from '../../data/mockLeads';
-import { Lead } from '../../types/leads';
+  fetchCalls,
+  fetchCallStats,
+  logCallApi,
+  scheduleCallApi,
+  updateCallApi,
+  completeCallApi,
+  deleteCallApi,
+  bulkDeleteCallsApi,
+  bulkAssignCallsApi,
+} from '../../services/callService';
 import { CallSummaryCards } from '../../components/communication/calls/CallSummaryCards';
 import { CallTabs } from '../../components/communication/calls/CallTabs';
 import { CallToolbar } from '../../components/communication/calls/CallToolbar';
@@ -34,14 +38,22 @@ import {
   AlertCircle,
   RotateCcw,
   Sparkles,
+  RefreshCw,
 } from 'lucide-react';
 
 export const CallsPage: React.FC = () => {
   const navigate = useNavigate();
 
-  // Primary data state
-  const [calls, setCalls] = useState<CallRecord[]>(() => getStoredCalls());
-  const [isLoading, setIsLoading] = useState(false);
+  // Primary data state from backend
+  const [calls, setCalls] = useState<CallRecord[]>([]);
+  const [stats, setStats] = useState<CallSummaryStats>({
+    callsToday: 0,
+    scheduled: 0,
+    completed: 0,
+    missed: 0,
+    followUpRequired: 0,
+  });
+  const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
 
@@ -72,6 +84,58 @@ export const CallsPage: React.FC = () => {
     service: 'all',
   });
 
+  const loadCallsFromBackend = async () => {
+    setIsLoading(true);
+    try {
+      const [callsRes, statsRes] = await Promise.all([
+        fetchCalls({
+          tab: filters.tab,
+          status: filters.status,
+          type: filters.callType,
+          result: filters.result,
+          employee: filters.employee,
+          leadStatus: filters.leadStatus,
+          service: filters.service,
+          dateRange: filters.dateRange,
+          search: filters.search,
+          size: 150,
+        }),
+        fetchCallStats(),
+      ]);
+
+      setCalls(callsRes.content);
+      setStats({
+        callsToday: statsRes.callsToday,
+        scheduled: statsRes.scheduled,
+        completed: statsRes.completed,
+        missed: statsRes.missed,
+        followUpRequired: statsRes.followUpRequired,
+      });
+      setIsError(false);
+    } catch (err) {
+      console.error('Failed to load calls:', err);
+      setIsError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadCallsFromBackend();
+  }, [filters]);
+
+  useEffect(() => {
+    const handleUpdate = () => {
+      loadCallsFromBackend();
+    };
+    window.addEventListener('crm-calls-updated', handleUpdate);
+    window.addEventListener('crm-leads-updated', handleUpdate);
+    return () => {
+      window.removeEventListener('crm-calls-updated', handleUpdate);
+      window.removeEventListener('crm-leads-updated', handleUpdate);
+    };
+  }, [filters]);
+
   const showToast = (message: string) => {
     setToastMessage(message);
     setTimeout(() => setToastMessage(''), 4000);
@@ -99,9 +163,22 @@ export const CallsPage: React.FC = () => {
     setSelectedIds([]);
   };
 
-  // Active filter count (excluding default values and search)
+  // Tab Badge counts
+  const tabCounts = useMemo(() => {
+    const todayStr = new Date().toISOString().split('T')[0];
+    return {
+      all: calls.length,
+      today: stats.callsToday,
+      scheduled: stats.scheduled,
+      completed: stats.completed,
+      missed: stats.missed,
+    };
+  }, [calls, stats]);
+
+  // Active filter count for badge indicator
   const activeFilterCount = useMemo(() => {
     let count = 0;
+    if (filters.search) count++;
     if (filters.dateRange !== 'all') count++;
     if (filters.employee !== 'all') count++;
     if (filters.callType !== 'all') count++;
@@ -112,85 +189,6 @@ export const CallsPage: React.FC = () => {
     return count;
   }, [filters]);
 
-  // Tab counts
-  const counts = useMemo(() => {
-    return {
-      all: calls.length,
-      today: calls.filter((c) => c.date.includes('07 Sep') || c.date.toLowerCase().includes('today')).length,
-      scheduled: calls.filter((c) => c.status === 'scheduled').length,
-      completed: calls.filter((c) => c.status === 'completed').length,
-      missed: calls.filter((c) => c.status === 'missed').length,
-    };
-  }, [calls]);
-
-  // Filtered Calls list
-  const filteredCalls = useMemo(() => {
-    return calls.filter((call) => {
-      // Tab filter
-      if (filters.tab === 'today') {
-        if (!call.date.includes('07 Sep') && !call.date.toLowerCase().includes('today')) return false;
-      } else if (filters.tab === 'scheduled') {
-        if (call.status !== 'scheduled') return false;
-      } else if (filters.tab === 'completed') {
-        if (call.status !== 'completed') return false;
-      } else if (filters.tab === 'missed') {
-        if (call.status !== 'missed') return false;
-      }
-
-      // Search query
-      if (filters.search) {
-        const query = filters.search.toLowerCase();
-        const matchCompany = call.companyName.toLowerCase().includes(query);
-        const matchContact = call.contactName.toLowerCase().includes(query);
-        const matchPhone = call.contactPhone.toLowerCase().includes(query);
-        const matchLead = call.leadCode.toLowerCase().includes(query);
-        const matchNotes = call.notes?.toLowerCase().includes(query);
-        if (!matchCompany && !matchContact && !matchPhone && !matchLead && !matchNotes) {
-          return false;
-        }
-      }
-
-      // Date Range filter
-      if (filters.dateRange === 'today') {
-        if (!call.date.includes('07 Sep')) return false;
-      } else if (filters.dateRange === 'yesterday') {
-        if (!call.date.includes('06 Sep')) return false;
-      }
-
-      // Employee
-      if (filters.employee !== 'all' && call.employeeName !== filters.employee) {
-        return false;
-      }
-
-      // Call Type
-      if (filters.callType !== 'all' && call.type !== filters.callType) {
-        return false;
-      }
-
-      // Status
-      if (filters.status !== 'all' && call.status !== filters.status) {
-        return false;
-      }
-
-      // Result
-      if (filters.result !== 'all' && call.result !== filters.result) {
-        return false;
-      }
-
-      // Lead Status
-      if (filters.leadStatus !== 'all' && call.leadStatus !== filters.leadStatus) {
-        return false;
-      }
-
-      // Service
-      if (filters.service !== 'all' && call.service !== filters.service) {
-        return false;
-      }
-
-      return true;
-    });
-  }, [calls, filters]);
-
   // Selection handlers
   const handleToggleSelect = (id: string) => {
     setSelectedIds((prev) =>
@@ -199,10 +197,10 @@ export const CallsPage: React.FC = () => {
   };
 
   const handleSelectAll = () => {
-    if (selectedIds.length === filteredCalls.length) {
+    if (selectedIds.length === calls.length) {
       setSelectedIds([]);
     } else {
-      setSelectedIds(filteredCalls.map((c) => c.id));
+      setSelectedIds(calls.map((c) => c.id));
     }
   };
 
@@ -238,34 +236,99 @@ export const CallsPage: React.FC = () => {
     setIsOpportunityModalOpen(true);
   };
 
-  // Add new call record to state
-  const handleSaveLogCall = (newCall: CallRecord) => {
-    const updated = [newCall, ...calls];
-    setCalls(updated);
-    saveStoredCalls(updated);
-    showToast(`Call record for ${newCall.companyName} logged successfully!`);
+  // Add new call record to database
+  const handleSaveLogCall = async (newCall: CallRecord) => {
+    try {
+      const saved = await logCallApi(newCall);
+      setCalls((prev) => [saved, ...prev]);
+      showToast(`Call record for ${saved.companyName} logged successfully!`);
+    } catch (err) {
+      console.error('Failed to log call:', err);
+      showToast('Error saving call to server.');
+    }
   };
 
-  // Add scheduled call
-  const handleSaveScheduledCall = (newCall: CallRecord) => {
-    const updated = [newCall, ...calls];
-    setCalls(updated);
-    saveStoredCalls(updated);
-    showToast(`Call with ${newCall.companyName} scheduled for ${newCall.date}!`);
+  // Add scheduled call to database
+  const handleSaveScheduledCall = async (newCall: CallRecord) => {
+    try {
+      const saved = await scheduleCallApi(newCall);
+      setCalls((prev) => [saved, ...prev]);
+      showToast(`Call with ${saved.companyName} scheduled for ${saved.date}!`);
+    } catch (err) {
+      console.error('Failed to schedule call:', err);
+      showToast('Error scheduling call on server.');
+    }
   };
 
   // Update call with new follow-up
-  const handleUpdateFollowUpSuccess = (updatedCall: CallRecord) => {
-    const updated = calls.map((c) => (c.id === updatedCall.id ? updatedCall : c));
-    setCalls(updated);
-    saveStoredCalls(updated);
-    showToast(`Follow-up linked for ${updatedCall.companyName}!`);
+  const handleUpdateFollowUpSuccess = async (updatedCall: CallRecord) => {
+    try {
+      const saved = await updateCallApi(updatedCall.id, updatedCall);
+      setCalls((prev) => prev.map((c) => (c.id === saved.id ? saved : c)));
+      showToast(`Follow-up linked for ${saved.companyName}!`);
+    } catch (err) {
+      console.error('Failed updating call follow-up:', err);
+      showToast('Error updating follow-up on server.');
+    }
+  };
+
+  // Complete a scheduled call
+  const handleCompleteCall = async (call: CallRecord) => {
+    try {
+      const completed = await completeCallApi(call.id, {
+        result: 'Connected',
+        notes: 'Call successfully completed.',
+        duration: '05m 00s',
+        durationSeconds: 300,
+      });
+      setCalls((prev) => prev.map((c) => (c.id === call.id ? completed : c)));
+      showToast(`Call with ${call.companyName} marked as completed.`);
+    } catch (err) {
+      console.error('Failed completing call:', err);
+      showToast('Error completing call on server.');
+    }
+  };
+
+  // Delete a single call
+  const handleDeleteCall = async (call: CallRecord) => {
+    try {
+      const ok = await deleteCallApi(call.id);
+      if (ok) {
+        setCalls((prev) => prev.filter((c) => c.id !== call.id));
+        setSelectedIds((prev) => prev.filter((id) => id !== call.id));
+        showToast(`Call record for ${call.companyName} deleted.`);
+      }
+    } catch (err) {
+      console.error('Failed deleting call:', err);
+      showToast('Error deleting call from server.');
+    }
   };
 
   // Bulk Actions
-  const handleBulkAssign = () => {
-    showToast(`Assigned ${selectedIds.length} call records to sales team.`);
-    setSelectedIds([]);
+  const handleBulkAssign = async () => {
+    if (selectedIds.length === 0) return;
+    try {
+      const count = await bulkAssignCallsApi(selectedIds, 'Sales Representative');
+      showToast(`Assigned ${count} call records to sales team.`);
+      setSelectedIds([]);
+      loadCallsFromBackend();
+    } catch (err) {
+      console.error('Failed bulk assign:', err);
+      showToast('Error assigning call records.');
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) return;
+    try {
+      const count = await bulkDeleteCallsApi(selectedIds);
+      setCalls((prev) => prev.filter((c) => !selectedIds.includes(c.id)));
+      showToast(`Deleted ${count} call records from database.`);
+      setSelectedIds([]);
+    } catch (err) {
+      console.error('Failed bulk delete:', err);
+      showToast('Error deleting call records.');
+    }
   };
 
   const handleBulkAddFollowUp = () => {
@@ -274,7 +337,6 @@ export const CallsPage: React.FC = () => {
   };
 
   const handleBulkExport = () => {
-    // Generate simple CSV
     const rows = [
       ['Call Code', 'Company', 'Contact', 'Phone', 'Type', 'Duration', 'Result', 'Employee', 'Status', 'Date'],
       ...calls
@@ -309,60 +371,79 @@ export const CallsPage: React.FC = () => {
     <div className="space-y-6 pb-12">
       {/* Toast Banner */}
       {toastMessage && (
-        <div className="fixed top-20 right-6 z-50 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-2.5 text-xs animate-in slide-in-from-top duration-200">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-          <span>{toastMessage}</span>
+        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white text-xs px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2 duration-200 border border-slate-700">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+          <span className="font-medium">{toastMessage}</span>
         </div>
       )}
 
-      {/* Page Header */}
+      {/* Header Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Calls</h1>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-            Track customer and lead calls and their outcomes.
-          </p>
+          <div className="flex items-center gap-2">
+            <div className="p-2 bg-purple-50 dark:bg-purple-950/60 text-[#5B4DB7] dark:text-purple-300 rounded-xl">
+              <PhoneCall className="w-5 h-5" />
+            </div>
+            <div>
+              <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+                Call Management & Logs
+              </h1>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Track client voice conversations, schedule callbacks, and review outbound sales performance
+              </p>
+            </div>
+          </div>
         </div>
 
-        {/* Top-Right Action Buttons */}
-        <div className="flex items-center gap-2.5">
+        {/* Action Buttons */}
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={loadCallsFromBackend}
+            className="inline-flex items-center gap-1.5 px-3 py-2 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold shadow-2xs transition-colors cursor-pointer min-h-[40px]"
+            title="Refresh from Database"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-[#5B4DB7]' : ''}`} />
+            <span className="hidden sm:inline">Refresh</span>
+          </button>
+
           <button
             type="button"
             onClick={() => setIsScheduleModalOpen(true)}
-            className="px-3.5 py-2 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 font-semibold text-xs flex items-center gap-1.5 shadow-2xs transition-colors min-h-[44px] cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold shadow-2xs transition-colors cursor-pointer min-h-[40px]"
           >
-            <CalendarClock className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+            <CalendarClock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
             <span>Schedule Call</span>
           </button>
 
           <button
             type="button"
             onClick={() => setIsLogModalOpen(true)}
-            className="px-4 py-2 rounded-xl bg-[#5B4DB7] hover:bg-[#4E41A2] text-white font-semibold text-xs flex items-center gap-1.5 shadow-sm transition-colors min-h-[44px] cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#5B4DB7] hover:bg-[#4E41A2] text-white rounded-xl text-xs font-semibold shadow-xs transition-colors cursor-pointer min-h-[40px]"
           >
             <Plus className="w-4 h-4" />
-            <span>+ Log Call</span>
+            <span>Log Call</span>
           </button>
         </div>
       </div>
 
-      {/* Summary Cards */}
+      {/* 1. Summary Cards */}
       <CallSummaryCards
-        stats={INITIAL_CALL_STATS}
+        stats={stats}
         activeTab={filters.tab}
-        onSelectTab={(tab) => handleFilterChange('tab', tab)}
+        onTabSelect={(tab) => handleFilterChange('tab', tab)}
       />
 
-      {/* Filter Tabs & View Switcher */}
+      {/* 2. Tabs Row with View Switcher */}
       <CallTabs
         activeTab={filters.tab}
         onTabChange={(tab) => handleFilterChange('tab', tab)}
-        counts={counts}
+        counts={tabCounts}
         viewMode={viewMode}
         onViewModeChange={setViewMode}
       />
 
-      {/* Toolbar (Search, Filter dropdowns, Bulk actions) */}
+      {/* 3. Toolbar & Inline Filters */}
       <CallToolbar
         filters={filters}
         onFilterChange={handleFilterChange}
@@ -370,67 +451,65 @@ export const CallsPage: React.FC = () => {
         activeFilterCount={activeFilterCount}
         onOpenMobileFilters={() => setIsMobileFiltersOpen(true)}
         selectedCount={selectedIds.length}
-        totalCount={filteredCalls.length}
+        totalCount={calls.length}
         onSelectAll={handleSelectAll}
         onClearSelection={handleClearSelection}
-        isAllSelected={
-          filteredCalls.length > 0 && selectedIds.length === filteredCalls.length
-        }
+        isAllSelected={calls.length > 0 && selectedIds.length === calls.length}
         onBulkAssign={handleBulkAssign}
         onBulkAddFollowUp={handleBulkAddFollowUp}
         onBulkExport={handleBulkExport}
       />
 
-      {/* Error state fallback */}
-      {isError && (
-        <div className="p-8 text-center bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/50 rounded-xl space-y-3">
+      {/* 4. Active Content by View Mode */}
+      {isLoading ? (
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-12 text-center space-y-3">
+          <RefreshCw className="w-6 h-6 text-[#5B4DB7] animate-spin mx-auto" />
+          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Loading call records from database...</p>
+        </div>
+      ) : isError ? (
+        <div className="bg-white dark:bg-slate-900 border border-rose-200 dark:border-rose-900/60 rounded-2xl p-8 text-center space-y-3">
           <AlertCircle className="w-8 h-8 text-rose-500 mx-auto" />
-          <h3 className="text-sm font-bold text-rose-900 dark:text-rose-200">Unable to load calls.</h3>
-          <p className="text-xs text-rose-600 dark:text-rose-300">Please check your connection and retry.</p>
+          <h3 className="text-sm font-bold text-slate-900 dark:text-white">Failed to connect to backend server</h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
+            Could not fetch calls from database. Ensure backend is running.
+          </p>
           <button
             type="button"
-            onClick={() => {
-              setIsError(false);
-              setCalls(getStoredCalls());
-            }}
-            className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer min-h-[44px]"
+            onClick={loadCallsFromBackend}
+            className="px-4 py-2 bg-[#5B4DB7] text-white rounded-lg text-xs font-semibold cursor-pointer"
           >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span>Try Again</span>
+            Try Again
           </button>
         </div>
-      )}
-
-      {/* VIEW MODES */}
-      {!isError && (
+      ) : (
         <>
-          {/* 1. LIST VIEW (Table on Desktop, Cards on Mobile) */}
+          {/* 1. TABLE LIST VIEW */}
           {viewMode === 'list' && (
             <>
-              {filteredCalls.length > 0 ? (
+              {calls.length > 0 ? (
                 <>
-                  {/* Desktop / Tablet Table View (hidden on small mobile) */}
+                  {/* Desktop Table View */}
                   <div className="hidden md:block">
                     <CallTable
-                      calls={filteredCalls}
+                      calls={calls}
                       selectedIds={selectedIds}
                       onToggleSelect={handleToggleSelect}
                       onSelectAll={handleSelectAll}
-                      isAllSelected={
-                        filteredCalls.length > 0 && selectedIds.length === filteredCalls.length
-                      }
+                      isAllSelected={calls.length > 0 && selectedIds.length === calls.length}
                       onView={handleViewCall}
                       onEdit={handleEditCall}
                       onAddFollowUp={handleAddFollowUp}
                       onScheduleMeeting={handleScheduleMeeting}
                       onOpenLead={handleOpenLead}
                       onCreateOpportunity={handleTriggerOpportunity}
+                      onDelete={handleDeleteCall}
+                      onComplete={handleCompleteCall}
                     />
                   </div>
 
-                  {/* Mobile Call Cards View (visible on small mobile screens) */}
+                  {/* Mobile Call Cards View */}
                   <div className="md:hidden space-y-3">
-                    {filteredCalls.map((call) => (
+                    {calls.map((call) => (
                       <CallCard
                         key={call.id}
                         call={call}
@@ -502,7 +581,7 @@ export const CallsPage: React.FC = () => {
           {/* 2. TIMELINE VIEW */}
           {viewMode === 'timeline' && (
             <CallTimeline
-              calls={filteredCalls}
+              calls={calls}
               onView={handleViewCall}
               onAddFollowUp={handleAddFollowUp}
               onOpenLead={handleOpenLead}
@@ -512,6 +591,7 @@ export const CallsPage: React.FC = () => {
           {/* 3. EMPLOYEE PERFORMANCE VIEW */}
           {viewMode === 'team' && (
             <CallEmployeePerformance
+              calls={calls}
               onSelectEmployee={(name) => {
                 handleFilterChange('employee', name);
                 setViewMode('list');
@@ -528,7 +608,6 @@ export const CallsPage: React.FC = () => {
         filters={filters}
         onFilterChange={handleFilterChange}
         onResetFilters={handleResetFilters}
-        activeFilterCount={activeFilterCount}
       />
 
       {/* Log Call Modal */}
@@ -536,42 +615,15 @@ export const CallsPage: React.FC = () => {
         isOpen={isLogModalOpen}
         onClose={() => setIsLogModalOpen(false)}
         onSaveCall={handleSaveLogCall}
-        onTriggerOpportunityModal={(lead, partialCall) => {
-          setSelectedCallForModal({
-            id: `call-temp-${Date.now()}`,
-            callCode: 'CALL-NEW',
-            leadId: lead.id,
-            leadCode: lead.leadCode,
-            companyName: lead.company.name,
-            contactId: 'ct-temp',
-            contactName: partialCall.contactName || lead.contact.name,
-            contactDesignation: lead.contact.designation,
-            contactPhone: lead.contact.phone,
-            employeeId: 'emp-1',
-            employeeName: 'Kunal Patil',
-            employeeRole: 'Sales Manager',
-            employeeAvatar: 'KP',
-            type: 'outbound',
-            status: 'completed',
-            date: '07 Sep 2026',
-            time: '11:30 AM',
-            duration: '12m 34s',
-            durationSeconds: 754,
-            result: partialCall.result,
-            notes: partialCall.notes || '',
-            service: lead.service,
-            leadStatus: lead.status,
-            leadScore: lead.score,
-            createdAt: new Date().toISOString(),
-          });
-          setIsOpportunityModalOpen(true);
-        }}
       />
 
       {/* Schedule Call Modal */}
       <ScheduleCallModal
         isOpen={isScheduleModalOpen}
-        onClose={() => setIsScheduleModalOpen(false)}
+        onClose={() => {
+          setIsScheduleModalOpen(false);
+          setSelectedCallForModal(null);
+        }}
         onScheduleCall={handleSaveScheduledCall}
       />
 
@@ -579,7 +631,10 @@ export const CallsPage: React.FC = () => {
       {selectedCallForModal && (
         <AddFollowUpModal
           isOpen={isFollowUpModalOpen}
-          onClose={() => setIsFollowUpModalOpen(false)}
+          onClose={() => {
+            setIsFollowUpModalOpen(false);
+            setSelectedCallForModal(null);
+          }}
           call={selectedCallForModal}
           onSuccess={handleUpdateFollowUpSuccess}
         />
@@ -589,11 +644,11 @@ export const CallsPage: React.FC = () => {
       {selectedCallForModal && (
         <CreateOpportunityModal
           isOpen={isOpportunityModalOpen}
-          onClose={() => setIsOpportunityModalOpen(false)}
-          call={selectedCallForModal}
-          onSuccess={(name) => {
-            showToast(`Opportunity "${name}" successfully created from call requirement!`);
+          onClose={() => {
+            setIsOpportunityModalOpen(false);
+            setSelectedCallForModal(null);
           }}
+          call={selectedCallForModal}
         />
       )}
     </div>

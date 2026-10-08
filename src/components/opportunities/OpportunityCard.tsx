@@ -14,6 +14,7 @@ import {
   Briefcase,
   Layers,
   GripVertical,
+  Trash2,
 } from 'lucide-react';
 import { OpportunityRecord, OpportunityStage } from '../../types/opportunities';
 import { OpportunityValue } from './OpportunityValue';
@@ -28,6 +29,7 @@ interface OpportunityCardProps {
   onCreateProposal?: (opp: OpportunityRecord) => void;
   onMarkWon?: (opp: OpportunityRecord) => void;
   onMarkLost?: (opp: OpportunityRecord) => void;
+  onDelete?: (opp: OpportunityRecord) => void;
   isDragging?: boolean;
   isDragOverlay?: boolean;
   dragHandleProps?: Record<string, any>;
@@ -41,6 +43,7 @@ export const OpportunityCard: React.FC<OpportunityCardProps> = ({
   onCreateProposal,
   onMarkWon,
   onMarkLost,
+  onDelete,
   isDragging = false,
   isDragOverlay = false,
   dragHandleProps,
@@ -241,6 +244,20 @@ export const OpportunityCard: React.FC<OpportunityCardProps> = ({
                     </button>
                   </div>
                 )}
+
+                <div className="py-1 border-t border-slate-100 dark:border-slate-800">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowMenu(false);
+                      onDelete?.(opportunity);
+                    }}
+                    className="w-full text-left px-3 py-1.5 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-700 dark:text-rose-400 flex items-center gap-2 cursor-pointer"
+                  >
+                    <Trash2 className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
+                    <span>Delete Opportunity</span>
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -327,7 +344,7 @@ export const OpportunityCard: React.FC<OpportunityCardProps> = ({
               className="py-1.5 px-2 bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 dark:hover:bg-purple-900/50 text-[#5B4DB7] dark:text-purple-300 text-xs font-semibold rounded-lg transition-colors cursor-pointer"
               title="Create Proposal"
             >
-              + Proposal
+              Proposal
             </button>
           )}
         </div>

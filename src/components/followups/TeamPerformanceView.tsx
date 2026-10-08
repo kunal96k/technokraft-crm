@@ -11,6 +11,23 @@ export const TeamPerformanceView: React.FC<TeamPerformanceViewProps> = ({
   performanceData,
   onSelectEmployee,
 }) => {
+  const totalAssigned = performanceData.reduce((sum, e) => sum + (e.assigned || 0), 0);
+  const totalCompleted = performanceData.reduce((sum, e) => sum + (e.completed || 0), 0);
+  const avgCompletion =
+    totalAssigned > 0 ? ((totalCompleted / totalAssigned) * 100).toFixed(1) : '0.0';
+
+  if (performanceData.length === 0) {
+    return (
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-8 text-center text-xs text-slate-500 dark:text-slate-400">
+        <Users className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto mb-2" />
+        <p className="font-semibold text-slate-800 dark:text-slate-100 text-sm">
+          No Team Performance Records
+        </p>
+        <p className="mt-1">Assign follow-ups to sales team members to track completion rates.</p>
+      </div>
+    );
+  }
+
   return (
     <div id="team-performance-container" className="space-y-4">
       {/* Overview Banner */}
@@ -31,7 +48,7 @@ export const TeamPerformanceView: React.FC<TeamPerformanceViewProps> = ({
 
         <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700">
           <Award className="w-4 h-4 text-amber-500" />
-          <span>Team Average Completion: <strong>80.3%</strong></span>
+          <span>Team Average Completion: <strong>{avgCompletion}%</strong></span>
         </div>
       </div>
 
@@ -51,8 +68,8 @@ export const TeamPerformanceView: React.FC<TeamPerformanceViewProps> = ({
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
-            {performanceData.map((emp) => (
-              <tr key={emp.name} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors">
+            {performanceData.map((emp, index) => (
+              <tr key={`${emp.name}-${emp.role || ''}-${index}`} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors">
                 <td className="py-3 px-4">
                   <div className="flex items-center gap-2.5">
                     <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/50 text-[#5B4DB7] dark:text-purple-300 font-bold text-xs flex items-center justify-center flex-shrink-0">

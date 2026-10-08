@@ -1,6 +1,7 @@
 import React from 'react';
 import { X, Filter, RotateCcw } from 'lucide-react';
 import { LeadFilterState } from '../../types/leads';
+import { EmployeeSelect } from '../common/EmployeeSelect';
 
 interface LeadFiltersModalProps {
   isOpen: boolean;
@@ -110,17 +111,12 @@ export const LeadFiltersModal: React.FC<LeadFiltersModalProps> = ({
           {/* Assigned Employee */}
           <div>
             <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Assigned To</label>
-            <select
+            <EmployeeSelect
               value={filters.assignedTo}
               onChange={(e) => onChangeFilter('assignedTo', e.target.value)}
+              placeholder="All Employees"
               className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
-            >
-              <option value="">All Employees</option>
-              <option value="Kunal Patil">Kunal Patil (Sales Manager)</option>
-              <option value="Shruti Raundal">Shruti Raundal (Sales Executive)</option>
-              <option value="Ankush Pandit">Ankush Pandit (Sales Executive)</option>
-              <option value="Pranav Jejurkar">Pranav Jejurkar (Senior BA)</option>
-            </select>
+            />
           </div>
 
           {/* Priority */}

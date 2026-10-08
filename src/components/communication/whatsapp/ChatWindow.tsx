@@ -6,14 +6,10 @@ import {
   Phone,
   ExternalLink,
   CalendarPlus,
-  FileText,
   Info,
-  MoreVertical,
   CheckCircle2,
-  Tag,
-  UserCheck,
 } from 'lucide-react';
-import { WhatsAppConversation, WhatsAppMessage } from '../../../types/communication';
+import { WhatsAppConversation } from '../../../types/communication';
 import { MessageBubble } from './MessageBubble';
 import { ChatComposer } from './ChatComposer';
 import { WhatsAppTemplateModal } from './WhatsAppTemplateModal';
@@ -57,13 +53,17 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
 
   if (!conversation) {
     return (
-      <div className={`flex flex-col items-center justify-center p-8 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 text-center text-slate-400 dark:text-slate-500 ${className}`}>
+      <div
+        className={`flex flex-col items-center justify-center p-8 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 text-center text-slate-400 dark:text-slate-500 h-full min-h-0 ${className}`}
+      >
         <div className="w-12 h-12 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-300 dark:text-slate-600 mb-3">
           <Phone className="w-6 h-6" />
         </div>
-        <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">No Conversation Selected</h4>
+        <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">
+          No Conversation Selected
+        </h4>
         <p className="text-xs text-slate-400 dark:text-slate-400 max-w-xs leading-relaxed">
-          Select a WhatsApp prospect conversation from the left to start chatting or send CRM business updates.
+          Select a WhatsApp client lead from the list to start chatting or send CRM business updates.
         </p>
       </div>
     );
@@ -74,16 +74,18 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     showToast('Message sent via WhatsApp Gateway');
   };
 
-  const handleAttachMock = () => {
+  const handleAttachDocument = () => {
     const filename = `${conversation.companyName.replace(/\s+/g, '_')}_Proposal_Estimate.pdf`;
     onSendDocument(conversation.id, filename);
     showToast(`Attached & sent ${filename}`);
   };
 
   return (
-    <div className={`flex flex-col h-full bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs ${className}`}>
-      {/* Chat Header */}
-      <div className="p-3.5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/60 flex items-center justify-between gap-3">
+    <div
+      className={`flex flex-col h-full min-h-0 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs relative ${className}`}
+    >
+      {/* Chat Header (Fixed at top of chat card) */}
+      <div className="flex-shrink-0 p-3.5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/60 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5 min-w-0">
           {onBackMobile && (
             <button
@@ -123,7 +125,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         </div>
 
         {/* Header Actions */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 flex-shrink-0">
           {/* Quick CRM actions */}
           <button
             type="button"
@@ -164,8 +166,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         </div>
       </div>
 
-      {/* Messages Stream Area */}
-      <div className="flex-1 overflow-y-auto p-4 bg-slate-50/50 dark:bg-slate-950/40 space-y-1">
+      {/* Messages Stream Area (Strictly Scrollable Within Container) */}
+      <div className="flex-1 min-h-0 overflow-y-auto p-4 bg-slate-50/50 dark:bg-slate-950/40 space-y-1">
         {/* Date separator */}
         <div className="flex justify-center my-3">
           <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 px-2.5 py-0.5 rounded-full shadow-2xs">
@@ -180,12 +182,14 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Chat Composer */}
-      <ChatComposer
-        onSendMessage={handleSend}
-        onOpenTemplates={() => setIsTemplateModalOpen(true)}
-        onAttachFile={handleAttachMock}
-      />
+      {/* Chat Composer (Fixed at bottom of chat card) */}
+      <div className="flex-shrink-0">
+        <ChatComposer
+          onSendMessage={handleSend}
+          onOpenTemplates={() => setIsTemplateModalOpen(true)}
+          onAttachFile={handleAttachDocument}
+        />
+      </div>
 
       {/* Quick Templates Modal */}
       <WhatsAppTemplateModal
@@ -195,7 +199,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         onSelectTemplate={handleSend}
       />
 
-      {/* Toast */}
+      {/* Toast Notification */}
       {toastMessage && (
         <div className="absolute top-16 right-4 z-20 bg-slate-900 text-white text-xs px-3.5 py-2 rounded-lg shadow-lg flex items-center gap-2 animate-in fade-in duration-150">
           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />

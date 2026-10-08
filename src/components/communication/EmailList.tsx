@@ -9,6 +9,10 @@ import {
   Square,
   Trash2,
   Mail,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
 } from 'lucide-react';
 import { EmailRecord, EmailCategoryTab } from '../../types/communication';
 import { EmailListItem } from './EmailListItem';
@@ -27,6 +31,12 @@ interface EmailListProps {
   onBulkDelete: () => void;
   onOpenBulkCompose: () => void;
   isLoading?: boolean;
+  page?: number;
+  pageSize?: number;
+  totalPages?: number;
+  totalElements?: number;
+  onPageChange?: (newPage: number) => void;
+  onPageSizeChange?: (newSize: number) => void;
 }
 
 export const EmailList: React.FC<EmailListProps> = ({
@@ -42,6 +52,12 @@ export const EmailList: React.FC<EmailListProps> = ({
   onBulkDelete,
   onOpenBulkCompose,
   isLoading = false,
+  page = 0,
+  pageSize = 15,
+  totalPages = 1,
+  totalElements = 0,
+  onPageChange,
+  onPageSizeChange,
 }) => {
   const tabs: { id: EmailCategoryTab; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
     { id: 'all', label: 'All', icon: Inbox },
@@ -136,17 +152,17 @@ export const EmailList: React.FC<EmailListProps> = ({
       </div>
 
       {/* Email List Content Area */}
-      <div className="flex-1 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/80">
+      <div className="flex-1 min-h-0 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/80">
         {isLoading ? (
           <div className="p-4 space-y-3">
             {[1, 2, 3, 4, 5].map((n) => (
               <div key={n} className="animate-pulse flex items-center gap-3">
-                <div className="w-4 h-4 bg-slate-200 rounded" />
+                <div className="w-4 h-4 bg-slate-200 dark:bg-slate-800 rounded" />
                 <div className="flex-1 space-y-2">
-                  <div className="h-3.5 bg-slate-200 rounded w-1/3" />
-                  <div className="h-3 bg-slate-100 rounded w-3/4" />
+                  <div className="h-3.5 bg-slate-200 dark:bg-slate-800 rounded w-1/3" />
+                  <div className="h-3 bg-slate-100 dark:bg-slate-850 rounded w-3/4" />
                 </div>
-                <div className="w-16 h-4 bg-slate-200 rounded" />
+                <div className="w-16 h-4 bg-slate-200 dark:bg-slate-800 rounded" />
               </div>
             ))}
           </div>
@@ -169,6 +185,86 @@ export const EmailList: React.FC<EmailListProps> = ({
           ))
         )}
       </div>
+
+      {/* Server-Side Pagination Bar */}
+      {onPageChange && (
+        <div className="flex-shrink-0 px-3.5 py-2.5 bg-slate-50/90 dark:bg-slate-950/80 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 gap-2">
+          {/* Item range info */}
+          <div className="text-[11px] font-medium text-slate-600 dark:text-slate-400 truncate">
+            {totalElements > 0 ? (
+              <>
+                <strong className="text-slate-800 dark:text-slate-200">
+                  {page * pageSize + 1}–{Math.min((page + 1) * pageSize, totalElements)}
+                </strong>{' '}
+                of <strong className="text-slate-800 dark:text-slate-200">{totalElements.toLocaleString()}</strong>
+              </>
+            ) : (
+              '0 emails'
+            )}
+          </div>
+
+          {/* Controls: Page Size & Nav Buttons */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            {onPageSizeChange && (
+              <select
+                value={pageSize}
+                onChange={(e) => onPageSizeChange(Number(e.target.value))}
+                className="text-[11px] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded px-1.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-[#5B4DB7] cursor-pointer"
+                title="Emails per page"
+              >
+                <option value={10}>10</option>
+                <option value={15}>15</option>
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+              </select>
+            )}
+
+            <div className="flex items-center gap-0.5">
+              <button
+                type="button"
+                onClick={() => onPageChange(0)}
+                disabled={page === 0 || isLoading}
+                className="p-1 rounded bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-750 disabled:opacity-30 disabled:cursor-not-allowed border border-slate-200 dark:border-slate-700 shadow-2xs transition-colors"
+                title="First Page"
+              >
+                <ChevronsLeft className="w-3.5 h-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => onPageChange(Math.max(0, page - 1))}
+                disabled={page === 0 || isLoading}
+                className="p-1 rounded bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-750 disabled:opacity-30 disabled:cursor-not-allowed border border-slate-200 dark:border-slate-700 shadow-2xs transition-colors"
+                title="Previous Page"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+              </button>
+
+              <span className="text-[11px] px-1 font-semibold text-slate-700 dark:text-slate-300">
+                {page + 1}/{Math.max(1, totalPages)}
+              </span>
+
+              <button
+                type="button"
+                onClick={() => onPageChange(Math.min(totalPages - 1, page + 1))}
+                disabled={page >= totalPages - 1 || isLoading}
+                className="p-1 rounded bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-750 disabled:opacity-30 disabled:cursor-not-allowed border border-slate-200 dark:border-slate-700 shadow-2xs transition-colors"
+                title="Next Page"
+              >
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => onPageChange(Math.max(0, totalPages - 1))}
+                disabled={page >= totalPages - 1 || isLoading}
+                className="p-1 rounded bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-750 disabled:opacity-30 disabled:cursor-not-allowed border border-slate-200 dark:border-slate-700 shadow-2xs transition-colors"
+                title="Last Page"
+              >
+                <ChevronsRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

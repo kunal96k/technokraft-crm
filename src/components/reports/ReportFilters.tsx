@@ -1,6 +1,7 @@
 import React from 'react';
 import { Filter, RotateCcw, User, Users, Shield, Briefcase, Globe, Layers } from 'lucide-react';
 import { RoleScope } from '../../types/reports';
+import { EmployeeSelect } from '../common/EmployeeSelect';
 
 interface ReportFiltersProps {
   selectedEmployee: string;
@@ -19,15 +20,6 @@ interface ReportFiltersProps {
   onReset?: () => void;
   isAnalytics?: boolean;
 }
-
-const EMPLOYEES = [
-  'All Employees',
-  'Kunal Patil',
-  'Shruti Raundal',
-  'Pranav Jejurkar',
-  'Ankush Pandit',
-  'Rohan Patil',
-];
 
 const TEAMS = [
   'All Teams',
@@ -128,17 +120,12 @@ export const ReportFilters: React.FC<ReportFiltersProps> = ({
           <label className="block text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 mb-1">
             Employee
           </label>
-          <select
-            value={selectedEmployee}
-            onChange={(e) => onEmployeeChange(e.target.value)}
+          <EmployeeSelect
+            value={selectedEmployee === 'All Employees' ? '' : selectedEmployee}
+            onChange={(e) => onEmployeeChange(e.target.value || 'All Employees')}
+            placeholder="All Employees"
             className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-800 dark:text-slate-100 font-medium focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-1 focus:ring-[#5B4DB7]"
-          >
-            {EMPLOYEES.map((emp) => (
-              <option key={emp} value={emp}>
-                {emp}
-              </option>
-            ))}
-          </select>
+          />
         </div>
 
         {/* Team */}

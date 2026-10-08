@@ -1,7 +1,11 @@
 import React from 'react';
 import { X, CheckSquare, AlertCircle, Building2 } from 'lucide-react';
 import { TaskRecord, TaskPriority, TaskStatus } from '../../../types/followUps';
-import { MOCK_LEADS } from '../../../data/mockLeads';
+import { Lead } from '../../../types/leads';
+import { EmployeeSelect } from '../../common/EmployeeSelect';
+import { ConfirmationModal } from '../../common/ConfirmationModal';
+import { LeadSearchSelect } from '../../common/LeadSearchSelect';
+import { getTodayIST_YYYYMMDD } from '../../../utils/dateUtils';
 
 interface CreateTaskModalProps {
   isOpen: boolean;
@@ -16,17 +20,17 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
 }) => {
   const [taskName, setTaskName] = React.useState('');
   const [description, setDescription] = React.useState('');
-  const [leadId, setLeadId] = React.useState(MOCK_LEADS[0]?.id || '');
-  const [assignedTo, setAssignedTo] = React.useState('Kunal Patil');
+  const [selectedLead, setSelectedLead] = React.useState<Lead | null>(null);
+  const [leadId, setLeadId] = React.useState('');
+  const [assignedTo, setAssignedTo] = React.useState('');
   const [priority, setPriority] = React.useState<TaskPriority>('MEDIUM');
-  const [dueDate, setDueDate] = React.useState('2026-09-08');
+  const [dueDate, setDueDate] = React.useState(() => getTodayIST_YYYYMMDD());
   const [dueTime, setDueTime] = React.useState('05:00 PM');
   const [notes, setNotes] = React.useState('');
   const [error, setError] = React.useState('');
+  const [showConfirmModal, setShowConfirmModal] = React.useState(false);
 
   if (!isOpen) return null;
-
-  const selectedLead = MOCK_LEADS.find((l) => l.id === leadId);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,6 +43,11 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
       return;
     }
 
+    setError('');
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmSave = () => {
     onSubmit({
       taskName,
       description,
@@ -46,7 +55,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
       leadCode: selectedLead?.leadCode,
       companyName: selectedLead?.company.name,
       assignedTo,
-      assignedAvatar: assignedTo.split(' ').map((n) => n[0]).join('').toUpperCase(),
+      assignedAvatar: assignedTo ? assignedTo.split(' ').map((n) => n[0]).join('').toUpperCase() : 'TK',
       priority,
       dueDate,
       dueTime,
@@ -54,6 +63,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
       notes,
     });
 
+    setShowConfirmModal(false);
     onClose();
   };
 
@@ -128,21 +138,17 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
 
             {/* Related Lead Selection */}
             <div>
-              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                Related Lead / Account (Optional)
-              </label>
-              <select
+              <LeadSearchSelect
+                label="Related Lead / Account (Optional)"
                 value={leadId}
-                onChange={(e) => setLeadId(e.target.value)}
-                className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40 cursor-pointer"
-              >
-                <option value="">None (General Internal Task)</option>
-                {MOCK_LEADS.map((l) => (
-                  <option key={l.id} value={l.id}>
-                    {l.company.name} ({l.leadCode})
-                  </option>
-                ))}
-              </select>
+                onChange={(newId, leadObj) => {
+                  setLeadId(newId);
+                  setSelectedLead(leadObj);
+                }}
+                placeholder="Search & link lead (Optional, 10K+ leads supported)..."
+                allowClear={true}
+                showMetaPreview={false}
+              />
             </div>
 
             {/* Due Date & Time */}
@@ -180,17 +186,12 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
                 <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Assigned Employee *
                 </label>
-                <select
+                <EmployeeSelect
                   value={assignedTo}
                   onChange={(e) => setAssignedTo(e.target.value)}
+                  placeholder="Select Employee / Unassigned"
                   className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40 cursor-pointer"
-                >
-                  <option value="Kunal Patil">Kunal Patil (Sales Manager)</option>
-                  <option value="Shruti Raundal">Shruti Raundal (Sales Executive)</option>
-                  <option value="Pranav Jejurkar">Pranav Jejurkar (Business Analyst)</option>
-                  <option value="Ankush Pandit">Ankush Pandit (Tech Lead)</option>
-                  <option value="Rohan Patil">Rohan Patil (Sales Executive)</option>
-                </select>
+                />
               </div>
 
               <div>
@@ -229,6 +230,26 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
           </div>
         </form>
       </div>
+
+      {/* Confirmation Modal Before Saving Task */}
+      <ConfirmationModal
+        isOpen={showConfirmModal}
+        title="Confirm Task Creation"
+        message={`Are you sure you want to create the task "${taskName}"?`}
+        confirmLabel="Confirm & Create"
+        cancelLabel="Review Details"
+        variant="primary"
+        iconType="save"
+        itemDetails={[
+          { label: 'Task Name', value: taskName },
+          { label: 'Related Lead', value: selectedLead?.company.name || 'Internal Team' },
+          { label: 'Assigned To', value: assignedTo || 'Unassigned' },
+          { label: 'Priority', value: priority },
+          { label: 'Due Date', value: `${dueDate} (${dueTime})` },
+        ]}
+        onConfirm={handleConfirmSave}
+        onCancel={() => setShowConfirmModal(false)}
+      />
     </div>
   );
 };

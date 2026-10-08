@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { EmployeePerformanceRecord } from '../../types/reports';
-import { formatLakhsINR, formatCurrencyINR } from '../../data/mockReports';
+import { formatLakhsINR, formatCurrencyINR } from '../../utils/currencyFormatters';
 import { EmployeeActivityChart } from './EmployeeActivityChart';
 import { ConversionFunnel } from './ConversionFunnel';
 

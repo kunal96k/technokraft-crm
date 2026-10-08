@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Sliders, User, Tag, Calendar, Clock, DollarSign } from 'lucide-react';
 import { CrmPreferencesData } from '../../../types/settings';
-import { INITIAL_EMPLOYEES } from '../../../data/mockEmployees';
+import { Employee } from '../../../types/employees';
+import * as employeeService from '../../../services/employeeService';
 
 interface CRMSettingsProps {
   data: CrmPreferencesData;
@@ -9,6 +10,15 @@ interface CRMSettingsProps {
 }
 
 export const CRMSettings: React.FC<CRMSettingsProps> = ({ data, onChange }) => {
+  const [employees, setEmployees] = useState<Employee[]>([]);
+
+  useEffect(() => {
+    employeeService.fetchEmployees({ size: 100 }).then((res) => {
+      setEmployees(res.content || []);
+    }).catch((err) => {
+      console.error('[CRMSettings] Failed to fetch employees:', err);
+    });
+  }, []);
   return (
     <div className="space-y-6">
       <div>
@@ -55,11 +65,15 @@ export const CRMSettings: React.FC<CRMSettingsProps> = ({ data, onChange }) => {
               onChange={(e) => onChange({ ...data, defaultLeadOwner: e.target.value })}
               className="w-full pl-8 pr-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20"
             >
-              {INITIAL_EMPLOYEES.map((emp) => (
-                <option key={emp.id} value={emp.name}>
-                  {emp.name} ({emp.role})
-                </option>
-              ))}
+              {employees.length === 0 ? (
+                <option value="">No employees found</option>
+              ) : (
+                employees.map((emp) => (
+                  <option key={emp.id} value={emp.name}>
+                    {emp.name} ({emp.role})
+                  </option>
+                ))
+              )}
             </select>
             <User className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
           </div>

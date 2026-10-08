@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Search, Filter, Plus, FileText, X, RotateCcw, SlidersHorizontal } from 'lucide-react';
 import { EmailCategoryTab } from '../../types/communication';
+import { EmployeeSelect } from '../common/EmployeeSelect';
 
 interface EmailToolbarProps {
   searchQuery: string;
@@ -78,15 +79,12 @@ export const EmailToolbar: React.FC<EmailToolbarProps> = ({
 
           {/* Employee filter (Desktop/Tablet) */}
           <div className="hidden lg:block">
-            <select
+            <EmployeeSelect
               value={employeeFilter}
               onChange={(e) => onEmployeeFilterChange(e.target.value)}
-              className="text-xs font-medium px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40 shadow-2xs cursor-pointer"
-            >
-              <option value="">All Senders</option>
-              <option value="Kunal Patil">Kunal Patil</option>
-              <option value="Ankush Pandit">Ankush Pandit</option>
-            </select>
+              placeholder="All Senders / Employees"
+              className="text-xs font-medium px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40 shadow-2xs cursor-pointer max-w-[200px]"
+            />
           </div>
 
           {/* Reset Filters */}
@@ -185,15 +183,12 @@ export const EmailToolbar: React.FC<EmailToolbarProps> = ({
                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                   Sender / Employee
                 </label>
-                <select
+                <EmployeeSelect
                   value={employeeFilter}
                   onChange={(e) => onEmployeeFilterChange(e.target.value)}
+                  placeholder="All Senders / Employees"
                   className="w-full text-xs px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-200"
-                >
-                  <option value="">All Senders</option>
-                  <option value="Kunal Patil">Kunal Patil</option>
-                  <option value="Ankush Pandit">Ankush Pandit</option>
-                </select>
+                />
               </div>
             </div>
 

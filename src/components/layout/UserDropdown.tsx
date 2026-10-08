@@ -13,6 +13,8 @@ import {
 } from 'lucide-react';
 import { UserProfile, UserRole } from '../../types/navigation';
 import { useTheme, ThemeMode } from '../../context/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 interface UserDropdownProps {
   user: UserProfile;
@@ -35,6 +37,14 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({ user, onRoleChange }
   const [showRoleSelector, setShowRoleSelector] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { theme, setTheme } = useTheme();
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    setIsOpen(false);
+    await logout();
+    navigate('/login', { replace: true });
+  };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -204,7 +214,7 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({ user, onRoleChange }
           <div className="border-t border-slate-100 dark:border-slate-700/60 pt-1">
             <button
               type="button"
-              onClick={() => setIsOpen(false)}
+              onClick={handleSignOut}
               className="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors text-left cursor-pointer"
             >
               <LogOut className="w-4 h-4 text-rose-500" />

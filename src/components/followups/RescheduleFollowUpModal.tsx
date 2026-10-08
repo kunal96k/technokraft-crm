@@ -1,6 +1,7 @@
 import React from 'react';
 import { X, RotateCcw, AlertCircle, Calendar, Clock } from 'lucide-react';
 import { FollowUpRecord } from '../../types/followUps';
+import { getTomorrowIST_YYYYMMDD, formatISTTime } from '../../utils/dateUtils';
 
 interface RescheduleFollowUpModalProps {
   isOpen: boolean;
@@ -20,11 +21,26 @@ export const RescheduleFollowUpModal: React.FC<RescheduleFollowUpModalProps> = (
   onClose,
   onReschedule,
 }) => {
-  const [newDate, setNewDate] = React.useState('2026-09-09');
+  const [newDate, setNewDate] = React.useState('');
   const [newTime, setNewTime] = React.useState('11:00 AM');
   const [reason, setReason] = React.useState('Customer requested later date/time');
   const [customReason, setCustomReason] = React.useState('');
   const [error, setError] = React.useState('');
+
+  React.useEffect(() => {
+    if (followUp) {
+      // Default to follow-up's date or tomorrow
+      if (followUp.date && /^\d{4}-\d{2}-\d{2}/.test(followUp.date)) {
+        setNewDate(followUp.date);
+      } else {
+        setNewDate(getTomorrowIST_YYYYMMDD());
+      }
+      setNewTime(formatISTTime(followUp.time) || '11:00 AM');
+      setReason('Customer requested later date/time');
+      setCustomReason('');
+      setError('');
+    }
+  }, [followUp, isOpen]);
 
   if (!isOpen || !followUp) return null;
 

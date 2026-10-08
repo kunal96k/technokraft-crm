@@ -102,7 +102,7 @@ export interface Lead {
   status: LeadStatus;
   priority: LeadPriority;
   score: number; // 0 - 100
-  assignedEmployee: {
+  assignedEmployee?: {
     name: string;
     avatar: string;
     role: string;
@@ -112,23 +112,35 @@ export interface Lead {
     name: string;
     role: string;
   };
-  createdBy: {
+  createdBy?: {
     name: string;
+    email?: string;
+    role?: string;
     date: string;
+    timestamp?: string;
   };
+  updatedBy?: {
+    name: string;
+    email?: string;
+    role?: string;
+    date: string;
+    timestamp?: string;
+  };
+  createdAt?: string;
+  updatedAt?: string;
   nextFollowUp?: {
     date: string;
     time: string;
     isOverdue?: boolean;
     displayString: string;
   };
-  lastActivity: {
+  lastActivity?: {
     date: string;
     summary: string;
   };
-  requirement: BusinessRequirement;
-  activities: LeadActivity[];
-  followUps: FollowUpSchedule[];
+  requirement?: BusinessRequirement;
+  activities?: LeadActivity[];
+  followUps?: FollowUpSchedule[];
   attachments?: {
     id: string;
     name: string;
@@ -147,3 +159,24 @@ export interface LeadFilterState {
   priority: string;
   dateRange: string;
 }
+
+export interface LeadSummaryData {
+  totalLeads: number;
+  newLeads: number;
+  contactedLeads?: number;
+  interestedLeads?: number;
+  qualifiedLeads: number;
+  hotLeads?: number;
+  proposalCount?: number;
+  proposalLeads?: number;
+  negotiationCount?: number;
+  negotiationLeads?: number;
+  wonCount?: number;
+  wonLeads?: number;
+  lostCount?: number;
+  lostLeads?: number;
+  conversionRate?: number;
+  pipelineValue?: number;
+  activeFollowUps?: number;
+}
+

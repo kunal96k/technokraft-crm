@@ -5,7 +5,11 @@ import {
   MeetingType,
   MeetingLocation,
 } from '../../../types/followUps';
-import { MOCK_LEADS } from '../../../data/mockLeads';
+import { Lead } from '../../../types/leads';
+import { EmployeeSelect } from '../../common/EmployeeSelect';
+import { ConfirmationModal } from '../../common/ConfirmationModal';
+import { LeadSearchSelect } from '../../common/LeadSearchSelect';
+import { getTodayIST_YYYYMMDD } from '../../../utils/dateUtils';
 
 interface CreateMeetingModalProps {
   isOpen: boolean;
@@ -20,26 +24,26 @@ export const CreateMeetingModal: React.FC<CreateMeetingModalProps> = ({
   onSubmit,
   preselectedLeadId,
 }) => {
-  const [leadId, setLeadId] = React.useState(preselectedLeadId || MOCK_LEADS[0]?.id || '');
+  const [selectedLead, setSelectedLead] = React.useState<Lead | null>(null);
+  const [leadId, setLeadId] = React.useState(preselectedLeadId || '');
   const [title, setTitle] = React.useState('');
   const [meetingType, setMeetingType] = React.useState<MeetingType>('Discovery Call');
-  const [date, setDate] = React.useState('2026-09-08');
+  const [date, setDate] = React.useState(() => getTodayIST_YYYYMMDD());
   const [startTime, setStartTime] = React.useState('11:00 AM');
   const [endTime, setEndTime] = React.useState('12:00 PM');
-  const [assignedEmployee, setAssignedEmployee] = React.useState('Kunal Patil');
+  const [assignedEmployee, setAssignedEmployee] = React.useState('');
   const [location, setLocation] = React.useState<MeetingLocation>('Online');
   const [meetingLink, setMeetingLink] = React.useState('https://meet.google.com/tk-client-sync');
   const [description, setDescription] = React.useState('');
   const [notes, setNotes] = React.useState('');
   const [error, setError] = React.useState('');
+  const [showConfirmModal, setShowConfirmModal] = React.useState(false);
 
   React.useEffect(() => {
     if (preselectedLeadId) setLeadId(preselectedLeadId);
   }, [preselectedLeadId]);
 
   if (!isOpen) return null;
-
-  const selectedLead = MOCK_LEADS.find((l) => l.id === leadId);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,6 +55,13 @@ export const CreateMeetingModal: React.FC<CreateMeetingModalProps> = ({
       setError('Please select a lead.');
       return;
     }
+
+    setError('');
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmSave = () => {
+    if (!selectedLead) return;
 
     onSubmit({
       leadId: selectedLead.id,
@@ -66,7 +77,7 @@ export const CreateMeetingModal: React.FC<CreateMeetingModalProps> = ({
       startTime,
       endTime,
       assignedEmployee,
-      assignedAvatar: assignedEmployee.split(' ').map((n) => n[0]).join('').toUpperCase(),
+      assignedAvatar: assignedEmployee ? assignedEmployee.split(' ').map((n) => n[0]).join('').toUpperCase() : 'ME',
       location,
       meetingLink: location === 'Online' ? meetingLink : undefined,
       description,
@@ -74,6 +85,7 @@ export const CreateMeetingModal: React.FC<CreateMeetingModalProps> = ({
       status: 'Scheduled',
     });
 
+    setShowConfirmModal(false);
     onClose();
   };
 
@@ -119,21 +131,17 @@ export const CreateMeetingModal: React.FC<CreateMeetingModalProps> = ({
 
           {/* Lead Selection */}
           <div>
-            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
-              Select Client / Lead *
-            </label>
-            <select
-              value={leadId}
-              onChange={(e) => setLeadId(e.target.value)}
-              className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
+            <LeadSearchSelect
+              label="Select Client / Lead"
               required
-            >
-              {MOCK_LEADS.map((l) => (
-                <option key={l.id} value={l.id}>
-                  {l.company.name} ({l.leadCode}) — {l.contact.name}
-                </option>
-              ))}
-            </select>
+              value={leadId}
+              onChange={(newId, leadObj) => {
+                setLeadId(newId);
+                setSelectedLead(leadObj);
+              }}
+              placeholder="Search by company, contact, phone, email, or lead code (10K+ leads)..."
+              showMetaPreview={true}
+            />
           </div>
 
           {/* Meeting Title */}
@@ -255,17 +263,12 @@ export const CreateMeetingModal: React.FC<CreateMeetingModalProps> = ({
             <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
               Host / Assigned Employee *
             </label>
-            <select
+            <EmployeeSelect
               value={assignedEmployee}
               onChange={(e) => setAssignedEmployee(e.target.value)}
+              placeholder="Select Host / Assigned Employee"
               className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
-            >
-              <option value="Kunal Patil">Kunal Patil (Sales Manager)</option>
-              <option value="Shruti Raundal">Shruti Raundal (Sales Executive)</option>
-              <option value="Pranav Jejurkar">Pranav Jejurkar (Business Analyst)</option>
-              <option value="Ankush Pandit">Ankush Pandit (Tech Lead)</option>
-              <option value="Rohan Patil">Rohan Patil (Sales Executive)</option>
-            </select>
+            />
           </div>
 
           {/* Agenda / Description */}
@@ -301,6 +304,28 @@ export const CreateMeetingModal: React.FC<CreateMeetingModalProps> = ({
           </div>
         </form>
       </div>
+
+      {/* Confirmation Modal Before Saving / Scheduling */}
+      <ConfirmationModal
+        isOpen={showConfirmModal}
+        title="Confirm & Schedule Meeting"
+        message={`Are you sure you want to schedule this ${meetingType} with ${selectedLead?.company.name}?`}
+        confirmLabel="Confirm & Schedule"
+        cancelLabel="Review Details"
+        variant="primary"
+        iconType="save"
+        itemDetails={[
+          { label: 'Client / Company', value: selectedLead?.company.name },
+          { label: 'Contact Person', value: selectedLead?.contact.name },
+          { label: 'Meeting Title', value: title },
+          { label: 'Meeting Type', value: meetingType },
+          { label: 'Date & Time', value: `${date} (${startTime} - ${endTime})` },
+          { label: 'Location / Format', value: location },
+          { label: 'Assigned Host', value: assignedEmployee || 'Unassigned' },
+        ]}
+        onConfirm={handleConfirmSave}
+        onCancel={() => setShowConfirmModal(false)}
+      />
     </div>
   );
 };

@@ -1,7 +1,7 @@
 import React from 'react';
 import { ChevronRight, Phone, Mail, Award, TrendingUp } from 'lucide-react';
 import { EmployeePerformanceRecord } from '../../types/reports';
-import { formatLakhsINR } from '../../data/mockReports';
+import { formatLakhsINR } from '../../utils/currencyFormatters';
 
 interface EmployeePerformanceCardProps {
   employee: EmployeePerformanceRecord;

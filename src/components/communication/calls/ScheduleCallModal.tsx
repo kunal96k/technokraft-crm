@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { CallRecord } from '../../../types/calls';
-import { MOCK_LEADS } from '../../../data/mockLeads';
 import { Lead } from '../../../types/leads';
+import { EmployeeSelect } from '../../common/EmployeeSelect';
+import { LeadSearchSelect } from '../../common/LeadSearchSelect';
 import {
   X,
   Search,
@@ -28,15 +29,12 @@ export const ScheduleCallModal: React.FC<ScheduleCallModalProps> = ({
   onScheduleCall,
   initialLead,
 }) => {
-  const [leadSearch, setLeadSearch] = useState('');
-  const [isLeadDropdownOpen, setIsLeadDropdownOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(initialLead || null);
-
-  const [contactName, setContactName] = useState('');
-  const [contactPhone, setContactPhone] = useState('');
+  const [contactName, setContactName] = useState(initialLead?.contact?.name || '');
+  const [contactPhone, setContactPhone] = useState(initialLead?.contact?.phone || '');
   const [date, setDate] = useState('2026-09-09');
   const [time, setTime] = useState('11:00 AM');
-  const [assignedEmployee, setAssignedEmployee] = useState('Kunal Patil');
+  const [assignedEmployee, setAssignedEmployee] = useState(initialLead?.assignedEmployee?.name || '');
   const [purpose, setPurpose] = useState('Discuss proposal');
   const [reminder, setReminder] = useState('15 minutes before');
   const [notes, setNotes] = useState('');
@@ -45,28 +43,24 @@ export const ScheduleCallModal: React.FC<ScheduleCallModalProps> = ({
   useEffect(() => {
     if (initialLead) {
       applyLead(initialLead);
-    } else if (!selectedLead && MOCK_LEADS.length > 0) {
-      applyLead(MOCK_LEADS[0]);
     }
   }, [initialLead]);
 
-  const applyLead = (lead: Lead) => {
+  const applyLead = (lead: Lead | null) => {
     setSelectedLead(lead);
-    setContactName(lead.contact.name);
-    setContactPhone(lead.contact.phone);
-    setAssignedEmployee(lead.assignedEmployee.name);
-    setIsLeadDropdownOpen(false);
-    setLeadSearch('');
+    if (lead) {
+      setContactName(lead.contact?.name || '');
+      setContactPhone(lead.contact?.phone || '');
+      if (lead.assignedEmployee?.name) {
+        setAssignedEmployee(lead.assignedEmployee.name);
+      }
+    } else {
+      setContactName('');
+      setContactPhone('');
+    }
   };
 
   if (!isOpen) return null;
-
-  const filteredLeads = MOCK_LEADS.filter(
-    (l) =>
-      l.company.name.toLowerCase().includes(leadSearch.toLowerCase()) ||
-      l.leadCode.toLowerCase().includes(leadSearch.toLowerCase()) ||
-      l.contact.name.toLowerCase().includes(leadSearch.toLowerCase())
-  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -151,7 +145,7 @@ export const ScheduleCallModal: React.FC<ScheduleCallModalProps> = ({
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 space-y-4 text-xs">
+        <form id="schedule-call-form" onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 space-y-4 text-xs">
           {errorMessage && (
             <div className="p-3 bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800 rounded-lg font-medium text-xs">
               {errorMessage}
@@ -160,61 +154,15 @@ export const ScheduleCallModal: React.FC<ScheduleCallModalProps> = ({
 
           {/* Lead Selector */}
           <div>
-            <label className="block font-bold text-slate-900 dark:text-white mb-1">
-              Select Lead <span className="text-rose-500">*</span>
-            </label>
-            <div className="relative">
-              <div
-                onClick={() => setIsLeadDropdownOpen(!isLeadDropdownOpen)}
-                className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 flex items-center justify-between cursor-pointer hover:border-slate-400 dark:hover:border-slate-600 min-h-[44px]"
-              >
-                {selectedLead ? (
-                  <div className="flex items-center gap-2">
-                    <Building2 className="w-4 h-4 text-[#5B4DB7] dark:text-purple-400" />
-                    <span className="font-bold text-slate-900 dark:text-white">{selectedLead.company.name}</span>
-                    <span className="font-mono text-[11px] text-slate-500 dark:text-slate-400">
-                      ({selectedLead.leadCode})
-                    </span>
-                  </div>
-                ) : (
-                  <span className="text-slate-400 dark:text-slate-500">Choose lead...</span>
-                )}
-                <ChevronDown className="w-4 h-4 text-slate-400 dark:text-slate-500" />
-              </div>
-
-              {isLeadDropdownOpen && (
-                <div className="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl z-20 max-h-56 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-700">
-                  <div className="p-2 sticky top-0 bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700">
-                    <div className="relative">
-                      <Search className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 absolute left-2.5 top-1/2 -translate-y-1/2" />
-                      <input
-                        type="text"
-                        value={leadSearch}
-                        onChange={(e) => setLeadSearch(e.target.value)}
-                        placeholder="Search leads..."
-                        className="w-full pl-8 pr-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
-                        autoFocus
-                      />
-                    </div>
-                  </div>
-                  {filteredLeads.map((lead) => (
-                    <div
-                      key={lead.id}
-                      onClick={() => applyLead(lead)}
-                      className="p-2.5 hover:bg-purple-50/50 dark:hover:bg-slate-700/50 cursor-pointer flex items-center justify-between text-xs"
-                    >
-                      <div>
-                        <p className="font-bold text-slate-900 dark:text-white">{lead.company.name}</p>
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                          {lead.contact.name} • {lead.contact.designation}
-                        </p>
-                      </div>
-                      <span className="font-mono text-[10px] text-slate-400 dark:text-slate-500">{lead.leadCode}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            <LeadSearchSelect
+              label="Select Client / Lead"
+              required
+              value={selectedLead ? selectedLead.id : ''}
+              initialLead={selectedLead}
+              onChange={(newId, leadObj) => applyLead(leadObj)}
+              placeholder="Search by company, contact, phone, email, or lead code (10K+ leads)..."
+              showMetaPreview={true}
+            />
           </div>
 
           {/* Contact Person & Phone */}
@@ -273,17 +221,12 @@ export const ScheduleCallModal: React.FC<ScheduleCallModalProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Assigned Employee</label>
-              <select
+              <EmployeeSelect
                 value={assignedEmployee}
                 onChange={(e) => setAssignedEmployee(e.target.value)}
+                placeholder="Select Assigned Employee"
                 className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-medium text-slate-900 dark:text-slate-100 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
-              >
-                <option value="Kunal Patil">Kunal Patil (Sales Manager)</option>
-                <option value="Shruti Raundal">Shruti Raundal (Senior Sales Executive)</option>
-                <option value="Pranav Jejurkar">Pranav Jejurkar (Business Analyst)</option>
-                <option value="Ankush Pandit">Ankush Pandit (Sales Executive)</option>
-                <option value="Rohan Patil">Rohan Patil (Enterprise BDM)</option>
-              </select>
+              />
             </div>
 
             <div>
@@ -327,25 +270,26 @@ export const ScheduleCallModal: React.FC<ScheduleCallModalProps> = ({
               className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
             />
           </div>
-
-          {/* Actions */}
-          <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2.5">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-5 py-2.5 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl text-slate-700 dark:text-slate-200 font-semibold hover:bg-slate-100 dark:hover:bg-slate-700 min-h-[44px] flex items-center justify-center cursor-pointer order-2 sm:order-1 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-6 py-2.5 bg-[#5B4DB7] hover:bg-[#4E41A2] text-white rounded-xl font-semibold shadow-md min-h-[44px] flex items-center justify-center gap-2 cursor-pointer order-1 sm:order-2 transition-colors"
-            >
-              <CheckCircle2 className="w-4 h-4" />
-              <span>Schedule Call</span>
-            </button>
-          </div>
         </form>
+
+        {/* Fixed Pinned Bottom Actions */}
+        <div className="p-4 sm:px-6 sm:py-3.5 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end gap-2.5 shrink-0 bg-slate-50/90 dark:bg-slate-900/95 backdrop-blur-xs">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-5 py-2.5 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl text-slate-700 dark:text-slate-200 text-xs font-semibold hover:bg-slate-100 dark:hover:bg-slate-700 min-h-[42px] flex items-center justify-center cursor-pointer transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            form="schedule-call-form"
+            className="px-6 py-2.5 bg-[#5B4DB7] hover:bg-[#4E41A2] text-white text-xs rounded-xl font-semibold shadow-md min-h-[42px] flex items-center justify-center gap-2 cursor-pointer transition-colors"
+          >
+            <CheckCircle2 className="w-4 h-4" />
+            <span>Schedule Call</span>
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { X, User, Mail, Shield, Building, UserCheck, Send } from 'lucide-react';
 import { CrmUser, UserRoleType, DepartmentType, UserStatus } from '../../../types/settings';
-import { INITIAL_EMPLOYEES } from '../../../data/mockEmployees';
+import { Employee } from '../../../types/employees';
+import * as employeeService from '../../../services/employeeService';
+import { EmployeeSelect } from '../../common/EmployeeSelect';
 
 interface UserFormModalProps {
   isOpen: boolean;
@@ -43,13 +45,24 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<UserRoleType>('Sales Executive');
   const [department, setDepartment] = useState<DepartmentType>('Sales');
-  const [reportingManager, setReportingManager] = useState('Rajesh Mehta');
+  const [reportingManager, setReportingManager] = useState('');
   const [status, setStatus] = useState<UserStatus>('Active');
   const [crmAccess, setCrmAccess] = useState(true);
   const [sendInvitation, setSendInvitation] = useState(true);
+  const [availableEmployees, setAvailableEmployees] = useState<Employee[]>([]);
 
   // Errors
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (isOpen) {
+      employeeService.fetchEmployees({ size: 100 }).then((res) => {
+        setAvailableEmployees(res.content || []);
+      }).catch((err) => {
+        console.error('[UserFormModal] Failed to fetch employees:', err);
+      });
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (initialUser) {
@@ -58,7 +71,7 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
       setEmail(initialUser.email);
       setRole(initialUser.role);
       setDepartment(initialUser.department);
-      setReportingManager(initialUser.reportingManager || 'Rajesh Mehta');
+      setReportingManager(initialUser.reportingManager || '');
       setStatus(initialUser.status);
       setCrmAccess(initialUser.crmAccess);
       setSendInvitation(false);
@@ -68,7 +81,7 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
       setEmail('');
       setRole('Sales Executive');
       setDepartment('Sales');
-      setReportingManager('Rajesh Mehta');
+      setReportingManager('');
       setStatus('Active');
       setCrmAccess(true);
       setSendInvitation(true);
@@ -79,13 +92,13 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
   // Handle employee dropdown select
   const handleSelectEmployee = (empCode: string) => {
     setEmployeeId(empCode);
-    const emp = INITIAL_EMPLOYEES.find((e) => e.employeeCode === empCode);
+    const emp = availableEmployees.find((e) => e.employeeCode === empCode);
     if (emp) {
       setName(emp.name);
       setEmail(emp.email);
-      setDepartment(emp.department);
-      setRole(emp.role);
-      setReportingManager(emp.reportingManager);
+      setDepartment(emp.department as DepartmentType);
+      setRole(emp.role as UserRoleType);
+      setReportingManager(emp.reportingManager || '');
     }
   };
 
@@ -133,10 +146,10 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto animate-in fade-in duration-150">
-      <div className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 my-8 overflow-hidden animate-in zoom-in-95 duration-150">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto animate-in fade-in duration-150">
+      <div className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 my-auto max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-150">
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+        <div className="shrink-0 flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40">
           <div>
             <h3 className="text-base font-bold text-slate-900 dark:text-white">
               {initialUser ? 'Edit CRM User' : 'Add New CRM User'}
@@ -155,7 +168,7 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form id="crm-user-form" onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
           {/* Quick Select from Employee Directory */}
           {!initialUser && (
             <div>
@@ -167,7 +180,7 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                 className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
               >
                 <option value="">— Or enter custom employee details below —</option>
-                {INITIAL_EMPLOYEES.map((emp) => (
+                {availableEmployees.map((emp) => (
                   <option key={emp.id} value={emp.employeeCode}>
                     {emp.name} ({emp.employeeCode}) — {emp.role}
                   </option>
@@ -190,29 +203,28 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                     setName(e.target.value);
                     if (errors.name) setErrors((prev) => ({ ...prev, name: '' }));
                   }}
-                  placeholder="e.g. Kunal Patil"
-                  className={`w-full px-3 py-2 text-xs rounded-lg border bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 ${
+                  placeholder="Enter full name (e.g. Kunal Patil)"
+                  className={`w-full pl-8 pr-3 py-2 text-xs rounded-lg border ${
                     errors.name
-                      ? 'border-rose-300 focus:ring-rose-500/20'
-                      : 'border-slate-200 dark:border-slate-700 focus:ring-purple-500/20'
-                  }`}
+                      ? 'border-rose-400 dark:border-rose-500'
+                      : 'border-slate-200 dark:border-slate-700'
+                  } bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20`}
                 />
+                <User className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
               </div>
-              {errors.name && (
-                <p className="text-[11px] text-rose-500 mt-1">{errors.name}</p>
-              )}
+              {errors.name && <p className="text-[11px] text-rose-500 mt-1">{errors.name}</p>}
             </div>
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                Employee ID <span className="text-rose-500">*</span>
+                Employee Code / ID
               </label>
               <input
                 type="text"
                 value={employeeId}
                 onChange={(e) => setEmployeeId(e.target.value)}
-                placeholder="e.g. EMP-0012"
-                className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-mono focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+                placeholder="Enter employee code (e.g. EMP-0025)"
+                className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 font-mono"
               />
             </div>
           </div>
@@ -220,7 +232,7 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
           {/* Email */}
           <div>
             <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-              Company Email <span className="text-rose-500">*</span>
+              Work Email Address <span className="text-rose-500">*</span>
             </label>
             <div className="relative">
               <input
@@ -230,54 +242,58 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                   setEmail(e.target.value);
                   if (errors.email) setErrors((prev) => ({ ...prev, email: '' }));
                 }}
-                placeholder="e.g. kunal.patil@technokraftservices.com"
-                className={`w-full pl-8 pr-3 py-2 text-xs rounded-lg border bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 ${
+                placeholder="Enter company email (e.g. kunal.p@technokraft.in)"
+                className={`w-full pl-8 pr-3 py-2 text-xs rounded-lg border ${
                   errors.email
-                    ? 'border-rose-300 focus:ring-rose-500/20'
-                    : 'border-slate-200 dark:border-slate-700 focus:ring-purple-500/20'
-                }`}
+                    ? 'border-rose-400 dark:border-rose-500'
+                    : 'border-slate-200 dark:border-slate-700'
+                } bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20`}
               />
               <Mail className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
             </div>
-            {errors.email && (
-              <p className="text-[11px] text-rose-500 mt-1">{errors.email}</p>
-            )}
+            {errors.email && <p className="text-[11px] text-rose-500 mt-1">{errors.email}</p>}
           </div>
 
           {/* Role & Department */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             <div>
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                Assigned Role <span className="text-rose-500">*</span>
+                CRM Role <span className="text-rose-500">*</span>
               </label>
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value as UserRoleType)}
-                className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20"
-              >
-                {ROLES.map((r) => (
-                  <option key={r} value={r}>
-                    {r}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <select
+                  value={role}
+                  onChange={(e) => setRole(e.target.value as UserRoleType)}
+                  className="w-full pl-8 pr-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 appearance-none"
+                >
+                  {ROLES.map((r) => (
+                    <option key={r} value={r}>
+                      {r}
+                    </option>
+                  ))}
+                </select>
+                <Shield className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+              </div>
             </div>
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Department <span className="text-rose-500">*</span>
               </label>
-              <select
-                value={department}
-                onChange={(e) => setDepartment(e.target.value as DepartmentType)}
-                className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20"
-              >
-                {DEPARTMENTS.map((d) => (
-                  <option key={d} value={d}>
-                    {d}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <select
+                  value={department}
+                  onChange={(e) => setDepartment(e.target.value as DepartmentType)}
+                  className="w-full pl-8 pr-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 appearance-none"
+                >
+                  {DEPARTMENTS.map((d) => (
+                    <option key={d} value={d}>
+                      {d}
+                    </option>
+                  ))}
+                </select>
+                <Building className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+              </div>
             </div>
           </div>
 
@@ -287,11 +303,11 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Reporting Manager
               </label>
-              <input
-                type="text"
+              <EmployeeSelect
                 value={reportingManager}
-                onChange={(e) => setReportingManager(e.target.value)}
-                placeholder="e.g. Rajesh Mehta"
+                onChange={(e: any) => setReportingManager(typeof e === 'string' ? e : e?.target?.value || '')}
+                valueField="name"
+                placeholder="Select Reporting Manager"
                 className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20"
               />
             </div>
@@ -349,31 +365,32 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
               </span>
             </label>
           )}
-
-          {/* Action buttons */}
-          <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-slate-100 dark:border-slate-800">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-xs font-medium rounded-lg border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 text-xs font-medium rounded-lg bg-purple-600 text-white hover:bg-purple-700 shadow-xs transition-colors flex items-center gap-1.5"
-            >
-              {sendInvitation && !initialUser ? (
-                <>
-                  <Send className="w-3.5 h-3.5" />
-                  Create & Send Invitation
-                </>
-              ) : (
-                'Save User'
-              )}
-            </button>
-          </div>
         </form>
+
+        {/* Fixed Pinned Bottom Action Buttons */}
+        <div className="shrink-0 p-4 sm:px-6 sm:py-3.5 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end gap-3 bg-slate-50/90 dark:bg-slate-900/95 backdrop-blur-xs">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            form="crm-user-form"
+            className="px-4 py-2 text-xs font-medium rounded-xl bg-purple-600 text-white hover:bg-purple-700 shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
+          >
+            {sendInvitation && !initialUser ? (
+              <>
+                <Send className="w-3.5 h-3.5" />
+                Create & Send Invitation
+              </>
+            ) : (
+              'Save User'
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );

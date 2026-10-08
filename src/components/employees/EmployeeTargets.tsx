@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Target, TrendingUp, ArrowUpRight, Award, CheckCircle2 } from 'lucide-react';
 import { Employee } from '../../types/employees';
 import { TargetStatusBadge } from './EmployeeStatusBadge';
-import { formatCurrencyINR } from '../../data/mockReports';
+import { formatCurrencyINR } from '../../utils/currencyFormatters';
 
 interface EmployeeTargetsProps {
   employee: Employee;

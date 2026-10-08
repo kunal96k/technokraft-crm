@@ -8,6 +8,14 @@ interface StaleLeadAnalysisProps {
 }
 
 export const StaleLeadAnalysis: React.FC<StaleLeadAnalysisProps> = ({ stats }) => {
+  if (!stats || stats.length === 0) {
+    return (
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-8 text-center text-xs text-slate-400 font-medium">
+        No stale lead records for the selected filter.
+      </div>
+    );
+  }
+
   const totalStale = stats.reduce((acc, s) => acc + s.count, 0);
 
   return (

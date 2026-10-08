@@ -1,7 +1,6 @@
 import React from 'react';
 import { Search, Filter, Calendar, Download, X } from 'lucide-react';
-import { AttendanceFiltersState, Employee } from '../../types/employees';
-import { DEPARTMENTS } from '../../data/mockEmployees';
+import { AttendanceFiltersState, Employee, DEPARTMENTS } from '../../types/employees';
 
 interface AttendanceToolbarProps {
   filters: AttendanceFiltersState;

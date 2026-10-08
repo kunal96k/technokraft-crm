@@ -9,7 +9,7 @@ import {
   TrendingUp,
   Percent,
 } from 'lucide-react';
-import { formatLakhsINR } from '../../data/mockReports';
+import { formatLakhsINR } from '../../utils/currencyFormatters';
 
 interface AnalyticsKpiCardsProps {
   totalLeads?: number;
@@ -23,14 +23,14 @@ interface AnalyticsKpiCardsProps {
 }
 
 export const AnalyticsKpiCards: React.FC<AnalyticsKpiCardsProps> = ({
-  totalLeads = 1284,
-  interested = 320,
-  qualified = 145,
-  opportunities = 72,
-  proposals = 42,
-  won = 18,
-  pipelineValue = 4250000,
-  winRate = 36.0,
+  totalLeads = 0,
+  interested = 0,
+  qualified = 0,
+  opportunities = 0,
+  proposals = 0,
+  won = 0,
+  pipelineValue = 0,
+  winRate = 0,
 }) => {
   const cards = [
     { label: 'Total Leads', value: totalLeads.toLocaleString('en-IN'), icon: Users, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-950/40', subtext: 'Inbound & Outbound' },

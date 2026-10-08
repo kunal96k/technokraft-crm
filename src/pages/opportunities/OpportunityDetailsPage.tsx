@@ -1,30 +1,40 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   ArrowLeft,
   Building2,
   User,
+  Mail,
+  Phone,
   Calendar,
-  IndianRupee,
-  Briefcase,
+  DollarSign,
+  TrendingUp,
   FileText,
-  CalendarClock,
+  Clock,
   CheckCircle2,
   XCircle,
-  Edit2,
   Plus,
-  Clock,
-  Phone,
-  Mail,
-  Layers,
-  Sparkles,
   Download,
   Send,
   Eye,
-  ChevronDown,
-  UserCheck,
+  Loader2,
+  Edit,
+  Trash2,
   AlertCircle,
+  Briefcase,
+  Share2,
+  Pencil,
 } from 'lucide-react';
+import { PageHeader } from '../../components/layout/PageHeader';
+import { OpportunityStageBadge } from '../../components/opportunities/OpportunityStageBadge';
+import { ProposalStatusBadge } from '../../components/opportunities/ProposalStatusBadge';
+import { ProposalDetailsModal } from '../../components/opportunities/ProposalDetailsModal';
+import { SendProposalEmailModal } from '../../components/opportunities/SendProposalEmailModal';
+import { CreateProposalModal } from '../../components/opportunities/CreateProposalModal';
+import { MarkWonModal } from '../../components/opportunities/MarkWonModal';
+import { MarkLostModal } from '../../components/opportunities/MarkLostModal';
+import { AddFollowUpModal } from '../../components/opportunities/AddFollowUpModal';
+import { ConfirmationModal } from '../../components/common/ConfirmationModal';
 import {
   OpportunityRecord,
   OpportunityStage,
@@ -32,24 +42,20 @@ import {
   OpportunityFollowUp,
   LossReason,
 } from '../../types/opportunities';
-import { OpportunityStageBadge } from '../../components/opportunities/OpportunityStageBadge';
-import { OpportunityValue } from '../../components/opportunities/OpportunityValue';
-import { ProbabilityIndicator } from '../../components/opportunities/ProbabilityIndicator';
-import { ProposalStatusBadge } from '../../components/opportunities/ProposalStatusBadge';
-import { OpportunityForm } from '../../components/opportunities/OpportunityForm';
-import { MarkWonModal } from '../../components/opportunities/MarkWonModal';
-import { MarkLostModal } from '../../components/opportunities/MarkLostModal';
-import { AddFollowUpModal } from '../../components/opportunities/AddFollowUpModal';
-import { CreateProposalModal } from '../../components/opportunities/CreateProposalModal';
-import { ProposalDetailsModal } from '../../components/opportunities/ProposalDetailsModal';
 import {
-  getStoredOpportunities,
-  saveStoredOpportunities,
-  getStoredProposals,
-  saveStoredProposals,
-  formatCurrencyINR,
-  formatLakhsINR,
-} from '../../data/mockOpportunities';
+  fetchOpportunityById,
+  updateOpportunityStage,
+  addOpportunityFollowUp,
+  deleteOpportunity as deleteOpportunityApi,
+} from '../../services/opportunityService';
+import {
+  fetchProposalsByOpportunity,
+  createProposal,
+  updateProposal,
+  deleteProposal as deleteProposalApi,
+} from '../../services/proposalService';
+import { generateProposalPDF, printProposalDocument } from '../../utils/proposalPdfGenerator';
+import { formatCurrencyINR } from '../../utils/currencyFormatters';
 
 export const OpportunityDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -57,1031 +63,782 @@ export const OpportunityDetailsPage: React.FC = () => {
 
   const [opportunity, setOpportunity] = useState<OpportunityRecord | null>(null);
   const [proposals, setProposals] = useState<ProposalRecord[]>([]);
-  const [activeTab, setActiveTab] = useState<
-    'overview' | 'requirements' | 'proposals' | 'followups' | 'activities'
-  >('overview');
-
-  // Move stage dropdown
-  const [showStageDropdown, setShowStageDropdown] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'overview' | 'proposals' | 'activities' | 'followups'>('overview');
 
   // Modals
-  const [isEditOpen, setIsEditOpen] = useState(false);
   const [isWonOpen, setIsWonOpen] = useState(false);
   const [isLostOpen, setIsLostOpen] = useState(false);
   const [isFollowUpOpen, setIsFollowUpOpen] = useState(false);
-  const [isProposalOpen, setIsProposalOpen] = useState(false);
+  const [isCreatePropOpen, setIsCreatePropOpen] = useState(false);
   const [selectedProposal, setSelectedProposal] = useState<ProposalRecord | null>(null);
+  const [editingProposal, setEditingProposal] = useState<ProposalRecord | null>(null);
+  const [emailProposal, setEmailProposal] = useState<ProposalRecord | null>(null);
+  const [deleteProposalTarget, setDeleteProposalTarget] = useState<ProposalRecord | null>(null);
+  const [isDeleteOppOpen, setIsDeleteOppOpen] = useState(false);
 
   // Toast
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-
   const showToast = (msg: string) => {
     setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3500);
+    setTimeout(() => setToastMessage(null), 4000);
   };
 
-  useEffect(() => {
-    const opps = getStoredOpportunities();
-    const found = opps.find((o) => o.id === id || o.opportunityCode === id);
-    if (found) {
-      setOpportunity(found);
+  const loadData = useCallback(async () => {
+    if (!id) return;
+    setIsLoading(true);
+    try {
+      const opp = await fetchOpportunityById(id);
+      setOpportunity(opp);
+      const propList = await fetchProposalsByOpportunity(opp.id);
+      setProposals(propList);
+    } catch (err) {
+      console.error('Failed to load opportunity details', err);
+      showToast('Could not load opportunity details.');
+    } finally {
+      setIsLoading(false);
     }
-
-    const allProps = getStoredProposals();
-    const linked = allProps.filter(
-      (p) =>
-        p.opportunityId === id ||
-        (found && p.opportunityName.toLowerCase() === found.name.toLowerCase()) ||
-        (found && p.companyName.toLowerCase() === found.companyName.toLowerCase())
-    );
-    setProposals(linked);
   }, [id]);
 
-  if (!opportunity) {
+  useEffect(() => {
+    loadData();
+
+    const handleSync = () => {
+      loadData();
+    };
+
+    window.addEventListener('crm-opportunities-updated', handleSync);
+    window.addEventListener('crm-leads-updated', handleSync);
+    window.addEventListener('crm-proposals-updated', handleSync);
+    window.addEventListener('crm-stage-synced', handleSync);
+
+    return () => {
+      window.removeEventListener('crm-opportunities-updated', handleSync);
+      window.removeEventListener('crm-leads-updated', handleSync);
+      window.removeEventListener('crm-proposals-updated', handleSync);
+      window.removeEventListener('crm-stage-synced', handleSync);
+    };
+  }, [loadData]);
+
+  // Stage change
+  const handleStageChange = async (newStage: OpportunityStage) => {
+    if (!opportunity) return;
+    try {
+      const updated = await updateOpportunityStage(opportunity.id, { stage: newStage });
+      setOpportunity(updated);
+      showToast(`Deal moved to stage "${newStage}"`);
+      window.dispatchEvent(new Event('crm-opportunities-updated'));
+      window.dispatchEvent(new Event('crm-leads-updated'));
+      window.dispatchEvent(new Event('crm-proposals-updated'));
+      window.dispatchEvent(new Event('crm-stage-synced'));
+    } catch (err) {
+      console.error('Failed to update stage', err);
+      showToast('Failed to update stage on server.');
+    }
+  };
+
+  // Confirm Won
+  const handleConfirmWon = async (
+    oppId: string,
+    finalValue: number,
+    closingDate: string,
+    notes: string
+  ) => {
+    try {
+      const updated = await updateOpportunityStage(oppId, {
+        stage: 'Won',
+        finalValue,
+        notes,
+      });
+      setOpportunity(updated);
+      showToast('Deal successfully marked as WON!');
+      window.dispatchEvent(new Event('crm-opportunities-updated'));
+      window.dispatchEvent(new Event('crm-leads-updated'));
+      window.dispatchEvent(new Event('crm-proposals-updated'));
+      window.dispatchEvent(new Event('crm-stage-synced'));
+    } catch (err) {
+      console.error(err);
+      showToast('Failed to mark deal as won.');
+    }
+  };
+
+  // Confirm Lost
+  const handleConfirmLost = async (oppId: string, reason: LossReason, notes: string) => {
+    try {
+      const updated = await updateOpportunityStage(oppId, {
+        stage: 'Lost',
+        lossReason: reason,
+        notes,
+      });
+      setOpportunity(updated);
+      showToast(`Deal marked as Lost (${reason})`);
+      window.dispatchEvent(new Event('crm-opportunities-updated'));
+      window.dispatchEvent(new Event('crm-leads-updated'));
+      window.dispatchEvent(new Event('crm-proposals-updated'));
+      window.dispatchEvent(new Event('crm-stage-synced'));
+    } catch (err) {
+      console.error(err);
+      showToast('Failed to mark deal as lost.');
+    }
+  };
+
+  // Add Follow Up
+  const handleAddFollowUp = async (oppId: string, followUp: OpportunityFollowUp) => {
+    try {
+      const updated = await addOpportunityFollowUp(oppId, followUp);
+      setOpportunity(updated);
+      showToast(`Follow-up scheduled for ${followUp.date}`);
+    } catch (err) {
+      console.error(err);
+      showToast('Failed to save follow-up.');
+    }
+  };
+
+  // Delete Opportunity
+  const handleDeleteOpportunity = async () => {
+    if (!opportunity) return;
+    try {
+      await deleteOpportunityApi(opportunity.id);
+      navigate('/opportunities/pipeline');
+    } catch (err) {
+      console.error(err);
+      showToast('Failed to delete deal.');
+    }
+  };
+
+  // Delete Proposal
+  const handleDeleteProposal = async () => {
+    if (!deleteProposalTarget) return;
+    try {
+      await deleteProposalApi(deleteProposalTarget.id);
+      setProposals((prev) => prev.filter((p) => p.id !== deleteProposalTarget.id));
+      showToast(`Proposal ${deleteProposalTarget.proposalCode} deleted.`);
+    } catch (err) {
+      console.error(err);
+      showToast('Failed to delete proposal.');
+    } finally {
+      setDeleteProposalTarget(null);
+    }
+  };
+
+  if (isLoading) {
     return (
-      <div className="p-12 text-center bg-white rounded-2xl border border-slate-200">
-        <h2 className="text-lg font-bold text-slate-800">Opportunity Not Found</h2>
-        <p className="text-xs text-slate-500 mt-1">
-          The requested opportunity record does not exist or has been removed.
+      <div className="p-20 flex flex-col items-center justify-center text-center">
+        <Loader2 className="w-9 h-9 text-[#5B4DB7] animate-spin mb-3" />
+        <p className="text-xs font-semibold text-slate-600 dark:text-slate-300">
+          Loading opportunity details...
         </p>
-        <button
-          type="button"
-          onClick={() => navigate('/opportunities/pipeline')}
-          className="mt-4 px-4 py-2 bg-[#5B4DB7] text-white rounded-lg text-xs font-semibold cursor-pointer"
-        >
-          Return to Pipeline
-        </button>
       </div>
     );
   }
 
-  const handleUpdateOpportunity = (updated: OpportunityRecord) => {
-    setOpportunity(updated);
-    const opps = getStoredOpportunities();
-    const nextOpps = opps.map((o) => (o.id === updated.id ? updated : o));
-    saveStoredOpportunities(nextOpps);
-  };
-
-  // Move stage
-  const handleMoveStage = (newStage: OpportunityStage) => {
-    setShowStageDropdown(false);
-    const prob =
-      newStage === 'Won'
-        ? 100
-        : newStage === 'Lost'
-        ? 0
-        : newStage === 'Negotiation'
-        ? 85
-        : newStage === 'Proposal'
-        ? 60
-        : newStage === 'Requirement Received'
-        ? 40
-        : 25;
-
-    const newActivity = {
-      id: `act-${Date.now()}`,
-      date: '07 Sep 2026',
-      time: '04:15 PM',
-      employeeName: opportunity.owner.name,
-      type: 'STAGE_CHANGE' as const,
-      title: `Moved from ${opportunity.stage} to ${newStage}`,
-      notes: `Stage updated with recalculated win probability of ${prob}%.`,
-    };
-
-    const updated: OpportunityRecord = {
-      ...opportunity,
-      stage: newStage,
-      probability: prob,
-      activities: [newActivity, ...opportunity.activities],
-      updatedAt: new Date().toISOString(),
-    };
-
-    handleUpdateOpportunity(updated);
-    showToast(`Stage updated to ${newStage}`);
-  };
-
-  // Confirm Won
-  const handleConfirmWon = (
-    oppId: string,
-    finalVal: number,
-    closingDate: string,
-    notes: string
-  ) => {
-    const updated: OpportunityRecord = {
-      ...opportunity,
-      stage: 'Won',
-      probability: 100,
-      estimatedValue: finalVal,
-      wonDate: closingDate,
-      wonNotes: notes,
-      activities: [
-        {
-          id: `act-${Date.now()}`,
-          date: closingDate,
-          time: '05:00 PM',
-          employeeName: opportunity.owner.name,
-          type: 'WON',
-          title: `Deal Closed & Won! Final Value: ₹${finalVal.toLocaleString('en-IN')}`,
-          notes,
-        },
-        ...opportunity.activities,
-      ],
-      updatedAt: new Date().toISOString(),
-    };
-
-    handleUpdateOpportunity(updated);
-    showToast(`Opportunity marked as WON!`);
-  };
-
-  // Confirm Lost
-  const handleConfirmLost = (oppId: string, reason: LossReason, notes: string) => {
-    const updated: OpportunityRecord = {
-      ...opportunity,
-      stage: 'Lost',
-      probability: 0,
-      lossReason: reason,
-      lossNotes: notes,
-      activities: [
-        {
-          id: `act-${Date.now()}`,
-          date: '07 Sep 2026',
-          time: '05:30 PM',
-          employeeName: opportunity.owner.name,
-          type: 'LOST',
-          title: `Opportunity Closed as Lost (${reason})`,
-          notes: notes || 'No comments provided.',
-        },
-        ...opportunity.activities,
-      ],
-      updatedAt: new Date().toISOString(),
-    };
-
-    handleUpdateOpportunity(updated);
-    showToast(`Opportunity archived as Lost (${reason})`);
-  };
-
-  // Add Follow Up
-  const handleAddFollowUp = (oppId: string, fu: OpportunityFollowUp) => {
-    const updated: OpportunityRecord = {
-      ...opportunity,
-      followUps: [fu, ...opportunity.followUps],
-      activities: [
-        {
-          id: `act-${Date.now()}`,
-          date: '07 Sep 2026',
-          time: '04:00 PM',
-          employeeName: fu.assignedTo,
-          type: 'FOLLOW_UP',
-          title: `Follow-up Scheduled: ${fu.type} on ${fu.date} at ${fu.time}`,
-          notes: fu.notes,
-        },
-        ...opportunity.activities,
-      ],
-      updatedAt: new Date().toISOString(),
-    };
-
-    handleUpdateOpportunity(updated);
-    showToast(`Follow-up scheduled for ${fu.date}`);
-  };
-
-  // Save proposal
-  const handleSaveProposal = (proposal: ProposalRecord) => {
-    const currentProps = getStoredProposals();
-    const updatedProps = [proposal, ...currentProps];
-    saveStoredProposals(updatedProps);
-    setProposals([proposal, ...proposals]);
-
-    const shouldAdvance =
-      opportunity.stage === 'Qualified' || opportunity.stage === 'Requirement Received';
-    const updated: OpportunityRecord = {
-      ...opportunity,
-      stage: shouldAdvance ? 'Proposal' : opportunity.stage,
-      probability: shouldAdvance ? 60 : opportunity.probability,
-      proposalsCount: (opportunity.proposalsCount || 0) + 1,
-      activities: [
-        {
-          id: `act-${Date.now()}`,
-          date: proposal.sentDate,
-          time: '03:45 PM',
-          employeeName: proposal.ownerName,
-          type: 'PROPOSAL_SENT',
-          title: `Commercial Proposal ${proposal.proposalCode} Created`,
-          notes: `Amount: ₹${proposal.amount.toLocaleString('en-IN')}, Valid until: ${proposal.validUntil}.`,
-        },
-        ...opportunity.activities,
-      ],
-    };
-
-    handleUpdateOpportunity(updated);
-    showToast(`Proposal ${proposal.proposalCode} created!`);
-  };
-
-  const stagesList: OpportunityStage[] = [
-    'Qualified',
-    'Requirement Received',
-    'Proposal',
-    'Negotiation',
-    'Won',
-    'Lost',
-  ];
-
-  const stageStepIndex = [
-    'Qualified',
-    'Requirement Received',
-    'Proposal',
-    'Negotiation',
-    'Won',
-  ].indexOf(opportunity.stage);
+  if (!opportunity) {
+    return (
+      <div className="p-16 flex flex-col items-center justify-center text-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
+        <AlertCircle className="w-10 h-10 text-rose-500 mb-3" />
+        <h3 className="text-base font-bold text-slate-900 dark:text-white">Opportunity Not Found</h3>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+          The requested deal record does not exist or has been deleted.
+        </p>
+        <Link
+          to="/opportunities/pipeline"
+          className="mt-4 px-4 py-2 bg-[#5B4DB7] text-white text-xs font-bold rounded-xl"
+        >
+          Return to Pipeline
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-5">
-      {/* Toast */}
+      {/* Toast Feedback */}
       {toastMessage && (
-        <div className="fixed bottom-5 right-5 z-50 bg-slate-900 text-white text-xs font-semibold px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2 animate-in fade-in slide-in-from-bottom duration-200">
+        <div className="fixed bottom-5 right-5 z-50 bg-slate-900 dark:bg-slate-800 text-white text-xs font-semibold px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2 border border-slate-700 animate-in fade-in slide-in-from-bottom duration-200">
           <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
           <span>{toastMessage}</span>
         </div>
       )}
 
-      {/* Back Navigation Bar */}
+      {/* Top Breadcrumb & Actions */}
       <div className="flex items-center justify-between">
-        <button
-          type="button"
-          onClick={() => navigate('/opportunities/pipeline')}
-          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-[#5B4DB7] dark:hover:text-purple-300 transition-colors cursor-pointer"
+        <Link
+          to="/opportunities/pipeline"
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-[#5B4DB7] dark:hover:text-purple-300 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Opportunities Pipeline</span>
-        </button>
+        </Link>
 
         <div className="flex items-center gap-2">
-          {opportunity.leadCode && (
-            <Link
-              to={`/leads/${opportunity.leadId || opportunity.leadCode}`}
-              className="text-xs font-mono font-semibold text-[#5B4DB7] dark:text-purple-300 hover:underline bg-purple-50 dark:bg-purple-950/40 px-2 py-1 rounded-md border border-purple-100 dark:border-purple-800"
-            >
-              Lead: {opportunity.leadCode}
-            </Link>
+          {opportunity.stage !== 'Won' && opportunity.stage !== 'Lost' && (
+            <>
+              <button
+                type="button"
+                onClick={() => setIsWonOpen(true)}
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-2xs transition-colors cursor-pointer"
+              >
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>Mark Won</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsLostOpen(true)}
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white shadow-2xs transition-colors cursor-pointer"
+              >
+                <XCircle className="w-3.5 h-3.5" />
+                <span>Mark Lost</span>
+              </button>
+            </>
           )}
-          <span className="text-xs font-mono font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md">
-            {opportunity.opportunityCode}
-          </span>
+
+          <button
+            type="button"
+            onClick={() => setIsDeleteOppOpen(true)}
+            title="Delete Deal"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
         </div>
       </div>
 
-      {/* TOP HEADER CARD */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-2xs p-5 sm:p-6 space-y-4">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                {opportunity.companyName}
+      {/* Opportunity Banner Card */}
+      <div className="p-5 sm:p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2.5">
+              <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-purple-50 dark:bg-purple-950/50 text-[#5B4DB7] dark:text-purple-300 border border-purple-200 dark:border-purple-800">
+                {opportunity.opportunityCode}
               </span>
-              <OpportunityStageBadge stage={opportunity.stage} size="sm" />
-              <span className="text-xs font-medium text-slate-500 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">
-                {opportunity.service}
-              </span>
+              <OpportunityStageBadge stage={opportunity.stage} />
             </div>
 
-            <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mt-2">
               {opportunity.name}
             </h1>
 
-            <div className="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400 pt-1 flex-wrap">
-              <div className="flex items-center gap-1.5">
-                <User className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
-                <span>
-                  Contact: <strong className="text-slate-800 dark:text-slate-200">{opportunity.contactName}</strong>
+            <div className="flex flex-wrap items-center gap-4 mt-2 text-xs text-slate-500 dark:text-slate-400">
+              <span className="flex items-center gap-1.5 font-semibold text-slate-700 dark:text-slate-300">
+                <Building2 className="w-4 h-4 text-slate-400" />
+                {opportunity.companyName}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <User className="w-4 h-4 text-slate-400" />
+                {opportunity.contactName} ({opportunity.contactDesignation || 'Lead Contact'})
+              </span>
+              {opportunity.contactEmail && (
+                <span className="flex items-center gap-1.5">
+                  <Mail className="w-4 h-4 text-slate-400" />
+                  {opportunity.contactEmail}
                 </span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <Calendar className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
-                <span>
-                  Close: <strong className="text-slate-800 dark:text-slate-200">{opportunity.expectedCloseDate}</strong>
-                </span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-4 h-4 rounded-full bg-[#5B4DB7] text-white flex items-center justify-center text-[9px] font-bold">
-                  {opportunity.owner.name.charAt(0)}
-                </div>
-                <span>
-                  Owner: <strong className="text-slate-800 dark:text-slate-200">{opportunity.owner.name}</strong>
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Deal Financials Highlight */}
-          <div className="flex items-center gap-4 bg-slate-50 dark:bg-slate-950/60 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 shrink-0">
-            <div>
-              <div className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500">Deal Value</div>
-              <div className="font-mono text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
-                {formatCurrencyINR(opportunity.estimatedValue)}
-              </div>
-              <div className="text-[10px] text-slate-500 dark:text-slate-400">
-                Weighted:{' '}
-                <strong className="font-mono text-slate-700 dark:text-slate-300">
-                  {formatLakhsINR((opportunity.estimatedValue * opportunity.probability) / 100)}
-                </strong>
-              </div>
-            </div>
-
-            <div className="h-10 w-px bg-slate-200 dark:bg-slate-800" />
-
-            <div className="text-right">
-              <div className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 mb-0.5">
-                Probability
-              </div>
-              <ProbabilityIndicator probability={opportunity.probability} showBar={true} size="md" />
-            </div>
-          </div>
-        </div>
-
-        {/* Action Buttons Toolbar */}
-        <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-800 flex-wrap gap-2">
-          {/* Move Stage Dropdown */}
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => setShowStageDropdown(!showStageDropdown)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-lg text-xs font-semibold cursor-pointer transition-colors"
-            >
-              <span>Move Stage: {opportunity.stage}</span>
-              <ChevronDown className="w-3.5 h-3.5" />
-            </button>
-
-            {showStageDropdown && (
-              <div className="absolute left-0 top-full mt-1 w-48 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xl py-1 z-30 divide-y divide-slate-100 dark:divide-slate-800 animate-in fade-in zoom-in-95 duration-100">
-                {stagesList.map((stg) => (
-                  <button
-                    key={stg}
-                    type="button"
-                    disabled={stg === opportunity.stage}
-                    onClick={() => handleMoveStage(stg)}
-                    className={`w-full text-left px-3.5 py-2 text-xs font-semibold flex items-center justify-between cursor-pointer ${
-                      stg === opportunity.stage
-                        ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed'
-                        : 'hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200'
-                    }`}
-                  >
-                    <span>{stg}</span>
-                    {stg === opportunity.stage && <span className="text-[11px] text-[#5B4DB7] dark:text-purple-400">Current</span>}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="flex items-center gap-2 flex-wrap">
-            <button
-              type="button"
-              onClick={() => setIsEditOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-semibold transition-colors cursor-pointer shadow-2xs"
-            >
-              <Edit2 className="w-3.5 h-3.5" />
-              <span>Edit</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setIsFollowUpOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:bg-indigo-50 dark:hover:bg-purple-950/40 hover:text-[#5B4DB7] dark:hover:text-purple-300 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-semibold transition-colors cursor-pointer shadow-2xs"
-            >
-              <CalendarClock className="w-3.5 h-3.5" />
-              <span>Add Follow-up</span>
-            </button>
-
-            {opportunity.stage !== 'Won' && opportunity.stage !== 'Lost' && (
-              <button
-                type="button"
-                onClick={() => setIsProposalOpen(true)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 dark:hover:bg-purple-900/60 text-[#5B4DB7] dark:text-purple-300 border border-purple-200 dark:border-purple-800 rounded-lg text-xs font-semibold transition-colors cursor-pointer shadow-2xs"
-              >
-                <FileText className="w-3.5 h-3.5" />
-                <span>Create Proposal</span>
-              </button>
-            )}
-
-            {opportunity.stage !== 'Won' && opportunity.stage !== 'Lost' && (
-              <>
-                <button
-                  type="button"
-                  onClick={() => setIsWonOpen(true)}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer shadow-2xs"
-                >
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>Mark Won</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsLostOpen(true)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 rounded-lg text-xs font-semibold transition-colors cursor-pointer shadow-2xs"
-                >
-                  <XCircle className="w-3.5 h-3.5" />
-                  <span>Mark Lost</span>
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Visual Stage Progression Stepper */}
-        {opportunity.stage !== 'Lost' ? (
-          <div className="pt-2">
-            <div className="grid grid-cols-5 gap-1 text-center text-[10px] font-bold">
-              {['Qualified', 'Requirement Received', 'Proposal', 'Negotiation', 'Won'].map(
-                (stg, idx) => {
-                  const isPassed = stageStepIndex >= idx;
-                  const isCurrent = opportunity.stage === stg;
-                  return (
-                    <div key={stg} className="space-y-1">
-                      <div
-                        className={`h-2 rounded-full transition-all duration-300 ${
-                          isCurrent
-                            ? 'bg-[#5B4DB7] dark:bg-purple-600'
-                            : isPassed
-                            ? 'bg-purple-300 dark:bg-purple-800'
-                            : 'bg-slate-200 dark:bg-slate-800'
-                        }`}
-                      />
-                      <span
-                        className={`truncate block ${
-                          isCurrent
-                            ? 'text-[#5B4DB7] dark:text-purple-400 font-extrabold'
-                            : isPassed
-                            ? 'text-slate-700 dark:text-slate-300'
-                            : 'text-slate-400 dark:text-slate-500'
-                        }`}
-                      >
-                        {stg}
-                      </span>
-                    </div>
-                  );
-                }
               )}
             </div>
           </div>
-        ) : (
-          <div className="p-3 bg-rose-50 dark:bg-rose-950/40 rounded-xl border border-rose-200 dark:border-rose-800 text-xs text-rose-900 dark:text-rose-200 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400" />
-              <span>
-                Deal closed as <strong>Lost</strong> ({opportunity.lossReason || 'Budget'}).
-              </span>
-            </div>
-            {opportunity.lossNotes && (
-              <span className="text-rose-700 dark:text-rose-300 italic">{opportunity.lossNotes}</span>
-            )}
+
+          <div className="flex md:flex-col items-end justify-between md:justify-center border-t md:border-t-0 pt-3 md:pt-0 border-slate-100 dark:border-slate-800">
+            <span className="text-[11px] text-slate-400 uppercase tracking-wider font-semibold">
+              Deal Estimated Value
+            </span>
+            <span className="text-2xl font-black text-slate-900 dark:text-white font-mono">
+              {formatCurrencyINR(opportunity.estimatedValue)}
+            </span>
+            <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold">
+              {opportunity.probability}% Win Probability
+            </span>
           </div>
-        )}
+        </div>
       </div>
 
-      {/* TABS NAVIGATION */}
-      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 overflow-x-auto no-scrollbar">
-        {[
-          { id: 'overview', label: 'Overview' },
-          { id: 'requirements', label: 'Requirements' },
-          {
-            id: 'proposals',
-            label: `Proposals (${proposals.length})`,
-          },
-          {
-            id: 'followups',
-            label: `Follow-ups (${opportunity.followUps.length})`,
-          },
-          {
-            id: 'activities',
-            label: `Activities (${opportunity.activities.length})`,
-          },
-        ].map((tab) => (
+      {/* 4 KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs">
+          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+            Domain Service
+          </span>
+          <div className="mt-1 text-sm font-bold text-slate-900 dark:text-white truncate">
+            {opportunity.service}
+          </div>
+          <span className="text-[10px] text-slate-400 mt-1 block">
+            Industry: {opportunity.industry}
+          </span>
+        </div>
+
+        <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs">
+          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+            Commercial Owner
+          </span>
+          <div className="mt-1 text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+            <div className="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[10px] font-bold text-slate-700 dark:text-slate-300">
+              {opportunity.owner.name.charAt(0)}
+            </div>
+            <span>{opportunity.owner.name}</span>
+          </div>
+          <span className="text-[10px] text-slate-400 mt-1 block">{opportunity.owner.role}</span>
+        </div>
+
+        <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs">
+          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+            Expected Close Date
+          </span>
+          <div className="mt-1 text-sm font-bold text-slate-900 dark:text-white font-mono">
+            {opportunity.expectedCloseDate || 'Not specified'}
+          </div>
+          <span className="text-[10px] text-slate-400 mt-1 block">Target deal closure</span>
+        </div>
+
+        <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs">
+          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+            Commercial Proposals
+          </span>
+          <div className="mt-1 text-sm font-bold text-slate-900 dark:text-white font-mono">
+            {proposals.length} Quoted
+          </div>
           <button
-            key={tab.id}
             type="button"
-            onClick={() => setActiveTab(tab.id as any)}
-            className={`px-4 py-2.5 text-xs font-bold whitespace-nowrap border-b-2 transition-all cursor-pointer ${
-              activeTab === tab.id
-                ? 'border-[#5B4DB7] dark:border-purple-400 text-[#5B4DB7] dark:text-purple-400 bg-white dark:bg-slate-900'
-                : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
-            }`}
+            onClick={() => setIsCreatePropOpen(true)}
+            className="text-[10px] text-[#5B4DB7] dark:text-purple-400 hover:underline mt-1 block font-bold cursor-pointer"
           >
-            {tab.label}
+            + Generate Proposal
           </button>
-        ))}
+        </div>
       </div>
 
-      {/* TAB CONTENT AREAS */}
+      {/* Tabs Navigation */}
+      <div className="border-b border-slate-200 dark:border-slate-800 flex items-center gap-4 text-xs font-bold">
+        <button
+          type="button"
+          onClick={() => setActiveTab('overview')}
+          className={`pb-2.5 px-1 border-b-2 transition-colors cursor-pointer ${
+            activeTab === 'overview'
+              ? 'border-[#5B4DB7] text-[#5B4DB7] dark:text-purple-300'
+              : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+          }`}
+        >
+          Scope & Requirements
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('proposals')}
+          className={`pb-2.5 px-1 border-b-2 transition-colors cursor-pointer ${
+            activeTab === 'proposals'
+              ? 'border-[#5B4DB7] text-[#5B4DB7] dark:text-purple-300'
+              : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+          }`}
+        >
+          Commercial Proposals ({proposals.length})
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('followups')}
+          className={`pb-2.5 px-1 border-b-2 transition-colors cursor-pointer ${
+            activeTab === 'followups'
+              ? 'border-[#5B4DB7] text-[#5B4DB7] dark:text-purple-300'
+              : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+          }`}
+        >
+          Follow-ups ({opportunity.followUps?.length || 0})
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('activities')}
+          className={`pb-2.5 px-1 border-b-2 transition-colors cursor-pointer ${
+            activeTab === 'activities'
+              ? 'border-[#5B4DB7] text-[#5B4DB7] dark:text-purple-300'
+              : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+          }`}
+        >
+          Activity Timeline ({opportunity.activities?.length || 0})
+        </button>
+      </div>
 
-      {/* TAB 1: OVERVIEW */}
+      {/* Tab 1: Overview & Scope */}
       {activeTab === 'overview' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-          {/* Column 1 & 2: Company & Contact & Financials */}
-          <div className="lg:col-span-2 space-y-5">
-            {/* Company Info Card */}
-            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/90 dark:border-slate-800 p-5 space-y-3 shadow-2xs">
-              <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                <Building2 className="w-4 h-4 text-[#5B4DB7] dark:text-purple-400" />
-                <span>Company & Account Information</span>
+          <div className="lg:col-span-2 space-y-4">
+            <div className="p-5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs space-y-3">
+              <h3 className="text-xs font-bold text-[#5B4DB7] dark:text-purple-300 uppercase tracking-wider">
+                Technical Requirement Summary
               </h3>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
-                <div>
-                  <span className="text-slate-400 dark:text-slate-500 font-semibold block">Company Name</span>
-                  <span className="font-bold text-slate-800 dark:text-slate-200">{opportunity.companyName}</span>
+              <p className="text-xs leading-relaxed text-slate-700 dark:text-slate-300">
+                {opportunity.requirement?.summary ||
+                  'No formal technical requirement scope documented yet.'}
+              </p>
+
+              {opportunity.requirement?.problemStatement && (
+                <div className="pt-2">
+                  <h4 className="text-xs font-bold text-slate-900 dark:text-white mb-1">
+                    Problem Statement
+                  </h4>
+                  <p className="text-xs text-slate-600 dark:text-slate-400">
+                    {opportunity.requirement.problemStatement}
+                  </p>
                 </div>
-                <div>
-                  <span className="text-slate-400 dark:text-slate-500 font-semibold block">Industry</span>
-                  <span className="font-medium text-slate-700 dark:text-slate-300">{opportunity.industry || 'IT & Tech'}</span>
-                </div>
-                <div>
-                  <span className="text-slate-400 dark:text-slate-500 font-semibold block">Service Domain</span>
-                  <span className="font-medium text-slate-700 dark:text-slate-300">{opportunity.service}</span>
-                </div>
-              </div>
+              )}
             </div>
 
-            {/* Key Contact Card */}
-            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/90 dark:border-slate-800 p-5 space-y-3 shadow-2xs">
-              <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                <User className="w-4 h-4 text-[#5B4DB7] dark:text-purple-400" />
-                <span>Primary Customer Contact</span>
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-                <div>
-                  <span className="text-slate-400 dark:text-slate-500 font-semibold block">Contact Name</span>
-                  <span className="font-bold text-slate-800 dark:text-slate-200">{opportunity.contactName}</span>
-                  <span className="text-[11px] text-slate-500 dark:text-slate-400 block">
-                    {opportunity.contactDesignation || 'Stakeholder'}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-slate-400 dark:text-slate-500 font-semibold block">Email</span>
-                  <div className="flex items-center gap-1 text-slate-700 dark:text-slate-300 mt-0.5">
-                    <Mail className="w-3 h-3 text-slate-400 dark:text-slate-500" />
-                    <span className="truncate">{opportunity.contactEmail || 'Not provided'}</span>
-                  </div>
-                </div>
-                <div>
-                  <span className="text-slate-400 dark:text-slate-500 font-semibold block">Phone</span>
-                  <div className="flex items-center gap-1 text-slate-700 dark:text-slate-300 mt-0.5">
-                    <Phone className="w-3 h-3 text-slate-400 dark:text-slate-500" />
-                    <span>{opportunity.contactPhone || 'Not provided'}</span>
-                  </div>
-                </div>
+            <div className="p-5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <span className="text-[11px] text-slate-400 font-semibold block">
+                  Delivery Timeline
+                </span>
+                <span className="text-xs font-bold text-slate-900 dark:text-white mt-0.5 block">
+                  {opportunity.requirement?.timeline || '12 Weeks schedule'}
+                </span>
               </div>
-            </div>
-
-            {/* Deal Financials Detailed */}
-            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/90 dark:border-slate-800 p-5 space-y-3 shadow-2xs">
-              <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                <IndianRupee className="w-4 h-4 text-[#5B4DB7] dark:text-purple-400" />
-                <span>Commercial Terms & Pipeline Forecast</span>
-              </h3>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs bg-slate-50 dark:bg-slate-950/60 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800">
-                <div>
-                  <span className="text-[10px] text-slate-400 dark:text-slate-500 uppercase font-bold block">
-                    Total Deal Value
-                  </span>
-                  <span className="font-mono font-bold text-slate-900 dark:text-white text-sm">
-                    {formatCurrencyINR(opportunity.estimatedValue)}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-[10px] text-slate-400 dark:text-slate-500 uppercase font-bold block">
-                    Win Probability
-                  </span>
-                  <span className="font-bold text-[#5B4DB7] dark:text-purple-400 text-sm">{opportunity.probability}%</span>
-                </div>
-                <div>
-                  <span className="text-[10px] text-slate-400 dark:text-slate-500 uppercase font-bold block">
-                    Weighted Value
-                  </span>
-                  <span className="font-mono font-bold text-emerald-700 dark:text-emerald-400 text-sm">
-                    {formatCurrencyINR(
-                      Math.round((opportunity.estimatedValue * opportunity.probability) / 100)
-                    )}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-[10px] text-slate-400 dark:text-slate-500 uppercase font-bold block">
-                    Priority
-                  </span>
-                  <span className="font-bold text-slate-800 dark:text-slate-200 text-sm">{opportunity.priority || 'High'}</span>
-                </div>
+              <div>
+                <span className="text-[11px] text-slate-400 font-semibold block">
+                  Budget Expectation
+                </span>
+                <span className="text-xs font-bold text-slate-900 dark:text-white mt-0.5 block">
+                  {opportunity.requirement?.budget || formatCurrencyINR(opportunity.estimatedValue)}
+                </span>
               </div>
             </div>
           </div>
 
-          {/* Column 3: Team Assignment & Timelines */}
-          <div className="space-y-5">
-            {/* Team Assignment Card */}
-            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/90 dark:border-slate-800 p-5 space-y-4 shadow-2xs">
-              <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                <UserCheck className="w-4 h-4 text-[#5B4DB7] dark:text-purple-400" />
-                <span>Account Team Assignment</span>
+          {/* Right sidebar: Contacts & Lead Link */}
+          <div className="space-y-4">
+            <div className="p-5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs space-y-3">
+              <h3 className="text-xs font-bold text-slate-900 dark:text-white">
+                Client Contact Details
               </h3>
-
-              <div className="space-y-3 text-xs">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-[#5B4DB7] text-white flex items-center justify-center text-xs font-bold">
-                    {opportunity.owner.avatar || opportunity.owner.name.charAt(0)}
+              <div className="space-y-2 text-xs">
+                <div>
+                  <span className="text-slate-400 text-[11px]">Primary Contact</span>
+                  <div className="font-semibold text-slate-900 dark:text-white">
+                    {opportunity.contactName}
                   </div>
+                  <div className="text-slate-500 text-[11px]">{opportunity.contactDesignation}</div>
+                </div>
+                {opportunity.contactEmail && (
                   <div>
-                    <div className="font-bold text-slate-900 dark:text-white">{opportunity.owner.name}</div>
-                    <div className="text-[11px] text-slate-500 dark:text-slate-400">Sales Owner (Primary)</div>
-                  </div>
-                </div>
-
-                {opportunity.businessAnalyst && (
-                  <div className="flex items-center gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
-                    <div className="w-8 h-8 rounded-full bg-sky-100 dark:bg-sky-950/60 text-sky-800 dark:text-sky-300 flex items-center justify-center text-xs font-bold">
-                      BA
-                    </div>
-                    <div>
-                      <div className="font-bold text-slate-900 dark:text-white">{opportunity.businessAnalyst.name}</div>
-                      <div className="text-[11px] text-slate-500 dark:text-slate-400">
-                        {opportunity.businessAnalyst.role || 'Business Analyst'}
-                      </div>
+                    <span className="text-slate-400 text-[11px]">Email Address</span>
+                    <div className="font-semibold text-slate-900 dark:text-white">
+                      {opportunity.contactEmail}
                     </div>
                   </div>
                 )}
-
-                {opportunity.technicalReviewer && (
-                  <div className="flex items-center gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
-                    <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-950/60 text-indigo-800 dark:text-indigo-300 flex items-center justify-center text-xs font-bold">
-                      TA
-                    </div>
-                    <div>
-                      <div className="font-bold text-slate-900 dark:text-white">{opportunity.technicalReviewer.name}</div>
-                      <div className="text-[11px] text-slate-500 dark:text-slate-400">
-                        {opportunity.technicalReviewer.role || 'Technical Reviewer'}
-                      </div>
+                {opportunity.contactPhone && (
+                  <div>
+                    <span className="text-slate-400 text-[11px]">Phone Number</span>
+                    <div className="font-semibold text-slate-900 dark:text-white">
+                      {opportunity.contactPhone}
                     </div>
                   </div>
                 )}
               </div>
-            </div>
 
-            {/* Timeline Horizons Card */}
-            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/90 dark:border-slate-800 p-5 space-y-3 shadow-2xs text-xs">
-              <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                <Clock className="w-4 h-4 text-[#5B4DB7] dark:text-purple-400" />
-                <span>Pipeline Milestone Dates</span>
-              </h3>
-
-              <div className="space-y-2.5">
-                <div className="flex justify-between">
-                  <span className="text-slate-400 dark:text-slate-500 font-medium">Created On:</span>
-                  <span className="font-bold text-slate-800 dark:text-slate-200">{opportunity.createdBy.date}</span>
+              {opportunity.leadId && (
+                <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+                  <Link
+                    to={`/leads/${opportunity.leadId}`}
+                    className="text-xs font-bold text-[#5B4DB7] dark:text-purple-400 hover:underline"
+                  >
+                    View Original Lead ({opportunity.leadCode || 'CRM'}) →
+                  </Link>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400 dark:text-slate-500 font-medium">Expected Close:</span>
-                  <span className="font-bold text-[#5B4DB7] dark:text-purple-400">{opportunity.expectedCloseDate}</span>
-                </div>
-                {opportunity.wonDate && (
-                  <div className="flex justify-between text-emerald-700 dark:text-emerald-400">
-                    <span className="font-semibold">Won On:</span>
-                    <span className="font-bold">{opportunity.wonDate}</span>
-                  </div>
-                )}
-                <div className="flex justify-between">
-                  <span className="text-slate-400 dark:text-slate-500 font-medium">Last Modified:</span>
-                  <span className="text-slate-600 dark:text-slate-400">
-                    {new Date(opportunity.updatedAt).toLocaleDateString('en-GB', {
-                      day: 'numeric',
-                      month: 'short',
-                      year: 'numeric',
-                    })}
-                  </span>
-                </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
       )}
 
-      {/* TAB 2: REQUIREMENTS */}
-      {activeTab === 'requirements' && (
-        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/90 dark:border-slate-800 p-5 sm:p-6 space-y-5 shadow-2xs text-xs">
-          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <FileText className="w-4 h-4 text-[#5B4DB7] dark:text-purple-400" />
-              <span>Customer Requirements & Discovery Scope</span>
+      {/* Tab 2: Proposals List */}
+      {activeTab === 'proposals' && (
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs overflow-hidden">
+          <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+            <h3 className="text-xs font-bold text-slate-900 dark:text-white">
+              Generated Quotations & Commercial Proposals
             </h3>
             <button
               type="button"
-              onClick={() => setIsEditOpen(true)}
-              className="text-xs font-semibold text-[#5B4DB7] dark:text-purple-400 hover:underline inline-flex items-center gap-1 cursor-pointer"
-            >
-              <Edit2 className="w-3 h-3" />
-              <span>Edit Requirements</span>
-            </button>
-          </div>
-
-          <div className="space-y-4">
-            <div>
-              <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">
-                Requirement Summary
-              </span>
-              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 font-medium leading-relaxed">
-                {opportunity.requirement.summary || 'No summary available.'}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">
-                  Business Problem Statement
-                </span>
-                <div className="p-3 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300">
-                  {opportunity.requirement.problemStatement || 'Not specified.'}
-                </div>
-              </div>
-
-              <div>
-                <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">
-                  Expected Users / Load
-                </span>
-                <div className="p-3 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300">
-                  {opportunity.requirement.expectedUsers || 'Not specified.'}
-                </div>
-              </div>
-
-              <div>
-                <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">
-                  Estimated Timeline
-                </span>
-                <div className="p-3 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300">
-                  {opportunity.requirement.timeline || 'Not specified.'}
-                </div>
-              </div>
-
-              <div>
-                <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">
-                  Target Customer Budget
-                </span>
-                <div className="p-3 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 font-mono font-bold">
-                  {opportunity.requirement.budget || 'Not specified.'}
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">
-                Technical Specifications & Architecture
-              </span>
-              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 leading-relaxed font-mono text-[11px]">
-                {opportunity.requirement.technicalRequirements || 'Standard modern stack requested.'}
-              </div>
-            </div>
-
-            {opportunity.requirement.notes && (
-              <div>
-                <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">
-                  Discovery & Engagement Notes
-                </span>
-                <div className="p-3 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 italic">
-                  {opportunity.requirement.notes}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* TAB 3: PROPOSALS */}
-      {activeTab === 'proposals' && (
-        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/90 dark:border-slate-800 p-5 sm:p-6 space-y-4 shadow-2xs">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Commercial Proposals</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Official quotation packages and contracts dispatched to {opportunity.companyName}
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => setIsProposalOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#5B4DB7] hover:bg-[#4E41A2] text-white rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+              onClick={() => setIsCreatePropOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#5B4DB7] hover:bg-[#4E41A2] text-white rounded-lg text-xs font-bold transition-colors cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Create Proposal</span>
             </button>
           </div>
 
-          <div className="overflow-x-auto border border-slate-200 dark:border-slate-800 rounded-xl">
-            <table className="w-full text-left text-xs text-slate-700 dark:text-slate-300">
-              <thead className="bg-slate-50 dark:bg-slate-950/60 border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold uppercase text-slate-500 dark:text-slate-400">
-                <tr>
-                  <th className="py-3 px-4">Proposal ID</th>
-                  <th className="py-3 px-3">Amount (₹)</th>
-                  <th className="py-3 px-3">Sent Date</th>
-                  <th className="py-3 px-3">Valid Until</th>
-                  <th className="py-3 px-3">Status</th>
-                  <th className="py-3 px-3">Owner</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
-                {proposals.length > 0 ? (
-                  proposals.map((prop) => (
-                    <tr
-                      key={prop.id}
-                      onClick={() => setSelectedProposal(prop)}
-                      className="hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer"
-                    >
-                      <td className="py-3 px-4 font-mono font-bold text-[#5B4DB7] dark:text-purple-400">
-                        {prop.proposalCode}
-                      </td>
-                      <td className="py-3 px-3 font-mono font-bold text-slate-900 dark:text-white">
+          {proposals.length === 0 ? (
+            <div className="p-12 flex flex-col items-center justify-center text-center">
+              <FileText className="w-8 h-8 text-slate-400 mb-2" />
+              <p className="text-xs font-semibold text-slate-600 dark:text-slate-300">
+                No formal proposals generated yet
+              </p>
+              <button
+                type="button"
+                onClick={() => setIsCreatePropOpen(true)}
+                className="mt-3 text-xs text-[#5B4DB7] dark:text-purple-400 hover:underline font-bold cursor-pointer"
+              >
+                + Generate First Proposal
+              </button>
+            </div>
+          ) : (
+            <div className="divide-y divide-slate-100 dark:divide-slate-800">
+              {proposals.map((prop) => (
+                <div
+                  key={prop.id}
+                  className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-purple-50 dark:bg-purple-950/50 text-[#5B4DB7] dark:text-purple-300 flex items-center justify-center shrink-0 font-mono font-bold text-xs">
+                      PDF
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono font-bold text-slate-900 dark:text-white text-xs">
+                          {prop.proposalCode}
+                        </span>
+                        <ProposalStatusBadge status={prop.status} />
+                      </div>
+                      <div className="text-xs font-black text-[#5B4DB7] dark:text-purple-300 font-mono mt-0.5">
                         {formatCurrencyINR(prop.amount)}
-                      </td>
-                      <td className="py-3 px-3 text-slate-600 dark:text-slate-400">{prop.sentDate}</td>
-                      <td className="py-3 px-3 text-slate-600 dark:text-slate-400">{prop.validUntil}</td>
-                      <td className="py-3 px-3">
-                        <ProposalStatusBadge status={prop.status} size="sm" />
-                      </td>
-                      <td className="py-3 px-3 text-slate-700 dark:text-slate-300">{prop.ownerName}</td>
-                      <td className="py-3 px-4 text-right" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center justify-end gap-1">
-                          <button
-                            type="button"
-                            onClick={() => setSelectedProposal(prop)}
-                            className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
-                            title="View"
-                          >
-                            <Eye className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => showToast(`Downloading ${prop.proposalCode}.pdf...`)}
-                            className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
-                            title="Download PDF"
-                          >
-                            <Download className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={7} className="py-8 text-center text-slate-400 dark:text-slate-500 text-xs">
-                      No proposals generated yet for this opportunity. Click "Create Proposal" above.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                      </div>
+                      <div className="text-[11px] text-slate-400 mt-0.5">
+                        Date: {prop.sentDate || prop.createdDate || 'Today'} • Lead: {prop.ownerName}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        generateProposalPDF(prop);
+                        showToast(`Quotation ${prop.proposalCode}.pdf downloaded successfully!`);
+                      }}
+                      className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-purple-50 dark:bg-purple-950/40 text-[#5B4DB7] dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/60 border border-purple-200 dark:border-purple-800 text-xs font-semibold cursor-pointer"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>Download PDF</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => printProposalDocument(prop)}
+                      className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                      title="Print Preview"
+                    >
+                      <Share2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEmailProposal(prop)}
+                      className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                      title="Send Email"
+                    >
+                      <Mail className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEditingProposal(prop)}
+                      className="p-1.5 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/40 cursor-pointer transition-colors"
+                      title="Edit Proposal"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedProposal(prop)}
+                      className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                      title="View Details"
+                    >
+                      <Eye className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDeleteProposalTarget(prop)}
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer"
+                      title="Delete"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
-      {/* TAB 4: FOLLOW-UPS */}
+      {/* Tab 3: Follow-ups */}
       {activeTab === 'followups' && (
-        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/90 dark:border-slate-800 p-5 sm:p-6 space-y-4 shadow-2xs">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Follow-ups & Next Actions</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Scheduled client touchpoints, calls, technical demos, and status checks
-              </p>
-            </div>
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xs font-bold text-slate-900 dark:text-white">Scheduled Follow-ups</h3>
             <button
               type="button"
               onClick={() => setIsFollowUpOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#5B4DB7] hover:bg-[#4E41A2] text-white rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#5B4DB7] text-white rounded-lg text-xs font-bold"
             >
-              <Plus className="w-4 h-4" />
-              <span>Add Follow-up</span>
+              <Plus className="w-3.5 h-3.5" />
+              <span>Schedule Follow-up</span>
             </button>
           </div>
 
-          <div className="space-y-3">
-            {opportunity.followUps.length > 0 ? (
-              opportunity.followUps.map((fu) => (
+          {(opportunity.followUps?.length || 0) === 0 ? (
+            <p className="text-xs text-slate-400 text-center py-8">No scheduled follow-ups.</p>
+          ) : (
+            <div className="space-y-2.5">
+              {opportunity.followUps?.map((f, idx) => (
                 <div
-                  key={fu.id}
-                  className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+                  key={idx}
+                  className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs"
                 >
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-slate-900 dark:text-white">{fu.type}</span>
-                      <span
-                        className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                          fu.status === 'Completed'
-                            ? 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
-                            : 'bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800'
-                        }`}
-                      >
-                        {fu.status}
-                      </span>
+                  <div className="flex items-center gap-3">
+                    <Calendar className="w-4 h-4 text-[#5B4DB7]" />
+                    <div>
+                      <div className="font-semibold text-slate-900 dark:text-white">
+                        {f.type} on {f.date} {f.time ? `at ${f.time}` : ''}
+                      </div>
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                        Assigned to: {f.assignedTo} {f.notes ? `• ${f.notes}` : ''}
+                      </div>
                     </div>
-                    <p className="text-slate-700 dark:text-slate-300">{fu.notes}</p>
-                    <span className="text-[11px] text-slate-400 dark:text-slate-500">Assigned: {fu.assignedTo}</span>
                   </div>
-
-                  <div className="flex items-center gap-2 font-mono text-xs text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 shrink-0">
-                    <Calendar className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
-                    <span>
-                      {fu.date} • {fu.time}
-                    </span>
-                  </div>
+                  <span className="font-mono text-[10px] px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-950/60 text-[#5B4DB7] dark:text-purple-300 font-bold">
+                    {f.status || 'Pending'}
+                  </span>
                 </div>
-              ))
-            ) : (
-              <div className="p-8 text-center text-slate-400 dark:text-slate-500 text-xs border border-dashed border-slate-200 dark:border-slate-800 rounded-xl">
-                No follow-ups recorded yet. Click "Add Follow-up" to schedule a client meeting or call.
-              </div>
-            )}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
-      {/* TAB 5: ACTIVITIES */}
+      {/* Tab 4: Activities */}
       {activeTab === 'activities' && (
-        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/90 dark:border-slate-800 p-5 sm:p-6 space-y-4 shadow-2xs">
-          <div>
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white">Activity History & Audit Trail</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Complete timeline of deal progression, stage movements, and commercial transactions
-            </p>
-          </div>
-
-          <div className="space-y-4 relative before:absolute before:inset-0 before:left-4 before:w-0.5 before:bg-slate-200 dark:before:bg-slate-800">
-            {opportunity.activities.map((act) => (
-              <div key={act.id} className="relative flex items-start gap-4 text-xs">
-                <div className="w-8 h-8 rounded-full bg-white dark:bg-slate-900 border-2 border-[#5B4DB7] dark:border-purple-400 text-[#5B4DB7] dark:text-purple-300 flex items-center justify-center font-bold z-10 shrink-0 shadow-2xs">
-                  {act.type === 'WON' ? '🏆' : act.type === 'LOST' ? '✕' : '•'}
-                </div>
-                <div className="flex-1 bg-slate-50 dark:bg-slate-950/60 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800">
-                  <div className="flex items-center justify-between gap-2">
-                    <h4 className="font-bold text-slate-900 dark:text-white">{act.title}</h4>
-                    <span className="font-mono text-[11px] text-slate-400 dark:text-slate-500 whitespace-nowrap">
-                      {act.date} • {act.time}
-                    </span>
-                  </div>
-                  {act.notes && <p className="text-slate-600 dark:text-slate-300 mt-1">{act.notes}</p>}
-                  <div className="text-[10px] text-slate-400 dark:text-slate-500 mt-1.5 font-medium">
-                    Logged by: <strong className="text-slate-700 dark:text-slate-300">{act.employeeName}</strong>
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs p-5">
+          <h3 className="text-xs font-bold text-slate-900 dark:text-white mb-4">
+            Deal History & Timeline
+          </h3>
+          {(opportunity.activities?.length || 0) === 0 ? (
+            <p className="text-xs text-slate-400 text-center py-8">No activities recorded yet.</p>
+          ) : (
+            <div className="space-y-3">
+              {opportunity.activities?.map((act, idx) => (
+                <div key={idx} className="flex gap-3 text-xs">
+                  <div className="w-2 h-2 rounded-full bg-[#5B4DB7] mt-1.5 shrink-0" />
+                  <div>
+                    <div className="font-semibold text-slate-900 dark:text-white">{act.title}</div>
+                    <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                      {act.date} {act.time} • By {act.user}
+                    </div>
+                    {act.description && (
+                      <p className="text-slate-600 dark:text-slate-300 mt-1">{act.description}</p>
+                    )}
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
-      {/* MODALS */}
-      <OpportunityForm
-        isOpen={isEditOpen}
-        onClose={() => setIsEditOpen(false)}
-        onSave={(updatedOpp) => {
-          handleUpdateOpportunity(updatedOpp);
-          showToast('Opportunity updated successfully.');
-        }}
-        initialOpportunity={opportunity}
-      />
-
+      {/* MARK WON MODAL */}
       <MarkWonModal
         isOpen={isWonOpen}
-        onClose={() => setIsWonOpen(false)}
         opportunity={opportunity}
-        onConfirmWon={handleConfirmWon}
+        onClose={() => setIsWonOpen(false)}
+        onConfirm={handleConfirmWon}
       />
 
+      {/* MARK LOST MODAL */}
       <MarkLostModal
         isOpen={isLostOpen}
-        onClose={() => setIsLostOpen(false)}
         opportunity={opportunity}
-        onConfirmLost={handleConfirmLost}
+        onClose={() => setIsLostOpen(false)}
+        onConfirm={handleConfirmLost}
       />
 
+      {/* ADD FOLLOW UP MODAL */}
       <AddFollowUpModal
         isOpen={isFollowUpOpen}
-        onClose={() => setIsFollowUpOpen(false)}
         opportunity={opportunity}
+        onClose={() => setIsFollowUpOpen(false)}
         onAddFollowUp={handleAddFollowUp}
       />
 
+      {/* CREATE / EDIT PROPOSAL MODAL */}
       <CreateProposalModal
-        isOpen={isProposalOpen}
-        onClose={() => setIsProposalOpen(false)}
+        isOpen={Boolean(isCreatePropOpen || editingProposal)}
         opportunity={opportunity}
-        onSaveProposal={handleSaveProposal}
+        initialProposal={editingProposal}
+        onClose={() => {
+          setIsCreatePropOpen(false);
+          setEditingProposal(null);
+        }}
+        onSaveProposal={async (savedProp) => {
+          if (editingProposal) {
+            const updated = await updateProposal(savedProp.id, savedProp);
+            setProposals((prev) =>
+              prev.map((p) => (p.id === updated.id ? updated : p))
+            );
+            showToast(`Proposal ${updated.proposalCode} updated successfully!`);
+          } else {
+            const created = await createProposal(savedProp);
+            setProposals((prev) => [created, ...prev]);
+            showToast(`Proposal ${created.proposalCode} generated successfully!`);
+          }
+          setIsCreatePropOpen(false);
+          setEditingProposal(null);
+          window.dispatchEvent(new Event('crm-proposals-updated'));
+          window.dispatchEvent(new Event('crm-opportunities-updated'));
+          window.dispatchEvent(new Event('crm-leads-updated'));
+          window.dispatchEvent(new Event('crm-stage-synced'));
+        }}
       />
 
+      {/* PROPOSAL DETAILS MODAL */}
       <ProposalDetailsModal
         isOpen={!!selectedProposal}
-        onClose={() => setSelectedProposal(null)}
         proposal={selectedProposal}
-        onStatusChange={(propId, status) => {
-          const updatedProps = proposals.map((p) => (p.id === propId ? { ...p, status } : p));
-          setProposals(updatedProps);
-          saveStoredProposals(updatedProps);
-          if (selectedProposal && selectedProposal.id === propId) {
-            setSelectedProposal({ ...selectedProposal, status });
-          }
+        onClose={() => setSelectedProposal(null)}
+        onEdit={(prop) => {
+          setSelectedProposal(null);
+          setEditingProposal(prop);
         }}
-        onNotice={(msg) => showToast(msg)}
+        onNotice={showToast}
+      />
+
+      {/* SEND PROPOSAL EMAIL MODAL */}
+      <SendProposalEmailModal
+        isOpen={!!emailProposal}
+        proposal={emailProposal}
+        onClose={() => setEmailProposal(null)}
+        onSentSuccess={(pid, rec) => {
+          showToast(`Proposal email successfully sent to ${rec}!`);
+          setProposals((prev) =>
+            prev.map((p) => (p.id === pid ? { ...p, status: 'Sent' } : p))
+          );
+        }}
+      />
+
+      {/* DELETE PROPOSAL CONFIRMATION */}
+      <ConfirmationModal
+        isOpen={!!deleteProposalTarget}
+        title="Delete Proposal"
+        message={`Are you sure you want to delete proposal ${deleteProposalTarget?.proposalCode}?`}
+        confirmLabel="Delete Proposal"
+        cancelLabel="Keep Proposal"
+        variant="danger"
+        iconType="trash"
+        onConfirm={handleDeleteProposal}
+        onCancel={() => setDeleteProposalTarget(null)}
+      />
+
+      {/* DELETE OPPORTUNITY CONFIRMATION */}
+      <ConfirmationModal
+        isOpen={isDeleteOppOpen}
+        title="Delete Opportunity"
+        message={`Are you sure you want to delete opportunity "${opportunity.name}"?`}
+        confirmLabel="Delete Opportunity"
+        cancelLabel="Keep Opportunity"
+        variant="danger"
+        iconType="trash"
+        onConfirm={handleDeleteOpportunity}
+        onCancel={() => setIsDeleteOppOpen(false)}
       />
     </div>
   );

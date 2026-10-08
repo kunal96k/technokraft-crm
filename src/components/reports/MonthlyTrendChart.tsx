@@ -17,6 +17,14 @@ interface MonthlyTrendChartProps {
 }
 
 export const MonthlyTrendChart: React.FC<MonthlyTrendChartProps> = ({ data }) => {
+  if (!data || data.length === 0) {
+    return (
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-8 text-center text-xs text-slate-400 font-medium">
+        No monthly progression data recorded for the selected filter.
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 sm:p-5 shadow-2xs space-y-4">
       <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
@@ -25,7 +33,7 @@ export const MonthlyTrendChart: React.FC<MonthlyTrendChartProps> = ({ data }) =>
             <Calendar className="w-3.5 h-3.5" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white">Monthly Progression Trend (H1 2026)</h3>
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white">Monthly Progression Trend (Last 6 Months)</h3>
             <p className="text-[11px] text-slate-500 dark:text-slate-400">Leads Generated vs Qualified vs Won Deals trajectory</p>
           </div>
         </div>

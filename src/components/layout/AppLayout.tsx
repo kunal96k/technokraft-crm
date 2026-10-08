@@ -1,104 +1,63 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { MobileSidebar } from './MobileSidebar';
 import { TopHeader } from './TopHeader';
 import { Footer } from './Footer';
-import { INITIAL_USER_PROFILE } from '../../config/navigation';
-import { UserProfile, UserRole } from '../../types/navigation';
-import { useTheme } from '../../context/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
+import { UserRole, UserProfile } from '../../types/navigation';
 
-interface AppLayoutProps {
-  children?: React.ReactNode;
-}
+export const AppLayout: React.FC = () => {
+  const { user } = useAuth();
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [sidebarTheme, setSidebarTheme] = useState<'dark' | 'light'>('dark');
 
-export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
-  const { resolvedTheme, setTheme } = useTheme();
-
-  // Sidebar states
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(() => {
-    const saved = localStorage.getItem('tk_crm_sidebar_collapsed');
-    return saved ? JSON.parse(saved) : false;
-  });
-
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState<boolean>(false);
-
-  // User and RBAC state
-  const [currentUser, setCurrentUser] = useState<UserProfile>(INITIAL_USER_PROFILE);
-
-  // Derive sidebar theme from resolvedTheme (can be 'dark' or 'light')
-  const sidebarTheme = resolvedTheme === 'Dark' ? 'dark' : 'light';
-
-  const setSidebarTheme = (
-    update: 'dark' | 'light' | ((prev: 'dark' | 'light') => 'dark' | 'light')
-  ) => {
-    const nextTheme = typeof update === 'function' ? update(sidebarTheme) : update;
-    setTheme(nextTheme === 'dark' ? 'Dark' : 'Light');
-  };
-
-  useEffect(() => {
-    localStorage.setItem('tk_crm_sidebar_collapsed', JSON.stringify(isSidebarCollapsed));
-  }, [isSidebarCollapsed]);
-
-  const handleToggleDesktopSidebar = () => {
-    setIsSidebarCollapsed((prev) => !prev);
-  };
-
-  const handleToggleMobileSidebar = () => {
-    setIsMobileSidebarOpen((prev) => !prev);
-  };
-
-  const handleRoleChange = (newRole: UserRole) => {
-    setCurrentUser((prev) => ({
-      ...prev,
-      role: newRole,
-    }));
+  const currentUser: UserProfile = {
+    name: user?.name || 'Administrator',
+    initials: user?.name ? user.name.slice(0, 2).toUpperCase() : 'AD',
+    email: user?.email || 'admin@technokraftservices.com',
+    role: (user?.accessRole as UserRole) || 'Sales Manager',
+    department: 'Management',
+    avatarUrl: user?.avatar,
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B1120] flex text-slate-900 dark:text-slate-100 font-sans antialiased selection:bg-[#5B4DB7]/20 selection:text-[#5B4DB7] transition-colors duration-200">
-      {/* 1. Desktop Persistent Sidebar */}
-      <Sidebar
-        collapsed={isSidebarCollapsed}
-        onToggleCollapse={handleToggleDesktopSidebar}
-        currentRole={currentUser.role}
-        theme={sidebarTheme}
-      />
-
-      {/* 2. Mobile Off-Canvas Drawer */}
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0B1120] text-slate-900 dark:text-slate-100 flex flex-col font-sans antialiased transition-colors duration-200">
+      {/* Mobile Drawer Navigation (<1024px) */}
       <MobileSidebar
         isOpen={isMobileSidebarOpen}
         onClose={() => setIsMobileSidebarOpen(false)}
         currentRole={currentUser.role}
-        theme={sidebarTheme}
       />
 
-      {/* 3. Main Workspace Area (Header + Scrollable Main + Footer) */}
-      <div className="flex-1 flex flex-col min-w-0 min-h-screen bg-[#F8FAFC] dark:bg-[#0B1120] transition-colors duration-200">
-        {/* Sticky Top Navigation Header */}
-        <TopHeader
-          onToggleMobileSidebar={handleToggleMobileSidebar}
-          onToggleDesktopSidebar={handleToggleDesktopSidebar}
-          isSidebarCollapsed={isSidebarCollapsed}
-          user={currentUser}
-          onRoleChange={handleRoleChange}
+      <div className="flex flex-1 w-full min-h-screen">
+        {/* Desktop Sticky Sidebar (>=1024px) */}
+        <Sidebar
+          collapsed={isSidebarCollapsed}
+          onToggleCollapse={() => setIsSidebarCollapsed((prev) => !prev)}
+          currentRole={currentUser.role}
         />
 
-        {/* Reusable Main Content Container */}
-        <main
-          id="crm-main-content-container"
-          className="flex-1 w-full max-w-full min-w-0 px-3 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-7 overflow-x-hidden bg-[#F8FAFC] dark:bg-[#0B1120] text-slate-900 dark:text-slate-100"
-        >
-          {/* Outlet for React Router nested routes or direct children */}
-          {children || (
-            <Outlet context={{ currentUser, sidebarTheme, setSidebarTheme }} />
-          )}
-        </main>
+        {/* Right Main Content Column */}
+        <div className="flex-1 flex flex-col min-w-0 min-h-screen bg-slate-50 dark:bg-[#0B1120]">
+          {/* Top Global Header Bar */}
+          <TopHeader
+            onToggleMobileSidebar={() => setIsMobileSidebarOpen(true)}
+            onToggleDesktopSidebar={() => setIsSidebarCollapsed((prev) => !prev)}
+            isSidebarCollapsed={isSidebarCollapsed}
+            user={currentUser}
+          />
 
-        {/* Standard Application Footer */}
-        <Footer />
+          {/* Main Content Area - naturally scrollable on Y-axis without trap */}
+          <main className="flex-1 px-3 sm:px-4 md:px-6 py-4 md:py-6">
+            <Outlet context={{ currentUser, sidebarTheme, setSidebarTheme }} />
+          </main>
+
+          {/* Footer */}
+          <Footer />
+        </div>
       </div>
     </div>
   );
 };
-

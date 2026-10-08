@@ -25,7 +25,6 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
         id: 'leads',
         title: 'Leads',
         icon: UsersRound,
-        badge: '1,284',
         badgeColor: 'purple',
         children: [
           {
@@ -55,7 +54,6 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
         id: 'communication',
         title: 'Communication',
         icon: Send,
-        badge: '5',
         badgeColor: 'blue',
         children: [
           {
@@ -85,7 +83,6 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
         id: 'follow-ups',
         title: 'Follow-ups',
         icon: CalendarClock,
-        badge: '12',
         badgeColor: 'amber',
         children: [
           {
@@ -178,20 +175,9 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
       {
         id: 'settings',
         title: 'Settings',
+        path: '/settings/general',
         icon: Settings,
         roles: ['Super Admin', 'Admin', 'Sales Manager'],
-        children: [
-          {
-            id: 'users-roles',
-            title: 'Users & Roles',
-            path: '/settings/users',
-          },
-          {
-            id: 'general-settings',
-            title: 'General Settings',
-            path: '/settings/general',
-          },
-        ],
       },
     ],
   },
@@ -201,7 +187,16 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
  * Helper to check whether the current user role can view a module or navigation item.
  * Defaults to true if no specific role restriction is configured.
  */
-export function canViewModule(item: NavigationItem, currentRole: UserRole): boolean {
+export function canViewModule(
+  item: NavigationItem,
+  currentRole: UserRole,
+  allowedModules?: string[]
+): boolean {
+  if (allowedModules && Array.isArray(allowedModules) && allowedModules.length > 0) {
+    if (!allowedModules.includes(item.id)) {
+      return false;
+    }
+  }
   if (!item.roles || item.roles.length === 0) {
     return true;
   }

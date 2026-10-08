@@ -1,25 +1,39 @@
 import React from 'react';
 import { Users, UserCheck, CalendarCheck, Clock, UserX } from 'lucide-react';
 import { Employee } from '../../types/employees';
+import { EmployeeSummaryData } from '../../services/employeeService';
 
 interface EmployeeSummaryCardsProps {
   employees: Employee[];
+  summary?: EmployeeSummaryData | null;
   activeFilter?: string;
+  selectedFilter?: string;
   onFilterSelect?: (filter: string) => void;
+  onSelectFilter?: (filter: string) => void;
 }
 
 export const EmployeeSummaryCards: React.FC<EmployeeSummaryCardsProps> = ({
   employees,
+  summary,
   activeFilter,
+  selectedFilter,
   onFilterSelect,
+  onSelectFilter,
 }) => {
-  const total = employees.length;
-  const active = employees.filter((e) => e.status === 'Active').length;
-  const presentToday = employees.filter(
-    (e) => e.todayAttendanceStatus === 'Present' || e.todayAttendanceStatus === 'Late'
-  ).length;
-  const currentlyWorking = employees.filter((e) => e.workStatus === 'Working').length;
-  const inactive = employees.filter((e) => e.status === 'Inactive').length;
+  const currentFilter = activeFilter || selectedFilter || 'all';
+  const handleSelect = onFilterSelect || onSelectFilter;
+
+  // Use global summary data from backend if available, otherwise compute from local list
+  const total = summary?.total ?? employees.length;
+  const active = summary?.active ?? employees.filter((e) => e.status === 'Active').length;
+  const presentToday =
+    summary?.presentToday ??
+    employees.filter(
+      (e) => e.todayAttendanceStatus === 'Present' || e.todayAttendanceStatus === 'Late'
+    ).length;
+  const currentlyWorking =
+    summary?.currentlyWorking ?? employees.filter((e) => e.workStatus === 'Working').length;
+  const inactive = summary?.inactive ?? employees.filter((e) => e.status === 'Inactive').length;
 
   const cards = [
     {
@@ -83,14 +97,16 @@ export const EmployeeSummaryCards: React.FC<EmployeeSummaryCardsProps> = ({
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
       {cards.map((card) => {
         const Icon = card.icon;
-        const isSelected = activeFilter === card.filterKey;
+        const isSelected =
+          currentFilter === card.filterKey ||
+          (card.filterKey === 'Active' && (currentFilter === 'active_pool' || currentFilter === 'active_only'));
 
         return (
           <button
             key={card.id}
             type="button"
-            onClick={() => onFilterSelect && onFilterSelect(card.filterKey)}
-            className={`flex flex-col text-left p-3.5 rounded-xl border transition-all duration-150 relative overflow-hidden group ${
+            onClick={() => handleSelect && handleSelect(card.filterKey)}
+            className={`flex flex-col text-left p-3.5 rounded-xl border transition-all duration-150 relative overflow-hidden group cursor-pointer ${
               isSelected
                 ? 'ring-2 ring-purple-500/50 border-purple-400 dark:border-purple-600 bg-purple-50/20 dark:bg-purple-950/20'
                 : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-xs'

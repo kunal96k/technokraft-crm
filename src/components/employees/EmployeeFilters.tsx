@@ -1,7 +1,6 @@
 import React from 'react';
 import { X, Filter } from 'lucide-react';
-import { EmployeeFiltersState } from '../../types/employees';
-import { DEPARTMENTS, EMPLOYEE_ROLES, MANAGERS } from '../../data/mockEmployees';
+import { EmployeeFiltersState, DEPARTMENTS, EMPLOYEE_ROLES, MANAGERS } from '../../types/employees';
 
 interface EmployeeFiltersProps {
   filters: EmployeeFiltersState;
@@ -108,10 +107,11 @@ export const EmployeeFilters: React.FC<EmployeeFiltersProps> = ({
             onChange={(e) => onChange({ ...filters, status: e.target.value })}
             className="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-2.5 py-1.5 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
           >
-            <option value="">All Statuses</option>
-            <option value="Active">Active</option>
-            <option value="Inactive">Inactive</option>
+            <option value="active_pool">Active Staff (Default - Active & On Leave)</option>
+            <option value="all">All Staff (Include Deactivated/Suspended)</option>
+            <option value="Active">Active Only</option>
             <option value="On Leave">On Leave</option>
+            <option value="Inactive">Inactive / Deactivated</option>
             <option value="Suspended">Suspended</option>
           </select>
         </div>

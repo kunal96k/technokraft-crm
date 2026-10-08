@@ -19,6 +19,7 @@ import { FollowUpRecord } from '../../types/followUps';
 import { FollowUpStatusBadge } from './FollowUpStatusBadge';
 import { FollowUpPriorityBadge } from './FollowUpPriorityBadge';
 import { FollowUpTypeBadge } from './FollowUpTypeBadge';
+import { formatDisplayDate, formatISTTime } from '../../utils/dateUtils';
 
 interface FollowUpDetailModalProps {
   isOpen: boolean;
@@ -101,14 +102,14 @@ export const FollowUpDetailModal: React.FC<FollowUpDetailModalProps> = ({
               <span className="text-[10px] text-slate-400 dark:text-slate-500 block font-medium">Scheduled Date</span>
               <span className="font-bold text-slate-800 dark:text-slate-200 text-xs flex items-center gap-1 mt-0.5">
                 <Calendar className="w-3.5 h-3.5 text-[#5B4DB7] dark:text-purple-400" />
-                {followUp.date}
+                {formatDisplayDate(followUp.date)}
               </span>
             </div>
             <div>
               <span className="text-[10px] text-slate-400 dark:text-slate-500 block font-medium">Scheduled Time</span>
               <span className="font-bold text-slate-800 dark:text-slate-200 text-xs flex items-center gap-1 mt-0.5">
                 <Clock className="w-3.5 h-3.5 text-[#5B4DB7] dark:text-purple-400" />
-                {followUp.time}
+                {formatISTTime(followUp.time)}
               </span>
             </div>
             <div>

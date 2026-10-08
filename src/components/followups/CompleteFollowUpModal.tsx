@@ -5,6 +5,7 @@ import {
   FollowUpOutcome,
   FollowUpType,
 } from '../../types/followUps';
+import { getTodayIST_YYYYMMDD } from '../../utils/dateUtils';
 
 interface CompleteFollowUpModalProps {
   isOpen: boolean;
@@ -24,6 +25,13 @@ interface CompleteFollowUpModalProps {
   ) => void;
 }
 
+function getPlusTwoDaysIST(): string {
+  const today = getTodayIST_YYYYMMDD();
+  const [y, m, d] = today.split('-').map(Number);
+  const target = new Date(y, m - 1, d + 2);
+  return `${target.getFullYear()}-${String(target.getMonth() + 1).padStart(2, '0')}-${String(target.getDate()).padStart(2, '0')}`;
+}
+
 export const CompleteFollowUpModal: React.FC<CompleteFollowUpModalProps> = ({
   isOpen,
   followUp,
@@ -35,10 +43,24 @@ export const CompleteFollowUpModal: React.FC<CompleteFollowUpModalProps> = ({
   const [hasNextAction, setHasNextAction] = React.useState<boolean>(false);
   const [nextType, setNextType] = React.useState<FollowUpType>('Call');
   const [nextPurpose, setNextPurpose] = React.useState('');
-  const [nextDate, setNextDate] = React.useState('2026-09-10');
-  const [nextTime, setNextTime] = React.useState('02:00 PM');
+  const [nextDate, setNextDate] = React.useState(() => getPlusTwoDaysIST());
+  const [nextTime, setNextTime] = React.useState('11:00 AM');
   const [nextNotes, setNextNotes] = React.useState('');
   const [error, setError] = React.useState('');
+
+  React.useEffect(() => {
+    if (followUp && isOpen) {
+      setOutcome('Interested');
+      setNotes('');
+      setHasNextAction(false);
+      setNextType('Call');
+      setNextPurpose(`Follow up on: ${followUp.companyName}`);
+      setNextDate(getPlusTwoDaysIST());
+      setNextTime('11:00 AM');
+      setNextNotes('');
+      setError('');
+    }
+  }, [followUp, isOpen]);
 
   if (!isOpen || !followUp) return null;
 

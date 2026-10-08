@@ -11,14 +11,24 @@ import {
   Building2,
   Eye,
   RotateCcw,
+  Trash2,
+  CalendarX,
 } from 'lucide-react';
 import { MeetingRecord, MeetingStatus } from '../../../types/followUps';
+import { FollowUpEmptyState } from '../FollowUpEmptyState';
+import { ConfirmationModal } from '../../common/ConfirmationModal';
+import { formatDisplayDate } from '../../../utils/dateUtils';
 
 interface MeetingTableProps {
   meetings: MeetingRecord[];
   onOpenDetails: (meeting: MeetingRecord) => void;
   onOpenComplete: (meeting: MeetingRecord) => void;
   onCancelMeeting: (meetingId: string) => void;
+  onDeleteMeeting?: (meetingId: string) => void;
+  onAction?: () => void;
+  onResetFilters?: () => void;
+  hasFilters?: boolean;
+  tab?: string;
 }
 
 export const MeetingTable: React.FC<MeetingTableProps> = ({
@@ -26,7 +36,27 @@ export const MeetingTable: React.FC<MeetingTableProps> = ({
   onOpenDetails,
   onOpenComplete,
   onCancelMeeting,
+  onDeleteMeeting,
+  onAction,
+  onResetFilters,
+  hasFilters,
+  tab,
 }) => {
+  const [confirmTarget, setConfirmTarget] = React.useState<{
+    meeting: MeetingRecord;
+    action: 'cancel' | 'delete';
+  } | null>(null);
+  if (meetings.length === 0) {
+    return (
+      <FollowUpEmptyState
+        module="meetings"
+        tab={tab}
+        hasFilters={hasFilters}
+        onAction={onAction}
+        onResetFilters={onResetFilters}
+      />
+    );
+  }
   const getStatusBadge = (status: MeetingStatus) => {
     switch (status) {
       case 'Completed':
@@ -100,7 +130,7 @@ export const MeetingTable: React.FC<MeetingTableProps> = ({
                   </div>
                   <div className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1 mt-0.5">
                     <Calendar className="w-3 h-3 text-slate-400" />
-                    <span>{item.date}</span>
+                    <span>{formatDisplayDate(item.date)}</span>
                   </div>
                 </td>
 
@@ -186,7 +216,7 @@ export const MeetingTable: React.FC<MeetingTableProps> = ({
                       <button
                         type="button"
                         onClick={() => onOpenComplete(item)}
-                        className="px-2 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 rounded border border-emerald-200 dark:border-emerald-800 transition-colors"
+                        className="px-2 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 rounded border border-emerald-200 dark:border-emerald-800 transition-colors cursor-pointer"
                         title="Complete and log minutes"
                       >
                         Complete
@@ -195,10 +225,28 @@ export const MeetingTable: React.FC<MeetingTableProps> = ({
                     <button
                       type="button"
                       onClick={() => onOpenDetails(item)}
-                      className="p-1 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded hover:bg-slate-100 dark:hover:bg-slate-800"
+                      className="p-1 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer transition-colors"
                       title="View Meeting Details"
                     >
                       <Eye className="w-4 h-4" />
+                    </button>
+                    {item.status !== 'Cancelled' && (
+                      <button
+                        type="button"
+                        onClick={() => setConfirmTarget({ meeting: item, action: 'cancel' })}
+                        className="p-1 text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 rounded hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer transition-colors"
+                        title="Cancel Meeting"
+                      >
+                        <CalendarX className="w-4 h-4" />
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => setConfirmTarget({ meeting: item, action: 'delete' })}
+                      className="p-1 text-slate-400 hover:text-red-600 dark:hover:text-red-400 rounded hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer transition-colors"
+                      title="Delete Meeting"
+                    >
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
                 </td>
@@ -207,6 +255,48 @@ export const MeetingTable: React.FC<MeetingTableProps> = ({
           })}
         </tbody>
       </table>
+
+      {/* Confirmation Modal for Table Actions */}
+      {confirmTarget && (
+        <ConfirmationModal
+          isOpen={true}
+          title={
+            confirmTarget.action === 'cancel'
+              ? 'Cancel Scheduled Meeting?'
+              : 'Delete Meeting Permanently?'
+          }
+          message={
+            confirmTarget.action === 'cancel'
+              ? `Are you sure you want to cancel the meeting with "${confirmTarget.meeting.companyName}"? The meeting status will be marked as Cancelled.`
+              : `Are you sure you want to permanently delete the meeting record for "${confirmTarget.meeting.companyName}"? This action cannot be reversed.`
+          }
+          confirmLabel={
+            confirmTarget.action === 'cancel' ? 'Yes, Cancel Meeting' : 'Yes, Delete Record'
+          }
+          cancelLabel="Keep Meeting"
+          variant={confirmTarget.action === 'cancel' ? 'warning' : 'danger'}
+          iconType={confirmTarget.action === 'cancel' ? 'cancel-meeting' : 'trash'}
+          itemDetails={[
+            { label: 'Client / Company', value: confirmTarget.meeting.companyName },
+            { label: 'Meeting Title', value: confirmTarget.meeting.title },
+            { label: 'Date & Time', value: `${confirmTarget.meeting.date} (${confirmTarget.meeting.startTime})` },
+            { label: 'Host', value: confirmTarget.meeting.assignedEmployee },
+          ]}
+          onConfirm={() => {
+            if (confirmTarget.action === 'cancel') {
+              onCancelMeeting(confirmTarget.meeting.id);
+            } else {
+              if (onDeleteMeeting) {
+                onDeleteMeeting(confirmTarget.meeting.id);
+              } else {
+                onCancelMeeting(confirmTarget.meeting.id);
+              }
+            }
+            setConfirmTarget(null);
+          }}
+          onCancel={() => setConfirmTarget(null)}
+        />
+      )}
     </div>
   );
 };

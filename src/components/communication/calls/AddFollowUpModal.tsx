@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { CallRecord } from '../../../types/calls';
 import { X, CalendarPlus, Calendar, Clock, User, CheckCircle2 } from 'lucide-react';
+import { EmployeeSelect } from '../../common/EmployeeSelect';
 
 interface AddFollowUpModalProps {
   isOpen: boolean;
@@ -18,7 +19,7 @@ export const AddFollowUpModal: React.FC<AddFollowUpModalProps> = ({
   const [date, setDate] = useState('2026-09-09');
   const [time, setTime] = useState('11:00 AM');
   const [type, setType] = useState<'Call' | 'Email' | 'Meeting' | 'Demo' | 'Document'>('Email');
-  const [assignedTo, setAssignedTo] = useState(call.employeeName || 'Kunal Patil');
+  const [assignedTo, setAssignedTo] = useState(call.employeeName || '');
   const [notes, setNotes] = useState('');
 
   if (!isOpen) return null;
@@ -124,17 +125,12 @@ export const AddFollowUpModal: React.FC<AddFollowUpModalProps> = ({
 
             <div>
               <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Assigned To</label>
-              <select
+              <EmployeeSelect
                 value={assignedTo}
                 onChange={(e) => setAssignedTo(e.target.value)}
+                placeholder="Select Assigned Employee"
                 className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-medium text-slate-900 dark:text-slate-100 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
-              >
-                <option value="Kunal Patil">Kunal Patil</option>
-                <option value="Shruti Raundal">Shruti Raundal</option>
-                <option value="Pranav Jejurkar">Pranav Jejurkar</option>
-                <option value="Ankush Pandit">Ankush Pandit</option>
-                <option value="Rohan Patil">Rohan Patil</option>
-              </select>
+              />
             </div>
           </div>
 

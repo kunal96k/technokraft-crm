@@ -11,6 +11,7 @@ interface DraggableOpportunityCardProps {
   onCreateProposal?: (opp: OpportunityRecord) => void;
   onMarkWon?: (opp: OpportunityRecord) => void;
   onMarkLost?: (opp: OpportunityRecord) => void;
+  onDelete?: (opp: OpportunityRecord) => void;
 }
 
 export const DraggableOpportunityCard: React.FC<DraggableOpportunityCardProps> = ({
@@ -21,6 +22,7 @@ export const DraggableOpportunityCard: React.FC<DraggableOpportunityCardProps> =
   onCreateProposal,
   onMarkWon,
   onMarkLost,
+  onDelete,
 }) => {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: opportunity.id,
@@ -52,6 +54,7 @@ export const DraggableOpportunityCard: React.FC<DraggableOpportunityCardProps> =
         onCreateProposal={onCreateProposal}
         onMarkWon={onMarkWon}
         onMarkLost={onMarkLost}
+        onDelete={onDelete}
         isDragging={isDragging}
         dragHandleProps={{ ...attributes, ...listeners }}
       />

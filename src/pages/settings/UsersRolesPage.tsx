@@ -36,7 +36,8 @@ import {
   saveUsers,
   loadRoles,
   saveRoles,
-} from '../../data/mockSettings';
+} from '../../services/settingsService';
+import { fetchEmployees } from '../../services/employeeService';
 
 export const UsersRolesPage: React.FC = () => {
   // Tabs: 'users' or 'roles'
@@ -80,15 +81,45 @@ export const UsersRolesPage: React.FC = () => {
     action: () => {},
   });
 
-  // Load data on mount
+  // Load data on mount from database
   useEffect(() => {
-    const loadedUsers = loadUsers();
-    const loadedRoles = loadRoles();
-    setUsers(loadedUsers);
-    setRoles(loadedRoles);
-    if (loadedRoles.length > 0) {
-      setSelectedRole(loadedRoles[0]);
+    async function loadData() {
+      const loadedRoles = loadRoles();
+      setRoles(loadedRoles);
+      if (loadedRoles.length > 0) {
+        setSelectedRole(loadedRoles[0]);
+      }
+
+      try {
+        const empRes = await fetchEmployees({ size: 100 });
+        if (empRes.content && empRes.content.length > 0) {
+          const mappedUsers: CrmUser[] = empRes.content.map((emp) => ({
+            id: `user-${emp.id}`,
+            employeeId: emp.employeeCode || `EMP-${String(emp.id).padStart(4, '0')}`,
+            name: emp.name,
+            email: emp.email,
+            avatar: emp.avatar || emp.name.slice(0, 2).toUpperCase(),
+            role: emp.role || 'Sales Executive',
+            department: emp.department || 'Sales',
+            reportingManager: emp.reportingManager || 'Management',
+            status: emp.status === 'Inactive' ? 'Inactive' : 'Active',
+            crmAccess: emp.crmAccess ?? true,
+            lastLogin: emp.loginTime ? `Today ${emp.loginTime}` : '—',
+            lastActivity: emp.todayWorkingTime ? `Working (${emp.todayWorkingTime})` : '—',
+            createdDate: emp.joiningDate || new Date().toISOString().slice(0, 10),
+          }));
+          setUsers(mappedUsers);
+          saveUsers(mappedUsers);
+          return;
+        }
+      } catch (err) {
+        console.warn('Could not fetch real employees for users page', err);
+      }
+
+      const loadedUsers = loadUsers();
+      setUsers(loadedUsers);
     }
+    loadData();
   }, []);
 
   const showToast = (msg: string) => {
@@ -149,7 +180,7 @@ export const UsersRolesPage: React.FC = () => {
         avatar: userData.avatar || 'TK',
         role: userData.role || 'Sales Executive',
         department: userData.department || 'Sales',
-        reportingManager: userData.reportingManager || 'Rajesh Mehta',
+        reportingManager: userData.reportingManager || '',
         crmAccess: userData.crmAccess !== undefined ? userData.crmAccess : true,
         status: sendInvitation ? 'Pending Invitation' : 'Active',
         lastLogin: 'Never',

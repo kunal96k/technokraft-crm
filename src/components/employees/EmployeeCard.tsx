@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  MoreVertical,
   Eye,
   TrendingUp,
   Calendar,
@@ -8,6 +7,10 @@ import {
   Mail,
   Briefcase,
   Clock,
+  KeyRound,
+  Lock,
+  Edit2,
+  Trash2,
 } from 'lucide-react';
 import { Employee } from '../../types/employees';
 import {
@@ -18,20 +21,35 @@ import {
 
 interface EmployeeCardProps {
   employee: Employee;
-  onView: (employee: Employee) => void;
-  onViewPerformance: (employee: Employee) => void;
-  onViewAttendance: (employee: Employee) => void;
+  onView?: (employee: Employee) => void;
+  onSelect?: (employee: Employee) => void;
+  onEdit?: (employee: Employee) => void;
+  onResetPassword?: (employee: Employee) => void;
+  onDeactivate?: (employee: Employee) => void;
+  onActivate?: (employee: Employee) => void;
+  onDelete?: (employee: Employee) => void;
+  onViewPerformance?: (employee: Employee) => void;
+  onViewAttendance?: (employee: Employee) => void;
 }
 
 export const EmployeeCard: React.FC<EmployeeCardProps> = ({
   employee,
   onView,
+  onSelect,
+  onEdit,
+  onResetPassword,
+  onDeactivate,
+  onActivate,
+  onDelete,
   onViewPerformance,
   onViewAttendance,
 }) => {
+  const handleSelect = () => {
+    (onView || onSelect)?.(employee);
+  };
   return (
     <div
-      onClick={() => onView(employee)}
+      onClick={handleSelect}
       className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs hover:border-purple-300 dark:hover:border-purple-800/60 transition-all cursor-pointer flex flex-col gap-3"
     >
       {/* Header with Avatar, Name, and Status */}
@@ -88,29 +106,57 @@ export const EmployeeCard: React.FC<EmployeeCardProps> = ({
       {/* Action shortcuts */}
       <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
         <span className="text-[11px] text-slate-400">
-          Mgr: {employee.reportingManager.split(' ')[0]}
+          Username: <span className="font-mono text-slate-600 dark:text-slate-300">{employee.username || employee.email.split('@')[0]}</span>
         </span>
 
         <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+          {onResetPassword && (
+            <button
+              type="button"
+              onClick={() => onResetPassword(employee)}
+              title="Reset Password"
+              className="p-1.5 rounded-lg text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 border border-indigo-200 dark:border-indigo-800"
+            >
+              <KeyRound className="w-3.5 h-3.5" />
+            </button>
+          )}
+          {onEdit && (
+            <button
+              type="button"
+              onClick={() => onEdit(employee)}
+              title="Edit Profile"
+              className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
+            >
+              <Edit2 className="w-3.5 h-3.5" />
+            </button>
+          )}
+          {onDelete && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(employee);
+              }}
+              title="Delete Employee"
+              className="p-1.5 rounded-lg text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          )}
+          {onViewPerformance && (
+            <button
+              type="button"
+              onClick={() => onViewPerformance(employee)}
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/50 hover:bg-purple-100"
+            >
+              <TrendingUp className="w-3.5 h-3.5" />
+              <span>Performance</span>
+            </button>
+          )}
           <button
             type="button"
-            onClick={() => onViewPerformance(employee)}
-            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/50 hover:bg-purple-100"
-          >
-            <TrendingUp className="w-3.5 h-3.5" />
-            <span>Performance</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => onViewAttendance(employee)}
-            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/50 hover:bg-blue-100"
-          >
-            <Calendar className="w-3.5 h-3.5" />
-            <span>Attendance</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => onView(employee)}
+            onClick={handleSelect}
+            title="View Details"
             className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
           >
             <Eye className="w-4 h-4" />

@@ -1,18 +1,19 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
   Employee,
   AttendanceFiltersState,
   DailyAttendanceRecord,
 } from '../../types/employees';
-import { INITIAL_EMPLOYEES, getTodayAttendanceRecords } from '../../data/mockEmployees';
+import * as employeeService from '../../services/employeeService';
+import { getTodayAttendanceRecords } from '../../services/employeeService';
 import { AttendanceSummaryCards } from '../../components/attendance/AttendanceSummaryCards';
 import { CurrentlyWorking } from '../../components/attendance/CurrentlyWorking';
 import { AttendanceToolbar } from '../../components/attendance/AttendanceToolbar';
 import { AttendanceTable } from '../../components/attendance/AttendanceTable';
 import { AttendanceCard } from '../../components/attendance/AttendanceCard';
 import { AttendanceDetailsModal } from '../../components/attendance/AttendanceDetailsModal';
-import { Calendar, CheckCircle2 } from 'lucide-react';
+import { Calendar, CheckCircle2, Loader2, RefreshCw } from 'lucide-react';
 
 const INITIAL_ATTENDANCE_FILTERS: AttendanceFiltersState = {
   datePreset: 'Today',
@@ -24,7 +25,24 @@ const INITIAL_ATTENDANCE_FILTERS: AttendanceFiltersState = {
 
 export const AttendancePage: React.FC = () => {
   const [searchParams] = useSearchParams();
-  const [employees] = useState<Employee[]>(INITIAL_EMPLOYEES);
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  const loadEmployees = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const res = await employeeService.fetchEmployees({ size: 150 });
+      setEmployees(res.content || []);
+    } catch (err) {
+      console.error('[AttendancePage] Failed to fetch employees:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadEmployees();
+  }, [loadEmployees]);
 
   // Generate today's records
   const allRecords = useMemo(() => getTodayAttendanceRecords(employees), [employees]);
@@ -159,60 +177,85 @@ export const AttendancePage: React.FC = () => {
       )}
 
       {/* Page Header */}
-      <div>
-        <div className="flex items-center gap-2">
-          <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
-            Attendance
-          </h1>
-          <span className="text-xs font-mono font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300">
-            Today: 07 Sep 2026
-          </span>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+              Attendance
+            </h1>
+            <span className="text-xs font-mono font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300">
+              {employees.length} Staff
+            </span>
+          </div>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            Track employee attendance, login sessions and working hours.
+          </p>
         </div>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-          Track employee attendance, login sessions and working hours.
-        </p>
+
+        <button
+          type="button"
+          onClick={() => loadEmployees()}
+          disabled={isLoading}
+          className="self-start sm:self-auto flex items-center gap-1.5 px-3 py-2 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 font-semibold text-xs rounded-xl shadow-xs transition-colors cursor-pointer"
+          title="Refresh attendance data"
+        >
+          <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
+          <span>Refresh</span>
+        </button>
       </div>
 
-      {/* Summary Cards */}
-      <AttendanceSummaryCards
-        employees={employees}
-        selectedFilter={filters.status}
-        onSelectFilter={handleSummaryCardFilter}
-      />
-
-      {/* Currently Working Live Telemetry Section */}
-      <CurrentlyWorking
-        employees={employees}
-        onSelectEmployee={(emp) => setSelectedEmployeeForModal(emp)}
-      />
-
-      {/* Attendance Toolbar */}
-      <AttendanceToolbar
-        filters={filters}
-        onChange={setFilters}
-        onReset={() => setFilters(INITIAL_ATTENDANCE_FILTERS)}
-        employees={employees}
-        onExport={handleExport}
-      />
-
-      {/* Attendance Table (Desktop) */}
-      <div className="hidden md:block">
-        <AttendanceTable
-          records={filteredRecords}
-          onViewDetails={handleViewDetails}
-        />
-      </div>
-
-      {/* Attendance Cards (Mobile) */}
-      <div className="md:hidden grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {filteredRecords.map((rec) => (
-          <AttendanceCard
-            key={rec.id}
-            record={rec}
-            onViewDetails={handleViewDetails}
+      {/* Loading State */}
+      {isLoading ? (
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-16 text-center text-xs text-slate-500 dark:text-slate-400">
+          <Loader2 className="w-8 h-8 text-[#5B4DB7] animate-spin mx-auto mb-2" />
+          <p className="font-semibold text-slate-800 dark:text-slate-100 text-sm">
+            Loading Attendance Sessions...
+          </p>
+        </div>
+      ) : (
+        <>
+          {/* Summary Cards */}
+          <AttendanceSummaryCards
+            employees={employees}
+            selectedFilter={filters.status}
+            onSelectFilter={handleSummaryCardFilter}
           />
-        ))}
-      </div>
+
+          {/* Currently Working Live Telemetry Section */}
+          <CurrentlyWorking
+            employees={employees}
+            onSelectEmployee={(emp) => setSelectedEmployeeForModal(emp)}
+          />
+
+          {/* Attendance Toolbar */}
+          <AttendanceToolbar
+            filters={filters}
+            onChange={setFilters}
+            onReset={() => setFilters(INITIAL_ATTENDANCE_FILTERS)}
+            employees={employees}
+            onExport={handleExport}
+          />
+
+          {/* Attendance Table (Desktop) */}
+          <div className="hidden md:block">
+            <AttendanceTable
+              records={filteredRecords}
+              onViewDetails={handleViewDetails}
+            />
+          </div>
+
+          {/* Attendance Cards (Mobile) */}
+          <div className="md:hidden grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {filteredRecords.map((rec) => (
+              <AttendanceCard
+                key={rec.id}
+                record={rec}
+                onViewDetails={handleViewDetails}
+              />
+            ))}
+          </div>
+        </>
+      )}
 
       {/* Attendance Details Modal */}
       <AttendanceDetailsModal

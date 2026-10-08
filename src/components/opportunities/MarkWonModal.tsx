@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, CheckCircle2, Trophy, IndianRupee } from 'lucide-react';
 import { OpportunityRecord } from '../../types/opportunities';
-import { formatCurrencyINR } from '../../data/mockOpportunities';
+import { formatCurrencyINR } from '../../utils/currencyFormatters';
 
 interface MarkWonModalProps {
   isOpen: boolean;
@@ -107,7 +107,7 @@ export const MarkWonModal: React.FC<MarkWonModalProps> = ({
             <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1">Closure Notes / Remarks</label>
             <textarea
               rows={3}
-              placeholder="e.g. Approved scope, payment milestones agreed, key customer contact..."
+              placeholder="Enter closure notes, agreed payment milestones, and contract details..."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-medium text-slate-900 dark:text-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none"

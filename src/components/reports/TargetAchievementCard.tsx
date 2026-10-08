@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Target, CheckCircle, AlertTriangle, AlertCircle, Sparkles } from 'lucide-react';
 import { EmployeePerformanceRecord, TargetStatus } from '../../types/reports';
-import { formatCurrencyINR } from '../../data/mockReports';
+import { formatCurrencyINR } from '../../utils/currencyFormatters';
 
 interface TargetAchievementCardProps {
   employees: EmployeePerformanceRecord[];
@@ -12,15 +12,23 @@ export const TargetAchievementCard: React.FC<TargetAchievementCardProps> = ({
   employees,
   selectedEmployeeName = 'All Employees',
 }) => {
+  if (!employees || employees.length === 0) {
+    return null;
+  }
+
   const activeEmployee =
     selectedEmployeeName !== 'All Employees'
       ? employees.find((e) => e.name === selectedEmployeeName) || employees[0]
       : employees[0]; // defaults to top rep when All is selected
 
-  const [currentEmpId, setCurrentEmpId] = useState(activeEmployee.id);
+  const [currentEmpId, setCurrentEmpId] = useState(activeEmployee?.id || '');
 
   const displayEmployee =
     employees.find((e) => e.id === currentEmpId) || activeEmployee;
+
+  if (!displayEmployee) {
+    return null;
+  }
 
   const getStatusBadge = (status: TargetStatus) => {
     switch (status) {

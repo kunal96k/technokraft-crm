@@ -17,12 +17,16 @@ import { FollowUpTypeBadge } from './FollowUpTypeBadge';
 import { FollowUpPriorityBadge } from './FollowUpPriorityBadge';
 import { FollowUpStatusBadge } from './FollowUpStatusBadge';
 
+import { formatISTDate, formatISTTime } from '../../utils/dateUtils';
+import { FollowUpEmptyState } from './FollowUpEmptyState';
+
 interface TodayTimelineViewProps {
   followUps: FollowUpRecord[];
   onOpenDetails: (item: FollowUpRecord) => void;
   onOpenComplete: (item: FollowUpRecord) => void;
   onOpenReschedule: (item: FollowUpRecord) => void;
   onCancel: (id: string) => void;
+  onAction?: () => void;
 }
 
 export const TodayTimelineView: React.FC<TodayTimelineViewProps> = ({
@@ -30,23 +34,18 @@ export const TodayTimelineView: React.FC<TodayTimelineViewProps> = ({
   onOpenDetails,
   onOpenComplete,
   onOpenReschedule,
+  onAction,
 }) => {
   // Sort today's follow-ups chronologically
-  const sorted = [...followUps].sort((a, b) => a.time.localeCompare(b.time));
+  const sorted = [...followUps].sort((a, b) => (a.time || '').localeCompare(b.time || ''));
 
   if (sorted.length === 0) {
     return (
-      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-12 text-center">
-        <div className="w-12 h-12 rounded-full bg-purple-50 dark:bg-purple-950/50 text-[#5B4DB7] dark:text-purple-300 flex items-center justify-center mx-auto mb-3">
-          <Calendar className="w-6 h-6" />
-        </div>
-        <h3 className="text-base font-semibold text-slate-800 dark:text-slate-100">
-          No Follow-ups for Today
-        </h3>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">
-          You're all caught up for today. Check the Upcoming tab or schedule a new customer follow-up.
-        </p>
-      </div>
+      <FollowUpEmptyState
+        module="followups"
+        tab="today"
+        onAction={onAction}
+      />
     );
   }
 
@@ -58,7 +57,9 @@ export const TodayTimelineView: React.FC<TodayTimelineViewProps> = ({
           <span className="font-semibold">Today's Schedule</span>
           <span className="text-purple-600 dark:text-purple-400">({sorted.length} scheduled items)</span>
         </div>
-        <span className="font-medium text-slate-600 dark:text-slate-400">Monday, 07 September 2026</span>
+        <span className="font-medium text-slate-600 dark:text-slate-400">
+          {formatISTDate(new Date(), 'long')}
+        </span>
       </div>
 
       <div className="relative pl-6 sm:pl-8 border-l-2 border-purple-200/80 dark:border-purple-900/60 space-y-4 ml-3 my-2">
@@ -83,7 +84,7 @@ export const TodayTimelineView: React.FC<TodayTimelineViewProps> = ({
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-2.5">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-xs font-bold font-mono text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/60 px-2 py-0.5 rounded border border-purple-100 dark:border-purple-800">
-                      {item.time}
+                      {formatISTTime(item.time)}
                     </span>
                     <FollowUpTypeBadge type={item.type} />
                     <FollowUpPriorityBadge priority={item.priority} size="sm" />

@@ -14,6 +14,19 @@ export type DepartmentType =
   | 'Administration'
   | 'Management';
 
+export const DEPARTMENTS: DepartmentType[] = [
+  'Sales',
+  'Business Analysis',
+  'Development',
+  'QA / Testing',
+  'DevOps',
+  'UI/UX',
+  'HR',
+  'Finance',
+  'Administration',
+  'Management',
+];
+
 export type EmployeeRole =
   | 'Sales Executive'
   | 'Business Analyst'
@@ -26,6 +39,22 @@ export type EmployeeRole =
   | 'HR Executive'
   | 'Admin'
   | 'Manager';
+
+export const EMPLOYEE_ROLES: EmployeeRole[] = [
+  'Sales Executive',
+  'Business Analyst',
+  'Sales Manager',
+  'Project Manager',
+  'Software Developer',
+  'QA Engineer',
+  'DevOps Engineer',
+  'UI/UX Designer',
+  'HR Executive',
+  'Admin',
+  'Manager',
+];
+
+export const MANAGERS: string[] = [];
 
 export type CrmAccessRole =
   | 'Employee'
@@ -140,9 +169,16 @@ export interface Employee {
   joiningDate: string;
   status: EmployeeStatus;
 
-  // CRM Access configuration
+  // CRM Access & Login Credentials configuration
   crmAccess: boolean;
   accessRole: CrmAccessRole;
+  allowedModules?: string[]; // IDs of sidebar navigation modules granted to this employee
+  username?: string;
+  password?: string;
+  isPasswordSet?: boolean;
+  forcePasswordReset?: boolean;
+  isAccountLocked?: boolean;
+  lastLoginAt?: string;
 
   // Live / Today status
   workStatus: WorkStatus;
@@ -169,6 +205,12 @@ export interface Employee {
   attendanceSummary: EmployeeMonthlyAttendanceSummary;
 
   createdAt: string;
+  isDeleted?: boolean;
+}
+
+export interface ResetPasswordRequest {
+  newPassword: string;
+  forcePasswordReset?: boolean;
 }
 
 export interface DailyAttendanceRecord {

@@ -5,13 +5,32 @@ import {
   FollowUpType,
   FollowUpPriority,
 } from '../../types/followUps';
-import { MOCK_LEADS } from '../../data/mockLeads';
+import { Lead } from '../../types/leads';
+import { EmployeeSelect } from '../common/EmployeeSelect';
+import { ConfirmationModal } from '../common/ConfirmationModal';
+import { LeadSearchSelect } from '../common/LeadSearchSelect';
+import { getTodayIST_YYYYMMDD } from '../../utils/dateUtils';
 
 interface CreateFollowUpModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (newFollowUp: Omit<FollowUpRecord, 'id' | 'createdAt'>) => void;
   preselectedLeadId?: string;
+  preselectedDate?: string;
+}
+
+function formatTo24HourTime(timeStr: string): string {
+  if (!timeStr) return '11:00';
+  const match12 = timeStr.trim().match(/^(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM)?$/i);
+  if (match12) {
+    let hours = parseInt(match12[1], 10);
+    const minutes = match12[2];
+    const ampm = match12[3]?.toUpperCase();
+    if (ampm === 'PM' && hours < 12) hours += 12;
+    if (ampm === 'AM' && hours === 12) hours = 0;
+    return `${hours.toString().padStart(2, '0')}:${minutes}`;
+  }
+  return timeStr;
 }
 
 export const CreateFollowUpModal: React.FC<CreateFollowUpModalProps> = ({
@@ -19,27 +38,31 @@ export const CreateFollowUpModal: React.FC<CreateFollowUpModalProps> = ({
   onClose,
   onSubmit,
   preselectedLeadId,
+  preselectedDate,
 }) => {
-  const [leadId, setLeadId] = React.useState(preselectedLeadId || MOCK_LEADS[0]?.id || '');
+  const [selectedLead, setSelectedLead] = React.useState<Lead | null>(null);
+  const [leadId, setLeadId] = React.useState(preselectedLeadId || '');
   const [type, setType] = React.useState<FollowUpType>('Call');
   const [purpose, setPurpose] = React.useState('');
-  const [date, setDate] = React.useState('2026-09-07');
-  const [time, setTime] = React.useState('04:30 PM');
-  const [assignedTo, setAssignedTo] = React.useState('Kunal Patil');
+  const [date, setDate] = React.useState(() => preselectedDate || getTodayIST_YYYYMMDD());
+  const [time, setTime] = React.useState('16:30');
+  const [assignedTo, setAssignedTo] = React.useState('');
   const [priority, setPriority] = React.useState<FollowUpPriority>('HIGH');
   const [reminder, setReminder] = React.useState('15 minutes before');
   const [notes, setNotes] = React.useState('');
   const [error, setError] = React.useState('');
+  const [showConfirmModal, setShowConfirmModal] = React.useState(false);
 
   React.useEffect(() => {
     if (preselectedLeadId) {
       setLeadId(preselectedLeadId);
     }
-  }, [preselectedLeadId]);
+    if (preselectedDate) {
+      setDate(preselectedDate);
+    }
+  }, [preselectedLeadId, preselectedDate, isOpen]);
 
   if (!isOpen) return null;
-
-  const selectedLead = MOCK_LEADS.find((l) => l.id === leadId);
 
   const purposePresets = [
     'Discuss ERP & cloud orchestration requirement specs',
@@ -64,6 +87,11 @@ export const CreateFollowUpModal: React.FC<CreateFollowUpModalProps> = ({
       return;
     }
 
+    setError('');
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmSave = () => {
     const lead = selectedLead;
     if (!lead) return;
 
@@ -81,15 +109,16 @@ export const CreateFollowUpModal: React.FC<CreateFollowUpModalProps> = ({
       type,
       purpose,
       date,
-      time,
+      time: formatTo24HourTime(time),
       assignedTo,
-      assignedAvatar: assignedTo.split(' ').map((n) => n[0]).join('').toUpperCase(),
+      assignedAvatar: assignedTo ? assignedTo.split(' ').map((n) => n[0]).join('').toUpperCase() : 'FU',
       priority,
       status: 'PENDING',
       reminder,
       notes,
     });
 
+    setShowConfirmModal(false);
     onClose();
   };
 
@@ -130,51 +159,17 @@ export const CreateFollowUpModal: React.FC<CreateFollowUpModalProps> = ({
 
           {/* Lead Selection */}
           <div>
-            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
-              Related Lead / Customer *
-            </label>
-            <select
-              value={leadId}
-              onChange={(e) => setLeadId(e.target.value)}
-              className="w-full px-3 py-2 text-xs sm:text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
+            <LeadSearchSelect
+              label="Select Client / Lead"
               required
-            >
-              {MOCK_LEADS.map((l) => (
-                <option key={l.id} value={l.id}>
-                  {l.company.name} ({l.leadCode}) — {l.contact.name}
-                </option>
-              ))}
-            </select>
-
-            {/* Auto-resolved Lead Meta Card */}
-            {selectedLead && (
-              <div className="mt-2 p-3 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200/80 dark:border-slate-800 grid grid-cols-2 sm:grid-cols-4 gap-2 text-slate-600 dark:text-slate-300 text-[11px]">
-                <div>
-                  <span className="text-slate-400 dark:text-slate-500 block">Contact:</span>
-                  <span className="font-semibold text-slate-800 dark:text-slate-200 truncate block">
-                    {selectedLead.contact.name}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-slate-400 dark:text-slate-500 block">Designation:</span>
-                  <span className="font-medium text-slate-700 dark:text-slate-300 truncate block">
-                    {selectedLead.contact.designation || 'Key Decision Maker'}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-slate-400 dark:text-slate-500 block">Service:</span>
-                  <span className="font-medium text-purple-700 dark:text-purple-300 truncate block">
-                    {selectedLead.service}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-slate-400 dark:text-slate-500 block">Score:</span>
-                  <span className="font-bold text-emerald-600 dark:text-emerald-400">
-                    {selectedLead.score} / 100
-                  </span>
-                </div>
-              </div>
-            )}
+              value={leadId}
+              onChange={(newId, leadObj) => {
+                setLeadId(newId);
+                setSelectedLead(leadObj);
+              }}
+              placeholder="Search by company, contact, phone, email, or lead code (10K+ leads)..."
+              showMetaPreview={true}
+            />
           </div>
 
           {/* Follow-up Type & Priority */}
@@ -268,11 +263,10 @@ export const CreateFollowUpModal: React.FC<CreateFollowUpModalProps> = ({
                 Time *
               </label>
               <input
-                type="text"
+                type="time"
                 value={time}
                 onChange={(e) => setTime(e.target.value)}
-                placeholder="e.g., 04:00 PM"
-                className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
+                className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
                 required
               />
             </div>
@@ -284,17 +278,12 @@ export const CreateFollowUpModal: React.FC<CreateFollowUpModalProps> = ({
               <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Assigned Employee *
               </label>
-              <select
+              <EmployeeSelect
                 value={assignedTo}
                 onChange={(e) => setAssignedTo(e.target.value)}
+                placeholder="Select Employee / Unassigned"
                 className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
-              >
-                <option value="Kunal Patil">Kunal Patil (Sales Manager)</option>
-                <option value="Shruti Raundal">Shruti Raundal (Sales Executive)</option>
-                <option value="Pranav Jejurkar">Pranav Jejurkar (Business Analyst)</option>
-                <option value="Ankush Pandit">Ankush Pandit (Tech Lead)</option>
-                <option value="Rohan Patil">Rohan Patil (Sales Executive)</option>
-              </select>
+              />
             </div>
 
             <div>
@@ -349,6 +338,28 @@ export const CreateFollowUpModal: React.FC<CreateFollowUpModalProps> = ({
           </div>
         </form>
       </div>
+
+      {/* Confirmation Modal Before Saving Follow-up */}
+      <ConfirmationModal
+        isOpen={showConfirmModal}
+        title="Confirm Follow-up Schedule"
+        message={`Are you sure you want to schedule this ${type} with "${selectedLead?.company.name}"?`}
+        confirmLabel="Confirm & Schedule"
+        cancelLabel="Review Details"
+        variant="primary"
+        iconType="save"
+        itemDetails={[
+          { label: 'Company / Lead', value: selectedLead?.company.name },
+          { label: 'Contact', value: selectedLead?.contact.name },
+          { label: 'Follow-up Type', value: type },
+          { label: 'Purpose', value: purpose },
+          { label: 'Date & Time', value: `${date} at ${time}` },
+          { label: 'Assigned To', value: assignedTo || 'Unassigned' },
+          { label: 'Priority', value: priority },
+        ]}
+        onConfirm={handleConfirmSave}
+        onCancel={() => setShowConfirmModal(false)}
+      />
     </div>
   );
 };

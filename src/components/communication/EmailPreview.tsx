@@ -51,12 +51,12 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({
     );
   }
 
-  const { tracking } = email;
+  const tracking = email.tracking || { sent: true, delivered: false, opened: false, replied: false };
 
   return (
     <div className={`flex flex-col h-full bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs ${className}`}>
       {/* Top Header Bar */}
-      <div className="p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-950/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="flex-shrink-0 p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-950/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-2 min-w-0">
           {onBackMobile && (
             <button
@@ -89,7 +89,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({
           <button
             type="button"
             onClick={() => navigate(`/leads/${email.leadId}`)}
-            className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg transition-colors shadow-2xs"
+            className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg transition-colors shadow-2xs cursor-pointer"
             title="Open lead details"
           >
             <span>View Lead</span>
@@ -99,7 +99,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({
       </div>
 
       {/* Delivery Tracking Step Bar */}
-      <div className="px-4 py-2.5 bg-slate-50/40 dark:bg-slate-950/40 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] overflow-x-auto scrollbar-none">
+      <div className="flex-shrink-0 px-4 py-2.5 bg-slate-50/40 dark:bg-slate-950/40 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] overflow-x-auto scrollbar-none">
         <div className="flex items-center gap-4 sm:gap-6 min-w-max">
           <div className="flex items-center gap-1.5">
             <span
@@ -161,7 +161,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({
       </div>
 
       {/* Recipient Details & Sender Box */}
-      <div className="p-4 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-2 text-xs text-slate-600 dark:text-slate-400">
+      <div className="flex-shrink-0 p-4 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-2 text-xs text-slate-600 dark:text-slate-400">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
           <div>
             <span className="font-semibold text-slate-800 dark:text-slate-200">To: </span>
@@ -204,21 +204,28 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({
       </div>
 
       {/* Main Email Body */}
-      <div className="flex-1 p-5 overflow-y-auto text-xs sm:text-sm text-slate-800 dark:text-slate-200 leading-relaxed space-y-4 whitespace-pre-wrap font-sans">
-        {email.body}
+      <div className="flex-1 min-h-0 p-5 overflow-y-auto text-xs sm:text-sm text-slate-800 dark:text-slate-200 leading-relaxed font-sans">
+        {email.body && (email.body.includes('<html') || email.body.includes('<div') || email.body.includes('<table') || email.body.includes('<p>')) ? (
+          <div
+            className="prose dark:prose-invert max-w-none text-xs sm:text-sm"
+            dangerouslySetInnerHTML={{ __html: email.body }}
+          />
+        ) : (
+          <div className="whitespace-pre-wrap leading-relaxed space-y-4">{email.body}</div>
+        )}
       </div>
 
       {/* Attachments Section */}
       {email.attachments && email.attachments.length > 0 && (
-        <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50">
+        <div className="flex-shrink-0 p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50">
           <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
             <Paperclip className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
             <span>Attachments ({email.attachments.length})</span>
           </div>
           <div className="flex flex-wrap gap-2">
-            {email.attachments.map((att) => (
+            {email.attachments.map((att, idx) => (
               <div
-                key={att.id}
+                key={att.id || att.name || `att-${idx}`}
                 className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs shadow-2xs hover:border-[#5B4DB7]/40 transition-colors"
               >
                 <span className="font-medium text-slate-800 dark:text-slate-200 truncate max-w-[180px]">
@@ -228,7 +235,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({
                 <button
                   type="button"
                   onClick={() => alert(`Downloading ${att.name}...`)}
-                  className="text-slate-400 hover:text-[#5B4DB7] dark:hover:text-purple-400 p-0.5 ml-1"
+                  className="text-slate-400 hover:text-[#5B4DB7] dark:hover:text-purple-400 p-0.5 ml-1 cursor-pointer"
                   title="Download attachment"
                 >
                   <Download className="w-3 h-3" />
@@ -240,7 +247,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({
       )}
 
       {/* Bottom Action Footer */}
-      <div className="p-3.5 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-wrap items-center justify-between gap-2">
+      <div className="flex-shrink-0 p-3.5 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <button
             type="button"

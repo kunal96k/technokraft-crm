@@ -1,14 +1,19 @@
 import React, { useState } from 'react';
 import { GitCompare, Check } from 'lucide-react';
 import { EmployeePerformanceRecord } from '../../types/reports';
-import { formatLakhsINR } from '../../data/mockReports';
+import { formatLakhsINR } from '../../utils/currencyFormatters';
 
 interface EmployeeComparisonProps {
   employees: EmployeePerformanceRecord[];
 }
 
 export const EmployeeComparison: React.FC<EmployeeComparisonProps> = ({ employees }) => {
-  const [selectedIds, setSelectedIds] = useState<string[]>([employees[0].id, employees[1].id]);
+  if (!employees || employees.length === 0) {
+    return null;
+  }
+
+  const initialIds = employees.slice(0, 2).map((e) => e.id);
+  const [selectedIds, setSelectedIds] = useState<string[]>(initialIds);
 
   const toggleSelect = (id: string) => {
     if (selectedIds.includes(id)) {

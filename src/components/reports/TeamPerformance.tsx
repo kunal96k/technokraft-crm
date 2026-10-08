@@ -10,7 +10,7 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import { TeamPerformanceSummary } from '../../types/reports';
-import { formatLakhsINR } from '../../data/mockReports';
+import { formatLakhsINR } from '../../utils/currencyFormatters';
 
 interface TeamPerformanceProps {
   summary: TeamPerformanceSummary;

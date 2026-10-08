@@ -196,3 +196,57 @@ export interface ExportReportOptions {
   dateRange: string;
   includeCharts: boolean;
 }
+
+export interface TopPerformer {
+  id: string;
+  name: string;
+  avatar: string;
+  role: string;
+  team: string;
+  wonRevenue: number;
+  dealsWon: number;
+  conversionRate: number;
+  targetAchievementRate: number;
+  rank: number;
+  badge: string;
+}
+
+export interface ActivityConversion {
+  employeeName: string;
+  avatar: string;
+  team: string;
+  totalActivities: number;
+  leadsEngaged: number;
+  qualifiedYield: number;
+  proposalsSent: number;
+  dealsWon: number;
+  activityToLeadRatio: number;
+  leadToQualRatio: number;
+  qualToWonRatio: number;
+  overallEfficiency: number;
+}
+
+export interface PerformanceReportResponse {
+  teamSummary: TeamPerformanceSummary;
+  employees: EmployeePerformanceRecord[];
+  topPerformers: TopPerformer[];
+  targetAchievements: TargetMetric[];
+  activityConversions: ActivityConversion[];
+  dateRange: string;
+  generatedAt: string;
+}
+
+export interface AnalyticsReportResponse {
+  conversionFunnel: FunnelStageStat[];
+  leadSources: LeadSourceStat[];
+  services: ServiceStat[];
+  pipelineStages: PipelineStageStat[];
+  winLoss: WinLossStat;
+  monthlyTrends: MonthlyTrendStat[];
+  communications: CommunicationStat[];
+  staleLeads: StaleLeadStat[];
+  overdueFollowUps: OverdueFollowUpStat[];
+  dateRange: string;
+  generatedAt: string;
+}
+

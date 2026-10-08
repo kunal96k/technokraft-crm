@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PanelLeftClose, PanelLeftOpen, LogOut } from 'lucide-react';
 import { BrandLogo } from '../common/BrandLogo';
 import { SidebarSection } from './SidebarSection';
@@ -7,6 +7,9 @@ import { NAVIGATION_CONFIG, canViewModule } from '../../config/navigation';
 import { UserRole } from '../../types/navigation';
 import { useTheme } from '../../context/ThemeContext';
 import { ConfirmationDialog } from '../settings/ConfirmationDialog';
+import { fetchLeadSummary } from '../../services/leadService';
+import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 interface SidebarProps {
   collapsed: boolean;
@@ -24,10 +27,36 @@ export const Sidebar: React.FC<SidebarProps> = ({
   theme,
 }) => {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [totalLeadsCount, setTotalLeadsCount] = useState<number | null>(null);
   const { resolvedTheme } = useTheme();
+  const { logout, user: authUser } = useAuth();
+  const navigate = useNavigate();
+
   // If theme prop is explicitly passed, use it; otherwise synchronize with global theme
   const activeTheme = theme || (resolvedTheme === 'Dark' ? 'dark' : 'light');
   const isDark = activeTheme === 'dark';
+
+  const handleLogout = async () => {
+    setShowLogoutConfirm(false);
+    await logout();
+    navigate('/login', { replace: true });
+  };
+
+  useEffect(() => {
+    const loadCount = () => {
+      fetchLeadSummary()
+        .then((res) => {
+          if (res.isBackendConnected && typeof res.summary.totalLeads === 'number') {
+            setTotalLeadsCount(res.summary.totalLeads);
+          }
+        })
+        .catch(() => {});
+    };
+
+    loadCount();
+    window.addEventListener('crm-leads-updated', loadCount);
+    return () => window.removeEventListener('crm-leads-updated', loadCount);
+  }, []);
 
   return (
     <aside
@@ -94,7 +123,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {NAVIGATION_CONFIG.map((section) => {
           // Filter items based on current role permissions
           const visibleItems = section.items.filter((item) =>
-            canViewModule(item, currentRole)
+            canViewModule(item, currentRole, (authUser as any)?.allowedModules)
           );
 
           if (visibleItems.length === 0) return null;
@@ -106,14 +135,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
               collapsed={collapsed}
               theme={activeTheme}
             >
-              {visibleItems.map((item) => (
-                <SidebarItem
-                  key={item.id}
-                  item={item}
-                  collapsed={collapsed}
-                  theme={activeTheme}
-                />
-              ))}
+              {visibleItems.map((item) => {
+                const itemWithBadge =
+                  item.id === 'leads' && totalLeadsCount !== null
+                    ? { ...item, badge: totalLeadsCount.toLocaleString() }
+                    : item;
+
+                return (
+                  <SidebarItem
+                    key={item.id}
+                    item={itemWithBadge}
+                    collapsed={collapsed}
+                    theme={activeTheme}
+                  />
+                );
+              })}
             </SidebarSection>
           );
         })}
@@ -141,10 +177,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </span>
                 <div className="truncate">
                   <p className="text-xs font-semibold truncate leading-tight">
-                    TechnoKraft
+                    {authUser?.name || 'TechnoKraft'}
                   </p>
                   <p className="text-[10px] text-slate-400 dark:text-slate-500 truncate leading-tight">
-                    {currentRole}
+                    {authUser?.accessRole || currentRole}
                   </p>
                 </div>
               </div>
@@ -191,10 +227,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         confirmLabel="Log Out"
         cancelLabel="Cancel"
         isDangerous={true}
-        onConfirm={() => {
-          setShowLogoutConfirm(false);
-          window.location.href = '/dashboard';
-        }}
+        onConfirm={handleLogout}
         onCancel={() => setShowLogoutConfirm(false)}
       />
     </aside>

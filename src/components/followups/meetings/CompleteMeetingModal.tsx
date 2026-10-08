@@ -5,6 +5,7 @@ import {
   MeetingOutcome,
   FollowUpType,
 } from '../../../types/followUps';
+import { ConfirmationModal } from '../../common/ConfirmationModal';
 
 interface CompleteMeetingModalProps {
   isOpen: boolean;
@@ -35,9 +36,14 @@ export const CompleteMeetingModal: React.FC<CompleteMeetingModalProps> = ({
   const [createNextFollowUp, setCreateNextFollowUp] = React.useState(true);
   const [followUpType, setFollowUpType] = React.useState<FollowUpType>('Proposal Follow-up');
   const [followUpPurpose, setFollowUpPurpose] = React.useState('');
-  const [followUpDate, setFollowUpDate] = React.useState('2026-09-10');
+  const [followUpDate, setFollowUpDate] = React.useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 2);
+    return d.toISOString().split('T')[0];
+  });
   const [followUpTime, setFollowUpTime] = React.useState('03:00 PM');
   const [error, setError] = React.useState('');
+  const [showConfirmModal, setShowConfirmModal] = React.useState(false);
 
   React.useEffect(() => {
     if (meeting) {
@@ -54,12 +60,18 @@ export const CompleteMeetingModal: React.FC<CompleteMeetingModalProps> = ({
       return;
     }
 
+    if (createNextFollowUp && !followUpPurpose.trim()) {
+      setError('Please enter purpose for the next follow-up.');
+      return;
+    }
+
+    setError('');
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmComplete = () => {
     let nextFollowUp;
     if (createNextFollowUp) {
-      if (!followUpPurpose.trim()) {
-        setError('Please enter purpose for the next follow-up.');
-        return;
-      }
       nextFollowUp = {
         type: followUpType,
         purpose: followUpPurpose,
@@ -70,6 +82,7 @@ export const CompleteMeetingModal: React.FC<CompleteMeetingModalProps> = ({
     }
 
     onComplete(meeting.id, outcome, outcomeNotes, nextFollowUp);
+    setShowConfirmModal(false);
     onClose();
   };
 
@@ -254,6 +267,27 @@ export const CompleteMeetingModal: React.FC<CompleteMeetingModalProps> = ({
           </div>
         </form>
       </div>
+
+      {/* Confirmation Modal Before Saving Meeting Minutes */}
+      <ConfirmationModal
+        isOpen={showConfirmModal}
+        title="Confirm & Complete Meeting"
+        message={`Are you sure you want to mark this meeting with "${meeting.companyName}" as completed with outcome "${outcome}"?`}
+        confirmLabel="Confirm & Complete"
+        cancelLabel="Review Details"
+        variant="success"
+        iconType="check"
+        itemDetails={[
+          { label: 'Client / Company', value: meeting.companyName },
+          { label: 'Meeting Title', value: meeting.title },
+          { label: 'Outcome', value: outcome },
+          ...(createNextFollowUp
+            ? [{ label: 'Next Follow-up', value: `${followUpType} on ${followUpDate}` }]
+            : []),
+        ]}
+        onConfirm={handleConfirmComplete}
+        onCancel={() => setShowConfirmModal(false)}
+      />
     </div>
   );
 };

@@ -3,6 +3,7 @@ import { AlertTriangle, ExternalLink, GitMerge, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface DuplicateLeadAlertProps {
+  existingLeadId?: string | number;
   existingLeadCode: string;
   existingCompanyName: string;
   existingEmail: string;
@@ -11,12 +12,14 @@ interface DuplicateLeadAlertProps {
 }
 
 export const DuplicateLeadAlert: React.FC<DuplicateLeadAlertProps> = ({
+  existingLeadId,
   existingLeadCode,
   existingCompanyName,
   existingEmail,
   onDismiss,
   onMergeLater,
 }) => {
+  const targetLink = existingLeadId ? `/leads/${existingLeadId}` : `/leads?search=${encodeURIComponent(existingCompanyName)}`;
   return (
     <div className="p-4 rounded-xl border border-amber-300 dark:border-amber-800 bg-amber-50/90 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200 shadow-2xs animate-in fade-in duration-200">
       <div className="flex items-start gap-3">
@@ -53,7 +56,7 @@ export const DuplicateLeadAlert: React.FC<DuplicateLeadAlertProps> = ({
           {/* Actions */}
           <div className="mt-3 flex flex-wrap items-center gap-2 pt-1">
             <Link
-              to="/leads/lead-1"
+              to={targetLink}
               target="_blank"
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-200 hover:bg-amber-300/80 dark:bg-amber-900/80 dark:hover:bg-amber-800 text-amber-950 dark:text-amber-100 font-semibold text-xs transition-colors"
             >

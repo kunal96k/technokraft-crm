@@ -8,6 +8,14 @@ interface OverdueFollowupAnalysisProps {
 }
 
 export const OverdueFollowupAnalysis: React.FC<OverdueFollowupAnalysisProps> = ({ stats }) => {
+  if (!stats || stats.length === 0) {
+    return (
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-8 text-center text-xs text-slate-400 font-medium">
+        No overdue follow-up bottlenecks detected. All tasks on schedule.
+      </div>
+    );
+  }
+
   const totalOverdue = stats.reduce((acc, s) => acc + s.overdueCount, 0);
 
   return (

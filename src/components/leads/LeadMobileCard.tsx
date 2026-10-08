@@ -6,6 +6,7 @@ import { LeadStatusBadge } from './LeadStatusBadge';
 import { LeadScoreBadge } from './LeadScoreBadge';
 import { LeadPriorityBadge } from './LeadPriorityBadge';
 import { LeadActionMenu } from './LeadActionMenu';
+import { getInitials, getAvatarColor } from '../../utils/avatarUtils';
 
 interface LeadMobileCardProps {
   lead: Lead;
@@ -85,15 +86,61 @@ export const LeadMobileCard: React.FC<LeadMobileCardProps> = ({
         <LeadScoreBadge score={lead.score} showLabel={false} />
       </div>
 
-      {/* Assigned & Follow-up Details */}
-      <div className="pt-2.5 border-t border-slate-100 dark:border-slate-800 space-y-1.5 text-xs text-slate-600 dark:text-slate-400">
-        <div className="flex items-center justify-between">
-          <span className="text-slate-400 dark:text-slate-500 text-[11px]">Assigned:</span>
-          <div className="flex items-center gap-1.5">
-            <div className="w-5 h-5 rounded-full bg-purple-100 dark:bg-purple-900/50 text-[#5B4DB7] dark:text-purple-300 text-[9px] font-bold flex items-center justify-center">
-              {lead.assignedEmployee.avatar}
+      {/* Assigned, Created By, Updated By & Follow-up Details */}
+      <div className="pt-2.5 border-t border-slate-100 dark:border-slate-800 space-y-2 text-xs text-slate-600 dark:text-slate-400">
+        <div className="flex items-start justify-between">
+          <span className="text-slate-400 dark:text-slate-500 text-[11px] mt-0.5">Assigned:</span>
+          <div className="flex flex-col items-end gap-1">
+            <div className="flex items-center gap-1.5">
+              {(() => {
+                const empName = lead.assignedEmployee?.name || 'Unassigned';
+                const initials = getInitials(empName, lead.assignedEmployee?.avatar);
+                const avatarColors = getAvatarColor(empName);
+                return (
+                  <div
+                    className={`w-5 h-5 rounded-full ${avatarColors.bg} ${avatarColors.text} ${avatarColors.border} border text-[9px] font-bold flex items-center justify-center flex-shrink-0 shadow-2xs`}
+                    title={empName}
+                  >
+                    {initials}
+                  </div>
+                );
+              })()}
+              <span className="font-medium text-slate-800 dark:text-slate-200">{lead.assignedEmployee?.name || 'Unassigned'}</span>
             </div>
-            <span className="font-medium text-slate-800 dark:text-slate-200">{lead.assignedEmployee.name}</span>
+            {lead.assignedBA?.name && (
+              <div className="flex items-center gap-1 text-[11px] text-purple-700 dark:text-purple-300 font-medium">
+                <span className="px-1 py-0.2 rounded text-[8.5px] font-bold uppercase bg-purple-100 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300 border border-purple-200/80 dark:border-purple-800/60">
+                  BA
+                </span>
+                <span>{lead.assignedBA.name}</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Created By */}
+        <div className="flex items-center justify-between">
+          <span className="text-slate-400 dark:text-slate-500 text-[11px]">Created By:</span>
+          <div className="text-right">
+            <span className="font-medium text-slate-800 dark:text-slate-200">
+              {lead.createdBy?.name || 'System Admin'}
+            </span>
+            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono block">
+              {lead.createdBy?.timestamp || lead.createdAt || lead.createdBy?.date || 'N/A'}
+            </span>
+          </div>
+        </div>
+
+        {/* Updated By */}
+        <div className="flex items-center justify-between">
+          <span className="text-slate-400 dark:text-slate-500 text-[11px]">Updated By:</span>
+          <div className="text-right">
+            <span className="font-medium text-purple-700 dark:text-purple-300">
+              {lead.updatedBy?.name || lead.createdBy?.name || 'Admin'}
+            </span>
+            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono block">
+              {lead.updatedBy?.timestamp || lead.updatedAt || lead.updatedBy?.date || 'N/A'}
+            </span>
           </div>
         </div>
 

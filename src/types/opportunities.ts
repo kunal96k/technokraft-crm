@@ -128,29 +128,88 @@ export interface OpportunityRecord {
   updatedAt: string;
 }
 
+export interface ProposalMilestone {
+  title: string;
+  percentage: number;
+  amount: number;
+}
+
+/** A single hosting/infrastructure line item (e.g. AWS EC2, S3, etc.) */
+export interface HostingLineItem {
+  id: string;
+  description: string;   // e.g. "AWS EC2 t3.medium – 2 vCPU / 4 GB RAM"
+  provider: string;      // e.g. "AWS", "GCP", "Azure", "Other"
+  billingCycle: 'monthly' | 'yearly' | 'one-time';
+  unitCost: number;      // per unit / per month cost in INR
+  quantity: number;      // number of instances or months
+  totalCost: number;     // unitCost × quantity
+  notes?: string;
+}
+
+/** A single managed-services or AMC line item */
+export interface ServicesLineItem {
+  id: string;
+  description: string;   // e.g. "Application Support & Maintenance"
+  billingCycle: 'monthly' | 'quarterly' | 'yearly' | 'one-time';
+  unitCost: number;
+  quantity: number;
+  totalCost: number;
+  notes?: string;
+}
+
 export interface ProposalRecord {
   id: string;
-  proposalCode: string; // e.g. "PR-2026-00125"
+  proposalCode: string; // e.g. "PR-2026-9182"
   opportunityId: string;
   opportunityName: string;
   leadCode?: string;
   companyName: string;
   contactName: string;
   contactEmail?: string;
+  contactPhone?: string;
   service: OpportunityService;
-  amount: number; // in INR
-  createdDate: string; // e.g. "07 Sep 2026"
+  amount: number; // development amount in INR (excl. hosting/services)
+  createdDate: string; // e.g. "2026-10-06"
   sentDate?: string;
-  validUntil: string;
+  validUntil?: string;
   status: ProposalStatus;
   ownerName: string;
   summary: string;
   commercialDetails?: {
-    milestones: { title: string; percentage: number; amount: number }[];
-    paymentTerms: string;
-    taxes: string;
+    milestones: ProposalMilestone[];
+    paymentTerms?: string;
+    taxes?: string;
+    hostingSection?: {
+      enabled: boolean;
+      note?: string;
+      items: HostingLineItem[];
+      subtotal: number;
+    };
+    servicesSection?: {
+      enabled: boolean;
+      note?: string;
+      items: ServicesLineItem[];
+      subtotal: number;
+    };
   };
   timelineDescription?: string;
+
+  /** Optional: Hosting & Infrastructure section (AWS EC2, Domain, etc.) */
+  hostingSection?: {
+    enabled: boolean;
+    note?: string; // e.g. "Hosting charges billed separately per actuals"
+    items: HostingLineItem[];
+    subtotal: number;
+  };
+
+  /** Optional: Managed Services / AMC section */
+  servicesSection?: {
+    enabled: boolean;
+    note?: string;
+    items: ServicesLineItem[];
+    subtotal: number;
+  };
+
   activityHistory?: {
     date: string;
     time: string;

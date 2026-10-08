@@ -96,7 +96,7 @@ export const MarkLostModal: React.FC<MarkLostModalProps> = ({
             </label>
             <textarea
               rows={3}
-              placeholder="Why did the customer decline? Who was the winning competitor or what budget constraints occurred?"
+              placeholder="Enter loss analysis, competitor details, or budget constraints..."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-medium text-slate-900 dark:text-slate-200 focus:ring-2 focus:ring-rose-500 focus:outline-none"

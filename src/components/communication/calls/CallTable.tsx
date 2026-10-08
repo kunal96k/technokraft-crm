@@ -18,6 +18,8 @@ interface CallTableProps {
   onScheduleMeeting: (call: CallRecord) => void;
   onOpenLead: (leadId: string) => void;
   onCreateOpportunity?: (call: CallRecord) => void;
+  onDelete?: (call: CallRecord) => void;
+  onComplete?: (call: CallRecord) => void;
 }
 
 export const CallTable: React.FC<CallTableProps> = ({
@@ -32,6 +34,8 @@ export const CallTable: React.FC<CallTableProps> = ({
   onScheduleMeeting,
   onOpenLead,
   onCreateOpportunity,
+  onDelete,
+  onComplete,
 }) => {
   return (
     <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl shadow-2xs overflow-hidden">
@@ -181,6 +185,8 @@ export const CallTable: React.FC<CallTableProps> = ({
                         onScheduleMeeting={onScheduleMeeting}
                         onOpenLead={onOpenLead}
                         onCreateOpportunity={onCreateOpportunity}
+                        onDelete={onDelete}
+                        onComplete={onComplete}
                       />
                     </div>
                   </td>

@@ -4,7 +4,7 @@ export const Footer: React.FC = () => {
   return (
     <footer
       id="crm-application-footer"
-      className="w-full bg-white dark:bg-[#0F172A] border-t border-slate-200/80 dark:border-slate-800 py-4 px-4 sm:px-6 lg:px-8 text-xs text-slate-500 dark:text-slate-400 select-none transition-colors duration-200"
+      className="flex-shrink-0 w-full bg-white dark:bg-[#0F172A] border-t border-slate-200/80 dark:border-slate-800 py-4 px-4 sm:px-6 lg:px-8 text-xs text-slate-500 dark:text-slate-400 select-none transition-colors duration-200"
     >
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
         {/* Left: Copyright */}

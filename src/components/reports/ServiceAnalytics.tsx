@@ -1,13 +1,21 @@
 import React from 'react';
 import { Layers } from 'lucide-react';
 import { ServiceStat } from '../../types/reports';
-import { formatLakhsINR } from '../../data/mockReports';
+import { formatLakhsINR } from '../../utils/currencyFormatters';
 
 interface ServiceAnalyticsProps {
   services: ServiceStat[];
 }
 
 export const ServiceAnalytics: React.FC<ServiceAnalyticsProps> = ({ services }) => {
+  if (!services || services.length === 0) {
+    return (
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-8 text-center text-xs text-slate-400 font-medium">
+        No service offering analytics recorded for the selected filter.
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 sm:p-5 shadow-2xs space-y-4">
       <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">

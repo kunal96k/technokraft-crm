@@ -8,6 +8,8 @@ import {
   CalendarCheck,
   ExternalLink,
   Sparkles,
+  CheckCircle2,
+  Trash2,
 } from 'lucide-react';
 
 interface CallActionMenuProps {
@@ -18,6 +20,8 @@ interface CallActionMenuProps {
   onScheduleMeeting: (call: CallRecord) => void;
   onOpenLead: (leadId: string) => void;
   onCreateOpportunity?: (call: CallRecord) => void;
+  onDelete?: (call: CallRecord) => void;
+  onComplete?: (call: CallRecord) => void;
 }
 
 export const CallActionMenu: React.FC<CallActionMenuProps> = ({
@@ -28,6 +32,8 @@ export const CallActionMenu: React.FC<CallActionMenuProps> = ({
   onScheduleMeeting,
   onOpenLead,
   onCreateOpportunity,
+  onDelete,
+  onComplete,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -79,6 +85,21 @@ export const CallActionMenu: React.FC<CallActionMenuProps> = ({
               <Eye className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
               <span>View Details</span>
             </button>
+
+            {call.status === 'scheduled' && onComplete && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsOpen(false);
+                  onComplete(call);
+                }}
+                className="w-full text-left px-3.5 py-2 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center gap-2 font-semibold cursor-pointer transition-colors"
+              >
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                <span>Mark Completed</span>
+              </button>
+            )}
 
             {call.status === 'scheduled' && (
               <button
@@ -140,18 +161,35 @@ export const CallActionMenu: React.FC<CallActionMenuProps> = ({
           )}
 
           <div className="py-0.5">
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsOpen(false);
-                onOpenLead(call.leadId);
-              }}
-              className="w-full text-left px-3.5 py-2 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white flex items-center gap-2 font-medium text-slate-600 dark:text-slate-400 cursor-pointer transition-colors"
-            >
-              <ExternalLink className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
-              <span>Open Lead</span>
-            </button>
+            {call.leadId && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsOpen(false);
+                  onOpenLead(call.leadId);
+                }}
+                className="w-full text-left px-3.5 py-2 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white flex items-center gap-2 font-medium text-slate-600 dark:text-slate-400 cursor-pointer transition-colors"
+              >
+                <ExternalLink className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
+                <span>Open Lead</span>
+              </button>
+            )}
+
+            {onDelete && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsOpen(false);
+                  onDelete(call);
+                }}
+                className="w-full text-left px-3.5 py-2 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center gap-2 font-semibold cursor-pointer transition-colors"
+              >
+                <Trash2 className="w-3.5 h-3.5 text-rose-500 dark:text-rose-400" />
+                <span>Delete Call</span>
+              </button>
+            )}
           </div>
         </div>
       )}

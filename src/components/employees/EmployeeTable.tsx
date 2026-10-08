@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   MoreVertical,
   Eye,
@@ -10,6 +11,8 @@ import {
   ArrowUpDown,
   ChevronDown,
   ChevronUp,
+  KeyRound,
+  Trash2,
 } from 'lucide-react';
 import { Employee } from '../../types/employees';
 import {
@@ -23,15 +26,21 @@ export type SortOrder = 'asc' | 'desc';
 
 interface EmployeeTableProps {
   employees: Employee[];
-  onView: (employee: Employee) => void;
-  onEdit: (employee: Employee) => void;
-  onViewPerformance: (employee: Employee) => void;
-  onViewAttendance: (employee: Employee) => void;
-  onDeactivate: (employee: Employee) => void;
-  onActivate: (employee: Employee) => void;
-  sortField: SortField;
-  sortOrder: SortOrder;
-  onSort: (field: SortField) => void;
+  onView?: (employee: Employee) => void;
+  onEdit?: (employee: Employee) => void;
+  onViewPerformance?: (employee: Employee) => void;
+  onViewAttendance?: (employee: Employee) => void;
+  onDeactivate?: (employee: Employee) => void;
+  onActivate?: (employee: Employee) => void;
+  onResetPassword?: (employee: Employee) => void;
+  onDelete?: (employee: Employee) => void;
+  onSelectEmployee?: (employee: Employee) => void;
+  onEditEmployee?: (employee: Employee) => void;
+  onDeactivateEmployee?: (employee: Employee) => void;
+  onActivateEmployee?: (employee: Employee) => void;
+  sortField?: SortField;
+  sortOrder?: SortOrder;
+  onSort?: (field: SortField) => void;
 }
 
 export const EmployeeTable: React.FC<EmployeeTableProps> = ({
@@ -42,23 +51,85 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
   onViewAttendance,
   onDeactivate,
   onActivate,
-  sortField,
-  sortOrder,
+  onResetPassword,
+  onDelete,
+  onSelectEmployee,
+  onEditEmployee,
+  onDeactivateEmployee,
+  onActivateEmployee,
+  sortField = 'name',
+  sortOrder = 'asc',
   onSort,
 }) => {
-  const [openActionId, setOpenActionId] = useState<string | null>(null);
+  const [openActionEmployee, setOpenActionEmployee] = useState<Employee | null>(null);
+  const [menuPosition, setMenuPosition] = useState<{ top: number; right: number } | null>(null);
 
-  const toggleActionMenu = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setOpenActionId(openActionId === id ? null : id);
+  const handleSort = (field: SortField) => {
+    if (typeof onSort === 'function') {
+      onSort(field);
+    }
   };
 
-  // Close popup when clicking elsewhere
-  React.useEffect(() => {
-    const handleClickOutside = () => setOpenActionId(null);
-    window.addEventListener('click', handleClickOutside);
-    return () => window.removeEventListener('click', handleClickOutside);
-  }, []);
+  const handleView = (emp: Employee) => {
+    (onView || onSelectEmployee)?.(emp);
+  };
+
+  const handleEdit = (emp: Employee) => {
+    (onEdit || onEditEmployee)?.(emp);
+  };
+
+  const handleDeactivate = (emp: Employee) => {
+    (onDeactivate || onDeactivateEmployee)?.(emp);
+  };
+
+  const handleActivate = (emp: Employee) => {
+    (onActivate || onActivateEmployee)?.(emp);
+  };
+
+  const toggleActionMenu = (emp: Employee, e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    if (openActionEmployee?.id === emp.id) {
+      setOpenActionEmployee(null);
+      setMenuPosition(null);
+    } else {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const menuHeight = 250;
+      const spaceBelow = window.innerHeight - rect.bottom;
+
+      let top: number;
+      if (spaceBelow < menuHeight && rect.top > menuHeight) {
+        // Open upwards if not enough room below
+        top = rect.top - menuHeight - 4;
+      } else {
+        // Open downwards
+        top = rect.bottom + 4;
+      }
+
+      const right = Math.max(16, window.innerWidth - rect.right);
+      setOpenActionEmployee(emp);
+      setMenuPosition({ top, right });
+    }
+  };
+
+  // Close popup when clicking elsewhere, scrolling or resizing
+  useEffect(() => {
+    if (!openActionEmployee) return;
+
+    const handleClose = () => {
+      setOpenActionEmployee(null);
+      setMenuPosition(null);
+    };
+
+    window.addEventListener('click', handleClose);
+    window.addEventListener('scroll', handleClose, true);
+    window.addEventListener('resize', handleClose);
+
+    return () => {
+      window.removeEventListener('click', handleClose);
+      window.removeEventListener('scroll', handleClose, true);
+      window.removeEventListener('resize', handleClose);
+    };
+  }, [openActionEmployee]);
 
   const renderSortIndicator = (field: SortField) => {
     if (sortField !== field) {
@@ -95,7 +166,7 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
             <th
               scope="col"
               className="py-3 px-4 cursor-pointer hover:bg-slate-100/60 dark:hover:bg-slate-800/60 transition-colors"
-              onClick={() => onSort('name')}
+              onClick={() => handleSort('name')}
             >
               <div className="flex items-center gap-1.5">
                 <span>Employee</span>
@@ -105,7 +176,7 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
             <th
               scope="col"
               className="py-3 px-3 cursor-pointer hover:bg-slate-100/60 dark:hover:bg-slate-800/60 transition-colors"
-              onClick={() => onSort('employeeCode')}
+              onClick={() => handleSort('employeeCode')}
             >
               <div className="flex items-center gap-1.5">
                 <span>Employee ID</span>
@@ -115,7 +186,7 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
             <th
               scope="col"
               className="py-3 px-3 cursor-pointer hover:bg-slate-100/60 dark:hover:bg-slate-800/60 transition-colors"
-              onClick={() => onSort('department')}
+              onClick={() => handleSort('department')}
             >
               <div className="flex items-center gap-1.5">
                 <span>Department</span>
@@ -125,7 +196,7 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
             <th
               scope="col"
               className="py-3 px-3 cursor-pointer hover:bg-slate-100/60 dark:hover:bg-slate-800/60 transition-colors"
-              onClick={() => onSort('role')}
+              onClick={() => handleSort('role')}
             >
               <div className="flex items-center gap-1.5">
                 <span>Role</span>
@@ -138,7 +209,7 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
             <th
               scope="col"
               className="py-3 px-3 cursor-pointer hover:bg-slate-100/60 dark:hover:bg-slate-800/60 transition-colors"
-              onClick={() => onSort('status')}
+              onClick={() => handleSort('status')}
             >
               <div className="flex items-center gap-1.5">
                 <span>Status</span>
@@ -154,7 +225,7 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
             <th
               scope="col"
               className="py-3 px-3 cursor-pointer hover:bg-slate-100/60 dark:hover:bg-slate-800/60 transition-colors"
-              onClick={() => onSort('joiningDate')}
+              onClick={() => handleSort('joiningDate')}
             >
               <div className="flex items-center gap-1.5">
                 <span>Joined Date</span>
@@ -168,13 +239,15 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
         </thead>
         <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
           {employees.map((emp) => {
-            const isMenuOpen = openActionId === emp.id;
+            const isMenuOpen = openActionEmployee?.id === emp.id;
 
             return (
               <tr
                 key={emp.id}
-                onClick={() => onView(emp)}
-                className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 cursor-pointer transition-colors group"
+                onClick={() => handleView(emp)}
+                className={`hover:bg-slate-50/70 dark:hover:bg-slate-800/40 cursor-pointer transition-colors group ${
+                  isMenuOpen ? 'bg-purple-50/30 dark:bg-purple-950/20' : ''
+                }`}
               >
                 {/* Employee Name & Contact */}
                 <td className="py-3.5 px-4">
@@ -194,59 +267,38 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
                 </td>
 
                 {/* Employee ID */}
-                <td className="py-3.5 px-3">
-                  <span className="font-mono text-[11px] font-medium text-slate-600 dark:text-slate-300 px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700">
-                    {emp.employeeCode}
-                  </span>
+                <td className="py-3.5 px-3 whitespace-nowrap font-mono font-medium text-slate-700 dark:text-slate-300 text-xs">
+                  {emp.employeeCode}
                 </td>
 
                 {/* Department */}
-                <td className="py-3.5 px-3 whitespace-nowrap">
-                  <span className="text-slate-700 dark:text-slate-300 font-medium">
-                    {emp.department}
-                  </span>
+                <td className="py-3.5 px-3 whitespace-nowrap font-medium text-slate-800 dark:text-slate-200">
+                  {emp.department}
                 </td>
 
                 {/* Role */}
-                <td className="py-3.5 px-3 whitespace-nowrap">
-                  <span className="text-slate-600 dark:text-slate-300">{emp.role}</span>
+                <td className="py-3.5 px-3 whitespace-nowrap text-slate-600 dark:text-slate-300">
+                  {emp.role}
                 </td>
 
-                {/* Manager */}
-                <td className="py-3.5 px-3 whitespace-nowrap">
-                  <span className="text-slate-500 dark:text-slate-400 text-[11px]">
-                    {emp.reportingManager}
-                  </span>
+                {/* Reporting Manager */}
+                <td className="py-3.5 px-3 whitespace-nowrap text-slate-600 dark:text-slate-300">
+                  {emp.reportingManager || '—'}
                 </td>
 
                 {/* Status */}
                 <td className="py-3.5 px-3 whitespace-nowrap">
-                  <EmployeeStatusBadge status={emp.status} size="sm" />
+                  <EmployeeStatusBadge status={emp.status} />
                 </td>
 
-                {/* Today Attendance */}
+                {/* Today's Attendance */}
                 <td className="py-3.5 px-3 whitespace-nowrap">
-                  <div className="flex items-center gap-1.5">
-                    <AttendanceStatusBadge status={emp.todayAttendanceStatus} size="sm" />
-                    {emp.loginTime !== '—' && (
-                      <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
-                        ({emp.loginTime})
-                      </span>
-                    )}
-                  </div>
+                  <AttendanceStatusBadge status={emp.todayAttendanceStatus} />
                 </td>
 
                 {/* Current Activity */}
-                <td className="py-3.5 px-3 max-w-[220px]">
-                  <div className="flex items-center gap-1.5 truncate">
-                    <WorkStatusBadge status={emp.workStatus} size="sm" />
-                    <span
-                      className="text-[11px] text-slate-500 dark:text-slate-400 truncate"
-                      title={emp.currentActivity}
-                    >
-                      {emp.currentActivity}
-                    </span>
-                  </div>
+                <td className="py-3.5 px-3 whitespace-nowrap">
+                  <WorkStatusBadge status={emp.workStatus} />
                 </td>
 
                 {/* Joined Date */}
@@ -256,104 +308,163 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
 
                 {/* Actions */}
                 <td
-                  className="py-3.5 px-3 text-right whitespace-nowrap relative"
+                  className="py-3.5 px-3 text-right whitespace-nowrap"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <button
                     type="button"
-                    onClick={(e) => toggleActionMenu(emp.id, e)}
+                    onClick={(e) => toggleActionMenu(emp, e)}
                     aria-label={`Actions for ${emp.name}`}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors focus:outline-none"
+                    className={`p-1.5 rounded-lg transition-colors focus:outline-none cursor-pointer ${
+                      isMenuOpen
+                        ? 'bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300'
+                        : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
+                    }`}
                   >
                     <MoreVertical className="w-4 h-4" />
                   </button>
-
-                  {/* Dropdown Menu */}
-                  {isMenuOpen && (
-                    <div className="absolute right-3 top-10 w-48 rounded-xl shadow-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 py-1.5 z-40 text-left animate-in fade-in zoom-in-95 duration-100">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setOpenActionId(null);
-                          onView(emp);
-                        }}
-                        className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60"
-                      >
-                        <Eye className="w-3.5 h-3.5 text-slate-400" />
-                        <span>View Details</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setOpenActionId(null);
-                          onEdit(emp);
-                        }}
-                        className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60"
-                      >
-                        <Edit2 className="w-3.5 h-3.5 text-slate-400" />
-                        <span>Edit Employee</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setOpenActionId(null);
-                          onViewPerformance(emp);
-                        }}
-                        className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60"
-                      >
-                        <TrendingUp className="w-3.5 h-3.5 text-purple-500" />
-                        <span>View Performance</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setOpenActionId(null);
-                          onViewAttendance(emp);
-                        }}
-                        className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60"
-                      >
-                        <Calendar className="w-3.5 h-3.5 text-blue-500" />
-                        <span>View Attendance</span>
-                      </button>
-
-                      <div className="my-1 border-t border-slate-100 dark:border-slate-700/80" />
-
-                      {emp.status === 'Active' ? (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setOpenActionId(null);
-                            onDeactivate(emp);
-                          }}
-                          className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30"
-                        >
-                          <UserX className="w-3.5 h-3.5" />
-                          <span>Deactivate</span>
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setOpenActionId(null);
-                            onActivate(emp);
-                          }}
-                          className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
-                        >
-                          <UserCheck className="w-3.5 h-3.5" />
-                          <span>Activate</span>
-                        </button>
-                      )}
-                    </div>
-                  )}
                 </td>
               </tr>
             );
           })}
         </tbody>
       </table>
+
+      {/* Floating Portal Action Menu (Never stretches or expands table container height) */}
+      {openActionEmployee && menuPosition && createPortal(
+        <div
+          style={{
+            position: 'fixed',
+            top: menuPosition.top,
+            right: menuPosition.right,
+            zIndex: 9999,
+          }}
+          onClick={(e) => e.stopPropagation()}
+          className="w-48 rounded-xl shadow-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 py-1.5 text-left animate-in fade-in zoom-in-95 duration-100"
+        >
+          <button
+            type="button"
+            onClick={() => {
+              const emp = openActionEmployee;
+              setOpenActionEmployee(null);
+              setMenuPosition(null);
+              handleView(emp);
+            }}
+            className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 cursor-pointer"
+          >
+            <Eye className="w-3.5 h-3.5 text-slate-400" />
+            <span>View Details</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              const emp = openActionEmployee;
+              setOpenActionEmployee(null);
+              setMenuPosition(null);
+              handleEdit(emp);
+            }}
+            className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 cursor-pointer"
+          >
+            <Edit2 className="w-3.5 h-3.5 text-slate-400" />
+            <span>Edit Employee</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              const emp = openActionEmployee;
+              setOpenActionEmployee(null);
+              setMenuPosition(null);
+              onResetPassword?.(emp);
+            }}
+            className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 cursor-pointer"
+          >
+            <KeyRound className="w-3.5 h-3.5 text-indigo-500" />
+            <span>Reset Password</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              const emp = openActionEmployee;
+              setOpenActionEmployee(null);
+              setMenuPosition(null);
+              (onViewPerformance || handleView)(emp);
+            }}
+            className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 cursor-pointer"
+          >
+            <TrendingUp className="w-3.5 h-3.5 text-purple-500" />
+            <span>View Performance</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              const emp = openActionEmployee;
+              setOpenActionEmployee(null);
+              setMenuPosition(null);
+              (onViewAttendance || handleView)(emp);
+            }}
+            className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 cursor-pointer"
+          >
+            <Calendar className="w-3.5 h-3.5 text-blue-500" />
+            <span>View Attendance</span>
+          </button>
+
+          <div className="my-1 border-t border-slate-100 dark:border-slate-700/80" />
+
+          {openActionEmployee.status === 'Active' ? (
+            <button
+              type="button"
+              onClick={() => {
+                const emp = openActionEmployee;
+                setOpenActionEmployee(null);
+                setMenuPosition(null);
+                handleDeactivate(emp);
+              }}
+              className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 cursor-pointer"
+            >
+              <UserX className="w-3.5 h-3.5" />
+              <span>Deactivate</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                const emp = openActionEmployee;
+                setOpenActionEmployee(null);
+                setMenuPosition(null);
+                handleActivate(emp);
+              }}
+              className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 cursor-pointer"
+            >
+              <UserCheck className="w-3.5 h-3.5" />
+              <span>Activate</span>
+            </button>
+          )}
+
+          {onDelete && (
+            <>
+              <div className="my-1 border-t border-slate-100 dark:border-slate-700/80" />
+              <button
+                type="button"
+                onClick={() => {
+                  const emp = openActionEmployee;
+                  setOpenActionEmployee(null);
+                  setMenuPosition(null);
+                  onDelete(emp);
+                }}
+                className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Delete Employee</span>
+              </button>
+            </>
+          )}
+        </div>,
+        document.body
+      )}
     </div>
   );
 };

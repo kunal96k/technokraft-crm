@@ -17,12 +17,16 @@ import { FollowUpTypeBadge } from './FollowUpTypeBadge';
 import { FollowUpPriorityBadge } from './FollowUpPriorityBadge';
 import { FollowUpStatusBadge } from './FollowUpStatusBadge';
 
+import { formatDisplayDate, formatISTTime } from '../../utils/dateUtils';
+import { FollowUpEmptyState } from './FollowUpEmptyState';
+
 interface OverdueListViewProps {
   followUps: FollowUpRecord[];
   onOpenDetails: (item: FollowUpRecord) => void;
   onOpenComplete: (item: FollowUpRecord) => void;
   onOpenReschedule: (item: FollowUpRecord) => void;
   onCancel: (id: string) => void;
+  onAction?: () => void;
 }
 
 export const OverdueListView: React.FC<OverdueListViewProps> = ({
@@ -30,20 +34,15 @@ export const OverdueListView: React.FC<OverdueListViewProps> = ({
   onOpenDetails,
   onOpenComplete,
   onOpenReschedule,
+  onAction,
 }) => {
   if (followUps.length === 0) {
     return (
-      <div className="bg-white dark:bg-slate-900 rounded-xl border border-emerald-200 dark:border-emerald-800/60 p-12 text-center bg-emerald-50/10 dark:bg-emerald-950/20">
-        <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-300 flex items-center justify-center mx-auto mb-3">
-          <CheckCircle2 className="w-6 h-6" />
-        </div>
-        <h3 className="text-base font-semibold text-slate-800 dark:text-slate-100">
-          No Overdue Follow-ups!
-        </h3>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">
-          Great job! All scheduled communications and deliverables are on track.
-        </p>
-      </div>
+      <FollowUpEmptyState
+        module="followups"
+        tab="overdue"
+        onAction={onAction}
+      />
     );
   }
 
@@ -91,7 +90,7 @@ export const OverdueListView: React.FC<OverdueListViewProps> = ({
                   <FollowUpTypeBadge type={item.type} />
                   <FollowUpPriorityBadge priority={item.priority} size="sm" />
                   <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
-                    Scheduled: {item.date} at {item.time}
+                    Scheduled: {formatDisplayDate(item.date)} at {formatISTTime(item.time)}
                   </span>
                 </div>
 

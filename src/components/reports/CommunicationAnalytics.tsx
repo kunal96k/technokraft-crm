@@ -7,6 +7,14 @@ interface CommunicationAnalyticsProps {
 }
 
 export const CommunicationAnalytics: React.FC<CommunicationAnalyticsProps> = ({ stats }) => {
+  if (!stats || stats.length === 0) {
+    return (
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-8 text-center text-xs text-slate-400 font-medium">
+        No communication telemetry recorded for the selected filter.
+      </div>
+    );
+  }
+
   const getIcon = (type: string) => {
     switch (type) {
       case 'Calls':

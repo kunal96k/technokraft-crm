@@ -15,7 +15,16 @@ export type FollowUpType =
   | 'Meeting'
   | 'Requirement Follow-up'
   | 'Proposal Follow-up'
-  | 'General Follow-up';
+  | 'General Follow-up'
+  | 'Task'
+  | 'Discovery Call'
+  | 'Requirement Discussion'
+  | 'Technical Discussion'
+  | 'Demo'
+  | 'Proposal Discussion'
+  | 'Negotiation'
+  | 'Internal Meeting'
+  | 'Other';
 
 export type FollowUpOutcome =
   | 'Interested'
@@ -55,6 +64,10 @@ export interface FollowUpRecord {
   completedAt?: string;
   rescheduleReason?: string;
   rescheduledToId?: string;
+  meetingLocation?: string;
+  meetingLink?: string;
+  meetingAgenda?: string;
+  completed?: boolean;
   createdAt: string;
   daysOverdue?: number;
 }

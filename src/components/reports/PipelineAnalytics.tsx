@@ -1,7 +1,7 @@
 import React from 'react';
 import { GitCommit, TrendingUp, DollarSign } from 'lucide-react';
 import { PipelineStageStat } from '../../types/reports';
-import { formatLakhsINR } from '../../data/mockReports';
+import { formatLakhsINR } from '../../utils/currencyFormatters';
 
 interface PipelineAnalyticsProps {
   stages: PipelineStageStat[];

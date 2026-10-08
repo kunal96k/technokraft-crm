@@ -1,6 +1,7 @@
 import React from 'react';
 import { CallFiltersState } from '../../../types/calls';
 import { X, RotateCcw, Check } from 'lucide-react';
+import { EmployeeSelect } from '../../common/EmployeeSelect';
 
 interface CallFiltersDrawerProps {
   isOpen: boolean;
@@ -69,18 +70,12 @@ export const CallFiltersDrawer: React.FC<CallFiltersDrawerProps> = ({
           {/* Employee */}
           <div>
             <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Employee (Caller)</label>
-            <select
-              value={filters.employee}
-              onChange={(e) => onFilterChange('employee', e.target.value)}
+            <EmployeeSelect
+              value={filters.employee === 'all' ? '' : filters.employee}
+              onChange={(e) => onFilterChange('employee', e.target.value || 'all')}
+              placeholder="All Employees"
               className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 text-xs focus:ring-2 focus:ring-[#5B4DB7] min-h-[44px] cursor-pointer"
-            >
-              <option value="all">All Employees</option>
-              <option value="Kunal Patil">Kunal Patil (Sales Manager)</option>
-              <option value="Shruti Raundal">Shruti Raundal (Senior Sales Executive)</option>
-              <option value="Pranav Jejurkar">Pranav Jejurkar (Business Analyst)</option>
-              <option value="Ankush Pandit">Ankush Pandit (Sales Executive)</option>
-              <option value="Rohan Patil">Rohan Patil (Enterprise BDM)</option>
-            </select>
+            />
           </div>
 
           {/* Call Type */}

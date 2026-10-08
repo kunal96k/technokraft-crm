@@ -1,5 +1,5 @@
 import React from 'react';
-import { formatCurrencyINR, formatLakhsINR } from '../../data/mockOpportunities';
+import { formatCurrencyINR, formatLakhsINR } from '../../utils/currencyFormatters';
 
 interface OpportunityValueProps {
   value: number;

@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
 import { History, ChevronDown, ChevronUp, Clock, ShieldCheck } from 'lucide-react';
-import { INITIAL_AUDIT_LOGS } from '../../data/mockSettings';
+import { AuditLogEntry } from '../../types/settings';
 
-export const AuditLogPreview: React.FC = () => {
+interface AuditLogPreviewProps {
+  logs?: AuditLogEntry[];
+}
+
+export const AuditLogPreview: React.FC<AuditLogPreviewProps> = ({ logs = [] }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
@@ -22,7 +26,7 @@ export const AuditLogPreview: React.FC = () => {
                 Configuration Audit History
               </span>
               <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
-                {INITIAL_AUDIT_LOGS.length} Revisions
+                {logs.length} Revisions
               </span>
             </div>
             <p className="text-[11px] text-slate-500 dark:text-slate-400">
@@ -48,35 +52,41 @@ export const AuditLogPreview: React.FC = () => {
             </span>
           </div>
 
-          <div className="divide-y divide-slate-100 dark:divide-slate-800/80">
-            {INITIAL_AUDIT_LOGS.map((log) => (
-              <div key={log.id} className="py-2.5 first:pt-0 last:pb-0 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
-                <div className="space-y-0.5">
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-slate-900 dark:text-white">
-                      {log.changedItem}
+          {logs.length === 0 ? (
+            <div className="py-6 text-center text-xs text-slate-400 dark:text-slate-500">
+              No audit events recorded yet. Administrative modifications will appear here in chronological order.
+            </div>
+          ) : (
+            <div className="divide-y divide-slate-100 dark:divide-slate-800/80">
+              {logs.map((log) => (
+                <div key={log.id} className="py-2.5 first:pt-0 last:pb-0 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-slate-900 dark:text-white">
+                        {log.changedItem}
+                      </span>
+                      <span className="text-[10px] px-1.5 py-0.2 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                        {log.module}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                      {log.details}
+                    </p>
+                  </div>
+
+                  <div className="flex sm:flex-col items-start sm:items-end justify-between text-[11px] text-slate-500 shrink-0">
+                    <span className="font-medium text-slate-700 dark:text-slate-300">
+                      By: {log.actorName}
                     </span>
-                    <span className="text-[10px] px-1.5 py-0.2 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                      {log.module}
+                    <span className="flex items-center gap-1 text-[10px] text-slate-400">
+                      <Clock className="w-2.5 h-2.5" />
+                      {log.timestamp}
                     </span>
                   </div>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                    {log.details}
-                  </p>
                 </div>
-
-                <div className="flex sm:flex-col items-start sm:items-end justify-between text-[11px] text-slate-500 shrink-0">
-                  <span className="font-medium text-slate-700 dark:text-slate-300">
-                    By: {log.actorName}
-                  </span>
-                  <span className="flex items-center gap-1 text-[10px] text-slate-400">
-                    <Clock className="w-2.5 h-2.5" />
-                    {log.timestamp}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>

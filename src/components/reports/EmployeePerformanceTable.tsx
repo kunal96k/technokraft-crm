@@ -9,7 +9,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { EmployeePerformanceRecord } from '../../types/reports';
-import { formatLakhsINR } from '../../data/mockReports';
+import { formatLakhsINR } from '../../utils/currencyFormatters';
 
 interface EmployeePerformanceTableProps {
   employees: EmployeePerformanceRecord[];

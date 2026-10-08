@@ -6,6 +6,7 @@ import { LeadStatusBadge } from './LeadStatusBadge';
 import { LeadPriorityBadge } from './LeadPriorityBadge';
 import { LeadScoreBadge } from './LeadScoreBadge';
 import { LeadActionMenu } from './LeadActionMenu';
+import { getInitials, getAvatarColor } from '../../utils/avatarUtils';
 
 interface LeadTableProps {
   leads: Lead[];
@@ -71,6 +72,8 @@ export const LeadTable: React.FC<LeadTableProps> = ({
             <th className="py-3.5 px-3">{renderSortHeader('Status', 'status')}</th>
             <th className="py-3.5 px-2.5">Priority</th>
             <th className="py-3.5 px-3 min-w-[140px]">{renderSortHeader('Assigned', 'assigned')}</th>
+            <th className="py-3.5 px-3 min-w-[150px]">{renderSortHeader('Created Date', 'createdAt')}</th>
+            <th className="py-3.5 px-3 min-w-[150px]">{renderSortHeader('Updated Date', 'updatedAt')}</th>
             <th className="py-3.5 px-3 min-w-[150px]">{renderSortHeader('Next Follow-up', 'followUp')}</th>
             <th className="w-12 py-3.5 pr-4 pl-2 text-right">Actions</th>
           </tr>
@@ -79,6 +82,11 @@ export const LeadTable: React.FC<LeadTableProps> = ({
         <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 font-sans">
           {leads.map((lead) => {
             const isSelected = selectedIds.includes(lead.id);
+
+            const createdName = lead.createdBy?.name || 'System Admin';
+            const createdTimestamp = lead.createdBy?.timestamp || lead.createdAt || lead.createdBy?.date;
+            const updatedName = lead.updatedBy?.name || lead.createdBy?.name || 'Admin';
+            const updatedTimestamp = lead.updatedBy?.timestamp || lead.updatedAt || lead.updatedBy?.date || createdTimestamp;
 
             return (
               <tr
@@ -162,14 +170,67 @@ export const LeadTable: React.FC<LeadTableProps> = ({
                   <LeadPriorityBadge priority={lead.priority} />
                 </td>
 
-                {/* Assigned To */}
-                <td className="py-3 px-3 whitespace-nowrap">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-950/80 text-[#5B4DB7] dark:text-purple-300 text-[10px] font-bold flex items-center justify-center flex-shrink-0">
-                      {lead.assignedEmployee.avatar}
+                {/* Assigned (Sales Executive & Business Analyst) */}
+                <td className="py-3 px-3">
+                  <div className="flex flex-col gap-1 min-w-[130px] max-w-[180px]">
+                    {/* Sales Representative */}
+                    <div className="flex items-center gap-1.5" title={`Sales: ${lead.assignedEmployee?.name || 'Unassigned'}`}>
+                      {(() => {
+                        const empName = lead.assignedEmployee?.name || 'Unassigned';
+                        const initials = getInitials(empName, lead.assignedEmployee?.avatar);
+                        const avatarColors = getAvatarColor(empName);
+                        return (
+                          <div
+                            className={`w-5 h-5 rounded-full ${avatarColors.bg} ${avatarColors.text} ${avatarColors.border} border text-[9px] font-bold flex items-center justify-center shrink-0 shadow-2xs`}
+                          >
+                            {initials}
+                          </div>
+                        );
+                      })()}
+                      <span className="text-xs font-medium text-slate-800 dark:text-slate-200 truncate">
+                        {lead.assignedEmployee?.name || 'Unassigned'}
+                      </span>
                     </div>
-                    <span className="text-xs font-medium text-slate-800 dark:text-slate-200 truncate max-w-[110px]">
-                      {lead.assignedEmployee.name}
+
+                    {/* Assigned Business Analyst (BA) */}
+                    {lead.assignedBA?.name ? (
+                      <div
+                        className="flex items-center gap-1 text-[11px] text-purple-700 dark:text-purple-300 font-medium truncate"
+                        title={`Business Analyst: ${lead.assignedBA.name} (${lead.assignedBA.role || 'BA'})`}
+                      >
+                        <span className="px-1 py-0.2 rounded text-[8.5px] font-bold uppercase bg-purple-100 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300 border border-purple-200/80 dark:border-purple-800/60 shrink-0">
+                          BA
+                        </span>
+                        <span className="truncate">{lead.assignedBA.name}</span>
+                      </div>
+                    ) : (
+                      <span className="text-[10px] text-slate-400 dark:text-slate-500 italic pl-6">
+                        No BA assigned
+                      </span>
+                    )}
+                  </div>
+                </td>
+
+                {/* Created By with Full Name and Timestamp */}
+                <td className="py-3 px-3 whitespace-nowrap">
+                  <div className="flex flex-col text-left">
+                    <span className="text-xs font-medium text-slate-800 dark:text-slate-200 leading-tight truncate max-w-[140px]" title={createdName}>
+                      {createdName}
+                    </span>
+                    <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono mt-0.5 leading-tight">
+                      {createdTimestamp || 'N/A'}
+                    </span>
+                  </div>
+                </td>
+
+                {/* Updated By with Full Name and Timestamp */}
+                <td className="py-3 px-3 whitespace-nowrap">
+                  <div className="flex flex-col text-left">
+                    <span className="text-xs font-medium text-purple-700 dark:text-purple-300 leading-tight truncate max-w-[140px]" title={updatedName}>
+                      {updatedName}
+                    </span>
+                    <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono mt-0.5 leading-tight">
+                      {updatedTimestamp || 'N/A'}
                     </span>
                   </div>
                 </td>

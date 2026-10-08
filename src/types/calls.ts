@@ -3,15 +3,20 @@ export type CallType = 'outbound' | 'inbound' | 'missed';
 export type CallStatus = 'scheduled' | 'completed' | 'missed' | 'cancelled' | 'failed';
 
 export type CallResult =
+  | 'Connected'
   | 'Interested'
   | 'Not Interested'
   | 'Callback Required'
+  | 'Callback Requested'
   | 'Requirement Received'
   | 'Meeting Requested'
   | 'Proposal Requested'
+  | 'Qualified'
+  | 'Scheduled'
   | 'No Response'
   | 'Wrong Number'
   | 'Busy'
+  | 'Busy / No Answer'
   | 'Other';
 
 export type NextActionType = 'none' | 'followup' | 'meeting' | 'email';
@@ -29,12 +34,13 @@ export interface CallRecord {
   leadId: string;
   leadCode: string;
   companyName: string;
-  contactId: string;
+  companyWebsite?: string;
+  contactId?: string;
   contactName: string;
   contactDesignation: string;
   contactPhone: string;
   contactEmail?: string;
-  employeeId: string;
+  employeeId?: string;
   employeeName: string;
   employeeRole: string;
   employeeAvatar: string;
@@ -42,10 +48,11 @@ export interface CallRecord {
   status: CallStatus;
   date: string; // e.g. '07 Sep 2026' or '2026-09-07'
   time: string; // e.g. '11:30 AM'
+  timestamp?: string;
   startTime?: string;
   endTime?: string;
   duration: string; // e.g. '12m 34s', '0m 00s' for scheduled/missed
-  durationSeconds: number;
+  durationSeconds?: number;
   result?: CallResult;
   notes: string;
   purpose?: string;
@@ -57,7 +64,9 @@ export interface CallRecord {
   leadScore: number;
   opportunityCreated?: boolean;
   recordingAvailable?: boolean;
-  createdAt: string;
+  followUpRequired?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface CallSummaryStats {

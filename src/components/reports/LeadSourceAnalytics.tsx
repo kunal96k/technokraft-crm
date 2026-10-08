@@ -9,13 +9,21 @@ import {
 } from 'recharts';
 import { LeadSourceStat } from '../../types/reports';
 import { Share2 } from 'lucide-react';
-import { formatLakhsINR } from '../../data/mockReports';
+import { formatLakhsINR } from '../../utils/currencyFormatters';
 
 interface LeadSourceAnalyticsProps {
   sources: LeadSourceStat[];
 }
 
 export const LeadSourceAnalytics: React.FC<LeadSourceAnalyticsProps> = ({ sources }) => {
+  if (!sources || sources.length === 0) {
+    return (
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-8 text-center text-xs text-slate-400 font-medium">
+        No lead sources recorded for the selected filter.
+      </div>
+    );
+  }
+
   const chartData = sources.map((s) => ({
     name: s.source,
     value: s.leads,

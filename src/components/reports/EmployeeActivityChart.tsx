@@ -106,6 +106,11 @@ export const EmployeeActivityChart: React.FC<EmployeeActivityChartProps> = ({
 
       {/* Chart Canvas */}
       <div className="w-full h-64 sm:h-72">
+        {!trendData || trendData.length === 0 ? (
+          <div className="h-full flex items-center justify-center text-xs text-slate-400 font-medium">
+            No activity logged during this time period.
+          </div>
+        ) : (
         <ResponsiveContainer width="100%" height="100%">
           {filter === 'All' ? (
             <BarChart data={trendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
@@ -173,6 +178,7 @@ export const EmployeeActivityChart: React.FC<EmployeeActivityChartProps> = ({
             </BarChart>
           )}
         </ResponsiveContainer>
+        )}
       </div>
     </div>
   );

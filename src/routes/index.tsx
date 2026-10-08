@@ -23,15 +23,25 @@ import { EmployeePerformanceDetailPage } from '../pages/reports/EmployeePerforma
 import { AnalyticsPage } from '../pages/reports/AnalyticsPage';
 import { EmployeeListPage } from '../pages/employees/EmployeeListPage';
 import { AttendancePage } from '../pages/attendance/AttendancePage';
-import { UsersRolesPage } from '../pages/settings/UsersRolesPage';
 import { GeneralSettingsPage } from '../pages/settings/GeneralSettingsPage';
+import { LoginPage } from '../pages/auth/LoginPage';
+import { ForgotPasswordPage } from '../pages/auth/ForgotPasswordPage';
+import { ResetPasswordPage } from '../pages/auth/ResetPasswordPage';
+import { ProtectedRoute } from '../components/auth/ProtectedRoute';
 
 export const AppRoutes: React.FC = () => {
   return (
     <Routes>
-      <Route element={<AppLayout />}>
-        <Route index element={<Navigate to="/dashboard" replace />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
+      {/* 1. Public Authentication Routes */}
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
+
+      {/* 2. Protected CRM Application Routes */}
+      <Route element={<ProtectedRoute />}>
+        <Route element={<AppLayout />}>
+          <Route index element={<Navigate to="/dashboard" replace />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
 
         {/* 2. Leads Module */}
         <Route path="/leads" element={<LeadsListPage />} />
@@ -69,14 +79,13 @@ export const AppRoutes: React.FC = () => {
         <Route path="/attendance" element={<AttendancePage />} />
 
         {/* 8. Settings Module */}
-        <Route path="/settings" element={<Navigate to="/settings/users" replace />} />
-        <Route path="/settings/users" element={<UsersRolesPage />} />
-        <Route path="/settings/users-roles" element={<UsersRolesPage />} />
+        <Route path="/settings" element={<Navigate to="/settings/general" replace />} />
         <Route path="/settings/general" element={<GeneralSettingsPage />} />
 
         {/* Fallback Catch-all */}
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Route>
-    </Routes>
-  );
+    </Route>
+  </Routes>
+);
 };

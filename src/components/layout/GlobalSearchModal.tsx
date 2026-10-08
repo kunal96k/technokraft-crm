@@ -12,17 +12,24 @@ import {
   Briefcase,
   FileText,
 } from 'lucide-react';
-import { getStoredOpportunities, getStoredProposals, formatCurrencyINR } from '../../data/mockOpportunities';
+import { fetchOpportunities } from '../../services/opportunityService';
+import { fetchProposals } from '../../services/proposalService';
+import { fetchLeads } from '../../services/leadService';
+import { fetchEmployees } from '../../services/employeeService';
+import { formatCurrencyINR } from '../../utils/currencyFormatters';
+import { OpportunityRecord, ProposalRecord } from '../../types/opportunities';
+import { Lead } from '../../types/leads';
+import { Employee } from '../../types/employees';
 
 interface GlobalSearchModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-interface SearchMockItem {
+interface SearchItem {
   id: string;
   title: string;
-  category: 'Reports' | 'Leads' | 'Opportunities' | 'Proposals' | 'Companies' | 'Contacts' | 'Tasks';
+  category: 'Reports' | 'Leads' | 'Opportunities' | 'Proposals' | 'Companies' | 'Contacts' | 'Employees';
   subtitle: string;
   path: string;
 }
@@ -31,12 +38,22 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({ isOpen, on
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [opportunities, setOpportunities] = useState<OpportunityRecord[]>([]);
+  const [proposals, setProposals] = useState<ProposalRecord[]>([]);
+  const [leads, setLeads] = useState<Lead[]>([]);
+  const [employees, setEmployees] = useState<Employee[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const opportunities = getStoredOpportunities();
-  const proposals = getStoredProposals();
+  useEffect(() => {
+    if (isOpen) {
+      fetchOpportunities({ size: 50 }).then((res) => setOpportunities(res.content || [])).catch(() => {});
+      fetchProposals({ size: 50 }).then((res) => setProposals(res.content || [])).catch(() => {});
+      fetchLeads({ size: 50 }).then((res) => setLeads(res.content || [])).catch(() => {});
+      fetchEmployees({ size: 50 }).then((res) => setEmployees(res.content || [])).catch(() => {});
+    }
+  }, [isOpen]);
 
-  const oppItems: SearchMockItem[] = opportunities.map((o) => ({
+  const oppItems: SearchItem[] = opportunities.map((o) => ({
     id: `opp-${o.id}`,
     title: o.name,
     category: 'Opportunities',
@@ -44,7 +61,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({ isOpen, on
     path: `/opportunities/${o.id}`,
   }));
 
-  const propItems: SearchMockItem[] = proposals.map((p) => ({
+  const propItems: SearchItem[] = proposals.map((p) => ({
     id: `prop-${p.id}`,
     title: `${p.proposalCode} - ${p.opportunityName}`,
     category: 'Proposals',
@@ -52,22 +69,31 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({ isOpen, on
     path: `/opportunities/proposals`,
   }));
 
-  const staticItems: SearchMockItem[] = [
+  const leadItems: SearchItem[] = leads.map((l) => ({
+    id: `lead-${l.id}`,
+    title: l.company?.name || l.contact?.name || `Lead #${l.id}`,
+    category: 'Leads',
+    subtitle: `${l.contact?.name || ''} • ${l.service || 'IT Services'} • ${l.status || 'New'}`,
+    path: `/leads/${l.id}`,
+  }));
+
+  const empItems: SearchItem[] = employees.map((e) => ({
+    id: `emp-${e.id}`,
+    title: e.name,
+    category: 'Employees',
+    subtitle: `${e.role || 'Staff'} • ${e.department || 'General'} • ${e.email || ''}`,
+    path: `/reports/performance/${e.id}`,
+  }));
+
+  const navItems: SearchItem[] = [
     { id: 'rep-1', title: 'Performance Report', category: 'Reports', subtitle: 'Sales rep activities, targets & conversion rates', path: '/reports/performance' },
     { id: 'rep-2', title: 'CRM Analytics', category: 'Reports', subtitle: 'Lead source attribution, funnel, & pipeline forecast', path: '/reports/analytics' },
-    { id: 'rep-3', title: 'Kunal Patil - Performance Record', category: 'Reports', subtitle: 'Sales Executive • 92% Target Achievement', path: '/reports/performance/emp-01' },
-    { id: 'rep-4', title: 'Shruti Raundal - Performance Record', category: 'Reports', subtitle: 'Senior Business Development • 89% Target Achievement', path: '/reports/performance/emp-02' },
-    { id: 'emp-dir', title: 'Employee Directory', category: 'Contacts', subtitle: 'TechnoKraft staff, roles, workloads and targets', path: '/employees' },
-    { id: 'att-dir', title: 'Attendance & Login Sessions', category: 'Tasks', subtitle: 'Track rep working hours, punches and telemetry', path: '/employees/attendance' },
-    { id: '1', title: 'ABC Technologies', category: 'Companies', subtitle: 'Cloud Migration & IT Services • Delhi', path: '/leads' },
-    { id: '2', title: 'Kunal Patil', category: 'Contacts', subtitle: 'VP of Technology at ABC Tech • kunal@abctech.com', path: '/leads' },
-    { id: '3', title: 'XYZ Solutions Ltd', category: 'Companies', subtitle: 'Enterprise Software Client • Mumbai', path: '/leads' },
-    { id: '4', title: 'Shruti Raundal', category: 'Contacts', subtitle: 'Procurement Lead • shruti@xyz.com', path: '/leads' },
-    { id: '5', title: 'Follow-up Call with Global IT Services', category: 'Tasks', subtitle: 'Due Today at 02:30 PM • High Priority', path: '/follow-ups' },
-    { id: '7', title: 'Ankush Pandit', category: 'Contacts', subtitle: 'Account Executive • TechnoKraft Pune', path: '/employees' },
+    { id: 'nav-emp', title: 'Employee Directory', category: 'Employees', subtitle: 'TechnoKraft staff, roles, workloads and targets', path: '/employees' },
+    { id: 'nav-att', title: 'Attendance & Login Sessions', category: 'Employees', subtitle: 'Track rep working hours, punches and telemetry', path: '/employees/attendance' },
+    { id: 'nav-fol', title: 'Follow-ups & Tasks', category: 'Reports', subtitle: 'Scheduled reminders, calls and client meetings', path: '/follow-ups' },
   ];
 
-  const allSearchData = [...oppItems, ...propItems, ...staticItems];
+  const allSearchData = [...leadItems, ...oppItems, ...propItems, ...empItems, ...navItems];
 
   useEffect(() => {
     if (isOpen) {
@@ -90,7 +116,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({ isOpen, on
 
   if (!isOpen) return null;
 
-  const categories = ['All', 'Reports', 'Opportunities', 'Proposals', 'Leads', 'Companies', 'Contacts', 'Tasks'];
+  const categories = ['All', 'Leads', 'Opportunities', 'Proposals', 'Employees', 'Reports'];
 
   const filteredItems = allSearchData.filter((item) => {
     const matchesCat = selectedCategory === 'All' || item.category === selectedCategory;
@@ -121,7 +147,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({ isOpen, on
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search opportunities, proposals, leads, companies..."
+            placeholder="Search opportunities, proposals, leads, employees..."
             className="w-full bg-transparent text-slate-900 placeholder:text-slate-400 text-[15px] outline-none"
           />
           {query && (
@@ -173,10 +199,9 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({ isOpen, on
                   <div className="w-8 h-8 rounded-lg bg-purple-50 text-[#5B4DB7] flex items-center justify-center flex-shrink-0">
                     {item.category === 'Opportunities' && <Briefcase className="w-4 h-4" />}
                     {item.category === 'Proposals' && <FileText className="w-4 h-4" />}
-                    {item.category === 'Companies' && <Building className="w-4 h-4" />}
-                    {item.category === 'Contacts' && <Users className="w-4 h-4" />}
-                    {item.category === 'Tasks' && <Calendar className="w-4 h-4" />}
-                    {item.category === 'Leads' && <Mail className="w-4 h-4" />}
+                    {item.category === 'Employees' && <Users className="w-4 h-4" />}
+                    {item.category === 'Reports' && <Calendar className="w-4 h-4" />}
+                    {item.category === 'Leads' && <Building className="w-4 h-4" />}
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
