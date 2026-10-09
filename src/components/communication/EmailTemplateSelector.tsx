@@ -6,25 +6,35 @@ import { fetchEmailTemplates } from '../../services/emailService';
 interface EmailTemplateSelectorProps {
   selectedTemplateId: string;
   onSelectTemplate: (template: EmailTemplate) => void;
+  onCreateNewTemplate?: () => void;
   className?: string;
 }
 
 export const EmailTemplateSelector: React.FC<EmailTemplateSelectorProps> = ({
   selectedTemplateId,
   onSelectTemplate,
+  onCreateNewTemplate,
   className = '',
 }) => {
   const [templates, setTemplates] = useState<EmailTemplate[]>([]);
 
-  useEffect(() => {
+  const reloadTemplates = () => {
     fetchEmailTemplates().then((data) => {
       if (data && data.length > 0) {
         setTemplates(data);
       }
     });
+  };
+
+  useEffect(() => {
+    reloadTemplates();
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    if (e.target.value === '__CREATE_NEW__') {
+      if (onCreateNewTemplate) onCreateNewTemplate();
+      return;
+    }
     const found = templates.find((t) => t.id === e.target.value);
     if (found) {
       onSelectTemplate(found);
@@ -43,11 +53,22 @@ export const EmailTemplateSelector: React.FC<EmailTemplateSelectorProps> = ({
           <Sparkles className="w-3.5 h-3.5 text-[#5B4DB7] dark:text-purple-400" />
           <span>Email Template</span>
         </label>
-        {selectedTemplate && (
-          <span className="text-[11px] font-medium text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/60 px-2 py-0.5 rounded-full border border-purple-200 dark:border-purple-800/60">
-            Category: {selectedTemplate.category}
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {selectedTemplate && (
+            <span className="text-[11px] font-medium text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/60 px-2 py-0.5 rounded-full border border-purple-200 dark:border-purple-800/60">
+              {selectedTemplate.category}
+            </span>
+          )}
+          {onCreateNewTemplate && (
+            <button
+              type="button"
+              onClick={onCreateNewTemplate}
+              className="text-[11px] font-semibold text-[#5B4DB7] dark:text-purple-400 hover:text-[#4335A0] dark:hover:text-purple-300 hover:underline cursor-pointer flex items-center gap-1"
+            >
+              <span>+ Create Own</span>
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="relative">
@@ -63,6 +84,11 @@ export const EmailTemplateSelector: React.FC<EmailTemplateSelectorProps> = ({
               {tpl.name} ({tpl.category})
             </option>
           ))}
+          {onCreateNewTemplate && (
+            <option value="__CREATE_NEW__" className="font-semibold text-[#5B4DB7]">
+              ✨ + Create Own Template...
+            </option>
+          )}
         </select>
         <ChevronDown className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
       </div>

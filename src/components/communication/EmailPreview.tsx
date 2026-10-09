@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { EmailRecord } from '../../types/communication';
 import { CommunicationStatusBadge } from './CommunicationStatusBadge';
+import { renderBrandedEmailHtml } from '../../utils/emailTemplateRenderer';
 
 interface EmailPreviewProps {
   email: EmailRecord | null;
@@ -205,13 +206,26 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({
 
       {/* Main Email Body */}
       <div className="flex-1 min-h-0 p-5 overflow-y-auto text-xs sm:text-sm text-slate-800 dark:text-slate-200 leading-relaxed font-sans">
-        {email.body && (email.body.includes('<html') || email.body.includes('<div') || email.body.includes('<table') || email.body.includes('<p>')) ? (
+        {email.body && (email.body.includes('<html') || email.body.includes('<!DOCTYPE')) ? (
           <div
             className="prose dark:prose-invert max-w-none text-xs sm:text-sm"
             dangerouslySetInnerHTML={{ __html: email.body }}
           />
         ) : (
-          <div className="whitespace-pre-wrap leading-relaxed space-y-4">{email.body}</div>
+          <div
+            className="rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm"
+            dangerouslySetInnerHTML={{
+              __html: renderBrandedEmailHtml({
+                subject: email.subject || 'B2B Communication',
+                body: email.body || '',
+                senderName: email.senderName || 'TechnoKraft Services LLP',
+                recipientEmail: email.recipientEmail || 'client@example.com',
+                category: 'B2B Enterprise Communication',
+                companyName: email.companyName,
+                leadCode: email.leadCode,
+              }),
+            }}
+          />
         )}
       </div>
 
@@ -234,7 +248,18 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({
                 <span className="text-[10px] text-slate-400 dark:text-slate-500">({att.size})</span>
                 <button
                   type="button"
-                  onClick={() => alert(`Downloading ${att.name}...`)}
+                  onClick={() => {
+                    const downloadUrl =
+                      att.url ||
+                      (att.id && !att.id.startsWith('att-')
+                        ? `/api/attachments/${att.id}/download`
+                        : undefined);
+                    if (downloadUrl) {
+                      window.open(downloadUrl, '_blank');
+                    } else {
+                      alert(`Attachment "${att.name}" is attached to this email.`);
+                    }
+                  }}
                   className="text-slate-400 hover:text-[#5B4DB7] dark:hover:text-purple-400 p-0.5 ml-1 cursor-pointer"
                   title="Download attachment"
                 >

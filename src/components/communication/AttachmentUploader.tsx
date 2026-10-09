@@ -42,6 +42,15 @@ export const AttachmentUploader: React.FC<AttachmentUploaderProps> = ({
     setIsDragging(false);
   };
 
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve((reader.result as string) || '');
+      reader.onerror = () => resolve('');
+      reader.readAsDataURL(file);
+    });
+  };
+
   const processFiles = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
     setIsUploading(true);
@@ -49,14 +58,39 @@ export const AttachmentUploader: React.FC<AttachmentUploaderProps> = ({
     try {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
-        const res = await uploadAttachment(file, leadId);
+        let base64 = '';
+        try {
+          base64 = await fileToBase64(file);
+        } catch {}
 
-        if (res.success && res.attachment) {
+        let res: any = null;
+        try {
+          res = await uploadAttachment(file, leadId);
+        } catch (uploadErr) {
+          console.warn('[AttachmentUploader] Backend upload failed, using local in-memory fallback:', uploadErr);
+        }
+
+        const saved = res?.attachment || (res?.id ? res : null);
+
+        // Deduce a valid RFC MIME type (e.g. application/pdf) with slash
+        let mimeType = 'application/octet-stream';
+        if (file.type && file.type.includes('/')) {
+          mimeType = file.type;
+        } else if (saved?.type && typeof saved.type === 'string' && saved.type.includes('/')) {
+          mimeType = saved.type;
+        } else if (file.name.toLowerCase().endsWith('.pdf')) {
+          mimeType = 'application/pdf';
+        }
+
+        if (saved && saved.id) {
           onAddAttachment({
-            id: String(res.attachment.id || `att-${Date.now()}-${i}`),
-            name: res.attachment.name || file.name,
-            size: res.attachment.size || `${(file.size / 1024).toFixed(1)} KB`,
-            type: res.attachment.type || file.type || 'application/octet-stream',
+            id: String(saved.id),
+            name: saved.name || file.name,
+            size: saved.size || `${(file.size / 1024).toFixed(1)} KB`,
+            type: mimeType,
+            url: saved.url || saved.downloadUrl || `/api/attachments/${saved.id}/download`,
+            filePath: saved.filePath,
+            base64Content: base64 || undefined,
           });
           toast.success(`Saved "${file.name}" to project storage & database.`, 'Attachment Saved');
         } else {
@@ -69,14 +103,15 @@ export const AttachmentUploader: React.FC<AttachmentUploaderProps> = ({
             id: `att-${Date.now()}-${i}`,
             name: file.name,
             size: sizeStr,
-            type: file.type || 'application/octet-stream',
+            type: mimeType,
+            base64Content: base64 || undefined,
           });
           toast.warning(`File loaded locally: ${file.name}`, 'Local Attachment');
         }
       }
     } catch (err) {
       console.error('Error during attachment upload:', err);
-      toast.error('Failed to upload file to backend server');
+      toast.error('Failed to process attachment file');
     } finally {
       setIsUploading(false);
     }

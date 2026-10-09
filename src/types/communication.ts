@@ -14,6 +14,9 @@ export interface EmailAttachment {
   name: string;
   size: string;
   type: string;
+  url?: string;
+  filePath?: string;
+  base64Content?: string;
 }
 
 export interface EmailTracking {
@@ -55,6 +58,7 @@ export interface EmailTemplate {
   subject: string;
   body: string;
   variables: string[];
+  isDefault?: boolean;
 }
 
 export type WhatsAppStatus = 'sending' | 'sent' | 'delivered' | 'read' | 'failed';

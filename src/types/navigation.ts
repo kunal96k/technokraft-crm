@@ -53,7 +53,12 @@ export interface NotificationItem {
   description: string;
   time: string;
   unread: boolean;
-  type: 'lead' | 'followup' | 'task' | 'requirement' | 'proposal' | 'system';
+  type: 'lead' | 'followup' | 'task' | 'requirement' | 'proposal' | 'email' | 'system';
+  linkUrl?: string;
+  leadId?: number;
+  leadCode?: string;
+  priority?: string;
+  createdAt?: string;
 }
 
 export interface QuickActionItem {

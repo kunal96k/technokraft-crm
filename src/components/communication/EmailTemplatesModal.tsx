@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { X, FileText, Sparkles, Copy, Check, Loader2 } from 'lucide-react';
+import { X, FileText, Sparkles, Copy, Check, Loader2, Plus } from 'lucide-react';
 import { EmailTemplate } from '../../types/communication';
 import { fetchEmailTemplates } from '../../services/emailService';
+import { CreateTemplateModal } from './CreateTemplateModal';
 
 interface EmailTemplatesModalProps {
   isOpen: boolean;
@@ -18,25 +19,35 @@ export const EmailTemplatesModal: React.FC<EmailTemplatesModalProps> = ({
   const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplate | null>(null);
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+  const loadTemplates = () => {
+    setLoading(true);
+    fetchEmailTemplates()
+      .then((data) => {
+        if (data && data.length > 0) {
+          setTemplates(data);
+          setSelectedTemplate((prev) => (prev ? data.find((t) => t.id === prev.id) || data[0] : data[0]));
+        } else {
+          setTemplates([]);
+          setSelectedTemplate(null);
+        }
+      })
+      .finally(() => setLoading(false));
+  };
 
   useEffect(() => {
     if (isOpen) {
-      setLoading(true);
-      fetchEmailTemplates()
-        .then((data) => {
-          if (data && data.length > 0) {
-            setTemplates(data);
-            setSelectedTemplate(data[0]);
-          } else {
-            setTemplates([]);
-            setSelectedTemplate(null);
-          }
-        })
-        .finally(() => setLoading(false));
+      loadTemplates();
     }
   }, [isOpen]);
 
   if (!isOpen) return null;
+
+  const handleTemplateCreated = (newTpl: EmailTemplate) => {
+    setTemplates((prev) => [newTpl, ...prev]);
+    setSelectedTemplate(newTpl);
+  };
 
   const handleCopy = () => {
     if (!selectedTemplate) return;
@@ -46,40 +57,51 @@ export const EmailTemplatesModal: React.FC<EmailTemplatesModalProps> = ({
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-150"
-      onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-      aria-label="Email Templates Library"
-    >
+    <>
       <div
-        className="w-full max-w-3xl max-h-[90vh] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden text-slate-800 dark:text-slate-100 transition-colors"
-        onClick={(e) => e.stopPropagation()}
+        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-150"
+        onClick={onClose}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Email Templates Library"
       >
-        {/* Modal Header */}
-        <div className="flex-shrink-0 flex items-center justify-between px-5 py-3.5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/70">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-purple-50 dark:bg-purple-950/60 text-[#5B4DB7] dark:text-purple-400 flex items-center justify-center border border-purple-200/50 dark:border-purple-800/50">
-              <FileText className="w-4 h-4" />
+        <div
+          className="w-full max-w-3xl max-h-[90vh] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden text-slate-800 dark:text-slate-100 transition-colors"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Modal Header */}
+          <div className="flex-shrink-0 flex items-center justify-between px-5 py-3.5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/70">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-purple-50 dark:bg-purple-950/60 text-[#5B4DB7] dark:text-purple-400 flex items-center justify-center border border-purple-200/50 dark:border-purple-800/50">
+                <FileText className="w-4 h-4" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                  Business Email Templates
+                </h3>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                  Standardized B2B communication templates with CRM variable tags
+                </p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                Business Email Templates
-              </h3>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                Standardized B2B communication templates with CRM variable tags
-              </p>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setIsCreateModalOpen(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-gradient-to-r from-[#0A2558] to-[#4f46e5] hover:opacity-95 rounded-lg shadow-2xs transition-opacity cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Create Own Template</span>
+              </button>
+              <button
+                type="button"
+                onClick={onClose}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
 
         {/* 2-column layout: template list on left, template preview on right */}
         <div className="flex-1 min-h-0 overflow-hidden grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-200 dark:divide-slate-800">
@@ -207,5 +229,14 @@ export const EmailTemplatesModal: React.FC<EmailTemplatesModalProps> = ({
         </div>
       </div>
     </div>
+
+      {isCreateModalOpen && (
+        <CreateTemplateModal
+          isOpen={isCreateModalOpen}
+          onClose={() => setIsCreateModalOpen(false)}
+          onTemplateCreated={handleTemplateCreated}
+        />
+      )}
+    </>
   );
 };

@@ -14,6 +14,10 @@ import {
   ChevronDown,
   ChevronUp,
   Sliders,
+  Eye,
+  Edit3,
+  BookmarkPlus,
+  Sparkles,
 } from 'lucide-react';
 import {
   resolveTemplateText,
@@ -31,6 +35,8 @@ import { EmailTemplateSelector } from './EmailTemplateSelector';
 import { EmailVariablePreview } from './EmailVariablePreview';
 import { AttachmentUploader } from './AttachmentUploader';
 import { ScheduleEmailModal } from './ScheduleEmailModal';
+import { CreateTemplateModal } from './CreateTemplateModal';
+import { renderBrandedEmailHtml } from '../../utils/emailTemplateRenderer';
 
 interface EmailComposerModalProps {
   isOpen: boolean;
@@ -73,6 +79,8 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
   // Template state
   const [availableTemplates, setAvailableTemplates] = useState<EmailTemplate[]>([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
+  const [isCreateTemplateModalOpen, setIsCreateTemplateModalOpen] = useState(false);
+  const [composerTab, setComposerTab] = useState<'edit' | 'preview'>('edit');
 
   // Attachments
   const [attachments, setAttachments] = useState<EmailAttachment[]>([]);
@@ -137,6 +145,17 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
     setBody(resolveTemplateText(template.body, selectedLead));
   };
 
+  const handleCustomTemplateCreated = (newTpl: EmailTemplate) => {
+    setAvailableTemplates((prev) => [newTpl, ...prev]);
+    setSelectedTemplateId(newTpl.id);
+    setSubject(resolveTemplateText(newTpl.subject, selectedLead));
+    setBody(resolveTemplateText(newTpl.body, selectedLead));
+    setToastType('success');
+    setToastMessage(`✓ Custom template "${newTpl.name}" applied`);
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 2500);
+  };
+
   const handleInsertVariable = (variableTag: string) => {
     const resolved = resolveTemplateText(variableTag, selectedLead);
     if (!resolved) return;
@@ -159,6 +178,16 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
 
     setIsSending(true);
     try {
+      const formattedAttachments = attachments.map((att) => ({
+        id: att.id,
+        name: att.name,
+        fileName: att.name,
+        filePath: att.filePath,
+        fileSize: att.size,
+        fileType: att.type,
+        base64Content: att.base64Content,
+      }));
+
       const res = await sendB2BEmail({
         leadId: selectedLead?.id,
         leadCode: selectedLead?.leadCode,
@@ -171,6 +200,7 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
         senderName: 'TechnoKraft Services',
         senderEmail: 'info@technokraftservices.com',
         status: 'sent',
+        attachments: formattedAttachments,
       });
 
       if (res.success) {
@@ -227,6 +257,16 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
   const handleConfirmSchedule = async (dateStr: string, timeStr: string) => {
     setIsSending(true);
     try {
+      const formattedAttachments = attachments.map((att) => ({
+        id: att.id,
+        name: att.name,
+        fileName: att.name,
+        filePath: att.filePath,
+        fileSize: att.size,
+        fileType: att.type,
+        base64Content: att.base64Content,
+      }));
+
       const res = await sendB2BEmail({
         leadId: selectedLead?.id,
         leadCode: selectedLead?.leadCode,
@@ -238,6 +278,7 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
         senderEmail: 'info@technokraftservices.com',
         status: 'scheduled',
         scheduledFor: `${dateStr}, ${timeStr}`,
+        attachments: formattedAttachments,
       });
 
       const newRecord: EmailRecord = {
@@ -286,6 +327,16 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
   const handleDraft = async () => {
     setIsSending(true);
     try {
+      const formattedAttachments = attachments.map((att) => ({
+        id: att.id,
+        name: att.name,
+        fileName: att.name,
+        filePath: att.filePath,
+        fileSize: att.size,
+        fileType: att.type,
+        base64Content: att.base64Content,
+      }));
+
       const res = await sendB2BEmail({
         leadId: selectedLead?.id,
         leadCode: selectedLead?.leadCode,
@@ -296,6 +347,7 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
         senderName: 'TechnoKraft Services',
         senderEmail: 'info@technokraftservices.com',
         status: 'draft',
+        attachments: formattedAttachments,
       });
 
       const draftRecord: EmailRecord = {
@@ -398,19 +450,31 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
           </div>
 
           {/* Template Selector & Dynamic Variables Bar */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
             <EmailTemplateSelector
               selectedTemplateId={selectedTemplateId}
               onSelectTemplate={handleTemplateSelect}
+              onCreateNewTemplate={() => setIsCreateTemplateModalOpen(true)}
+              className="flex-1"
             />
 
-            <div className="flex items-end">
+            <div className="flex items-center gap-2 pb-0.5">
+              <button
+                type="button"
+                onClick={() => setIsCreateTemplateModalOpen(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-[#0A2558] dark:text-purple-300 bg-purple-50 dark:bg-purple-950/60 border border-purple-200 dark:border-purple-800 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/40 transition-colors shadow-2xs cursor-pointer"
+                title="Create custom template or save current email draft"
+              >
+                <BookmarkPlus className="w-3.5 h-3.5 text-[#5B4DB7] dark:text-purple-400" />
+                <span>Save as Template</span>
+              </button>
+
               <button
                 type="button"
                 onClick={() => setShowCcBcc(!showCcBcc)}
-                className="inline-flex items-center gap-1.5 text-xs font-medium text-[#5B4DB7] dark:text-purple-400 hover:underline mb-2 cursor-pointer"
+                className="inline-flex items-center gap-1 px-2.5 py-2 text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-white dark:bg-slate-850 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg transition-colors cursor-pointer"
               >
-                <span>{showCcBcc ? 'Hide CC / BCC' : 'Add CC / BCC'}</span>
+                <span>{showCcBcc ? 'Hide CC/BCC' : 'CC/BCC'}</span>
                 {showCcBcc ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
               </button>
             </div>
@@ -475,18 +539,70 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
             </div>
           </div>
 
-          {/* Email Body TextArea */}
+          {/* Email Body TextArea / Live Branded Preview */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
-              Message Body
-            </label>
-            <textarea
-              rows={8}
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-              placeholder="Draft your personalized email here..."
-              className="w-full text-xs leading-relaxed p-3.5 bg-white dark:bg-slate-850 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 font-sans focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40 dark:focus:ring-purple-400/40"
-            />
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200">
+                Message Body
+              </label>
+              <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg text-xs font-semibold">
+                <button
+                  type="button"
+                  onClick={() => setComposerTab('edit')}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md transition-colors cursor-pointer ${
+                    composerTab === 'edit'
+                      ? 'bg-white dark:bg-slate-700 text-[#0A2558] dark:text-white shadow-2xs font-bold'
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-800'
+                  }`}
+                >
+                  <Edit3 className="w-3 h-3" />
+                  <span>Edit Plain Text</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setComposerTab('preview')}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md transition-colors cursor-pointer ${
+                    composerTab === 'preview'
+                      ? 'bg-white dark:bg-slate-700 text-[#0A2558] dark:text-white shadow-2xs font-bold'
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-800'
+                  }`}
+                >
+                  <Eye className="w-3 h-3 text-[#5B4DB7] dark:text-purple-400" />
+                  <span>Branded Preview</span>
+                </button>
+              </div>
+            </div>
+
+            {composerTab === 'edit' ? (
+              <textarea
+                rows={8}
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
+                placeholder="Draft your personalized email here..."
+                className="w-full text-xs leading-relaxed p-3.5 bg-white dark:bg-slate-850 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 font-sans focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40 dark:focus:ring-purple-400/40"
+              />
+            ) : (
+              <div className="border border-slate-200 dark:border-slate-800 rounded-xl p-3 bg-slate-50 dark:bg-slate-950 overflow-y-auto max-h-96">
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 mb-2 flex items-center justify-between">
+                  <span>Official TechnoKraft Corporate Email Layout with Header &amp; Footer</span>
+                  <span className="font-semibold text-purple-600 dark:text-purple-400">Live Preview</span>
+                </div>
+                <div
+                  className="bg-white rounded-lg shadow-sm overflow-hidden"
+                  dangerouslySetInnerHTML={{
+                    __html: renderBrandedEmailHtml({
+                      subject: subject || 'Business Communication',
+                      body: body || 'No body content entered yet.',
+                      senderName: 'TechnoKraft Consulting Team',
+                      recipientEmail: recipientEmail || 'client@example.com',
+                      category: 'B2B Enterprise Communication',
+                      companyName: selectedLead?.company?.name,
+                      leadCode: selectedLead?.leadCode,
+                    }),
+                  }}
+                />
+              </div>
+            )}
           </div>
 
           {/* Attachment Uploader */}
@@ -494,6 +610,7 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
             attachments={attachments}
             onAddAttachment={handleAddAttachment}
             onRemoveAttachment={handleRemoveAttachment}
+            leadId={selectedLead?.id ? String(selectedLead.id) : undefined}
           />
         </div>
 
@@ -552,6 +669,17 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
         onClose={() => setIsScheduleModalOpen(false)}
         onConfirmSchedule={handleConfirmSchedule}
       />
+
+      {/* Create Custom Template Modal */}
+      {isCreateTemplateModalOpen && (
+        <CreateTemplateModal
+          isOpen={isCreateTemplateModalOpen}
+          onClose={() => setIsCreateTemplateModalOpen(false)}
+          onTemplateCreated={handleCustomTemplateCreated}
+          initialSubject={subject}
+          initialBody={body}
+        />
+      )}
 
       {/* Toast Notification */}
       {showToast && (

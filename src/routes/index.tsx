@@ -24,6 +24,7 @@ import { AnalyticsPage } from '../pages/reports/AnalyticsPage';
 import { EmployeeListPage } from '../pages/employees/EmployeeListPage';
 import { AttendancePage } from '../pages/attendance/AttendancePage';
 import { GeneralSettingsPage } from '../pages/settings/GeneralSettingsPage';
+import { NotificationsPage } from '../pages/notifications/NotificationsPage';
 import { LoginPage } from '../pages/auth/LoginPage';
 import { ForgotPasswordPage } from '../pages/auth/ForgotPasswordPage';
 import { ResetPasswordPage } from '../pages/auth/ResetPasswordPage';
@@ -81,6 +82,9 @@ export const AppRoutes: React.FC = () => {
         {/* 8. Settings Module */}
         <Route path="/settings" element={<Navigate to="/settings/general" replace />} />
         <Route path="/settings/general" element={<GeneralSettingsPage />} />
+
+        {/* 9. Notification Center */}
+        <Route path="/notifications" element={<NotificationsPage />} />
 
         {/* Fallback Catch-all */}
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
