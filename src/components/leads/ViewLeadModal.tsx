@@ -19,6 +19,7 @@ import {
   CheckCircle2,
   FileCode,
   Loader2,
+  UploadCloud,
 } from 'lucide-react';
 import { Lead } from '../../types/leads';
 import { LeadStatusBadge } from './LeadStatusBadge';
@@ -142,20 +143,20 @@ export const ViewLeadModal: React.FC<ViewLeadModalProps> = ({
         <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/70 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="font-mono text-xs font-bold px-2 py-1 bg-purple-100 dark:bg-purple-950/60 text-[#5B4DB7] dark:text-purple-300 rounded-md border border-purple-200/60 dark:border-purple-800/60">
-              {lead.leadCode}
+              {currentLead.leadCode}
             </span>
             <div>
               <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white leading-tight">
-                {lead.company.name}
+                {currentLead.company.name}
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                {lead.service || 'TechnoKraft Professional IT Services'}
+                {currentLead.service || 'TechnoKraft Professional IT Services'}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            <LeadStatusBadge status={lead.status} size="sm" />
+            <LeadStatusBadge status={currentLead.status} size="sm" />
             <button
               type="button"
               onClick={onClose}
@@ -174,25 +175,25 @@ export const ViewLeadModal: React.FC<ViewLeadModalProps> = ({
             <div>
               <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 block">Priority</span>
               <div className="mt-0.5">
-                <LeadPriorityBadge priority={lead.priority} size="sm" />
+                <LeadPriorityBadge priority={currentLead.priority} size="sm" />
               </div>
             </div>
             <div>
               <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 block">Lead Score</span>
               <div className="mt-0.5">
-                <LeadScoreBadge score={lead.score} size="sm" />
+                <LeadScoreBadge score={currentLead.score} size="sm" />
               </div>
             </div>
             <div>
               <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 block">Lead Source</span>
               <span className="font-semibold text-slate-800 dark:text-slate-200 mt-0.5 block truncate">
-                {lead.source || 'Direct Outreach'}
+                {currentLead.source || 'Direct Outreach'}
               </span>
             </div>
             <div>
               <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 block">Assigned To</span>
               <span className="font-semibold text-slate-800 dark:text-slate-200 mt-0.5 block truncate">
-                {lead.assignedEmployee?.name || 'Kunal Patil'}
+                {currentLead.assignedEmployee?.name || 'Kunal Patil'}
               </span>
             </div>
           </div>
@@ -208,25 +209,25 @@ export const ViewLeadModal: React.FC<ViewLeadModalProps> = ({
               <div className="space-y-1.5 text-slate-600 dark:text-slate-300">
                 <p className="flex items-center justify-between">
                   <span className="text-slate-400 dark:text-slate-500">Industry:</span>
-                  <span className="font-medium">{lead.company.industry || 'Information Technology'}</span>
+                  <span className="font-medium">{currentLead.company.industry || 'Information Technology'}</span>
                 </p>
                 <p className="flex items-center justify-between">
                   <span className="text-slate-400 dark:text-slate-500">Location:</span>
                   <span className="font-medium">
-                    {[lead.company.city, lead.company.state, lead.company.country].filter(Boolean).join(', ') || 'India'}
+                    {[currentLead.company.city, currentLead.company.state, currentLead.company.country].filter(Boolean).join(', ') || 'India'}
                   </span>
                 </p>
-                {lead.company.website && (
+                {currentLead.company.website && (
                   <p className="flex items-center justify-between">
                     <span className="text-slate-400 dark:text-slate-500">Website:</span>
                     <a
-                      href={lead.company.website.startsWith('http') ? lead.company.website : `https://${lead.company.website}`}
+                      href={currentLead.company.website.startsWith('http') ? currentLead.company.website : `https://${currentLead.company.website}`}
                       target="_blank"
                       rel="noreferrer"
                       className="font-medium text-[#5B4DB7] dark:text-purple-400 hover:underline flex items-center gap-1"
                     >
                       <Globe className="w-3 h-3" />
-                      <span className="truncate max-w-[150px]">{lead.company.website}</span>
+                      <span className="truncate max-w-[150px]">{currentLead.company.website}</span>
                     </a>
                   </p>
                 )}
@@ -242,22 +243,22 @@ export const ViewLeadModal: React.FC<ViewLeadModalProps> = ({
               <div className="space-y-1.5 text-slate-600 dark:text-slate-300">
                 <p className="flex items-center justify-between">
                   <span className="text-slate-400 dark:text-slate-500">Name:</span>
-                  <span className="font-bold text-slate-800 dark:text-slate-200">{lead.contact.name}</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200">{currentLead.contact.name}</span>
                 </p>
                 <p className="flex items-center justify-between">
                   <span className="text-slate-400 dark:text-slate-500">Designation:</span>
-                  <span className="font-medium">{lead.contact.designation || 'Key Decision Maker'}</span>
+                  <span className="font-medium">{currentLead.contact.designation || 'Key Decision Maker'}</span>
                 </p>
                 <p className="flex items-center justify-between">
                   <span className="text-slate-400 dark:text-slate-500">Email:</span>
-                  <a href={`mailto:${lead.contact.email}`} className="font-medium text-[#5B4DB7] dark:text-purple-400 hover:underline">
-                    {lead.contact.email}
+                  <a href={`mailto:${currentLead.contact.email}`} className="font-medium text-[#5B4DB7] dark:text-purple-400 hover:underline">
+                    {currentLead.contact.email}
                   </a>
                 </p>
                 <p className="flex items-center justify-between">
                   <span className="text-slate-400 dark:text-slate-500">Phone:</span>
-                  <a href={`tel:${lead.contact.phone}`} className="font-medium">
-                    {lead.contact.phone}
+                  <a href={`tel:${currentLead.contact.phone}`} className="font-medium">
+                    {currentLead.contact.phone}
                   </a>
                 </p>
               </div>
@@ -273,14 +274,43 @@ export const ViewLeadModal: React.FC<ViewLeadModalProps> = ({
                   Uploaded Documents & Attachments
                 </h3>
               </div>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 dark:bg-purple-950/60 text-[#5B4DB7] dark:text-purple-300">
-                {lead.attachments?.length || 0} Files
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 dark:bg-purple-950/60 text-[#5B4DB7] dark:text-purple-300">
+                  {currentLead.attachments?.length || 0} Files
+                </span>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  onChange={handleFileUpload}
+                  className="hidden"
+                  accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.png,.jpg,.jpeg,.zip,.csv,.txt"
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-semibold rounded-lg bg-[#5B4DB7] hover:bg-[#4E41A2] text-white shadow-2xs transition-colors cursor-pointer disabled:opacity-50"
+                  title="Upload document"
+                >
+                  {isUploading ? (
+                    <>
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                      <span>Saving...</span>
+                    </>
+                  ) : (
+                    <>
+                      <UploadCloud className="w-3 h-3" />
+                      <span>Upload File</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
 
-            {lead.attachments && lead.attachments.length > 0 ? (
+            {currentLead.attachments && currentLead.attachments.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                {lead.attachments.map((att) => {
+                {currentLead.attachments.map((att) => {
                   const isCurProcessing = isProcessing && activeAttId === String(att.id);
                   return (
                     <div
@@ -337,14 +367,22 @@ export const ViewLeadModal: React.FC<ViewLeadModalProps> = ({
                 })}
               </div>
             ) : (
-              <div className="py-5 text-center text-slate-400 dark:text-slate-500 text-xs">
-                No attachments or documents uploaded for this lead record.
+              <div className="py-5 text-center text-slate-400 dark:text-slate-500 text-xs space-y-2">
+                <p>No attachments or documents uploaded for this lead record.</p>
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-purple-50 dark:bg-purple-950/50 text-[#5B4DB7] dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/50 border border-purple-200 dark:border-purple-800 transition-colors cursor-pointer"
+                >
+                  <UploadCloud className="w-3.5 h-3.5" />
+                  <span>Upload First Document</span>
+                </button>
               </div>
             )}
           </div>
 
           {/* Follow-up & Reminders Summary */}
-          {lead.nextFollowUp && (
+          {currentLead.nextFollowUp && (
             <div className="p-3.5 rounded-xl border border-indigo-200 dark:border-indigo-900/60 bg-indigo-50/50 dark:bg-indigo-950/30 flex items-center justify-between text-xs">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 flex items-center justify-center">
@@ -353,12 +391,12 @@ export const ViewLeadModal: React.FC<ViewLeadModalProps> = ({
                 <div>
                   <span className="font-bold text-slate-900 dark:text-white">Scheduled Follow-up & Reminder</span>
                   <p className="text-slate-600 dark:text-slate-300 mt-0.5">
-                    {lead.nextFollowUp.displayString || `${lead.nextFollowUp.date} at ${lead.nextFollowUp.time}`}
+                    {currentLead.nextFollowUp.displayString || `${currentLead.nextFollowUp.date} at ${currentLead.nextFollowUp.time}`}
                   </p>
                 </div>
               </div>
 
-              {lead.nextFollowUp.isOverdue && (
+              {currentLead.nextFollowUp.isOverdue && (
                 <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-rose-100 text-rose-700 border border-rose-200">
                   Overdue
                 </span>
@@ -381,7 +419,7 @@ export const ViewLeadModal: React.FC<ViewLeadModalProps> = ({
             type="button"
             onClick={() => {
               onClose();
-              if (onOpenFullLead) onOpenFullLead(lead.id);
+              if (onOpenFullLead) onOpenFullLead(currentLead.id);
             }}
             className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-[#5B4DB7] hover:bg-[#4E41A2] text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
           >

@@ -612,7 +612,7 @@ export const LeadDetailsPage: React.FC = () => {
           { id: 'followups', label: `Follow-ups (${followUpsCount})` },
           { id: 'emails', label: `Email History (${emailsCount})` },
           { id: 'calls', label: `Calls (${callsCount})` },
-          { id: 'requirements', label: 'Requirements & Scope' },
+          { id: 'requirements', label: `Requirements & Attachments (${lead?.attachments?.length || 0})` },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -813,7 +813,106 @@ export const LeadDetailsPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Card 5: Lead Ownership & Complete Audit Trail */}
+          {/* Card 5: Uploaded Documents & RFP Attachments */}
+          <div className="lg:col-span-2 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl p-5 shadow-2xs space-y-3">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2.5">
+              <div className="flex items-center gap-2">
+                <Paperclip className="w-4 h-4 text-[#5B4DB7] dark:text-purple-400" />
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200">
+                  Uploaded Documents & RFP Attachments
+                </h3>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 dark:bg-purple-950/60 text-[#5B4DB7] dark:text-purple-300">
+                  {lead.attachments?.length || 0} Files
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => leadFileInputRef.current?.click()}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-lg bg-[#5B4DB7] hover:bg-[#4E41A2] text-white shadow-2xs transition-colors cursor-pointer"
+                >
+                  <UploadCloud className="w-3.5 h-3.5" />
+                  <span>Upload Document</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('requirements')}
+                  className="text-xs text-[#5B4DB7] dark:text-purple-400 hover:underline font-semibold"
+                >
+                  View All in Scope Tab →
+                </button>
+              </div>
+            </div>
+
+            {lead.attachments && lead.attachments.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 pt-1">
+                {lead.attachments.map((att) => (
+                  <div
+                    key={att.id}
+                    className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 flex items-center justify-between gap-2 text-xs hover:border-purple-300 dark:hover:border-purple-700/60 transition-all shadow-2xs"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-950/50 text-[#5B4DB7] dark:text-purple-300 font-bold text-[10px] flex items-center justify-center shrink-0">
+                        {att.type || 'PDF'}
+                      </div>
+                      <div className="min-w-0">
+                        <p
+                          onClick={() => handleViewAttachment(att.id, att.name)}
+                          className="font-semibold text-slate-900 dark:text-white truncate text-xs hover:text-[#5B4DB7] dark:hover:text-purple-300 cursor-pointer transition-colors"
+                          title={`Preview ${att.name}`}
+                        >
+                          {att.name}
+                        </p>
+                        <span className="text-[10px] text-slate-400 dark:text-slate-500 block">
+                          {att.size || 'Document'} {att.uploadedAt ? `• ${att.uploadedAt}` : ''}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => handleViewAttachment(att.id, att.name)}
+                        disabled={downloadingAttId === String(att.id)}
+                        className="p-1.5 text-slate-500 dark:text-slate-400 hover:text-[#5B4DB7] dark:hover:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-950/40 rounded-lg transition-colors cursor-pointer"
+                        title="View file in browser"
+                      >
+                        {downloadingAttId === String(att.id) ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin text-[#5B4DB7]" />
+                        ) : (
+                          <Eye className="w-3.5 h-3.5" />
+                        )}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleDownloadAttachment(att.id, att.name)}
+                        disabled={downloadingAttId === String(att.id)}
+                        className="p-1.5 text-slate-500 dark:text-slate-400 hover:text-[#5B4DB7] dark:hover:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-950/40 rounded-lg transition-colors cursor-pointer"
+                        title="Download file"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="py-4 text-center text-xs text-slate-400 dark:text-slate-500 space-y-2">
+                <p>No documents uploaded yet for this lead record.</p>
+                <button
+                  type="button"
+                  onClick={() => leadFileInputRef.current?.click()}
+                  className="inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold rounded-lg bg-purple-50 dark:bg-purple-950/50 text-[#5B4DB7] dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/50 border border-purple-200 dark:border-purple-800 transition-colors cursor-pointer"
+                >
+                  <UploadCloud className="w-3.5 h-3.5" />
+                  <span>Upload Document</span>
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Card 6: Lead Ownership & Complete Audit Trail */}
           <div className="lg:col-span-2 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl p-5 shadow-2xs space-y-3">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2.5">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200 flex items-center gap-2">
