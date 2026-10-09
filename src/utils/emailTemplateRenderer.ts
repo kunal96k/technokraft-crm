@@ -10,6 +10,8 @@
  * - Official company footer with address, phone, email, website, social links & copyright
  */
 
+import { TECHNOKRAFT_LOGO_BASE64 } from '../assets/brandLogoBase64';
+
 export interface RenderEmailOptions {
   subject: string;
   body: string;
@@ -113,9 +115,23 @@ export function renderBrandedEmailHtml(options: RenderEmailOptions): string {
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                 <tr>
                   <td valign="middle" align="left">
-                    <img src="https://www.technokraftservices.com/assessment/images/tts-logo-services.png"
-                         alt="TechnoKraft Services LLP" width="160"
-                         style="display: block; width: 160px; max-width: 160px; height: auto;" />
+                    <table cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td valign="middle" style="padding-right: 10px;">
+                          <img src="${TECHNOKRAFT_LOGO_BASE64}"
+                               alt="TechnoKraft Emblem" width="38" height="38"
+                               style="display: block; width: 38px; height: 38px; object-fit: contain;" />
+                        </td>
+                        <td valign="middle">
+                          <div style="font-size: 19px; font-weight: 400; color: #0f172a; line-height: 1; letter-spacing: 0.4px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+                            TechnoKraft
+                          </div>
+                          <div style="font-size: 10.5px; font-weight: 700; color: #5B4DB7; text-align: right; line-height: 1; margin-top: 2px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+                            Services LLP
+                          </div>
+                        </td>
+                      </tr>
+                    </table>
                   </td>
                   <td valign="middle" align="right">
                     <table role="presentation" cellpadding="0" cellspacing="0" border="0">

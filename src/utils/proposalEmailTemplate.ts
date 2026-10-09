@@ -1,5 +1,6 @@
 import { ProposalRecord } from '../types/opportunities';
 import { formatCurrencyINR } from './currencyFormatters';
+import { TECHNOKRAFT_LOGO_BASE64 } from '../assets/brandLogoBase64';
 import {
   cleanProposalTitle,
   resolveMilestones,
@@ -92,14 +93,26 @@ export function buildProposalEmailHtml(
 
     <!-- Brand Header -->
     <tr>
-      <td style="background-color: #0F172A; padding: 24px 30px;">
+      <td style="background-color: #0F172A; padding: 22px 28px;">
         <table width="100%" border="0" cellpadding="0" cellspacing="0">
           <tr>
             <td valign="middle">
-              <div style="font-size: 20px; font-weight: 800; color: #FFFFFF; letter-spacing: -0.3px;">
-                TechnoKraft <span style="font-size: 14px; font-weight: 600; color: #CBD5E1;">Services LLP</span>
-              </div>
-              <div style="font-size: 11px; color: #94A3B8; margin-top: 3px; letter-spacing: 0.3px; text-transform: uppercase;">
+              <table cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td valign="middle" style="padding-right: 12px;">
+                    <img src="${TECHNOKRAFT_LOGO_BASE64}" alt="TechnoKraft" width="38" height="38" style="display: block; width: 38px; height: 38px; object-fit: contain;" />
+                  </td>
+                  <td valign="middle">
+                    <div style="font-size: 19px; font-weight: 400; color: #FFFFFF; letter-spacing: 0.4px; line-height: 1;">
+                      TechnoKraft
+                    </div>
+                    <div style="font-size: 11px; font-weight: 700; color: #A5B4FC; text-align: right; line-height: 1; margin-top: 3px;">
+                      Services LLP
+                    </div>
+                  </td>
+                </tr>
+              </table>
+              <div style="font-size: 11px; color: #94A3B8; margin-top: 6px; letter-spacing: 0.3px;">
                 Enterprise Engineering & Cloud Consulting
               </div>
             </td>

@@ -18,6 +18,7 @@ import {
   Layers,
   Send,
   Download,
+  Eye,
   AlertCircle,
   Loader2,
   Trash2,
@@ -51,6 +52,8 @@ import {
   fetchLeadActivities,
   uploadAttachment,
   deleteAttachment,
+  viewAttachmentFile,
+  downloadAttachmentFile,
 } from '../../services/leadService';
 import { getInitials, getAvatarColor } from '../../utils/avatarUtils';
 
@@ -151,7 +154,37 @@ export const LeadDetailsPage: React.FC = () => {
   const [isEmailComposerOpen, setIsEmailComposerOpen] = useState(false);
   const [isFollowUpModalOpen, setIsFollowUpModalOpen] = useState(false);
   const [isUploadingLeadFile, setIsUploadingLeadFile] = useState(false);
+  const [downloadingAttId, setDownloadingAttId] = useState<string | null>(null);
   const leadFileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleViewAttachment = async (attId: string | number, name: string) => {
+    try {
+      setDownloadingAttId(String(attId));
+      await viewAttachmentFile(attId, name);
+    } catch (err) {
+      console.error('Failed to view attachment:', err);
+      window.open(`/api/attachments/${String(attId).replace(/^att-/, '')}/download`, '_blank');
+    } finally {
+      setDownloadingAttId(null);
+    }
+  };
+
+  const handleDownloadAttachment = async (attId: string | number, name: string) => {
+    try {
+      setDownloadingAttId(String(attId));
+      await downloadAttachmentFile(attId, name);
+    } catch (err) {
+      console.error('Failed to download attachment:', err);
+      const link = document.createElement('a');
+      link.href = `/api/attachments/${String(attId).replace(/^att-/, '')}/download`;
+      link.download = name;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } finally {
+      setDownloadingAttId(null);
+    }
+  };
 
   // Real database calls & emails for this lead
   const allActivities = useMemo(() => lead?.activities || [], [lead?.activities]);
@@ -1100,6 +1133,90 @@ export const LeadDetailsPage: React.FC = () => {
                 )}
               </div>
             </div>
+
+            {/* Quick Access Documents & Files Card on Overview Tab */}
+            <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl p-5 shadow-2xs space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-[#5B4DB7] dark:text-purple-400" />
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200">
+                    Uploaded Documents & RFP Attachments
+                  </h3>
+                  <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-purple-50 dark:bg-purple-950/40 text-[#5B4DB7] dark:text-purple-300 border border-purple-200/60 dark:border-purple-800/60">
+                    {lead.attachments?.length || 0} Files
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('requirements')}
+                  className="text-xs font-semibold text-[#5B4DB7] dark:text-purple-400 hover:underline flex items-center gap-1 cursor-pointer"
+                >
+                  <span>Manage All</span>
+                  <span>→</span>
+                </button>
+              </div>
+
+              {lead.attachments && lead.attachments.length > 0 ? (
+                <div className="space-y-2">
+                  {lead.attachments.map((att) => (
+                    <div
+                      key={att.id}
+                      className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/60 flex items-center justify-between gap-3 text-xs"
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-950/50 text-[#5B4DB7] dark:text-purple-300 font-bold text-[10px] flex items-center justify-center shrink-0">
+                          {att.type}
+                        </div>
+                        <div className="min-w-0">
+                          <p
+                            onClick={() => handleViewAttachment(att.id, att.name)}
+                            className="font-semibold text-slate-900 dark:text-white truncate text-xs hover:text-[#5B4DB7] dark:hover:text-purple-300 cursor-pointer transition-colors"
+                            title={`Preview ${att.name}`}
+                          >
+                            {att.name}
+                          </p>
+                          <span className="text-[11px] text-slate-400 dark:text-slate-500 block">
+                            {att.size} • {att.uploadedAt}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => handleViewAttachment(att.id, att.name)}
+                          disabled={downloadingAttId === String(att.id)}
+                          className="p-1.5 text-slate-500 dark:text-slate-400 hover:text-[#5B4DB7] dark:hover:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-950/40 rounded-lg transition-colors cursor-pointer"
+                          title="View document in browser"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDownloadAttachment(att.id, att.name)}
+                          disabled={downloadingAttId === String(att.id)}
+                          className="p-1.5 text-slate-500 dark:text-slate-400 hover:text-[#5B4DB7] dark:hover:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-950/40 rounded-lg transition-colors cursor-pointer"
+                          title="Download document"
+                        >
+                          <Download className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="py-6 text-center text-xs text-slate-400 dark:text-slate-500 space-y-1">
+                  <p>No documents uploaded yet for this lead.</p>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('requirements')}
+                    className="text-[#5B4DB7] dark:text-purple-400 font-semibold hover:underline cursor-pointer"
+                  >
+                    Click here to attach client files or RFPs
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         );
       })()}
@@ -1672,7 +1789,11 @@ export const LeadDetailsPage: React.FC = () => {
                         {att.type}
                       </div>
                       <div>
-                        <p className="font-semibold text-slate-900 dark:text-white truncate max-w-[180px]">
+                        <p
+                          onClick={() => handleViewAttachment(att.id, att.name)}
+                          className="font-semibold text-slate-900 dark:text-white truncate max-w-[180px] hover:text-[#5B4DB7] dark:hover:text-purple-300 cursor-pointer transition-colors"
+                          title={`View ${att.name}`}
+                        >
                           {att.name}
                         </p>
                         <p className="text-[11px] text-slate-400 dark:text-slate-500">
@@ -1682,16 +1803,33 @@ export const LeadDetailsPage: React.FC = () => {
                     </div>
 
                     <div className="flex items-center gap-1">
-                      <a
-                        href={att.downloadUrl || `/api/attachments/${String(att.id).replace(/^att-/, '')}/download`}
-                        download={att.name}
-                        target="_blank"
-                        rel="noreferrer"
+                      {/* View Inline Button */}
+                      <button
+                        type="button"
+                        onClick={() => handleViewAttachment(att.id, att.name)}
+                        disabled={downloadingAttId === String(att.id)}
+                        className="p-2 text-slate-500 dark:text-slate-400 hover:text-[#5B4DB7] dark:hover:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-950/40 rounded-lg transition-colors cursor-pointer inline-flex items-center"
+                        title="View file in browser"
+                      >
+                        {downloadingAttId === String(att.id) ? (
+                          <Loader2 className="w-4 h-4 animate-spin text-[#5B4DB7]" />
+                        ) : (
+                          <Eye className="w-4 h-4" />
+                        )}
+                      </button>
+
+                      {/* Download Button */}
+                      <button
+                        type="button"
+                        onClick={() => handleDownloadAttachment(att.id, att.name)}
+                        disabled={downloadingAttId === String(att.id)}
                         className="p-2 text-slate-500 dark:text-slate-400 hover:text-[#5B4DB7] dark:hover:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-950/40 rounded-lg transition-colors cursor-pointer inline-flex items-center"
                         title="Download file"
                       >
                         <Download className="w-4 h-4" />
-                      </a>
+                      </button>
+
+                      {/* Delete Button */}
                       <button
                         type="button"
                         onClick={async () => {

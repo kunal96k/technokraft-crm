@@ -2,6 +2,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { ProposalRecord } from '../types/opportunities';
 import { formatCurrencyINR } from './currencyFormatters';
+import { TECHNOKRAFT_LOGO_BASE64, NEUROPOL_FONT_BASE64 } from '../assets/brandLogoBase64';
 import brandLogoImg from '../fonts/images/image.png';
 
 /**
@@ -108,21 +109,11 @@ async function getBase64ImageFromUrl(imageUrl: string): Promise<string | null> {
 }
 
 /**
- * Resolves active company logo for PDF & HTML rendering with graceful fallback
+ * Resolves active company logo for PDF & HTML rendering with 100% reliability
  */
 async function resolveCompanyLogo(): Promise<string> {
-  try {
-    if (brandLogoImg) {
-      const importedLogo = await getBase64ImageFromUrl(brandLogoImg);
-      if (importedLogo) return importedLogo;
-    }
-    const publicLogo = await getBase64ImageFromUrl('/fonts/images/image.png');
-    if (publicLogo) return publicLogo;
-
-    const rootLogo = await getBase64ImageFromUrl('/logo.png');
-    if (rootLogo) return rootLogo;
-  } catch {
-    // proceed to fallback
+  if (TECHNOKRAFT_LOGO_BASE64) {
+    return TECHNOKRAFT_LOGO_BASE64;
   }
   return getFallbackLogoBase64();
 }
@@ -399,7 +390,7 @@ export function generateProposalHtml(proposal: ProposalRecord): string {
     
     @font-face {
       font-family: 'Neuropol';
-      src: url('/fonts/Neuropol.otf') format('opentype');
+      src: url('${NEUROPOL_FONT_BASE64}') format('opentype'), url('/fonts/Neuropol.otf') format('opentype');
       font-weight: normal;
       font-style: normal;
       font-display: swap;
@@ -506,11 +497,12 @@ export function generateProposalHtml(proposal: ProposalRecord): string {
     
     .brand-title-text {
       font-family: 'Neuropol', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      font-size: 17px;
-      letter-spacing: 0.5px;
+      font-size: 17.5px;
+      letter-spacing: 0.4px;
       line-height: 1;
       color: #181C20;
-      font-weight: 700;
+      font-weight: 400;
+      -webkit-font-smoothing: antialiased;
     }
     
     .brand-sub-text {
@@ -824,10 +816,10 @@ export function generateProposalHtml(proposal: ProposalRecord): string {
     <!-- Header Section -->
     <div class="header">
       <div class="brand-header-left">
-        <!-- Brand Logo Copy-Pasted as is from Sidebar style -->
+        <!-- Brand Logo Copy-Pasted as is from Sidebar style with embedded base64 emblem -->
         <div id="brand-logo-container" class="brand-logo-container">
           <div class="brand-emblem-wrap">
-            <img alt="TechnoKraft Emblem" class="brand-emblem-img" src="${brandLogoImg || '/fonts/images/image.png'}" onerror="this.onerror=null; this.src='/logo.png';" />
+            <img alt="TechnoKraft Emblem" class="brand-emblem-img" src="${TECHNOKRAFT_LOGO_BASE64}" />
           </div>
           <div class="brand-title-col">
             <span class="font-brand brand-title-text">TechnoKraft</span>
@@ -1104,16 +1096,18 @@ export async function createProposalJsPdf(proposal: ProposalRecord): Promise<jsP
     }
   }
 
-  // Company Name
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(13.5);
+  // Company Name - Styled brand title + right-aligned Services LLP
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(14);
   doc.setTextColor(...darkTextColor);
   doc.text('TechnoKraft', textStartX, currentY + 4.5);
 
   const brandWidth = doc.getTextWidth('TechnoKraft');
-  doc.setFontSize(10.5);
+  doc.setFontSize(9.5);
   doc.setTextColor(...primaryColor);
-  doc.text('Services LLP', textStartX + brandWidth + 2.5, currentY + 4.5);
+  const subWidth = doc.getTextWidth('Services LLP');
+  const subX = textStartX + brandWidth - subWidth;
+  doc.text('Services LLP', subX > textStartX ? subX : textStartX + brandWidth + 2.5, currentY + 8.2);
 
   // Clean Company Contact Info & Address (No GSTIN / No tagline)
   doc.setFont('helvetica', 'normal');
@@ -1122,9 +1116,9 @@ export async function createProposalJsPdf(proposal: ProposalRecord): Promise<jsP
   doc.text(
     `${COMPANY_INFO.website} | ${COMPANY_INFO.email} | Tel: ${COMPANY_INFO.phone}`,
     textStartX,
-    currentY + 8.8
+    currentY + 12.2
   );
-  doc.text(COMPANY_INFO.address, textStartX, currentY + 12.8);
+  doc.text(COMPANY_INFO.address, textStartX, currentY + 15.8);
 
   // Right Side: Quotation Badge & Issue Date
   const proposalCode = proposal.proposalCode || 'PR-2026-9182';

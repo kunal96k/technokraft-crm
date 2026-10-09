@@ -1,4 +1,5 @@
 import React from 'react';
+import { TECHNOKRAFT_LOGO_BASE64 } from '../../assets/brandLogoBase64';
 import brandLogoImg from '../../fonts/images/image.png';
 
 interface BrandLogoProps {
@@ -47,7 +48,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
       {/* Red Triangular TTS Logo Emblem */}
       <div className={`relative flex-shrink-0 ${emblemSize} flex items-center justify-center transition-transform duration-200 hover:scale-105`}>
         <img
-          src={brandLogoImg}
+          src={TECHNOKRAFT_LOGO_BASE64 || brandLogoImg}
           alt="TechnoKraft Emblem"
           className="w-full h-full object-contain transform -translate-y-1"
         />

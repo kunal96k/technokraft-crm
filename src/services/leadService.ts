@@ -629,6 +629,60 @@ export async function deleteAttachment(id: string | number): Promise<boolean> {
 }
 
 /**
+ * View attachment inline in browser (opens in new tab)
+ */
+export async function viewAttachmentFile(id: string | number, fileName?: string): Promise<void> {
+  const numId = String(id).replace(/^att-/, '');
+  try {
+    const res = await authFetch(`${ATTACHMENTS_API_URL}/${numId}/view`, {
+      method: 'GET',
+    });
+    if (!res.ok) {
+      // Fallback to /download
+      const dlRes = await authFetch(`${ATTACHMENTS_API_URL}/${numId}/download`, { method: 'GET' });
+      if (!dlRes.ok) throw new Error(`HTTP ${dlRes.status}: Unable to load attachment`);
+      const blob = await dlRes.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      window.open(blobUrl, '_blank');
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+      return;
+    }
+    const blob = await res.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    window.open(blobUrl, '_blank');
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+  } catch (err: any) {
+    console.error(`[LeadService] Failed to view attachment ${id}:`, err);
+    throw err;
+  }
+}
+
+/**
+ * Download attachment file with proper authenticated request and filename
+ */
+export async function downloadAttachmentFile(id: string | number, fileName?: string): Promise<void> {
+  const numId = String(id).replace(/^att-/, '');
+  try {
+    const res = await authFetch(`${ATTACHMENTS_API_URL}/${numId}/download`, {
+      method: 'GET',
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}: Unable to download attachment`);
+    const blob = await res.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = blobUrl;
+    link.download = fileName || `attachment-${numId}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+  } catch (err: any) {
+    console.error(`[LeadService] Failed to download attachment ${id}:`, err);
+    throw err;
+  }
+}
+
+/**
  * Check for duplicate leads
  */
 export async function checkDuplicateLead(

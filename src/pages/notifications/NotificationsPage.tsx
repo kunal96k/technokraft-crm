@@ -282,17 +282,17 @@ export const NotificationsPage: React.FC = () => {
   };
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6 text-slate-800 dark:text-slate-100">
       {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-2 border-b border-slate-200">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-2 border-b border-slate-200 dark:border-slate-800">
         <div>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#5B4DB7] to-[#7B68EE] flex items-center justify-center text-white shadow-md shadow-purple-500/20">
               <Bell className="w-5 h-5" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Notification Center</h1>
-              <p className="text-sm text-slate-500">
+              <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Notification Center</h1>
+              <p className="text-sm text-slate-500 dark:text-slate-400">
                 Track assignments, follow-up deadlines, customer interactions, and system updates
               </p>
             </div>
@@ -305,10 +305,10 @@ export const NotificationsPage: React.FC = () => {
             type="button"
             onClick={() => loadData(true)}
             disabled={isRefreshing}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 shadow-xs transition-colors disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 shadow-xs transition-colors disabled:opacity-50 cursor-pointer"
             title="Refresh notifications"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-purple-600' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-purple-600 dark:text-purple-400' : ''}`} />
             Refresh
           </button>
 
@@ -316,7 +316,7 @@ export const NotificationsPage: React.FC = () => {
             <button
               type="button"
               onClick={handleMarkAllRead}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold text-white bg-[#5B4DB7] hover:bg-[#4E41A2] shadow-sm shadow-purple-500/20 transition-all"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold text-white bg-[#5B4DB7] hover:bg-[#4E41A2] shadow-sm shadow-purple-500/20 transition-all cursor-pointer"
             >
               <CheckCheck className="w-4 h-4" />
               Mark all as read
@@ -327,7 +327,7 @@ export const NotificationsPage: React.FC = () => {
             <button
               type="button"
               onClick={handleClearAll}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-rose-700 bg-rose-50 border border-rose-200 hover:bg-rose-100 transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 hover:bg-rose-100 dark:hover:bg-rose-900/60 transition-colors cursor-pointer"
             >
               <Trash2 className="w-3.5 h-3.5" />
               Clear all
@@ -337,7 +337,7 @@ export const NotificationsPage: React.FC = () => {
           <button
             type="button"
             onClick={() => setShowSimulateModal(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-purple-700 bg-purple-50 border border-purple-200 hover:bg-purple-100 transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-900/60 hover:bg-purple-100 dark:hover:bg-purple-900/60 transition-colors cursor-pointer"
           >
             <PlusCircle className="w-3.5 h-3.5" />
             Create notification
@@ -347,71 +347,71 @@ export const NotificationsPage: React.FC = () => {
 
       {/* KPI Summary Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-4 bg-white rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
+        <div className="p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs flex items-center justify-between">
           <div>
-            <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Alerts</p>
-            <h3 className="text-2xl font-bold text-slate-900 mt-1">{metrics.total}</h3>
-            <span className="text-[11px] text-slate-400">All registered notifications</span>
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Alerts</p>
+            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">{metrics.total}</h3>
+            <span className="text-[11px] text-slate-400 dark:text-slate-500">All registered notifications</span>
           </div>
-          <div className="w-11 h-11 rounded-lg bg-slate-100 flex items-center justify-center text-slate-700">
+          <div className="w-11 h-11 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-200">
             <Bell className="w-5 h-5" />
           </div>
         </div>
 
-        <div className="p-4 bg-white rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
+        <div className="p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs flex items-center justify-between">
           <div>
-            <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Unread Alerts</p>
-            <h3 className="text-2xl font-bold text-rose-600 mt-1">{metrics.unread}</h3>
-            <span className="text-[11px] text-slate-400">Pending your attention</span>
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Unread Alerts</p>
+            <h3 className="text-2xl font-bold text-rose-600 dark:text-rose-400 mt-1">{metrics.unread}</h3>
+            <span className="text-[11px] text-slate-400 dark:text-slate-500">Pending your attention</span>
           </div>
-          <div className="w-11 h-11 rounded-lg bg-rose-50 flex items-center justify-center text-rose-600">
+          <div className="w-11 h-11 rounded-lg bg-rose-50 dark:bg-rose-950/50 flex items-center justify-center text-rose-600 dark:text-rose-400">
             <ShieldAlert className="w-5 h-5" />
           </div>
         </div>
 
-        <div className="p-4 bg-white rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
+        <div className="p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs flex items-center justify-between">
           <div>
-            <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Lead Assignments</p>
-            <h3 className="text-2xl font-bold text-indigo-600 mt-1">{metrics.leads}</h3>
-            <span className="text-[11px] text-slate-400">Pipeline opportunities</span>
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Lead Assignments</p>
+            <h3 className="text-2xl font-bold text-indigo-600 dark:text-indigo-400 mt-1">{metrics.leads}</h3>
+            <span className="text-[11px] text-slate-400 dark:text-slate-500">Pipeline opportunities</span>
           </div>
-          <div className="w-11 h-11 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
+          <div className="w-11 h-11 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
             <UserCheck className="w-5 h-5" />
           </div>
         </div>
 
-        <div className="p-4 bg-white rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
+        <div className="p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs flex items-center justify-between">
           <div>
-            <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Urgent & High</p>
-            <h3 className="text-2xl font-bold text-amber-600 mt-1">{metrics.urgent}</h3>
-            <span className="text-[11px] text-slate-400">High priority events</span>
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Urgent & High</p>
+            <h3 className="text-2xl font-bold text-amber-600 dark:text-amber-400 mt-1">{metrics.urgent}</h3>
+            <span className="text-[11px] text-slate-400 dark:text-slate-500">High priority events</span>
           </div>
-          <div className="w-11 h-11 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600">
+          <div className="w-11 h-11 rounded-lg bg-amber-50 dark:bg-amber-950/50 flex items-center justify-center text-amber-600 dark:text-amber-400">
             <Clock className="w-5 h-5" />
           </div>
         </div>
       </div>
 
       {/* Main Content Area */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
         {/* Controls Toolbar: Search & Category Pills */}
-        <div className="p-4 border-b border-slate-200 space-y-3 bg-slate-50/50">
+        <div className="p-4 border-b border-slate-200 dark:border-slate-800 space-y-3 bg-slate-50/70 dark:bg-slate-950/60">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             {/* Search Input */}
             <div className="relative flex-1 max-w-md">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Search className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 placeholder="Search by title, description, or lead ID..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 text-xs sm:text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/30 focus:border-[#5B4DB7] transition-all"
+                className="w-full pl-9 pr-4 py-2 text-xs sm:text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40 focus:border-[#5B4DB7] transition-all"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5 cursor-pointer"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -420,14 +420,14 @@ export const NotificationsPage: React.FC = () => {
 
             {/* Priority Filter */}
             <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-500 font-medium flex items-center gap-1">
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-medium flex items-center gap-1">
                 <Filter className="w-3.5 h-3.5" />
                 Priority:
               </span>
               <select
                 value={priorityFilter}
                 onChange={(e) => setPriorityFilter(e.target.value)}
-                className="text-xs font-medium text-slate-700 bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/30"
+                className="text-xs font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/30 cursor-pointer"
               >
                 <option value="all">All Priorities</option>
                 <option value="urgent">Urgent Only</option>
@@ -441,10 +441,10 @@ export const NotificationsPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setActiveCategory('all')}
-              className={`px-3 py-1.5 rounded-lg font-medium transition-colors whitespace-nowrap ${
+              className={`px-3 py-1.5 rounded-lg font-medium transition-colors whitespace-nowrap cursor-pointer ${
                 activeCategory === 'all'
                   ? 'bg-[#5B4DB7] text-white shadow-xs'
-                  : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
               }`}
             >
               All ({notifications.length})
@@ -452,10 +452,10 @@ export const NotificationsPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setActiveCategory('unread')}
-              className={`px-3 py-1.5 rounded-lg font-medium transition-colors whitespace-nowrap flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-lg font-medium transition-colors whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
                 activeCategory === 'unread'
                   ? 'bg-[#5B4DB7] text-white shadow-xs'
-                  : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
               }`}
             >
               <span>Unread</span>
@@ -468,10 +468,10 @@ export const NotificationsPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setActiveCategory('lead')}
-              className={`px-3 py-1.5 rounded-lg font-medium transition-colors whitespace-nowrap ${
+              className={`px-3 py-1.5 rounded-lg font-medium transition-colors whitespace-nowrap cursor-pointer ${
                 activeCategory === 'lead'
                   ? 'bg-[#5B4DB7] text-white shadow-xs'
-                  : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
               }`}
             >
               Leads ({metrics.leads})
@@ -479,10 +479,10 @@ export const NotificationsPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setActiveCategory('followup')}
-              className={`px-3 py-1.5 rounded-lg font-medium transition-colors whitespace-nowrap ${
+              className={`px-3 py-1.5 rounded-lg font-medium transition-colors whitespace-nowrap cursor-pointer ${
                 activeCategory === 'followup'
                   ? 'bg-[#5B4DB7] text-white shadow-xs'
-                  : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
               }`}
             >
               Follow-ups ({metrics.followups})
@@ -490,10 +490,10 @@ export const NotificationsPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setActiveCategory('task')}
-              className={`px-3 py-1.5 rounded-lg font-medium transition-colors whitespace-nowrap ${
+              className={`px-3 py-1.5 rounded-lg font-medium transition-colors whitespace-nowrap cursor-pointer ${
                 activeCategory === 'task'
                   ? 'bg-[#5B4DB7] text-white shadow-xs'
-                  : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
               }`}
             >
               Tasks & RFP
@@ -501,10 +501,10 @@ export const NotificationsPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setActiveCategory('proposal')}
-              className={`px-3 py-1.5 rounded-lg font-medium transition-colors whitespace-nowrap ${
+              className={`px-3 py-1.5 rounded-lg font-medium transition-colors whitespace-nowrap cursor-pointer ${
                 activeCategory === 'proposal'
                   ? 'bg-[#5B4DB7] text-white shadow-xs'
-                  : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
               }`}
             >
               Proposals
@@ -512,10 +512,10 @@ export const NotificationsPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setActiveCategory('system')}
-              className={`px-3 py-1.5 rounded-lg font-medium transition-colors whitespace-nowrap ${
+              className={`px-3 py-1.5 rounded-lg font-medium transition-colors whitespace-nowrap cursor-pointer ${
                 activeCategory === 'system'
                   ? 'bg-[#5B4DB7] text-white shadow-xs'
-                  : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
               }`}
             >
               Email & System
@@ -525,17 +525,17 @@ export const NotificationsPage: React.FC = () => {
 
         {/* Notifications List */}
         {isLoading ? (
-          <div className="py-20 flex flex-col items-center justify-center text-slate-400">
+          <div className="py-20 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
             <RefreshCw className="w-8 h-8 animate-spin text-[#5B4DB7] mb-3" />
-            <p className="text-sm font-medium text-slate-600">Loading notifications from server...</p>
+            <p className="text-sm font-medium text-slate-600 dark:text-slate-300">Loading notifications from server...</p>
           </div>
         ) : filteredNotifications.length === 0 ? (
           <div className="py-20 flex flex-col items-center justify-center text-center px-4">
-            <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-3">
+            <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 dark:text-slate-500 mb-3">
               <Inbox className="w-8 h-8" />
             </div>
-            <h3 className="text-base font-semibold text-slate-800">No notifications found</h3>
-            <p className="text-xs text-slate-500 max-w-sm mt-1">
+            <h3 className="text-base font-semibold text-slate-800 dark:text-slate-200">No notifications found</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mt-1">
               {searchQuery
                 ? `No notifications matched your query "${searchQuery}". Try a different filter.`
                 : activeCategory === 'unread'
@@ -550,28 +550,28 @@ export const NotificationsPage: React.FC = () => {
                   setActiveCategory('all');
                   setPriorityFilter('all');
                 }}
-                className="mt-4 px-3.5 py-1.5 rounded-lg text-xs font-medium text-[#5B4DB7] bg-purple-50 hover:bg-purple-100 border border-purple-200 transition-colors"
+                className="mt-4 px-3.5 py-1.5 rounded-lg text-xs font-medium text-[#5B4DB7] dark:text-purple-300 bg-purple-50 dark:bg-purple-950/50 hover:bg-purple-100 dark:hover:bg-purple-900/50 border border-purple-200 dark:border-purple-800/60 transition-colors cursor-pointer"
               >
                 Reset all filters
               </button>
             )}
           </div>
         ) : (
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-slate-100 dark:divide-slate-800">
             {filteredNotifications.map((n) => (
               <div
                 key={n.id}
                 onClick={() => handleOpenItem(n)}
-                className={`p-4 transition-all hover:bg-slate-50 flex items-start gap-4 cursor-pointer group ${
-                  n.unread ? 'bg-purple-50/30' : ''
+                className={`p-4 transition-all hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-start gap-4 cursor-pointer group ${
+                  n.unread ? 'bg-purple-50/30 dark:bg-purple-950/20' : ''
                 }`}
               >
                 {/* Left Type Icon */}
                 <div
                   className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5 border transition-all ${
                     n.unread
-                      ? 'bg-white border-purple-200 shadow-xs'
-                      : 'bg-slate-50 border-slate-200 text-slate-500 group-hover:bg-white'
+                      ? 'bg-white dark:bg-slate-800 border-purple-200 dark:border-purple-800 text-[#5B4DB7] dark:text-purple-300 shadow-xs'
+                      : 'bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 group-hover:bg-white dark:group-hover:bg-slate-800'
                   }`}
                 >
                   {getIconForType(n.type)}
@@ -586,10 +586,10 @@ export const NotificationsPage: React.FC = () => {
                       <span
                         className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider ${
                           n.priority.toUpperCase() === 'URGENT'
-                            ? 'bg-rose-100 text-rose-700'
+                            ? 'bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200/50 dark:border-rose-900/50'
                             : n.priority.toUpperCase() === 'HIGH'
-                            ? 'bg-amber-100 text-amber-800'
-                            : 'bg-slate-100 text-slate-600'
+                            ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-200/50 dark:border-amber-900/50'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200/50 dark:border-slate-700'
                         }`}
                       >
                         {n.priority}
@@ -597,12 +597,12 @@ export const NotificationsPage: React.FC = () => {
                     )}
 
                     {n.leadCode && (
-                      <span className="text-[11px] font-mono text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">
+                      <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-200/50 dark:border-slate-700">
                         {n.leadCode}
                       </span>
                     )}
 
-                    <span className="text-xs text-slate-400 ml-auto flex items-center gap-1">
+                    <span className="text-xs text-slate-400 dark:text-slate-500 ml-auto flex items-center gap-1 font-mono">
                       <Clock className="w-3 h-3" />
                       {n.time}
                     </span>
@@ -610,17 +610,17 @@ export const NotificationsPage: React.FC = () => {
 
                   <h3
                     className={`text-sm ${
-                      n.unread ? 'font-bold text-slate-900' : 'font-semibold text-slate-800'
+                      n.unread ? 'font-bold text-slate-900 dark:text-white' : 'font-semibold text-slate-800 dark:text-slate-200'
                     }`}
                   >
                     {n.title}
                   </h3>
 
-                  <p className="text-xs text-slate-600 mt-1 leading-relaxed">{n.description}</p>
+                  <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">{n.description}</p>
 
                   {/* Deep link indicator */}
                   {n.linkUrl && (
-                    <div className="mt-2.5 flex items-center gap-1.5 text-xs font-semibold text-[#5B4DB7] group-hover:underline">
+                    <div className="mt-2.5 flex items-center gap-1.5 text-xs font-semibold text-[#5B4DB7] dark:text-purple-400 group-hover:underline">
                       <span>Go to associated record</span>
                       <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                     </div>
@@ -633,17 +633,17 @@ export const NotificationsPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={(e) => handleToggleRead(n.id, e)}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors"
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-700 transition-colors cursor-pointer"
                     title={n.unread ? 'Mark as read' : 'Mark as unread'}
                   >
-                    {n.unread ? <Eye className="w-4 h-4 text-purple-600" /> : <EyeOff className="w-4 h-4" />}
+                    {n.unread ? <Eye className="w-4 h-4 text-purple-600 dark:text-purple-400" /> : <EyeOff className="w-4 h-4" />}
                   </button>
 
                   {/* Delete Button */}
                   <button
                     type="button"
                     onClick={(e) => handleDelete(n.id, e)}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
                     title="Delete notification"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -652,7 +652,7 @@ export const NotificationsPage: React.FC = () => {
                   {/* Unread dot */}
                   {n.unread && (
                     <span
-                      className="w-2.5 h-2.5 rounded-full bg-[#5B4DB7] shrink-0 ml-1"
+                      className="w-2.5 h-2.5 rounded-full bg-[#5B4DB7] dark:bg-purple-400 shrink-0 ml-1"
                       title="Unread notification"
                     />
                   )}
@@ -663,12 +663,12 @@ export const NotificationsPage: React.FC = () => {
         )}
 
         {/* Footer bar */}
-        <div className="p-3 border-t border-slate-200 bg-slate-50 flex items-center justify-between text-xs text-slate-500">
+        <div className="p-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
           <span>
             Showing <strong>{filteredNotifications.length}</strong> of{' '}
             <strong>{notifications.length}</strong> notifications
           </span>
-          <span className="flex items-center gap-1 text-[11px] text-slate-400">
+          <span className="flex items-center gap-1 text-[11px] text-slate-400 dark:text-slate-500">
             <Sparkles className="w-3.5 h-3.5 text-purple-500" />
             Synchronized live with TechnoKraft CRM backend
           </span>
@@ -677,17 +677,17 @@ export const NotificationsPage: React.FC = () => {
 
       {/* Modal: Create / Simulate Custom Notification */}
       {showSimulateModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-            <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl max-w-lg w-full border border-slate-200 dark:border-slate-800 overflow-hidden animate-in fade-in zoom-in-95 duration-150 text-slate-800 dark:text-slate-100">
+            <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-950/70">
               <div className="flex items-center gap-2">
-                <PlusCircle className="w-5 h-5 text-purple-600" />
-                <h3 className="text-sm font-bold text-slate-900">Create In-App Notification</h3>
+                <PlusCircle className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">Create In-App Notification</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setShowSimulateModal(false)}
-                className="text-slate-400 hover:text-slate-600 p-1"
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -695,35 +695,35 @@ export const NotificationsPage: React.FC = () => {
 
             <form onSubmit={handleSimulateSubmit} className="p-5 space-y-4 text-xs">
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Title *</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Title *</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g., Client signed proposal contract"
                   value={simulateForm.title}
                   onChange={(e) => setSimulateForm({ ...simulateForm, title: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
+                  className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
                 />
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Description</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Description</label>
                 <textarea
                   rows={3}
                   placeholder="Detailed notes or context regarding this alert..."
                   value={simulateForm.description}
                   onChange={(e) => setSimulateForm({ ...simulateForm, description: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
+                  className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Type</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Type</label>
                   <select
                     value={simulateForm.type}
                     onChange={(e) => setSimulateForm({ ...simulateForm, type: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
+                    className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40 cursor-pointer"
                   >
                     <option value="lead">Lead Assignment</option>
                     <option value="followup">Follow-up Due</option>
@@ -736,11 +736,11 @@ export const NotificationsPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Priority</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Priority</label>
                   <select
                     value={simulateForm.priority}
                     onChange={(e) => setSimulateForm({ ...simulateForm, priority: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
+                    className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40 cursor-pointer"
                   >
                     <option value="NORMAL">Normal</option>
                     <option value="HIGH">High</option>
@@ -751,27 +751,27 @@ export const NotificationsPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Link URL (optional)</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Link URL (optional)</label>
                 <input
                   type="text"
                   placeholder="e.g. /leads/1 or /follow-ups"
                   value={simulateForm.linkUrl}
                   onChange={(e) => setSimulateForm({ ...simulateForm, linkUrl: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
+                  className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
                 />
               </div>
 
-              <div className="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
+              <div className="pt-2 flex items-center justify-end gap-2 border-t border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setShowSimulateModal(false)}
-                  className="px-4 py-2 rounded-lg font-medium text-slate-600 hover:bg-slate-100 transition-colors"
+                  className="px-4 py-2 rounded-lg font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-lg font-semibold text-white bg-[#5B4DB7] hover:bg-[#4E41A2] transition-colors"
+                  className="px-4 py-2 rounded-lg font-semibold text-white bg-[#5B4DB7] hover:bg-[#4E41A2] transition-colors cursor-pointer"
                 >
                   Create Alert
                 </button>

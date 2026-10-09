@@ -30,6 +30,7 @@ import { LeadSummaryCards } from '../../components/leads/LeadSummaryCards';
 import { LeadTable } from '../../components/leads/LeadTable';
 import { LeadMobileCard } from '../../components/leads/LeadMobileCard';
 import { LeadFiltersModal } from '../../components/leads/LeadFiltersModal';
+import { ViewLeadModal } from '../../components/leads/ViewLeadModal';
 import { useToast } from '../../context/ToastContext';
 import { Lead, LeadFilterState, LeadStatus } from '../../types/leads';
 import {
@@ -96,6 +97,9 @@ export const LeadsListPage: React.FC = () => {
   const [statusModalLead, setStatusModalLead] = useState<Lead | null>(null);
   const [pendingStatus, setPendingStatus] = useState<LeadStatus>('NEW');
   const [isUpdatingStatus, setIsUpdatingStatus] = useState<boolean>(false);
+
+  // Quick View Lead Modal state
+  const [viewModalLead, setViewModalLead] = useState<Lead | null>(null);
 
   // AbortController & Request Sequence Counter for race-condition prevention with 10k+ leads
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -327,6 +331,9 @@ export const LeadsListPage: React.FC = () => {
   // Single Lead Actions
   const handleLeadAction = async (action: string, lead: Lead) => {
     switch (action) {
+      case 'view':
+        setViewModalLead(lead);
+        break;
       case 'edit':
         navigate(`/leads/add?edit=${lead.id}`);
         break;
@@ -989,6 +996,14 @@ export const LeadsListPage: React.FC = () => {
         onChangeFilter={handleFilterChange}
         onResetFilters={handleResetFilters}
         onApply={() => setIsFilterModalOpen(false)}
+      />
+
+      {/* Quick View Lead Modal */}
+      <ViewLeadModal
+        lead={viewModalLead}
+        isOpen={!!viewModalLead}
+        onClose={() => setViewModalLead(null)}
+        onOpenFullLead={(leadId) => navigate(`/leads/${leadId}`)}
       />
     </div>
   );
