@@ -16,6 +16,7 @@ import {
   CalendarPlus,
   Download,
   AlertCircle,
+  Check,
 } from 'lucide-react';
 import { EmailRecord } from '../../types/communication';
 import { CommunicationStatusBadge } from './CommunicationStatusBadge';
@@ -108,8 +109,9 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({
                 tracking.sent ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-700'
               }`}
             />
-            <span className={tracking.sent ? 'font-semibold text-slate-700 dark:text-slate-300' : 'text-slate-400 dark:text-slate-500'}>
-              Sent {tracking.sent && '✓'}
+            <span className={`inline-flex items-center gap-1 ${tracking.sent ? 'font-semibold text-slate-700 dark:text-slate-300' : 'text-slate-400 dark:text-slate-500'}`}>
+              <span>Sent</span>
+              {tracking.sent && <Check className="w-3 h-3 text-emerald-500" />}
             </span>
           </div>
 
@@ -119,8 +121,9 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({
                 tracking.delivered ? 'bg-teal-500' : 'bg-slate-300 dark:bg-slate-700'
               }`}
             />
-            <span className={tracking.delivered ? 'font-semibold text-slate-700 dark:text-slate-300' : 'text-slate-400 dark:text-slate-500'}>
-              Delivered {tracking.delivered && '✓'}
+            <span className={`inline-flex items-center gap-1 ${tracking.delivered ? 'font-semibold text-slate-700 dark:text-slate-300' : 'text-slate-400 dark:text-slate-500'}`}>
+              <span>Delivered</span>
+              {tracking.delivered && <Check className="w-3 h-3 text-teal-500" />}
             </span>
           </div>
 
@@ -130,8 +133,9 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({
                 tracking.opened ? 'bg-[#5B4DB7]' : 'bg-slate-300 dark:bg-slate-700'
               }`}
             />
-            <span className={tracking.opened ? 'font-semibold text-slate-700 dark:text-slate-300' : 'text-slate-400 dark:text-slate-500'}>
-              Opened {tracking.opened && '✓'}
+            <span className={`inline-flex items-center gap-1 ${tracking.opened ? 'font-semibold text-slate-700 dark:text-slate-300' : 'text-slate-400 dark:text-slate-500'}`}>
+              <span>Opened</span>
+              {tracking.opened && <Check className="w-3 h-3 text-[#5B4DB7] dark:text-purple-400" />}
             </span>
             {tracking.openedAt && (
               <span className="text-[10px] text-slate-400 dark:text-slate-500">({tracking.openedAt})</span>
@@ -144,8 +148,9 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({
                 tracking.replied ? 'bg-emerald-600' : 'bg-slate-300 dark:bg-slate-700'
               }`}
             />
-            <span className={tracking.replied ? 'font-semibold text-slate-700 dark:text-slate-300' : 'text-slate-400 dark:text-slate-500'}>
-              Replied {tracking.replied && '✓'}
+            <span className={`inline-flex items-center gap-1 ${tracking.replied ? 'font-semibold text-slate-700 dark:text-slate-300' : 'text-slate-400 dark:text-slate-500'}`}>
+              <span>Replied</span>
+              {tracking.replied && <Check className="w-3 h-3 text-emerald-600" />}
             </span>
             {tracking.repliedAt && (
               <span className="text-[10px] text-slate-400 dark:text-slate-500">({tracking.repliedAt})</span>

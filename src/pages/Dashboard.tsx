@@ -15,7 +15,7 @@ import {
   ArrowRight,
   RefreshCw,
   Layers,
-  DollarSign,
+  IndianRupee,
   Briefcase,
   AlertCircle,
   ExternalLink,
@@ -99,7 +99,7 @@ export const DashboardPage: React.FC = () => {
     <div className="space-y-6">
       {/* Reusable Page Header */}
       <PageHeader
-        title={`Welcome Back, ${currentUser.name}! 👋`}
+        title={`Welcome Back, ${currentUser.name}!`}
         description="Here is the live real-time performance summary of your sales pipeline, deals, and activities."
         showDateBadge={true}
         actions={
@@ -165,7 +165,7 @@ export const DashboardPage: React.FC = () => {
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Active Pipeline Value</span>
             <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-300 flex items-center justify-center">
-              <DollarSign className="w-4 h-4" />
+              <IndianRupee className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3">

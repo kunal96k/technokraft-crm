@@ -275,8 +275,8 @@ export function buildProposalEmailHtml(
           <table width="100%" border="0" cellpadding="0" cellspacing="0">
             <tr>
               <td width="36" valign="middle">
-                <div style="width: 32px; height: 32px; background-color: #5B4DB7; color: #FFFFFF; border-radius: 8px; text-align: center; line-height: 32px; font-size: 16px;">
-                  📄
+                <div style="width: 32px; height: 32px; background-color: #5B4DB7; color: #FFFFFF; border-radius: 8px; text-align: center; line-height: 32px; display: flex; align-items: center; justify-content: center;">
+                  <svg style="display: inline-block; vertical-align: middle; width: 16px; height: 16px;" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
                 </div>
               </td>
               <td valign="middle" style="padding-left: 12px;">

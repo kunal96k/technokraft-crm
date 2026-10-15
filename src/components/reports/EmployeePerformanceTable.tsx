@@ -10,10 +10,11 @@ import {
 } from 'lucide-react';
 import { EmployeePerformanceRecord } from '../../types/reports';
 import { formatLakhsINR } from '../../utils/currencyFormatters';
+import { EmployeeAvatar } from '../common/EmployeeAvatar';
 
 interface EmployeePerformanceTableProps {
   employees: EmployeePerformanceRecord[];
-  onSelectEmployee: (emp: EmployeePerformanceRecord) => void;
+  onSelectEmployee?: (emp: EmployeePerformanceRecord) => void;
 }
 
 type SortField =
@@ -194,14 +195,17 @@ export const EmployeePerformanceTable: React.FC<EmployeePerformanceTableProps> =
                 return (
                   <tr
                     key={emp.id}
-                    onClick={() => onSelectEmployee(emp)}
+                    onClick={() => onSelectEmployee?.(emp)}
                     className="hover:bg-purple-50/40 dark:hover:bg-purple-950/20 cursor-pointer transition-colors"
                   >
                     <td className="py-3 px-4 font-bold text-slate-900 dark:text-white">
                       <div className="flex items-center gap-2.5">
-                        <div className="w-7 h-7 rounded-full bg-[#5B4DB7] text-white flex items-center justify-center text-[10px] font-bold shrink-0">
-                          {emp.avatar}
-                        </div>
+                        <EmployeeAvatar
+                          name={emp.name}
+                          avatar={emp.avatar}
+                          profilePhoto={emp.profilePhoto}
+                          size="sm"
+                        />
                         <div>
                           <div className="font-semibold text-slate-900 dark:text-white hover:text-[#5B4DB7] dark:hover:text-purple-300">
                             {emp.name}

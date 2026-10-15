@@ -1,6 +1,8 @@
 import React from 'react';
 import { Search, Filter, Calendar, Download, X } from 'lucide-react';
 import { AttendanceFiltersState, Employee, DEPARTMENTS } from '../../types/employees';
+import { useAuth } from '../../context/AuthContext';
+import { shouldMaskForSecurity } from '../../utils/securityUtils';
 
 interface AttendanceToolbarProps {
   filters: AttendanceFiltersState;
@@ -17,6 +19,7 @@ export const AttendanceToolbar: React.FC<AttendanceToolbarProps> = ({
   employees,
   onExport,
 }) => {
+  const { user } = useAuth();
   const datePresets: ('Today' | 'This Week' | 'This Month' | 'Custom Range')[] = [
     'Today',
     'This Week',
@@ -133,11 +136,14 @@ export const AttendanceToolbar: React.FC<AttendanceToolbarProps> = ({
             className="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-2.5 py-1.5 text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-purple-500/50 outline-none"
           >
             <option value="">All Employees ({employees.length})</option>
-            {employees.map((emp) => (
-              <option key={emp.id} value={emp.id}>
-                {emp.name} ({emp.employeeCode})
-              </option>
-            ))}
+            {employees.map((emp) => {
+              const isMasked = shouldMaskForSecurity(emp, user);
+              return (
+                <option key={emp.id} value={emp.id}>
+                  {isMasked ? `System Administrator (${emp.employeeCode})` : `${emp.name} (${emp.employeeCode})`}
+                </option>
+              );
+            })}
           </select>
         </div>
       </div>

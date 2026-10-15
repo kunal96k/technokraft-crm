@@ -3,6 +3,8 @@ import { CallRecord, CallType, CallResult, NextActionType } from '../../../types
 import { Lead } from '../../../types/leads';
 import { EmployeeSelect } from '../../common/EmployeeSelect';
 import { LeadSearchSelect } from '../../common/LeadSearchSelect';
+import { useAuth } from '../../../context/AuthContext';
+import { findCachedEmployee } from '../../../services/employeeService';
 import {
   X,
   Search,
@@ -34,6 +36,8 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
   initialLead,
   onTriggerOpportunityModal,
 }) => {
+  const { user: authUser } = useAuth();
+
   // Lead selection
   const [selectedLead, setSelectedLead] = useState<Lead | null>(initialLead || null);
 
@@ -48,7 +52,7 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
   const [durationSeconds, setDurationSeconds] = useState('34');
   const [result, setResult] = useState<CallResult>('Interested');
   const [notes, setNotes] = useState('');
-  const [assignedEmployee, setAssignedEmployee] = useState(initialLead?.assignedEmployee?.name || '');
+  const [assignedEmployee, setAssignedEmployee] = useState(initialLead?.assignedEmployee?.name || authUser?.name || 'Kunal Patil');
 
   // Next action
   const [nextAction, setNextAction] = useState<NextActionType>('none');
@@ -120,18 +124,21 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
       contactDesignation: contactDesignation || 'Stakeholder',
       contactPhone: contactPhone || selectedLead.contact.phone,
       contactEmail: selectedLead.contact.email,
-      employeeId: 'emp-1',
+      employeeId: (authUser && authUser.name === assignedEmployee) ? authUser.id : (findCachedEmployee(assignedEmployee)?.id ? String(findCachedEmployee(assignedEmployee)?.id) : 'emp-1'),
       employeeName: assignedEmployee,
       employeeRole:
-        assignedEmployee === 'Kunal Patil'
+        (authUser && authUser.name === assignedEmployee ? authUser.role : findCachedEmployee(assignedEmployee)?.role) ||
+        (assignedEmployee === 'Kunal Patil'
           ? 'Sales Manager'
           : assignedEmployee === 'Shruti Raundal'
           ? 'Senior Sales Executive'
-          : 'Business Analyst',
-      employeeAvatar: assignedEmployee
-        .split(' ')
-        .map((n) => n[0])
-        .join(''),
+          : 'Business Analyst'),
+      employeeAvatar:
+        (authUser && authUser.name === assignedEmployee && authUser.profilePhoto)
+          ? authUser.profilePhoto
+          : (findCachedEmployee(assignedEmployee)?.profilePhoto ||
+             (authUser && authUser.name === assignedEmployee ? authUser.avatar : findCachedEmployee(assignedEmployee)?.avatar) ||
+             assignedEmployee.split(' ').map((n) => n[0]).join('')),
       type: callType,
       status: 'completed',
       date: date
@@ -327,8 +334,8 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
                 className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-bold text-[#5B4DB7] dark:text-purple-300 min-h-[44px] focus:ring-2 focus:ring-[#5B4DB7]"
               >
                 <option value="Interested">Interested</option>
-                <option value="Requirement Received">Requirement Received ✦</option>
-                <option value="Proposal Requested">Proposal Requested ✦</option>
+                <option value="Requirement Received">Requirement Received</option>
+                <option value="Proposal Requested">Proposal Requested</option>
                 <option value="Meeting Requested">Meeting Requested</option>
                 <option value="Callback Required">Callback Required</option>
                 <option value="Not Interested">Not Interested</option>

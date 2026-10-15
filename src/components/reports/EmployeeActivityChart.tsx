@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   ResponsiveContainer,
   BarChart,
@@ -9,21 +9,65 @@ import {
   Tooltip,
   Legend,
 } from 'recharts';
-import { ActivityDayTrend } from '../../types/reports';
+import { ActivityDayTrend, EmployeePerformanceRecord } from '../../types/reports';
 import { Activity } from 'lucide-react';
 
 interface EmployeeActivityChartProps {
-  trendData: ActivityDayTrend[];
-  employeeName: string;
+  trendData?: ActivityDayTrend[];
+  employeeName?: string;
+  employees?: EmployeePerformanceRecord[];
 }
 
 type ActivityFilter = 'All' | 'Calls' | 'Emails' | 'Follow-ups' | 'Meetings' | 'Tasks';
 
 export const EmployeeActivityChart: React.FC<EmployeeActivityChartProps> = ({
-  trendData,
-  employeeName,
+  trendData: propTrendData,
+  employeeName: propEmployeeName,
+  employees,
 }) => {
   const [filter, setFilter] = useState<ActivityFilter>('All');
+
+  // Derive active employee name & trend data
+  const { chartData, displayName } = useMemo(() => {
+    if (propTrendData && propTrendData.length > 0) {
+      return { chartData: propTrendData, displayName: propEmployeeName || 'Employee' };
+    }
+
+    if (employees && employees.length > 0) {
+      if (propEmployeeName && propEmployeeName !== 'All Employees') {
+        const matched = employees.find((e) => e.name === propEmployeeName);
+        if (matched && matched.dailyActivityTrend) {
+          return { chartData: matched.dailyActivityTrend, displayName: matched.name };
+        }
+      }
+
+      // Aggregate across all employees by day
+      const dayMap = new Map<string, ActivityDayTrend>();
+      employees.forEach((emp) => {
+        (emp.dailyActivityTrend || []).forEach((day) => {
+          const key = day.date || day.dayLabel;
+          const existing = dayMap.get(key);
+          if (existing) {
+            existing.calls += day.calls || 0;
+            existing.emails += day.emails || 0;
+            existing.followUps += day.followUps || 0;
+            existing.meetings += day.meetings || 0;
+            existing.tasks += day.tasks || 0;
+            existing.total += day.total || 0;
+          } else {
+            dayMap.set(key, { ...day });
+          }
+        });
+      });
+
+      return {
+        chartData: Array.from(dayMap.values()),
+        displayName: 'All Sales Reps',
+      };
+    }
+
+    return { chartData: [], displayName: propEmployeeName || 'Team' };
+  }, [propTrendData, propEmployeeName, employees]);
 
   const getMetricKey = (f: ActivityFilter) => {
     switch (f) {
@@ -81,7 +125,7 @@ export const EmployeeActivityChart: React.FC<EmployeeActivityChartProps> = ({
             </h3>
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Operational activity distribution over the last 7 days for {employeeName}
+            Operational activity distribution over the last 7 days for {displayName}
           </p>
         </div>
 
@@ -106,14 +150,14 @@ export const EmployeeActivityChart: React.FC<EmployeeActivityChartProps> = ({
 
       {/* Chart Canvas */}
       <div className="w-full h-64 sm:h-72">
-        {!trendData || trendData.length === 0 ? (
+        {!chartData || chartData.length === 0 ? (
           <div className="h-full flex items-center justify-center text-xs text-slate-400 font-medium">
             No activity logged during this time period.
           </div>
         ) : (
         <ResponsiveContainer width="100%" height="100%">
           {filter === 'All' ? (
-            <BarChart data={trendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+            <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
               <XAxis
                 dataKey="date"
@@ -147,7 +191,7 @@ export const EmployeeActivityChart: React.FC<EmployeeActivityChartProps> = ({
               <Bar dataKey="tasks" name="Tasks" fill="#F59E0B" stackId="a" radius={[4, 4, 0, 0]} />
             </BarChart>
           ) : (
-            <BarChart data={trendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+            <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
               <XAxis
                 dataKey="date"

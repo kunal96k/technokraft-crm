@@ -18,6 +18,7 @@ import { EmployeePerformanceRecord } from '../../types/reports';
 import { formatLakhsINR, formatCurrencyINR } from '../../utils/currencyFormatters';
 import { EmployeeActivityChart } from './EmployeeActivityChart';
 import { ConversionFunnel } from './ConversionFunnel';
+import { EmployeeAvatar } from '../common/EmployeeAvatar';
 
 interface EmployeePerformanceDetailViewProps {
   employee: EmployeePerformanceRecord;
@@ -70,9 +71,13 @@ export const EmployeePerformanceDetailView: React.FC<EmployeePerformanceDetailVi
               <ArrowLeft className="w-5 h-5" />
             </button>
 
-            <div className="w-11 h-11 rounded-full bg-[#5B4DB7] text-white flex items-center justify-center font-bold text-sm shrink-0">
-              {employee.avatar}
-            </div>
+            <EmployeeAvatar
+              name={employee.name}
+              avatar={employee.avatar}
+              profilePhoto={employee.profilePhoto}
+              size="lg"
+              showRing={true}
+            />
 
             <div>
               <div className="flex items-center gap-2 flex-wrap">
@@ -149,7 +154,7 @@ export const EmployeePerformanceDetailView: React.FC<EmployeePerformanceDetailVi
           <div className="flex items-center gap-2">
             <Target className="w-4 h-4 text-[#5B4DB7] dark:text-purple-300" />
             <h2 className="text-sm font-bold text-slate-900 dark:text-white">
-              Personal Quota & Metric Targets (September 2026)
+              Personal Quota & Metric Targets
             </h2>
           </div>
           <span className="text-xs font-bold font-mono text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 px-2.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">

@@ -13,7 +13,6 @@ import {
   AlertCircle,
   Database,
   TrendingUp,
-  DollarSign,
 } from 'lucide-react';
 import { OpportunityRecord } from '../../types/opportunities';
 import { fetchOpportunities, fetchOpportunityById } from '../../services/opportunityService';

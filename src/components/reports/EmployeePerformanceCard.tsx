@@ -2,6 +2,7 @@ import React from 'react';
 import { ChevronRight, Phone, Mail, Award, TrendingUp } from 'lucide-react';
 import { EmployeePerformanceRecord } from '../../types/reports';
 import { formatLakhsINR } from '../../utils/currencyFormatters';
+import { EmployeeAvatar } from '../common/EmployeeAvatar';
 
 interface EmployeePerformanceCardProps {
   employee: EmployeePerformanceRecord;
@@ -24,9 +25,12 @@ export const EmployeePerformanceCard: React.FC<EmployeePerformanceCardProps> = (
     <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 shadow-2xs space-y-3.5">
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-full bg-[#5B4DB7] text-white flex items-center justify-center text-xs font-bold shrink-0">
-            {employee.avatar}
-          </div>
+          <EmployeeAvatar
+            name={employee.name}
+            avatar={employee.avatar}
+            profilePhoto={employee.profilePhoto}
+            size="md"
+          />
           <div>
             <h3 className="text-sm font-bold text-slate-900 dark:text-white leading-tight">
               {employee.name}

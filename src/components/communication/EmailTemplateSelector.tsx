@@ -86,7 +86,7 @@ export const EmailTemplateSelector: React.FC<EmailTemplateSelectorProps> = ({
           ))}
           {onCreateNewTemplate && (
             <option value="__CREATE_NEW__" className="font-semibold text-[#5B4DB7]">
-              ✨ + Create Own Template...
+              + Create Custom Template...
             </option>
           )}
         </select>

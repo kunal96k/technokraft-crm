@@ -293,6 +293,24 @@ export async function deleteEmployee(id: string | number): Promise<boolean> {
   }
 }
 
+let cachedActiveEmployees: Employee[] = [];
+
+export function getCachedActiveEmployees(): Employee[] {
+  return cachedActiveEmployees;
+}
+
+export function findCachedEmployee(nameOrEmail?: string | null): Employee | undefined {
+  if (!nameOrEmail || !nameOrEmail.trim()) return undefined;
+  const q = nameOrEmail.trim().toLowerCase();
+  return cachedActiveEmployees.find(
+    (e) =>
+      (e.name && e.name.toLowerCase() === q) ||
+      (e.email && e.email.toLowerCase() === q) ||
+      (e.username && e.username.toLowerCase() === q) ||
+      (e.firstName && e.lastName && `${e.firstName} ${e.lastName}`.toLowerCase() === q)
+  );
+}
+
 /**
  * Fetch all active employees from backend master employee list
  */
@@ -300,7 +318,9 @@ export async function fetchActiveEmployees(): Promise<Employee[]> {
   try {
     const res = await fetchEmployees({ status: 'Active', size: 1000, sortBy: 'name', sortDirection: 'asc' });
     const list = res.content || [];
-    return list.filter((e) => e.status === 'Active' && !e.isDeleted);
+    const active = list.filter((e) => e.status === 'Active' && !e.isDeleted);
+    cachedActiveEmployees = active;
+    return active;
   } catch (error) {
     console.error('[EmployeeService] Failed to fetch active employees:', error);
     return [];

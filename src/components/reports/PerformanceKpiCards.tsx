@@ -12,30 +12,51 @@ import {
 import { EmployeePerformanceRecord } from '../../types/reports';
 
 interface PerformanceKpiCardsProps {
-  employees: EmployeePerformanceRecord[];
-  selectedEmployeeName: string;
+  employees?: EmployeePerformanceRecord[];
+  selectedEmployeeName?: string;
+  kpis?: {
+    totalLeadsHandled?: number;
+    totalWonDeals?: number;
+    wonRevenueINR?: number;
+    avgConversionRate?: number;
+    totalCallsLogged?: number;
+    totalEmailsSent?: number;
+    followUpsCompleted?: number;
+    avgResponseTimeHours?: number;
+  };
 }
 
 export const PerformanceKpiCards: React.FC<PerformanceKpiCardsProps> = ({
-  employees,
-  selectedEmployeeName,
+  employees = [],
+  selectedEmployeeName = 'All Employees',
+  kpis,
 }) => {
+  const safeEmployees = employees || [];
   const filtered =
-    selectedEmployeeName === 'All Employees'
-      ? employees
-      : employees.filter((e) => e.name === selectedEmployeeName);
+    !selectedEmployeeName || selectedEmployeeName === 'All Employees'
+      ? safeEmployees
+      : safeEmployees.filter((e) => e.name === selectedEmployeeName);
 
-  const totalAssigned = filtered.reduce((acc, e) => acc + e.leadsAssigned, 0);
-  const totalContacted = filtered.reduce((acc, e) => acc + e.leadsContacted, 0);
-  const totalFollowUps = filtered.reduce((acc, e) => acc + e.followUps, 0);
-  const totalQualified = filtered.reduce((acc, e) => acc + e.qualified, 0);
-  const totalProposals = filtered.reduce((acc, e) => acc + e.proposals, 0);
-  const totalWon = filtered.reduce((acc, e) => acc + e.won, 0);
+  const totalAssigned =
+    filtered.reduce((acc, e) => acc + (e.leadsAssigned || 0), 0) || kpis?.totalLeadsHandled || 0;
+  const totalContacted =
+    filtered.reduce((acc, e) => acc + (e.leadsContacted || 0), 0) || kpis?.totalCallsLogged || 0;
+  const totalFollowUps =
+    filtered.reduce((acc, e) => acc + (e.followUps || 0), 0) || kpis?.followUpsCompleted || 0;
+  const totalQualified = filtered.reduce((acc, e) => acc + (e.qualified || 0), 0);
+  const totalProposals = filtered.reduce((acc, e) => acc + (e.proposals || 0), 0);
+  const totalWon =
+    filtered.reduce((acc, e) => acc + (e.won || 0), 0) || kpis?.totalWonDeals || 0;
 
   const contactedRate = totalAssigned > 0 ? Math.round((totalContacted / totalAssigned) * 100) : 0;
   const qualifiedRate = totalContacted > 0 ? Math.round((totalQualified / totalContacted) * 100) : 0;
   const proposalRate = totalQualified > 0 ? Math.round((totalProposals / totalQualified) * 100) : 0;
-  const winRate = totalAssigned > 0 ? ((totalWon / totalAssigned) * 100).toFixed(1) : '0.0';
+  const winRate =
+    totalAssigned > 0
+      ? ((totalWon / totalAssigned) * 100).toFixed(1)
+      : kpis?.avgConversionRate
+      ? kpis.avgConversionRate.toFixed(1)
+      : '0.0';
 
   const cards = [
     {

@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { Employee } from '../../types/employees';
 import { EmployeeStatusBadge, WorkStatusBadge } from './EmployeeStatusBadge';
+import { buildSafeApiUrl } from '../../utils/urlUtils';
 import { EmployeeOverview } from './EmployeeOverview';
 import { EmployeeActivity } from './EmployeeActivity';
 import { EmployeeTargets } from './EmployeeTargets';
@@ -63,8 +64,16 @@ export const EmployeeDetails: React.FC<EmployeeDetailsProps> = ({
       <div className="p-5 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shrink-0">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 font-bold text-base flex items-center justify-center shrink-0 border border-purple-200 dark:border-purple-800/60">
-              {employee.avatar}
+            <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 font-bold text-base flex items-center justify-center shrink-0 border border-purple-200 dark:border-purple-800/60 overflow-hidden">
+              {employee.profilePhoto ? (
+                <img
+                  src={buildSafeApiUrl(employee.profilePhoto)}
+                  alt={employee.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                employee.avatar
+              )}
             </div>
             <div>
               <div className="flex flex-wrap items-center gap-2">
@@ -151,9 +160,10 @@ export const EmployeeDetails: React.FC<EmployeeDetailsProps> = ({
                 type="button"
                 onClick={onClose}
                 aria-label="Close drawer"
-                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 ml-1"
+                title="Close"
+                className="inline-flex items-center justify-center p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 shadow-2xs transition-colors cursor-pointer ml-1"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             )}
           </div>

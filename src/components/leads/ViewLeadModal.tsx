@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { Lead } from '../../types/leads';
 import { LeadStatusBadge } from './LeadStatusBadge';
+import { EmployeeAvatar } from '../common/EmployeeAvatar';
 import { LeadPriorityBadge } from './LeadPriorityBadge';
 import { LeadScoreBadge } from './LeadScoreBadge';
 import { viewAttachmentFile, downloadAttachmentFile } from '../../services/leadService';
@@ -192,9 +193,18 @@ export const ViewLeadModal: React.FC<ViewLeadModalProps> = ({
             </div>
             <div>
               <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 block">Assigned To</span>
-              <span className="font-semibold text-slate-800 dark:text-slate-200 mt-0.5 block truncate">
-                {currentLead.assignedEmployee?.name || 'Kunal Patil'}
-              </span>
+              <div className="flex items-center gap-1.5 mt-1">
+                <EmployeeAvatar
+                  name={currentLead.assignedEmployee?.name || 'Unassigned'}
+                  avatar={currentLead.assignedEmployee?.avatar}
+                  profilePhoto={currentLead.assignedEmployee?.profilePhoto}
+                  email={currentLead.assignedEmployee?.email}
+                  size="xs"
+                />
+                <span className="font-semibold text-slate-800 dark:text-slate-200 block truncate">
+                  {currentLead.assignedEmployee?.name || 'Unassigned'}
+                </span>
+              </div>
             </div>
           </div>
 

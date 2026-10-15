@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Sliders, User, Tag, Calendar, Clock, DollarSign } from 'lucide-react';
+import { Sliders, User, Tag, Calendar, Clock, IndianRupee } from 'lucide-react';
 import { CrmPreferencesData } from '../../../types/settings';
 import { Employee } from '../../../types/employees';
 import * as employeeService from '../../../services/employeeService';
@@ -120,7 +120,7 @@ export const CRMSettings: React.FC<CRMSettingsProps> = ({ data, onChange }) => {
               <option value="EUR (€)">EUR € (Euro)</option>
               <option value="AED">AED (UAE Dirham)</option>
             </select>
-            <DollarSign className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+            <IndianRupee className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
           </div>
           <p className="text-[11px] text-slate-400 mt-1">
             Standard currency symbol and formatting for pipeline valuations and commercial proposals.

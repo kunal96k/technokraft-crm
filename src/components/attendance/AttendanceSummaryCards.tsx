@@ -2,24 +2,28 @@ import React from 'react';
 import { CalendarCheck, UserX, CalendarOff, ClockAlert, Clock } from 'lucide-react';
 import { Employee } from '../../types/employees';
 
+import { AttendanceSummaryData } from '../../services/attendanceService';
+
 interface AttendanceSummaryCardsProps {
-  employees: Employee[];
+  employees?: Employee[];
+  summary?: AttendanceSummaryData | null;
   selectedFilter?: string;
   onSelectFilter?: (status: string) => void;
 }
 
 export const AttendanceSummaryCards: React.FC<AttendanceSummaryCardsProps> = ({
-  employees,
+  employees = [],
+  summary,
   selectedFilter,
   onSelectFilter,
 }) => {
-  const presentToday = employees.filter(
+  const presentToday = summary?.presentToday ?? employees.filter(
     (e) => e.todayAttendanceStatus === 'Present' || e.todayAttendanceStatus === 'Late'
   ).length;
-  const absent = employees.filter((e) => e.todayAttendanceStatus === 'Absent').length;
-  const onLeave = employees.filter((e) => e.todayAttendanceStatus === 'Leave').length;
-  const late = employees.filter((e) => e.todayAttendanceStatus === 'Late').length;
-  const currentlyWorking = employees.filter((e) => e.workStatus === 'Working').length;
+  const absent = summary?.absent ?? employees.filter((e) => e.todayAttendanceStatus === 'Absent').length;
+  const onLeave = summary?.onLeave ?? employees.filter((e) => e.todayAttendanceStatus === 'Leave').length;
+  const late = summary?.late ?? employees.filter((e) => e.todayAttendanceStatus === 'Late').length;
+  const currentlyWorking = summary?.currentlyWorking ?? employees.filter((e) => e.workStatus === 'Working').length;
 
   const cards = [
     {

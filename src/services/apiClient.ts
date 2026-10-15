@@ -1,4 +1,5 @@
 import { getStoredToken, clearStoredAuth } from './authService';
+import { buildSafeApiUrl } from '../utils/urlUtils';
 
 /**
  * Returns request headers populated with session authorization tokens.
@@ -20,6 +21,7 @@ export function getAuthHeaders(customHeaders: Record<string, string> = {}): Reco
  * Enhanced fetch wrapper that automatically attaches session credentials and handles 401 Unauthorized.
  */
 export async function authFetch(url: string, init: RequestInit = {}): Promise<Response> {
+  const safeUrl = buildSafeApiUrl(url);
   const token = getStoredToken();
   const headers = new Headers(init.headers || {});
 
@@ -39,7 +41,7 @@ export async function authFetch(url: string, init: RequestInit = {}): Promise<Re
   };
 
   try {
-    const res = await fetch(url, mergedInit);
+    const res = await fetch(safeUrl, mergedInit);
     if (res.status === 401) {
       const currentPath = window.location.pathname;
       const isPublicAuthPage =

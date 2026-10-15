@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   Sparkles,
@@ -6,18 +6,22 @@ import {
   Edit3,
   Plus,
   Loader2,
-  CheckCircle2,
   Tag,
-  FileText,
+  Save,
 } from 'lucide-react';
 import { EmailTemplate } from '../../types/communication';
-import { createEmailTemplate } from '../../services/emailService';
+import { createEmailTemplate, updateEmailTemplate } from '../../services/emailService';
 import { renderBrandedEmailHtml } from '../../utils/emailTemplateRenderer';
 
 interface CreateTemplateModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onTemplateCreated: (template: EmailTemplate) => void;
+  /** Called when a template is successfully created */
+  onTemplateCreated?: (template: EmailTemplate) => void;
+  /** Called when a template is successfully updated */
+  onTemplateUpdated?: (template: EmailTemplate) => void;
+  /** When provided, the modal operates in EDIT mode pre-filled with this template */
+  editTemplate?: EmailTemplate | null;
   initialSubject?: string;
   initialBody?: string;
 }
@@ -39,82 +43,115 @@ const PRESET_CATEGORIES = [
   'Proposal',
   'Discovery',
   'Meeting',
+  'Scheduling',
   'Closing',
   'General',
 ];
+
+const DEFAULT_BODY =
+  'Dear {{contact_name}},\n\nThank you for reaching out to TechnoKraft Services LLP regarding {{service}} for {{company_name}}.\n\nWe would be delighted to schedule a brief discovery consultation with our solution architects.\n\nLooking forward to collaborating with your team.\n\nRegards,\n{{employee_name}}\nTechnoKraft Services LLP';
 
 export const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
   isOpen,
   onClose,
   onTemplateCreated,
+  onTemplateUpdated,
+  editTemplate = null,
   initialSubject = '',
   initialBody = '',
 }) => {
+  const isEditMode = editTemplate != null;
+
   const [name, setName] = useState('');
   const [category, setCategory] = useState('Outreach');
   const [customCategory, setCustomCategory] = useState('');
-  const [subject, setSubject] = useState(initialSubject);
-  const [body, setBody] = useState(
-    initialBody ||
-      'Dear {{contact_name}},\n\nThank you for reaching out to TechnoKraft Services LLP regarding {{service}} for {{company_name}}.\n\nWe would be delighted to schedule a brief discovery consultation with our solution architects.\n\nLooking forward to collaborating with your team.\n\nRegards,\n{{employee_name}}\nTechnoKraft Services LLP'
-  );
+  const [subject, setSubject] = useState('');
+  const [body, setBody] = useState('');
 
   const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit');
   const [isSaving, setIsSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
+  // Populate fields when modal opens — either from editTemplate or from initial* props
+  useEffect(() => {
+    if (!isOpen) return;
+
+    if (isEditMode && editTemplate) {
+      setName(editTemplate.name);
+      // If the category is not in PRESET_CATEGORIES, switch to custom
+      if (PRESET_CATEGORIES.includes(editTemplate.category)) {
+        setCategory(editTemplate.category);
+        setCustomCategory('');
+      } else {
+        setCategory('Custom');
+        setCustomCategory(editTemplate.category);
+      }
+      setSubject(editTemplate.subject);
+      setBody(editTemplate.body);
+    } else {
+      setName('');
+      setCategory('Outreach');
+      setCustomCategory('');
+      setSubject(initialSubject);
+      setBody(initialBody || DEFAULT_BODY);
+    }
+
+    setActiveTab('edit');
+    setErrorMsg('');
+  }, [isOpen, editTemplate]);
+
   if (!isOpen) return null;
 
-  const insertVariable = (key: string, targetField: 'subject' | 'body') => {
+  const insertVariable = (key: string) => {
     const placeholder = `{{${key}}}`;
-    if (targetField === 'subject') {
-      setSubject((prev) => `${prev} ${placeholder}`.trim());
-    } else {
-      setBody((prev) => `${prev} ${placeholder}`);
-    }
+    setBody((prev) => `${prev} ${placeholder}`);
   };
 
   const handleSave = async () => {
-    if (!name.trim()) {
-      setErrorMsg('Please enter a template name.');
-      return;
-    }
-    if (!subject.trim()) {
-      setErrorMsg('Please provide a subject line.');
-      return;
-    }
-    if (!body.trim()) {
-      setErrorMsg('Please write template body text.');
-      return;
-    }
+    if (!name.trim()) { setErrorMsg('Please enter a template name.'); return; }
+    if (!subject.trim()) { setErrorMsg('Please provide a subject line.'); return; }
+    if (!body.trim()) { setErrorMsg('Please write template body text.'); return; }
 
     setErrorMsg('');
     setIsSaving(true);
 
     try {
-      // Find all used variables
       const usedVars = TEMPLATE_VARIABLES.filter(
         (v) => subject.includes(`{{${v.key}}}`) || body.includes(`{{${v.key}}}`)
       ).map((v) => v.key);
 
-      const finalCategory = category === 'Custom' && customCategory.trim()
-        ? customCategory.trim()
-        : category;
+      const finalCategory =
+        category === 'Custom' && customCategory.trim()
+          ? customCategory.trim()
+          : category;
 
-      const created = await createEmailTemplate({
+      const payload: Partial<EmailTemplate> = {
         name: name.trim(),
         category: finalCategory,
         subject: subject.trim(),
         body: body.trim(),
         variables: usedVars.length > 0 ? usedVars : ['contact_name', 'employee_name', 'service'],
-        isDefault: false,
-      });
+        isDefault: isEditMode ? editTemplate!.isDefault : false,
+      };
 
-      if (created) {
-        onTemplateCreated(created);
-        onClose();
+      if (isEditMode && editTemplate) {
+        // UPDATE existing template
+        const updated = await updateEmailTemplate(editTemplate.id, payload);
+        if (updated) {
+          onTemplateUpdated?.(updated);
+          onClose();
+        } else {
+          setErrorMsg('Failed to update template. Please try again.');
+        }
       } else {
-        setErrorMsg('Failed to save template to server. Please try again.');
+        // CREATE new template
+        const created = await createEmailTemplate(payload);
+        if (created) {
+          onTemplateCreated?.(created);
+          onClose();
+        } else {
+          setErrorMsg('Failed to save template. Please try again.');
+        }
       }
     } catch (err: any) {
       console.error('Save template error:', err);
@@ -138,7 +175,7 @@ export const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
       onClick={onClose}
       role="dialog"
       aria-modal="true"
-      aria-label="Create Custom Email Template"
+      aria-label={isEditMode ? 'Edit Email Template' : 'Create Custom Email Template'}
     >
       <div
         className="w-full max-w-4xl max-h-[92vh] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden text-slate-800 dark:text-slate-100 transition-colors"
@@ -148,14 +185,16 @@ export const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
         <div className="flex-shrink-0 flex items-center justify-between px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/80">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#0A2558] to-[#4f46e5] text-white flex items-center justify-center shadow-xs">
-              <Sparkles className="w-4 h-4" />
+              {isEditMode ? <Edit3 className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
             </div>
             <div>
               <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                Create Custom Email Template
+                {isEditMode ? `Edit Template: ${editTemplate!.name}` : 'Create Custom Email Template'}
               </h3>
               <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                Craft a reusable B2B template with official TechnoKraft branding, header & footer
+                {isEditMode
+                  ? 'Modify this template — changes apply immediately across the CRM'
+                  : 'Craft a reusable B2B template with official TechnoKraft branding, header & footer'}
               </p>
             </div>
           </div>
@@ -220,7 +259,7 @@ export const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="e.g., Enterprise Architecture Pitch"
-                    className="w-full text-xs px-3 py-2 bg-white dark:bg-slate-850 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
+                    className="w-full text-xs px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
                   />
                 </div>
 
@@ -232,12 +271,10 @@ export const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
                     <select
                       value={category}
                       onChange={(e) => setCategory(e.target.value)}
-                      className="w-full text-xs px-3 py-2 bg-white dark:bg-slate-850 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
+                      className="w-full text-xs px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
                     >
                       {PRESET_CATEGORIES.map((cat) => (
-                        <option key={cat} value={cat}>
-                          {cat}
-                        </option>
+                        <option key={cat} value={cat}>{cat}</option>
                       ))}
                       <option value="Custom">+ Custom Category</option>
                     </select>
@@ -247,7 +284,7 @@ export const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
                         value={customCategory}
                         onChange={(e) => setCustomCategory(e.target.value)}
                         placeholder="New category..."
-                        className="w-full text-xs px-3 py-2 bg-white dark:bg-slate-850 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
+                        className="w-full text-xs px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
                       />
                     )}
                   </div>
@@ -269,7 +306,7 @@ export const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
                   placeholder="TechnoKraft Services LLP — {{service}} Proposal for {{company_name}}"
-                  className="w-full text-xs px-3 py-2 bg-white dark:bg-slate-850 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40 font-medium"
+                  className="w-full text-xs px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40 font-medium"
                 />
               </div>
 
@@ -277,14 +314,14 @@ export const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
               <div className="p-3 bg-purple-50/50 dark:bg-purple-950/20 rounded-xl border border-purple-100 dark:border-purple-900/30">
                 <div className="text-[11px] font-bold text-[#0A2558] dark:text-purple-300 mb-1.5 flex items-center gap-1.5">
                   <Tag className="w-3.5 h-3.5" />
-                  <span>Click to Insert CRM Smart Variables:</span>
+                  <span>Click to Insert CRM Smart Variables into Body:</span>
                 </div>
                 <div className="flex flex-wrap gap-1.5">
                   {TEMPLATE_VARIABLES.map((v) => (
                     <button
                       key={v.key}
                       type="button"
-                      onClick={() => insertVariable(v.key, 'body')}
+                      onClick={() => insertVariable(v.key)}
                       className="inline-flex items-center gap-1 text-[11px] font-mono font-medium px-2 py-1 rounded-md bg-white dark:bg-slate-800 text-[#0A2558] dark:text-purple-300 border border-purple-200 dark:border-purple-800 hover:bg-purple-100/60 dark:hover:bg-purple-900/60 transition-colors shadow-2xs cursor-pointer"
                       title={`Insert {{${v.key}}}`}
                     >
@@ -306,12 +343,12 @@ export const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
                   value={body}
                   onChange={(e) => setBody(e.target.value)}
                   placeholder="Draft your template body content..."
-                  className="w-full text-xs font-mono leading-relaxed p-3.5 bg-white dark:bg-slate-850 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
+                  className="w-full text-xs font-mono leading-relaxed p-3.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40"
                 />
               </div>
             </div>
           ) : (
-            /* Live Branded Email Preview matching hiring-campaign.html */
+            /* Live Branded Email Preview */
             <div className="space-y-3">
               <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/60 p-2.5 rounded-lg border border-slate-200 dark:border-slate-700">
                 <span>
@@ -334,7 +371,9 @@ export const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
         {/* Modal Footer */}
         <div className="flex-shrink-0 px-5 py-3.5 border-t border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/80 flex items-center justify-between">
           <div className="text-[11px] text-slate-500 dark:text-slate-400">
-            Saved templates are immediately available across the CRM.
+            {isEditMode
+              ? 'Edits apply immediately — default templates can also be edited.'
+              : 'Saved templates are immediately available across the CRM. Max 25 templates.'}
           </div>
 
           <div className="flex items-center gap-2">
@@ -355,12 +394,12 @@ export const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
               {isSaving ? (
                 <>
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  <span>Saving...</span>
+                  <span>{isEditMode ? 'Updating...' : 'Saving...'}</span>
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span>Save Template to Library</span>
+                  {isEditMode ? <Save className="w-3.5 h-3.5" /> : <Sparkles className="w-3.5 h-3.5" />}
+                  <span>{isEditMode ? 'Save Changes' : 'Save Template to Library'}</span>
                 </>
               )}
             </button>

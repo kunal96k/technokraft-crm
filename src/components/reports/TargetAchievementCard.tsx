@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Target, CheckCircle, AlertTriangle, AlertCircle, Sparkles } from 'lucide-react';
 import { EmployeePerformanceRecord, TargetStatus } from '../../types/reports';
 import { formatCurrencyINR } from '../../utils/currencyFormatters';
+import { EmployeeAvatar } from '../common/EmployeeAvatar';
 
 interface TargetAchievementCardProps {
   employees: EmployeePerformanceRecord[];
@@ -107,12 +108,21 @@ export const TargetAchievementCard: React.FC<TargetAchievementCardProps> = ({
       {/* Revenue Target Primary Focus Card */}
       <div className="bg-gradient-to-r from-purple-50/60 to-indigo-50/40 dark:from-purple-950/30 dark:to-indigo-950/20 rounded-xl p-4 border border-purple-100/80 dark:border-purple-900/50">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
-          <div>
-            <div className="text-[11px] font-bold uppercase text-[#5B4DB7] dark:text-purple-300 tracking-wide">
-              {displayEmployee.name} • Monthly Commercial Revenue Target
-            </div>
-            <div className="text-lg sm:text-xl font-bold font-mono text-slate-900 dark:text-white mt-0.5">
-              Target: {formatCurrencyINR(displayEmployee.targetRevenue)}
+          <div className="flex items-center gap-3">
+            <EmployeeAvatar
+              name={displayEmployee.name}
+              avatar={displayEmployee.avatar}
+              profilePhoto={displayEmployee.profilePhoto}
+              size="md"
+              showRing={true}
+            />
+            <div>
+              <div className="text-[11px] font-bold uppercase text-[#5B4DB7] dark:text-purple-300 tracking-wide">
+                {displayEmployee.name} • Monthly Commercial Revenue Target
+              </div>
+              <div className="text-lg sm:text-xl font-bold font-mono text-slate-900 dark:text-white mt-0.5">
+                Target: {formatCurrencyINR(displayEmployee.targetRevenue)}
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-3">

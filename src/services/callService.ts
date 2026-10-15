@@ -93,7 +93,7 @@ export async function fetchCalls(params: FetchCallsParams = {}): Promise<CallsPa
   query.append('sortDirection', params.sortDirection || 'desc');
 
   try {
-    const res = await fetch(`${CALLS_API_URL}?${query.toString()}`, {
+    const res = await authFetch(`${CALLS_API_URL}?${query.toString()}`, {
       method: 'GET',
       headers: { Accept: 'application/json' },
     });

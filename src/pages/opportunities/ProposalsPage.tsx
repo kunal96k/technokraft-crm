@@ -15,7 +15,7 @@ import {
   Calendar,
   Building2,
   User,
-  DollarSign,
+  IndianRupee,
   TrendingUp,
   LayoutGrid,
   Loader2,
@@ -232,7 +232,7 @@ export const ProposalsPage: React.FC = () => {
               Total Quoted Value
             </span>
             <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-300 flex items-center justify-center">
-              <DollarSign className="w-4 h-4" />
+              <IndianRupee className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-2 text-2xl font-black text-slate-900 dark:text-white font-mono">

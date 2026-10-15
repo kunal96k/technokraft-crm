@@ -2,6 +2,7 @@ import React from 'react';
 import { CalendarX, ArrowRight, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { OverdueFollowUpStat } from '../../types/reports';
+import { EmployeeAvatar } from '../common/EmployeeAvatar';
 
 interface OverdueFollowupAnalysisProps {
   stats: OverdueFollowUpStat[];
@@ -57,9 +58,11 @@ export const OverdueFollowupAnalysis: React.FC<OverdueFollowupAnalysisProps> = (
           >
             <div>
               <div className="flex items-center gap-2 mb-1.5">
-                <div className="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 flex items-center justify-center text-[10px] font-bold shrink-0">
-                  {item.employeeAvatar}
-                </div>
+                <EmployeeAvatar
+                  name={item.employeeName}
+                  avatar={item.employeeAvatar}
+                  size="sm"
+                />
                 <div className="min-w-0">
                   <div className="text-xs font-bold text-slate-900 dark:text-white truncate">{item.employeeName}</div>
                   <div className="text-[10px] text-slate-400 dark:text-slate-500 truncate">{item.employeeRole}</div>

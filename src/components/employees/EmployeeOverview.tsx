@@ -19,6 +19,8 @@ import {
   Copy,
   Check,
   ShieldAlert,
+  LogIn,
+  LogOut,
 } from 'lucide-react';
 import { Employee } from '../../types/employees';
 import {
@@ -30,6 +32,8 @@ import {
   SIDEBAR_MODULE_OPTIONS,
   getDefaultModulesForRole,
 } from './AddEmployeeModal';
+import { useAuth } from '../../context/AuthContext';
+import { shouldMaskForSecurity } from '../../utils/securityUtils';
 
 interface EmployeeOverviewProps {
   employee: Employee;
@@ -40,6 +44,7 @@ export const EmployeeOverview: React.FC<EmployeeOverviewProps> = ({
   employee,
   onResetPassword,
 }) => {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [copiedUsername, setCopiedUsername] = useState(false);
 
@@ -59,47 +64,88 @@ export const EmployeeOverview: React.FC<EmployeeOverviewProps> = ({
     }
   };
 
-  return (
-    <div className="space-y-5">
-      {/* Live Working Status Banner */}
-      <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-200 dark:border-emerald-800">
-            <Clock className="w-5 h-5" />
+    const isSubOneMinuteOrLeave =
+      employee.status === 'On Leave' ||
+      employee.workStatus === 'On Leave' ||
+      (employee.workStatus === 'Logged Out' &&
+        (!employee.todayWorkingTime ||
+          employee.todayWorkingTime === '0h 00m' ||
+          employee.todayWorkingTime === '00:00' ||
+          employee.todayWorkingTime === '0h 0m'));
+
+    const effectiveAttendanceStatus = isSubOneMinuteOrLeave
+      ? 'Leave'
+      : (employee.todayAttendanceStatus || (employee.workStatus === 'Working' ? 'Present' : 'Absent'));
+
+    const displayDuration = isSubOneMinuteOrLeave ? '00:00' : (employee.todayWorkingTime || '00:00');
+
+    if (shouldMaskForSecurity(employee, user)) {
+      return (
+        <div className="p-8 text-center bg-slate-50/70 dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4 animate-in fade-in zoom-in-95 duration-150">
+          <div className="w-16 h-16 mx-auto rounded-2xl bg-purple-100 dark:bg-purple-950/70 text-[#5B4DB7] dark:text-purple-300 flex items-center justify-center border border-purple-200 dark:border-purple-800">
+            <ShieldAlert className="w-8 h-8" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-slate-900 dark:text-white">
-                Live Status:
-              </span>
-              <WorkStatusBadge status={employee.workStatus} size="sm" />
-              <AttendanceStatusBadge status={employee.todayAttendanceStatus} size="sm" />
-            </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Current Task: <span className="text-slate-700 dark:text-slate-200 font-medium">{employee.currentActivity}</span>
+            <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 mb-2 border border-purple-200 dark:border-purple-800/60">
+              Protected System Role • Confidential
+            </span>
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">
+              System Administrator Profile
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 max-w-md mx-auto leading-relaxed">
+              Personal contact details, login credentials, and administrative activity for the primary System Administrator / Super Admin are restricted for organizational security.
             </p>
           </div>
+          <div className="pt-4 border-t border-slate-200/60 dark:border-slate-800/80 flex items-center justify-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+            <span>Employee Code: <strong className="font-mono text-slate-800 dark:text-slate-200">{employee.employeeCode}</strong></span>
+            <span>•</span>
+            <span>Status: <strong className="text-emerald-600 dark:text-emerald-400">Active</strong></span>
+          </div>
         </div>
+      );
+    }
 
-        <div className="flex items-center gap-4 text-xs text-slate-600 dark:text-slate-300 border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-200 dark:border-slate-800">
-          <div>
-            <span className="text-[11px] text-slate-400 block">Login Time</span>
-            <span className="font-mono font-medium">{employee.loginTime}</span>
+    return (
+      <div className="space-y-5">
+        {/* Live Working Status Banner */}
+        <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-200 dark:border-emerald-800">
+              <Clock className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold text-slate-900 dark:text-white">
+                  Live Status:
+                </span>
+                <WorkStatusBadge status={employee.workStatus} size="sm" />
+                <AttendanceStatusBadge status={effectiveAttendanceStatus} size="sm" />
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Current Task: <span className="text-slate-700 dark:text-slate-200 font-medium">{employee.currentActivity}</span>
+              </p>
+            </div>
           </div>
-          <div className="h-6 w-px bg-slate-200 dark:bg-slate-700" />
-          <div>
-            <span className="text-[11px] text-slate-400 block">Today's Duration</span>
-            <span className="font-mono font-medium text-emerald-600 dark:text-emerald-400">
-              {employee.todayWorkingTime}
-            </span>
-          </div>
-          <div className="h-6 w-px bg-slate-200 dark:bg-slate-700" />
-          <div>
-            <span className="text-[11px] text-slate-400 block">Last Active</span>
-            <span className="font-medium text-slate-500 dark:text-slate-400">{employee.lastActivityTime}</span>
+
+          <div className="flex items-center gap-4 text-xs text-slate-600 dark:text-slate-300 border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-200 dark:border-slate-800">
+            <div>
+              <span className="text-[11px] text-slate-400 block">Login Time</span>
+              <span className="font-mono font-medium">{employee.loginTime || '—'}</span>
+            </div>
+            <div className="h-6 w-px bg-slate-200 dark:bg-slate-700" />
+            <div>
+              <span className="text-[11px] text-slate-400 block">Today's Duration</span>
+              <span className="font-mono font-medium text-emerald-600 dark:text-emerald-400">
+                {displayDuration}
+              </span>
+            </div>
+            <div className="h-6 w-px bg-slate-200 dark:bg-slate-700" />
+            <div>
+              <span className="text-[11px] text-slate-400 block">Last Active</span>
+              <span className="font-medium text-slate-500 dark:text-slate-400">{employee.lastActivityTime || 'Active'}</span>
+            </div>
           </div>
         </div>
-      </div>
 
       {/* Connected CRM Workload Grid */}
       <div>
@@ -271,7 +317,7 @@ export const EmployeeOverview: React.FC<EmployeeOverviewProps> = ({
           )}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 text-xs">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 text-xs">
           {/* Username */}
           <div className="p-3 bg-white/80 dark:bg-slate-800/80 rounded-xl border border-slate-200/80 dark:border-slate-700/80">
             <span className="text-slate-400 text-[11px] block">Login Username</span>
@@ -342,6 +388,28 @@ export const EmployeeOverview: React.FC<EmployeeOverviewProps> = ({
               </span>
             </div>
           </div>
+
+          {/* Last Login Time */}
+          <div className="p-3 bg-white/80 dark:bg-slate-800/80 rounded-xl border border-slate-200/80 dark:border-slate-700/80">
+            <span className="text-slate-400 text-[11px] block">Last Login Time</span>
+            <div className="flex items-center gap-1.5 mt-1">
+              <LogIn className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+              <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs truncate">
+                {employee.lastLoginAt || employee.loginTime || 'Not recorded yet'}
+              </span>
+            </div>
+          </div>
+
+          {/* Last Logout Time */}
+          <div className="p-3 bg-white/80 dark:bg-slate-800/80 rounded-xl border border-slate-200/80 dark:border-slate-700/80">
+            <span className="text-slate-400 text-[11px] block">Last Logout Time</span>
+            <div className="flex items-center gap-1.5 mt-1">
+              <LogOut className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+              <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs truncate">
+                {employee.lastLogoutAt || employee.logoutTime || 'Active In Session'}
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -380,13 +448,23 @@ export const EmployeeOverview: React.FC<EmployeeOverviewProps> = ({
                   </div>
                 </div>
                 <span
-                  className={`text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0 ${
+                  className={`text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0 flex items-center gap-1 ${
                     hasAccess
                       ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
                       : 'bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
                   }`}
                 >
-                  {hasAccess ? '✓ Allowed' : '🔒 Locked'}
+                  {hasAccess ? (
+                    <>
+                      <Check className="w-3 h-3" />
+                      <span>Allowed</span>
+                    </>
+                  ) : (
+                    <>
+                      <Lock className="w-3 h-3" />
+                      <span>Locked</span>
+                    </>
+                  )}
                 </span>
               </div>
             );

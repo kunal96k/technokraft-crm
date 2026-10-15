@@ -344,8 +344,18 @@ export const ResetPasswordPage: React.FC = () => {
                   </button>
                 </div>
                 {confirmPassword && (
-                  <span className={`text-[10px] mt-1 block font-medium ${isMatch ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
-                    {isMatch ? '✓ Passwords match' : '✗ Passwords do not match'}
+                  <span className={`text-[10px] mt-1 flex items-center gap-1 font-medium ${isMatch ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                    {isMatch ? (
+                      <>
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                        <span>Passwords match</span>
+                      </>
+                    ) : (
+                      <>
+                        <AlertCircle className="w-3.5 h-3.5 text-rose-500" />
+                        <span>Passwords do not match</span>
+                      </>
+                    )}
                   </span>
                 )}
               </div>

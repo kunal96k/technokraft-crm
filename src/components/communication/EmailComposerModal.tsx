@@ -151,7 +151,7 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
     setSubject(resolveTemplateText(newTpl.subject, selectedLead));
     setBody(resolveTemplateText(newTpl.body, selectedLead));
     setToastType('success');
-    setToastMessage(`✓ Custom template "${newTpl.name}" applied`);
+    setToastMessage(`Custom template "${newTpl.name}" applied`);
     setShowToast(true);
     setTimeout(() => setShowToast(false), 2500);
   };
@@ -232,7 +232,7 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
 
         onSendEmail(newRecord);
         setToastType('success');
-        setToastMessage(`✓ Email dispatched successfully via SMTP to ${recipientEmail}`);
+        setToastMessage(`Email dispatched successfully via SMTP to ${recipientEmail}`);
         setShowToast(true);
         window.dispatchEvent(new Event('crm-leads-updated'));
         setTimeout(() => {
@@ -308,7 +308,7 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
 
       onSendEmail(newRecord);
       setToastType('success');
-      setToastMessage(`✓ Email scheduled for delivery on ${dateStr} at ${timeStr}`);
+      setToastMessage(`Email scheduled for delivery on ${dateStr} at ${timeStr}`);
       setShowToast(true);
       window.dispatchEvent(new Event('crm-leads-updated'));
       setTimeout(() => {
@@ -380,7 +380,7 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
         onSendEmail(draftRecord);
       }
       setToastType('success');
-      setToastMessage('✓ Draft saved successfully');
+      setToastMessage('Draft saved successfully');
       setShowToast(true);
       setTimeout(() => {
         setShowToast(false);

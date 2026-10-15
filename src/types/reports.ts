@@ -51,6 +51,7 @@ export interface EmployeePerformanceRecord {
   id: string;
   name: string;
   avatar: string;
+  profilePhoto?: string | null;
   role: string;
   team: string;
   email: string;
@@ -201,6 +202,7 @@ export interface TopPerformer {
   id: string;
   name: string;
   avatar: string;
+  profilePhoto?: string | null;
   role: string;
   team: string;
   wonRevenue: number;
@@ -214,6 +216,7 @@ export interface TopPerformer {
 export interface ActivityConversion {
   employeeName: string;
   avatar: string;
+  profilePhoto?: string | null;
   team: string;
   totalActivities: number;
   leadsEngaged: number;

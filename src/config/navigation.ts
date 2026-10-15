@@ -204,7 +204,8 @@ export function canViewModule(
 }
 
 /**
- * Helper to check route accessibility for the given role
+ * Helper to check route accessibility for the given role.
+ * Returns false for any path not found in NAVIGATION_CONFIG (deny by default).
  */
 export function canAccessRoute(path: string, currentRole: UserRole): boolean {
   for (const section of NAVIGATION_CONFIG) {
@@ -223,7 +224,8 @@ export function canAccessRoute(path: string, currentRole: UserRole): boolean {
       }
     }
   }
-  return true;
+  // Default DENY — unlisted routes are not accessible
+  return false;
 }
 
 export const INITIAL_USER_PROFILE = {

@@ -7,7 +7,7 @@ import brandLogoImg from '../fonts/images/image.png';
 
 /**
  * Company Profile & Metadata
- * Strictly commercial quotation information (Zero GSTIN / banking / remittance details)
+ * Strictly QUOTATION information (Zero GSTIN / banking / remittance details)
  */
 export const COMPANY_INFO = {
   name: 'TechnoKraft Services LLP',
@@ -224,7 +224,7 @@ export function resolveServicesSection(proposal: ProposalRecord) {
 }
 
 /**
- * Generate a complete, styled HTML document for the pre-sales Commercial Quotation
+ * Generate a complete, styled HTML document for the pre-sales QUOTATION
  * Formatted for standard A4 print layout (@media print) and browser print preview.
  */
 export function generateProposalHtml(proposal: ProposalRecord): string {
@@ -305,11 +305,10 @@ export function generateProposalHtml(proposal: ProposalRecord): string {
             </tr>
           </tbody>
         </table>
-        ${
-          resolvedHosting.note
-            ? `<div style="font-size: 9.5px; color: #64748B; margin-top: 4px; font-style: italic;">Note: ${resolvedHosting.note}</div>`
-            : ''
-        }
+        ${resolvedHosting.note
+        ? `<div style="font-size: 9.5px; color: #64748B; margin-top: 4px; font-style: italic;">Note: ${resolvedHosting.note}</div>`
+        : ''
+      }
       </div>
     `;
   }
@@ -357,11 +356,10 @@ export function generateProposalHtml(proposal: ProposalRecord): string {
             </tr>
           </tbody>
         </table>
-        ${
-          resolvedServices.note
-            ? `<div style="font-size: 9.5px; color: #64748B; margin-top: 4px; font-style: italic;">Note: ${resolvedServices.note}</div>`
-            : ''
-        }
+        ${resolvedServices.note
+        ? `<div style="font-size: 9.5px; color: #64748B; margin-top: 4px; font-style: italic;">Note: ${resolvedServices.note}</div>`
+        : ''
+      }
       </div>
     `;
   }
@@ -797,12 +795,13 @@ export function generateProposalHtml(proposal: ProposalRecord): string {
     <!-- Non-printable top preview bar -->
     <div class="no-print" style="margin-bottom: 14px; background: #0F172A; color: #FFFFFF; padding: 10px 16px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.15);">
       <div style="display: flex; align-items: center; gap: 8px;">
-        <span style="font-size: 15px;">📄</span>
+        <svg style="width: 15px; height: 15px; color: #A5B4FC;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
         <span style="font-weight: 700; font-size: 12px; letter-spacing: 0.2px;">Quotation Preview: ${proposalCode} &bull; ${clientCompany}</span>
       </div>
       <div style="display: flex; align-items: center; gap: 8px;">
-        <button onclick="window.print()" style="background: #5B4DB7; color: #FFFFFF; border: none; padding: 6px 14px; border-radius: 6px; font-weight: 700; font-size: 11px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
-          <span>🖨️</span><span>Print / Save as PDF</span>
+        <button onclick="window.print()" style="background: #5B4DB7; color: #FFFFFF; border: none; padding: 6px 14px; border-radius: 6px; font-weight: 700; font-size: 11px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+          <svg style="width: 13px; height: 13px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+          <span>Print / Save as PDF</span>
         </button>
         <button onclick="window.close()" style="background: #334155; color: #E2E8F0; border: none; padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 11px; cursor: pointer;">
           Close
@@ -832,7 +831,7 @@ export function generateProposalHtml(proposal: ProposalRecord): string {
         </div>
       </div>
       <div class="quotation-badge-area">
-        <div class="doc-type-label">Commercial Quotation</div>
+        <div class="doc-type-label">QUOTATION</div>
         <div class="quotation-code-pill">${proposalCode}</div>
         <div class="meta-line">Issue Date: <strong>${issueDate}</strong></div>
       </div>
@@ -861,10 +860,9 @@ export function generateProposalHtml(proposal: ProposalRecord): string {
     <div>
       <div class="section-header">1. Executive Project Scope & Architectural Overview</div>
       <div class="scope-callout">
-        ${
-          proposal.summary ||
-          `Comprehensive commercial quotation and technical implementation scope for ${opportunityTitle}, executed according to structured enterprise delivery milestones, technical sign-off criteria, and quality standards established by TechnoKraft Services LLP.`
-        }
+        ${proposal.summary ||
+    `Comprehensive QUOTATION and technical implementation scope for ${opportunityTitle}, executed according to structured enterprise delivery milestones, technical sign-off criteria, and quality standards established by TechnoKraft Services LLP.`
+    }
       </div>
     </div>
 
@@ -904,11 +902,10 @@ export function generateProposalHtml(proposal: ProposalRecord): string {
         <ol>
           <li><strong>Scope of Work:</strong> Pricing corresponds strictly to agreed milestone deliverables and infrastructure specs.</li>
           <li><strong>Milestone Sign-off:</strong> Invoices are settled upon client review and acceptance sign-off.</li>
-          ${
-            hostingEnabled
-              ? '<li><strong>Cloud Infrastructure:</strong> AWS EC2 server and domain charges are billed per resource usage schedule.</li>'
-              : ''
-          }
+          ${hostingEnabled
+      ? '<li><strong>Cloud Infrastructure:</strong> AWS EC2 server and domain charges are billed per resource usage schedule.</li>'
+      : ''
+    }
           <li><strong>Intellectual Property:</strong> 100% IP rights and source code transferred upon final handover.</li>
           <li><strong>Quality Warranty:</strong> Includes 30-day post-launch technical warranty and bug resolution support.</li>
         </ol>
@@ -917,21 +914,19 @@ export function generateProposalHtml(proposal: ProposalRecord): string {
       <!-- Section 6: Quotation Summary Card -->
       <div class="summary-card">
         <div>
-          <div class="section-header" style="margin-bottom: 4px;">6. Commercial Quotation Summary</div>
+          <div class="section-header" style="margin-bottom: 4px;">6. QUOTATION Summary</div>
           <div class="summary-row">
             <span>Development Milestones:</span>
             <span>${formatCurrencyINR(devAmount)}</span>
           </div>
-          ${
-            hostingEnabled
-              ? `<div class="summary-row"><span>Cloud Infrastructure & Hosting:</span><span>${formatCurrencyINR(hostingSubtotal)}</span></div>`
-              : ''
-          }
-          ${
-            servicesEnabled
-              ? `<div class="summary-row"><span>Managed Services & AMC:</span><span>${formatCurrencyINR(servicesSubtotal)}</span></div>`
-              : ''
-          }
+          ${hostingEnabled
+      ? `<div class="summary-row"><span>Cloud Infrastructure & Hosting:</span><span>${formatCurrencyINR(hostingSubtotal)}</span></div>`
+      : ''
+    }
+          ${servicesEnabled
+      ? `<div class="summary-row"><span>Managed Services & AMC:</span><span>${formatCurrencyINR(servicesSubtotal)}</span></div>`
+      : ''
+    }
         </div>
         <div class="total-highlight-row">
           <span class="total-label">Total Commercial Value:</span>
@@ -963,7 +958,7 @@ export function generateProposalHtml(proposal: ProposalRecord): string {
 
     <!-- Footer -->
     <div class="doc-footer">
-      <div>Commercial Quotation &bull; TechnoKraft Services LLP &bull; Ref: ${proposalCode}</div>
+      <div>QUOTATION &bull; TechnoKraft Services LLP &bull; Ref: ${proposalCode}</div>
       <div>Page 1 of 1</div>
     </div>
   </div>
@@ -987,7 +982,7 @@ export function printProposalDocument(proposal: ProposalRecord): void {
     setTimeout(() => {
       try {
         URL.revokeObjectURL(blobUrl);
-      } catch {}
+      } catch { }
     }, 60000);
   } else {
     // Popup fallback using invisible iframe
@@ -1128,7 +1123,7 @@ export async function createProposalJsPdf(proposal: ProposalRecord): Promise<jsP
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(8.5);
   doc.setTextColor(...primaryColor);
-  doc.text('COMMERCIAL QUOTATION', pageWidth - margin, currentY + 2.5, { align: 'right' });
+  doc.text('QUOTATION', pageWidth - margin, currentY + 2.5, { align: 'right' });
 
   // Badge Box for Proposal Code
   doc.setFont('helvetica', 'bold');
@@ -1228,7 +1223,7 @@ export async function createProposalJsPdf(proposal: ProposalRecord): Promise<jsP
 
   const rawSummary =
     proposal.summary ||
-    `Commercial quotation and technical scope package for ${proposal.opportunityName || proposal.companyName}. Deliverables are structured as progressive development and testing milestones to assure robust architecture, high security, and seamless deployment.`;
+    `QUOTATION and technical scope package for ${proposal.opportunityName || proposal.companyName}. Deliverables are structured as progressive development and testing milestones to assure robust architecture, high security, and seamless deployment.`;
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7.5);
@@ -1452,7 +1447,7 @@ export async function createProposalJsPdf(proposal: ProposalRecord): Promise<jsP
     termY += 4.2;
   });
 
-  // Right Box: Commercial Quotation Summary (No GST taxes)
+  // Right Box: QUOTATION Summary (No GST taxes)
   doc.setFillColor(...lightCardBg);
   doc.setDrawColor(...borderColor);
   doc.roundedRect(summaryBoxX, currentY, summaryBoxWidth, lowerBoxHeight, 1.5, 1.5, 'FD');
@@ -1460,7 +1455,7 @@ export async function createProposalJsPdf(proposal: ProposalRecord): Promise<jsP
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(7);
   doc.setTextColor(...primaryColor);
-  doc.text('COMMERCIAL QUOTATION SUMMARY', summaryBoxX + 3.5, currentY + 4.5);
+  doc.text('QUOTATION SUMMARY', summaryBoxX + 3.5, currentY + 4.5);
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(6.8);
@@ -1564,7 +1559,7 @@ export async function createProposalJsPdf(proposal: ProposalRecord): Promise<jsP
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(148, 163, 184);
     doc.text(
-      `Commercial Quotation • ${COMPANY_INFO.name} • Ref: ${proposalCode}`,
+      `QUOTATION • ${COMPANY_INFO.name} • Ref: ${proposalCode}`,
       margin,
       footerY
     );

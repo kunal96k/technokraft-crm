@@ -243,7 +243,7 @@ export const WhatsAppPage: React.FC = () => {
         if (c.id === conversationId) {
           return {
             ...c,
-            lastMessage: `📄 ${filename}`,
+            lastMessage: `Document: ${filename}`,
             lastActivityTime: 'Just now',
             messages: [...c.messages, newDocMessage],
           };

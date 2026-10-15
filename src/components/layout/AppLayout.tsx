@@ -18,8 +18,9 @@ export const AppLayout: React.FC = () => {
     initials: user?.name ? user.name.slice(0, 2).toUpperCase() : 'AD',
     email: user?.email || 'admin@technokraftservices.com',
     role: (user?.accessRole as UserRole) || 'Sales Manager',
-    department: 'Management',
-    avatarUrl: user?.avatar,
+    department: user?.department || 'Management',
+    avatarUrl: user?.profilePhoto || user?.avatar,
+    profilePhoto: user?.profilePhoto,
   };
 
   return (

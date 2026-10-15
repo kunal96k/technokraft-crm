@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Building, Upload, Check, Globe, Phone, Mail, MapPin, Clock, DollarSign, Image } from 'lucide-react';
+import { Building, Upload, Check, Globe, Phone, Mail, MapPin, Clock, IndianRupee, Image } from 'lucide-react';
 import { CompanySettingsData } from '../../../types/settings';
 
 interface CompanySettingsProps {
@@ -217,7 +217,7 @@ export const CompanySettings: React.FC<CompanySettingsProps> = ({ data, onChange
               <option value="GBP (£)">British Pound (GBP £)</option>
               <option value="AED (د.إ)">UAE Dirham (AED)</option>
             </select>
-            <DollarSign className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+            <IndianRupee className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
           </div>
         </div>
 

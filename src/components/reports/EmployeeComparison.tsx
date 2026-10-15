@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { GitCompare, Check } from 'lucide-react';
 import { EmployeePerformanceRecord } from '../../types/reports';
 import { formatLakhsINR } from '../../utils/currencyFormatters';
+import { EmployeeAvatar } from '../common/EmployeeAvatar';
 
 interface EmployeeComparisonProps {
   employees: EmployeePerformanceRecord[];
@@ -71,7 +72,10 @@ export const EmployeeComparison: React.FC<EmployeeComparisonProps> = ({ employee
               <th className="py-2.5 px-3">Metric</th>
               {comparedList.map((emp) => (
                 <th key={emp.id} className="py-2.5 px-3 text-right text-slate-800 dark:text-slate-200">
-                  {emp.name}
+                  <div className="flex items-center justify-end gap-1.5">
+                    <EmployeeAvatar name={emp.name} avatar={emp.avatar} profilePhoto={emp.profilePhoto} size="xs" />
+                    <span>{emp.name}</span>
+                  </div>
                   <div className="text-[9px] text-slate-400 dark:text-slate-500 font-normal lowercase">{emp.role}</div>
                 </th>
               ))}

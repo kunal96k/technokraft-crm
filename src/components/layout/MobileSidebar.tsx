@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, LogOut } from 'lucide-react';
 import { BrandLogo } from '../common/BrandLogo';
 import { SidebarSection } from './SidebarSection';
@@ -8,6 +8,7 @@ import { UserRole } from '../../types/navigation';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { LogoutConfirmModal } from './LogoutConfirmModal';
 
 interface MobileSidebarProps {
   isOpen: boolean;
@@ -22,6 +23,7 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
   currentRole = 'Sales Manager' as UserRole,
   theme,
 }) => {
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const { resolvedTheme } = useTheme();
   const { logout, user: authUser } = useAuth();
   const navigate = useNavigate();
@@ -29,6 +31,7 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
   const isDark = activeTheme === 'dark';
 
   const handleMobileLogout = async () => {
+    setShowLogoutConfirm(false);
     onClose();
     await logout();
     navigate('/login', { replace: true });
@@ -161,7 +164,7 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
 
           <button
             type="button"
-            onClick={handleMobileLogout}
+            onClick={() => setShowLogoutConfirm(true)}
             className={`w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
               isDark
                 ? 'bg-rose-950/40 hover:bg-rose-950/70 text-rose-400 border border-rose-900/50'
@@ -173,6 +176,13 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
           </button>
         </div>
       </div>
+
+      <LogoutConfirmModal
+        isOpen={showLogoutConfirm}
+        onClose={() => setShowLogoutConfirm(false)}
+        onConfirm={handleMobileLogout}
+        user={authUser}
+      />
     </div>
   );
 };

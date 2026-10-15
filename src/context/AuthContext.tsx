@@ -1,5 +1,11 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { AuthUser, LoginCredentials, LoginResponse, ChangePasswordPayload } from '../types/auth';
+import {
+  AuthUser,
+  LoginCredentials,
+  LoginResponse,
+  ChangePasswordPayload,
+  UpdateProfilePayload,
+} from '../types/auth';
 import * as authService from '../services/authService';
 
 interface AuthContextType {
@@ -11,11 +17,14 @@ interface AuthContextType {
   logout: () => Promise<void>;
   changePassword: (payload: ChangePasswordPayload) => Promise<void>;
   updateUser: (updates: Partial<AuthUser>) => void;
+  refreshUser: () => Promise<AuthUser | null>;
+  uploadProfilePhoto: (file: File) => Promise<AuthUser>;
+  updateProfile: (payload: UpdateProfilePayload) => Promise<AuthUser>;
   hasRole: (allowedRoles: string[]) => boolean;
   hasPermission: (permission: string) => boolean;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -108,6 +117,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [token]);
 
+  const refreshUser = useCallback(async (): Promise<AuthUser | null> => {
+    const currentToken = token || authService.getStoredToken();
+    if (!currentToken) return null;
+    try {
+      const freshUser = await authService.getCurrentUser(currentToken);
+      if (freshUser) {
+        setUser(freshUser);
+        return freshUser;
+      }
+      return null;
+    } catch (e) {
+      console.warn('[AuthContext] Failed to refresh user profile:', e);
+      return null;
+    }
+  }, [token]);
+
+  const uploadProfilePhoto = useCallback(async (file: File): Promise<AuthUser> => {
+    const updated = await authService.uploadProfilePhoto(file);
+    setUser(updated);
+    const currentToken = token || authService.getStoredToken();
+    if (currentToken) {
+      authService.setStoredAuth(currentToken, updated, true);
+    }
+    return updated;
+  }, [token]);
+
+  const updateProfile = useCallback(async (payload: UpdateProfilePayload): Promise<AuthUser> => {
+    const updated = await authService.updateProfile(payload);
+    setUser(updated);
+    const currentToken = token || authService.getStoredToken();
+    if (currentToken) {
+      authService.setStoredAuth(currentToken, updated, true);
+    }
+    return updated;
+  }, [token]);
+
   const updateUser = useCallback((updates: Partial<AuthUser>) => {
     setUser((prev) => {
       if (!prev) return null;
@@ -129,7 +174,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const hasPermission = useCallback((permission: string): boolean => {
     if (!user) return false;
-    if (!user.permissions || user.permissions.length === 0) return true;
+    // Wildcard: Super Admin / Admin always have all permissions
+    const role = (user.accessRole || user.role || '').toLowerCase();
+    if (role === 'super admin' || role === 'admin') return true;
+    // Guard: if no permissions list at all, deny access (do NOT default to true)
+    if (!user.permissions || user.permissions.length === 0) return false;
     if (user.permissions.includes('*')) return true;
     return user.permissions.includes(permission);
   }, [user]);
@@ -145,6 +194,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         logout,
         changePassword,
         updateUser,
+        refreshUser,
+        uploadProfilePhoto,
+        updateProfile,
         hasRole,
         hasPermission,
       }}

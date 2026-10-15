@@ -188,7 +188,7 @@ export const EmailSettings: React.FC<EmailSettingsProps> = ({ data, onChange }) 
           {testResult && (
             <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800 text-xs font-medium animate-in fade-in">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-              ✓ {testResult}
+              <span>{testResult}</span>
             </div>
           )}
         </div>

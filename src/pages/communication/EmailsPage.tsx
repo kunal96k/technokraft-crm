@@ -243,7 +243,7 @@ export const EmailsPage: React.FC = () => {
       showToast(`Resending email to ${original.recipientEmail}...`);
       const res = await resendEmail(original.id);
       if (res.success) {
-        showToast(`✓ Email resent successfully to ${original.recipientEmail}`);
+        showToast(`Email resent successfully to ${original.recipientEmail}`);
         loadEmailData();
       } else {
         showToast(`Resend failed: ${res.message || 'Error'}`, 'error');

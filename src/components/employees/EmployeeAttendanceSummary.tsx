@@ -21,6 +21,8 @@ export const EmployeeAttendanceSummary: React.FC<EmployeeAttendanceSummaryProps>
   const navigate = useNavigate();
   const { attendanceSummary } = employee;
 
+  const currentMonthYear = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
   return (
     <div className="space-y-5">
       {/* Top Banner with Direct Link */}
@@ -32,7 +34,7 @@ export const EmployeeAttendanceSummary: React.FC<EmployeeAttendanceSummaryProps>
           <div>
             <div className="flex items-center gap-2">
               <span className="text-xs font-semibold text-slate-900 dark:text-white">
-                September 2026 Attendance Summary
+                {currentMonthYear} Attendance Summary
               </span>
               <span className="px-2 py-0.5 rounded-full text-xs font-mono font-bold bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300">
                 {attendanceSummary.presentDays} / {attendanceSummary.workingDays} Days Present

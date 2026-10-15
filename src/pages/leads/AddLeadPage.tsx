@@ -19,6 +19,8 @@ import {
   RotateCcw,
   Trash2,
   FileCheck,
+  Flame,
+  Zap,
 } from 'lucide-react';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { DuplicateLeadAlert } from '../../components/leads/DuplicateLeadAlert';
@@ -27,6 +29,7 @@ import { Lead, LeadSource, TechnoKraftService, LeadStatus, LeadPriority } from '
 import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
 import { EmployeeSelect } from '../../components/common/EmployeeSelect';
+import { findCachedEmployee } from '../../services/employeeService';
 
 type TabKey = 'company' | 'contact' | 'classification' | 'requirement' | 'assignment';
 
@@ -585,7 +588,11 @@ export const AddLeadPage: React.FC = () => {
       priority,
       score: leadScore,
       assignedEmployeeName: assignedEmployee,
+      assignedEmployeeEmail: (authUser && authUser.name === assignedEmployee ? authUser.email : findCachedEmployee(assignedEmployee)?.email) || '',
+      assignedEmployeeRole: (authUser && authUser.name === assignedEmployee ? authUser.role : findCachedEmployee(assignedEmployee)?.role) || 'Sales Executive',
+      assignedEmployeeAvatar: (authUser && authUser.name === assignedEmployee ? (authUser.profilePhoto || authUser.avatar) : (findCachedEmployee(assignedEmployee)?.profilePhoto || findCachedEmployee(assignedEmployee)?.avatar)) || '',
       assignedBAName: assignedBA,
+      assignedBARole: (findCachedEmployee(assignedBA)?.role) || 'Business Analyst',
       createdByName: editingLead?.createdBy?.name || authUser?.name || 'System Admin',
       createdByEmail: editingLead?.createdBy?.email || authUser?.email || '',
       createdByRole: editingLead?.createdBy?.role || authUser?.accessRole || authUser?.role || 'Sales Manager',
@@ -1215,8 +1222,20 @@ export const AddLeadPage: React.FC = () => {
                   <label className="font-semibold text-slate-700 dark:text-slate-300">
                     Initial Lead Score: <strong className="text-[#5B4DB7] dark:text-purple-400">{leadScore} / 100</strong>
                   </label>
-                  <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                    {leadScore >= 81 ? '🔥 Very Hot' : leadScore >= 61 ? '⚡ Hot' : 'Warm'}
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1 font-medium">
+                    {leadScore >= 81 ? (
+                      <>
+                        <Flame className="w-3.5 h-3.5 text-amber-500" />
+                        <span>Very Hot</span>
+                      </>
+                    ) : leadScore >= 61 ? (
+                      <>
+                        <Zap className="w-3.5 h-3.5 text-yellow-500" />
+                        <span>Hot</span>
+                      </>
+                    ) : (
+                      <span>Warm</span>
+                    )}
                   </span>
                 </div>
                 <input

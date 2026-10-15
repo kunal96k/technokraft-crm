@@ -228,7 +228,7 @@ export async function fetchEmailTemplates(): Promise<EmailTemplate[]> {
 }
 
 /**
- * Create custom email template in database
+ * Create custom email template in database (max 25 templates enforced by backend)
  */
 export async function createEmailTemplate(tpl: Partial<EmailTemplate>): Promise<EmailTemplate | null> {
   try {
@@ -241,11 +241,64 @@ export async function createEmailTemplate(tpl: Partial<EmailTemplate>): Promise<
       body: JSON.stringify(tpl),
     });
 
-    if (!res.ok) return null;
+    if (!res.ok) {
+      let errMsg = `HTTP ${res.status}`;
+      try { const err = await res.json(); if (err.message) errMsg = err.message; } catch {}
+      throw new Error(errMsg);
+    }
     return await res.json();
   } catch (error) {
     console.error('[EmailService] Failed to create template:', error);
-    return null;
+    throw error;
+  }
+}
+
+/**
+ * Update an existing email template (partial or full update supported by backend)
+ */
+export async function updateEmailTemplate(id: string | number, tpl: Partial<EmailTemplate>): Promise<EmailTemplate | null> {
+  try {
+    const res = await authFetch(`${TEMPLATES_API_URL}/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify(tpl),
+    });
+
+    if (!res.ok) {
+      let errMsg = `HTTP ${res.status}`;
+      try { const err = await res.json(); if (err.message) errMsg = err.message; } catch {}
+      throw new Error(errMsg);
+    }
+    return await res.json();
+  } catch (error) {
+    console.error(`[EmailService] Failed to update template ${id}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Permanently delete an email template (works for default and custom templates)
+ */
+export async function deleteEmailTemplate(id: string | number): Promise<boolean> {
+  try {
+    const res = await authFetch(`${TEMPLATES_API_URL}/${id}`, {
+      method: 'DELETE',
+      headers: { Accept: 'application/json' },
+    });
+
+    if (!res.ok) {
+      let errMsg = `HTTP ${res.status}`;
+      try { const err = await res.json(); if (err.message) errMsg = err.message; } catch {}
+      throw new Error(errMsg);
+    }
+    const data = await res.json();
+    return data.success === true;
+  } catch (error) {
+    console.error(`[EmailService] Failed to delete template ${id}:`, error);
+    throw error;
   }
 }
 

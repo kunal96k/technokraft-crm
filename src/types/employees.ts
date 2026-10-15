@@ -172,6 +172,7 @@ export interface Employee {
   // CRM Access & Login Credentials configuration
   crmAccess: boolean;
   accessRole: CrmAccessRole;
+  isSuperAdmin?: boolean;
   allowedModules?: string[]; // IDs of sidebar navigation modules granted to this employee
   username?: string;
   password?: string;
@@ -179,6 +180,7 @@ export interface Employee {
   forcePasswordReset?: boolean;
   isAccountLocked?: boolean;
   lastLoginAt?: string;
+  lastLogoutAt?: string;
 
   // Live / Today status
   workStatus: WorkStatus;
@@ -232,6 +234,7 @@ export interface DailyAttendanceRecord {
   status: AttendanceStatus;
   currentActivity: string;
   workStatus: WorkStatus;
+  isSuperAdmin?: boolean;
 }
 
 export interface EmployeeFiltersState {

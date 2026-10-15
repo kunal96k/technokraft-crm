@@ -23,8 +23,9 @@ import {
   Sparkles,
   Info
 } from 'lucide-react';
-import { bulkImportLeads, checkDuplicateLead, CreateLeadPayload, BulkImportResponse } from '../../services/leadService';
+import { bulkImportLeads, CreateLeadPayload, BulkImportResponse } from '../../services/leadService';
 import { useAuth } from '../../context/AuthContext';
+import { findCachedEmployee } from '../../services/employeeService';
 import { PageHeader } from '../../components/layout/PageHeader';
 
 interface ColumnMap {
@@ -304,8 +305,6 @@ export const BulkImportPage: React.FC = () => {
     });
 
     const evaluated: EvaluatedRecord[] = [];
-    const seenEmailsInFile = new Set<string>();
-    const seenCompaniesInFile = new Set<string>();
 
     for (const record of parsedRows) {
       const getVal = (fieldKey: string) => {
@@ -377,20 +376,7 @@ export const BulkImportPage: React.FC = () => {
         continue;
       }
 
-      // 3. Check for In-File Duplicates
-      const normEmail = email.toLowerCase();
-      const normCompany = companyName.toLowerCase();
-      if ((normEmail && seenEmailsInFile.has(normEmail)) || seenCompaniesInFile.has(normCompany)) {
-        evaluated.push({
-          rowNum: record.rowNum,
-          status: 'DUPLICATE',
-          reason: `Duplicate row in current spreadsheet (${email || companyName})`,
-          display: displayObj,
-        });
-        continue;
-      }
-
-      // 4. Construct valid lead payload
+      // 3. Construct valid lead payload (Duplicate check removed - one client can inquire multiple times)
       const payload: CreateLeadPayload = {
         company: {
           name: companyName,
@@ -422,7 +408,11 @@ export const BulkImportPage: React.FC = () => {
         priority: priority,
         score: score,
         assignedEmployeeName: assignedEmployeeName || undefined,
+        assignedEmployeeEmail: (assignedEmployeeName ? (authUser && authUser.name === assignedEmployeeName ? authUser.email : findCachedEmployee(assignedEmployeeName)?.email) : undefined) || undefined,
+        assignedEmployeeRole: (assignedEmployeeName ? (authUser && authUser.name === assignedEmployeeName ? authUser.role : findCachedEmployee(assignedEmployeeName)?.role) : undefined) || undefined,
+        assignedEmployeeAvatar: (assignedEmployeeName ? (authUser && authUser.name === assignedEmployeeName ? (authUser.profilePhoto || authUser.avatar) : (findCachedEmployee(assignedEmployeeName)?.profilePhoto || findCachedEmployee(assignedEmployeeName)?.avatar)) : undefined) || undefined,
         assignedBAName: assignedBAName || undefined,
+        assignedBARole: (assignedBAName ? findCachedEmployee(assignedBAName)?.role : undefined) || undefined,
         createdByName: authUser?.name || 'Bulk Import Specialist',
         createdByEmail: authUser?.email || '',
         createdByRole: authUser?.accessRole || authUser?.role || 'Admin',
@@ -431,9 +421,6 @@ export const BulkImportPage: React.FC = () => {
         updatedByRole: authUser?.accessRole || authUser?.role || 'Admin',
       };
 
-      if (normEmail) seenEmailsInFile.add(normEmail);
-      seenCompaniesInFile.add(normCompany);
-
       evaluated.push({
         rowNum: record.rowNum,
         status: 'VALID',
@@ -441,19 +428,6 @@ export const BulkImportPage: React.FC = () => {
         payload,
         display: displayObj,
       });
-    }
-
-    // Optional quick backend duplicate check for first 5 valid records
-    for (const item of evaluated) {
-      if (item.status === 'VALID' && item.payload) {
-        try {
-          const dupRes = await checkDuplicateLead(item.payload.contact.email, item.payload.company.name);
-          if (dupRes.isDuplicate && dupRes.matchedLeads?.length > 0) {
-            item.status = 'DUPLICATE';
-            item.reason = `Matches existing CRM Lead (${dupRes.matchedLeads[0].leadCode || dupRes.matchedLeads[0].companyName})`;
-          }
-        } catch {}
-      }
     }
 
     setEvaluatedRecords(evaluated);
@@ -1052,17 +1026,20 @@ export const BulkImportPage: React.FC = () => {
                       <td className="py-2.5 px-3">
                         {rec.status === 'VALID' && (
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                            Valid ✓
+                            <Check className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                            <span>Valid</span>
                           </span>
                         )}
                         {rec.status === 'DUPLICATE' && (
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
-                            Duplicate ⚠
+                            <AlertTriangle className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+                            <span>Duplicate</span>
                           </span>
                         )}
                         {rec.status === 'INVALID' && (
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800">
-                            Invalid ✕
+                            <XCircle className="w-3 h-3 text-rose-600 dark:text-rose-400" />
+                            <span>Invalid</span>
                           </span>
                         )}
                       </td>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Clock, AlertCircle, CheckCircle2, UserCheck, ChevronRight } from 'lucide-react';
 import { EmployeePerformanceRecord } from '../../types/reports';
+import { EmployeeAvatar } from '../common/EmployeeAvatar';
 
 interface ActivityStatusProps {
   employees: EmployeePerformanceRecord[];
@@ -48,9 +49,12 @@ export const ActivityStatus: React.FC<ActivityStatusProps> = ({
               >
                 <td className="py-2.5 px-3">
                   <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200 flex items-center justify-center text-[10px] font-bold">
-                      {emp.avatar}
-                    </div>
+                    <EmployeeAvatar
+                      name={emp.name}
+                      avatar={emp.avatar}
+                      profilePhoto={emp.profilePhoto}
+                      size="sm"
+                    />
                     <div>
                       <div className="font-semibold text-slate-900 dark:text-white">{emp.name}</div>
                       <div className="text-[10px] text-slate-400 dark:text-slate-500">{emp.role}</div>

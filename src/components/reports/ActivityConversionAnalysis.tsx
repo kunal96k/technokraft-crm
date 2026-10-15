@@ -1,19 +1,23 @@
 import React from 'react';
-import { TrendingUp, ArrowRight } from 'lucide-react';
-import { EmployeePerformanceRecord } from '../../types/reports';
+import { TrendingUp } from 'lucide-react';
+import { EmployeePerformanceRecord, ActivityConversion } from '../../types/reports';
+import { EmployeeAvatar } from '../common/EmployeeAvatar';
 
 interface ActivityConversionAnalysisProps {
-  employees: EmployeePerformanceRecord[];
+  employees?: EmployeePerformanceRecord[];
+  conversions?: ActivityConversion[];
   onSelectEmployee?: (emp: EmployeePerformanceRecord) => void;
 }
 
 export const ActivityConversionAnalysis: React.FC<ActivityConversionAnalysisProps> = ({
-  employees,
+  employees = [],
+  conversions,
   onSelectEmployee,
 }) => {
-  if (!employees || employees.length === 0) {
+  if ((!employees || employees.length === 0) && (!conversions || conversions.length === 0)) {
     return null;
   }
+
   return (
     <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 sm:p-5 shadow-2xs space-y-4">
       <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
@@ -57,9 +61,12 @@ export const ActivityConversionAnalysis: React.FC<ActivityConversionAnalysisProp
                 >
                   <td className="py-2.5 px-3 font-semibold text-slate-900 dark:text-white">
                     <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-[#5B4DB7] text-white flex items-center justify-center text-[10px] font-bold">
-                        {emp.avatar}
-                      </div>
+                      <EmployeeAvatar
+                        name={emp.name}
+                        avatar={emp.avatar}
+                        profilePhoto={emp.profilePhoto}
+                        size="sm"
+                      />
                       <span>{emp.name}</span>
                     </div>
                   </td>

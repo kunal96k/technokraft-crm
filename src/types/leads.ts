@@ -76,6 +76,7 @@ export interface LeadActivity {
   time: string;
   employeeName: string;
   employeeAvatar?: string;
+  employeeProfilePhoto?: string;
   activityType: 'CALL' | 'EMAIL' | 'WHATSAPP' | 'STATUS_CHANGE' | 'FOLLOWUP' | 'NOTE' | 'CREATED';
   title: string;
   result?: string;
@@ -107,10 +108,13 @@ export interface Lead {
     avatar: string;
     role: string;
     email: string;
+    profilePhoto?: string;
   };
   assignedBA?: {
     name: string;
     role: string;
+    avatar?: string;
+    profilePhoto?: string;
   };
   createdBy?: {
     name: string;
@@ -118,6 +122,8 @@ export interface Lead {
     role?: string;
     date: string;
     timestamp?: string;
+    avatar?: string;
+    profilePhoto?: string;
   };
   updatedBy?: {
     name: string;
@@ -125,6 +131,8 @@ export interface Lead {
     role?: string;
     date: string;
     timestamp?: string;
+    avatar?: string;
+    profilePhoto?: string;
   };
   createdAt?: string;
   updatedAt?: string;

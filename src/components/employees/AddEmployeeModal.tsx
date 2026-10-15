@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   X,
   User,
@@ -13,6 +13,7 @@ import {
   Sparkles,
   Lock,
   Unlock,
+  Loader2,
 } from 'lucide-react';
 import {
   Employee,
@@ -25,6 +26,7 @@ import {
   EMPLOYEE_ROLES,
 } from '../../types/employees';
 import { EmployeeSelect } from '../common/EmployeeSelect';
+import { isSuperAdminRecord } from '../../utils/securityUtils';
 
 export const SIDEBAR_MODULE_OPTIONS = [
   { id: 'dashboard', label: 'CRM Dashboard', desc: 'KPI metrics, live team workload & conversion charts', defaultFor: ['Admin', 'Manager', 'Sales Executive', 'Business Analyst', 'Employee'] },
@@ -44,9 +46,93 @@ export const getDefaultModulesForRole = (role: CrmAccessRole): string[] => {
 interface AddEmployeeModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (employee: Partial<Employee>) => void;
+  onSave: (employee: Partial<Employee>) => void | Promise<void>;
   initialEmployee?: Employee | null;
 }
+
+const cleanDateForInput = (d?: string | null): string => {
+  if (!d) return '';
+  const match = String(d).match(/^\d{4}-\d{2}-\d{2}/);
+  return match ? match[0] : '';
+};
+
+const getInitialFormValues = (emp?: Employee | null) => {
+  if (!emp) {
+    return {
+      firstName: '',
+      lastName: '',
+      phone: '+91 ',
+      personalEmail: '',
+      gender: 'Male' as const,
+      dob: '',
+      employeeCode: `EMP-00${Math.floor(Math.random() * 80 + 30)}`,
+      companyEmail: '',
+      department: 'Sales',
+      role: 'Sales Executive',
+      reportingManager: '',
+      employmentType: 'Full Time' as EmploymentType,
+      joiningDate: new Date().toISOString().split('T')[0],
+      status: 'Active' as EmployeeStatus,
+      crmAccess: true,
+      accessRole: 'Sales Executive' as CrmAccessRole,
+      allowedModules: getDefaultModulesForRole('Sales Executive'),
+      username: '',
+      forcePasswordReset: true,
+      isAccountLocked: false,
+      monthlyRevenue: 800000,
+      monthlyLeads: 40,
+      monthlyCalls: 80,
+      monthlyFollowUps: 35,
+      monthlyProposals: 6,
+      monthlyWonDeals: 3,
+    };
+  }
+
+  // Name splitting fallback if firstName/lastName were not stored individually
+  let fName = emp.firstName || '';
+  let lName = emp.lastName || '';
+  if (!fName && !lName && emp.name) {
+    const parts = emp.name.trim().split(/\s+/);
+    fName = parts[0] || '';
+    lName = parts.slice(1).join(' ') || '';
+  }
+
+  const cleanDob = cleanDateForInput(emp.dateOfBirth);
+  const cleanJoinDate = cleanDateForInput(emp.joiningDate) || new Date().toISOString().split('T')[0];
+  const empAccessRole = (emp.accessRole || (emp.role as any) || 'Employee') as CrmAccessRole;
+
+  return {
+    firstName: fName,
+    lastName: lName,
+    phone: emp.phone || '+91 ',
+    personalEmail: emp.personalEmail || '',
+    gender: (emp.gender || 'Male') as 'Male' | 'Female' | 'Other',
+    dob: cleanDob,
+    employeeCode: emp.employeeCode || '',
+    companyEmail: emp.email || '',
+    department: emp.department || 'Sales',
+    role: emp.role || 'Sales Executive',
+    reportingManager: emp.reportingManager || '',
+    employmentType: (emp.employmentType || 'Full Time') as EmploymentType,
+    joiningDate: cleanJoinDate,
+    status: (emp.status || 'Active') as EmployeeStatus,
+    crmAccess: emp.crmAccess ?? true,
+    accessRole: empAccessRole,
+    allowedModules:
+      emp.allowedModules && emp.allowedModules.length > 0
+        ? emp.allowedModules
+        : getDefaultModulesForRole(empAccessRole),
+    username: emp.username || (emp.email ? emp.email.split('@')[0] : ''),
+    forcePasswordReset: emp.forcePasswordReset ?? false,
+    isAccountLocked: emp.isAccountLocked ?? false,
+    monthlyRevenue: emp.targets?.monthlyRevenueTarget ?? 800000,
+    monthlyLeads: emp.targets?.monthlyLeadTarget ?? 40,
+    monthlyCalls: emp.targets?.monthlyCallTarget ?? 80,
+    monthlyFollowUps: emp.targets?.monthlyFollowUpTarget ?? 35,
+    monthlyProposals: emp.targets?.monthlyProposalTarget ?? 6,
+    monthlyWonDeals: emp.targets?.monthlyWonDealTarget ?? 3,
+  };
+};
 
 export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
   isOpen,
@@ -55,81 +141,104 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
   initialEmployee,
 }) => {
   const isEditing = !!initialEmployee;
+  const initialValues = useMemo(() => getInitialFormValues(initialEmployee), [initialEmployee]);
 
   // Form State
-  const [firstName, setFirstName] = useState(initialEmployee?.firstName || '');
-  const [lastName, setLastName] = useState(initialEmployee?.lastName || '');
-  const [phone, setPhone] = useState(initialEmployee?.phone || '+91 ');
-  const [personalEmail, setPersonalEmail] = useState(initialEmployee?.personalEmail || '');
-  const [gender, setGender] = useState<'Male' | 'Female' | 'Other'>(
-    initialEmployee?.gender || 'Male'
-  );
-  const [dob, setDob] = useState(initialEmployee?.dateOfBirth || '');
+  const [firstName, setFirstName] = useState(initialValues.firstName);
+  const [lastName, setLastName] = useState(initialValues.lastName);
+  const [phone, setPhone] = useState(initialValues.phone);
+  const [personalEmail, setPersonalEmail] = useState(initialValues.personalEmail);
+  const [gender, setGender] = useState<'Male' | 'Female' | 'Other'>(initialValues.gender);
+  const [dob, setDob] = useState(initialValues.dob);
 
   // Company Info
-  const [employeeCode, setEmployeeCode] = useState(
-    initialEmployee?.employeeCode || `EMP-00${Math.floor(Math.random() * 80 + 30)}`
-  );
-  const [companyEmail, setCompanyEmail] = useState(initialEmployee?.email || '');
-  const [department, setDepartment] = useState<DepartmentType | string>(
-    initialEmployee?.department || 'Sales'
-  );
-  const [role, setRole] = useState<EmployeeRole | string>(
-    initialEmployee?.role || 'Sales Executive'
-  );
-  const [reportingManager, setReportingManager] = useState(
-    initialEmployee?.reportingManager || ''
-  );
-  const [employmentType, setEmploymentType] = useState<EmploymentType>(
-    initialEmployee?.employmentType || 'Full Time'
-  );
-  const [joiningDate, setJoiningDate] = useState(
-    initialEmployee?.joiningDate || new Date().toISOString().split('T')[0]
-  );
-  const [status, setStatus] = useState<EmployeeStatus>(
-    initialEmployee?.status || 'Active'
-  );
+  const [employeeCode, setEmployeeCode] = useState(initialValues.employeeCode);
+  const [companyEmail, setCompanyEmail] = useState(initialValues.companyEmail);
+  const [department, setDepartment] = useState<DepartmentType | string>(initialValues.department);
+  const [role, setRole] = useState<EmployeeRole | string>(initialValues.role);
+  const [reportingManager, setReportingManager] = useState(initialValues.reportingManager);
+  const [employmentType, setEmploymentType] = useState<EmploymentType>(initialValues.employmentType);
+  const [joiningDate, setJoiningDate] = useState(initialValues.joiningDate);
+  const [status, setStatus] = useState<EmployeeStatus>(initialValues.status);
 
   // CRM Access & Credentials
-  const [crmAccess, setCrmAccess] = useState(initialEmployee?.crmAccess ?? true);
-  const [accessRole, setAccessRole] = useState<CrmAccessRole>(
-    initialEmployee?.accessRole || 'Sales Executive'
-  );
-  const [allowedModules, setAllowedModules] = useState<string[]>(
-    initialEmployee?.allowedModules || getDefaultModulesForRole(initialEmployee?.accessRole || 'Sales Executive')
-  );
-  const [username, setUsername] = useState(initialEmployee?.username || '');
+  const [crmAccess, setCrmAccess] = useState(initialValues.crmAccess);
+  const [accessRole, setAccessRole] = useState<CrmAccessRole>(initialValues.accessRole);
+  const [allowedModules, setAllowedModules] = useState<string[]>(initialValues.allowedModules);
+  const [username, setUsername] = useState(initialValues.username);
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [forcePasswordReset, setForcePasswordReset] = useState(
-    initialEmployee?.forcePasswordReset ?? true
-  );
-  const [isAccountLocked, setIsAccountLocked] = useState(
-    initialEmployee?.isAccountLocked ?? false
-  );
+  const [forcePasswordReset, setForcePasswordReset] = useState(initialValues.forcePasswordReset);
+  const [isAccountLocked, setIsAccountLocked] = useState(initialValues.isAccountLocked);
 
   // Target Settings
-  const [monthlyRevenue, setMonthlyRevenue] = useState(
-    initialEmployee?.targets?.monthlyRevenueTarget || 800000
-  );
-  const [monthlyLeads, setMonthlyLeads] = useState(
-    initialEmployee?.targets?.monthlyLeadTarget || 40
-  );
-  const [monthlyCalls, setMonthlyCalls] = useState(
-    initialEmployee?.targets?.monthlyCallTarget || 80
-  );
-  const [monthlyFollowUps, setMonthlyFollowUps] = useState(
-    initialEmployee?.targets?.monthlyFollowUpTarget || 35
-  );
-  const [monthlyProposals, setMonthlyProposals] = useState(
-    initialEmployee?.targets?.monthlyProposalTarget || 6
-  );
-  const [monthlyWonDeals, setMonthlyWonDeals] = useState(
-    initialEmployee?.targets?.monthlyWonDealTarget || 3
-  );
+  const [monthlyRevenue, setMonthlyRevenue] = useState(initialValues.monthlyRevenue);
+  const [monthlyLeads, setMonthlyLeads] = useState(initialValues.monthlyLeads);
+  const [monthlyCalls, setMonthlyCalls] = useState(initialValues.monthlyCalls);
+  const [monthlyFollowUps, setMonthlyFollowUps] = useState(initialValues.monthlyFollowUps);
+  const [monthlyProposals, setMonthlyProposals] = useState(initialValues.monthlyProposals);
+  const [monthlyWonDeals, setMonthlyWonDeals] = useState(initialValues.monthlyWonDeals);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Synchronize state every time initialEmployee changes or modal is opened
+  useEffect(() => {
+    if (!isOpen) return;
+    const values = getInitialFormValues(initialEmployee);
+    setFirstName(values.firstName);
+    setLastName(values.lastName);
+    setPhone(values.phone);
+    setPersonalEmail(values.personalEmail);
+    setGender(values.gender);
+    setDob(values.dob);
+    setEmployeeCode(values.employeeCode);
+    setCompanyEmail(values.companyEmail);
+    setDepartment(values.department);
+    setRole(values.role);
+    setReportingManager(values.reportingManager);
+    setEmploymentType(values.employmentType);
+    setJoiningDate(values.joiningDate);
+    setStatus(values.status);
+    setCrmAccess(values.crmAccess);
+    setAccessRole(values.accessRole);
+    setAllowedModules(values.allowedModules);
+    setUsername(values.username);
+    setPassword('');
+    setShowPassword(false);
+    setForcePasswordReset(values.forcePasswordReset);
+    setIsAccountLocked(values.isAccountLocked);
+    setMonthlyRevenue(values.monthlyRevenue);
+    setMonthlyLeads(values.monthlyLeads);
+    setMonthlyCalls(values.monthlyCalls);
+    setMonthlyFollowUps(values.monthlyFollowUps);
+    setMonthlyProposals(values.monthlyProposals);
+    setMonthlyWonDeals(values.monthlyWonDeals);
+    setIsSubmitting(false);
+  }, [initialEmployee, isOpen]);
+
+  // Dynamic dropdown options so current custom values are never lost
+  const departmentOptions = useMemo(() => {
+    return Array.from(
+      new Set([
+        ...DEPARTMENTS,
+        ...(department ? [department] : []),
+        ...(initialEmployee?.department ? [initialEmployee.department] : []),
+      ])
+    );
+  }, [department, initialEmployee?.department]);
+
+  const roleOptions = useMemo(() => {
+    return Array.from(
+      new Set([
+        ...EMPLOYEE_ROLES,
+        ...(role ? [role] : []),
+        ...(initialEmployee?.role ? [initialEmployee.role] : []),
+      ])
+    );
+  }, [role, initialEmployee?.role]);
 
   // Auto-generate company email & username if first & last name typed
   const handleNameBlur = () => {
+    if (isEditing) return; // Do not overwrite existing employee credentials on blur
     const cleanFirst = firstName.trim().toLowerCase();
     const cleanLast = lastName.trim().toLowerCase();
     if (cleanFirst && cleanLast) {
@@ -165,23 +274,24 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
 
-    const fullName = `${firstName.trim()} ${lastName.trim()}`;
+    const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
     const initials = `${firstName[0] || ''}${lastName[0] || ''}`.toUpperCase();
 
     const employeeData: Partial<Employee> = {
-      firstName,
-      lastName,
-      name: fullName,
-      avatar: initials,
-      email: companyEmail,
-      personalEmail,
-      phone,
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      name: fullName || initialEmployee?.name || 'Employee',
+      avatar: initials || initialEmployee?.avatar || 'EM',
+      email: companyEmail.trim().toLowerCase(),
+      personalEmail: personalEmail.trim(),
+      phone: phone.trim(),
       gender,
-      dateOfBirth: dob,
-      employeeCode,
+      dateOfBirth: dob || undefined,
+      employeeCode: employeeCode.trim(),
       department,
       role,
       reportingManager: typeof reportingManager === 'string' ? reportingManager : (reportingManager as any)?.target?.value || '',
@@ -197,12 +307,12 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
       isAccountLocked,
       targets: {
         period: 'Monthly',
-        monthlyRevenueTarget: Number(monthlyRevenue),
-        monthlyLeadTarget: Number(monthlyLeads),
-        monthlyCallTarget: Number(monthlyCalls),
-        monthlyFollowUpTarget: Number(monthlyFollowUps),
-        monthlyProposalTarget: Number(monthlyProposals),
-        monthlyWonDealTarget: Number(monthlyWonDeals),
+        monthlyRevenueTarget: Number(monthlyRevenue) || 0,
+        monthlyLeadTarget: Number(monthlyLeads) || 0,
+        monthlyCallTarget: Number(monthlyCalls) || 0,
+        monthlyFollowUpTarget: Number(monthlyFollowUps) || 0,
+        monthlyProposalTarget: Number(monthlyProposals) || 0,
+        monthlyWonDealTarget: Number(monthlyWonDeals) || 0,
         achievedRevenue: initialEmployee?.targets?.achievedRevenue || 0,
         achievedLeads: initialEmployee?.targets?.achievedLeads || 0,
         achievedCalls: initialEmployee?.targets?.achievedCalls || 0,
@@ -214,12 +324,18 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
       },
     };
 
-    onSave(employeeData);
-    onClose();
+    try {
+      setIsSubmitting(true);
+      await onSave(employeeData);
+    } catch (err) {
+      console.error('[AddEmployeeModal] Submit error:', err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+    <div className="fixed inset-0 z-[70] flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
       <div className="relative w-full max-w-3xl rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden my-auto max-h-[90vh] flex flex-col">
         {/* Modal Header */}
         <div className="p-4 sm:p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
@@ -229,14 +345,14 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               {isEditing
-                ? `Update company information, CRM permissions and monthly targets for ${initialEmployee?.name}`
+                ? `Update company information, CRM permissions and monthly targets for ${initialEmployee?.name || (firstName ? `${firstName} ${lastName}`.trim() : 'employee')}`
                 : 'Onboard a new employee to TechnoKraft CRM system and configure initial quotas'}
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -383,7 +499,7 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
                   onChange={(e) => setDepartment(e.target.value as any)}
                   className="w-full text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500/50 outline-none"
                 >
-                  {DEPARTMENTS.map((dept) => (
+                  {departmentOptions.map((dept) => (
                     <option key={dept} value={dept}>
                       {dept}
                     </option>
@@ -400,7 +516,7 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
                   onChange={(e) => setRole(e.target.value as any)}
                   className="w-full text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500/50 outline-none"
                 >
-                  {EMPLOYEE_ROLES.map((r) => (
+                  {roleOptions.map((r) => (
                     <option key={r} value={r}>
                       {r}
                     </option>
@@ -509,18 +625,28 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
                   </label>
                   <select
                     value={accessRole}
+                    disabled={isSuperAdminRecord(initialEmployee)}
                     onChange={(e) => {
                       const newRole = e.target.value as CrmAccessRole;
                       setAccessRole(newRole);
                       setAllowedModules(getDefaultModulesForRole(newRole));
                     }}
-                    className="w-full text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500/50 outline-none"
+                    className="w-full text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500/50 outline-none disabled:opacity-60 disabled:cursor-not-allowed"
                   >
-                    <option value="Sales Executive">Sales Executive</option>
-                    <option value="Business Analyst">Business Analyst</option>
-                    <option value="Manager">Manager</option>
-                    <option value="Admin">Admin</option>
-                    <option value="Employee">Employee (Read Only)</option>
+                    {isSuperAdminRecord(initialEmployee) ? (
+                      <option value="Super Admin">Super Admin (Primary System Role)</option>
+                    ) : (
+                      <>
+                        <option value="Employee">Employee (Standard Access)</option>
+                        <option value="Sales Executive">Sales Executive</option>
+                        <option value="Business Analyst">Business Analyst</option>
+                        <option value="Manager">Manager</option>
+                        <option value="Admin">Admin</option>
+                        {!['Super Admin', 'Employee', 'Sales Executive', 'Business Analyst', 'Manager', 'Admin'].includes(accessRole) && (
+                          <option value={accessRole}>{accessRole}</option>
+                        )}
+                      </>
+                    )}
                   </select>
                 </div>
 
@@ -812,10 +938,20 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
           <button
             type="submit"
             form="add-employee-form"
-            className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold shadow-sm hover:shadow transition-all min-h-[42px] flex items-center gap-1.5 cursor-pointer"
+            disabled={isSubmitting}
+            className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold shadow-sm hover:shadow transition-all min-h-[42px] flex items-center gap-1.5 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            <CheckCircle2 className="w-4 h-4" />
-            <span>{isEditing ? 'Save Employee Changes' : 'Create Employee Profile'}</span>
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Saving...</span>
+              </>
+            ) : (
+              <>
+                <CheckCircle2 className="w-4 h-4" />
+                <span>{isEditing ? 'Save Employee Changes' : 'Create Employee Profile'}</span>
+              </>
+            )}
           </button>
         </div>
       </div>

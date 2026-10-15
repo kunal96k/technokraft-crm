@@ -14,7 +14,6 @@ import {
   Clock,
   CheckCircle2,
   Calendar,
-  DollarSign,
   Layers,
   Send,
   Download,
@@ -56,11 +55,14 @@ import {
   downloadAttachmentFile,
 } from '../../services/leadService';
 import { getInitials, getAvatarColor } from '../../utils/avatarUtils';
+import { EmployeeAvatar } from '../../components/common/EmployeeAvatar';
+import { useAuth } from '../../context/AuthContext';
 
 export const LeadDetailsPage: React.FC = () => {
   const { leadId } = useParams<{ leadId: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user: authUser } = useAuth();
 
   const [lead, setLead] = useState<Lead | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -219,7 +221,9 @@ export const LeadDetailsPage: React.FC = () => {
         activityType: 'NOTE',
         title: 'Quick Note',
         notes: newNote.trim(),
-        employeeName: lead.assignedEmployee?.name || 'CRM User',
+        employeeName: authUser?.name || lead.assignedEmployee?.name || 'CRM User',
+        employeeAvatar: authUser?.avatar,
+        employeeProfilePhoto: authUser?.profilePhoto,
       });
 
       if (updated) {
@@ -329,8 +333,9 @@ export const LeadDetailsPage: React.FC = () => {
           title: `${callTypeLabel} - ${newCall.result}`,
           result: newCall.result,
           notes: newCall.notes || `Call with ${newCall.contactName} (${newCall.contactPhone})`,
-          employeeName: newCall.employeeName || lead.assignedEmployee?.name || 'Current User',
-          employeeAvatar: newCall.employeeAvatar,
+          employeeName: newCall.employeeName || authUser?.name || lead.assignedEmployee?.name || 'Current User',
+          employeeAvatar: newCall.employeeAvatar || authUser?.avatar,
+          employeeProfilePhoto: authUser?.profilePhoto,
           date: newCall.date,
           time: newCall.time,
         });
@@ -461,18 +466,13 @@ export const LeadDetailsPage: React.FC = () => {
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-2 lg:pt-0">
             {/* Lead Owner Pill */}
             <div className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800">
-              {(() => {
-                const empName = lead.assignedEmployee?.name || 'Unassigned';
-                const initials = getInitials(empName, lead.assignedEmployee?.avatar);
-                const colors = getAvatarColor(empName);
-                return (
-                  <div
-                    className={`w-8 h-8 rounded-full ${colors.bg} ${colors.text} ${colors.border} border text-xs font-bold flex items-center justify-center shadow-2xs`}
-                  >
-                    {initials}
-                  </div>
-                );
-              })()}
+              <EmployeeAvatar
+                name={lead.assignedEmployee?.name || 'Unassigned'}
+                avatar={lead.assignedEmployee?.avatar}
+                profilePhoto={lead.assignedEmployee?.profilePhoto}
+                email={lead.assignedEmployee?.email}
+                size="md"
+              />
               <div className="text-left">
                 <p className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 leading-none">
                   Lead Owner
@@ -529,30 +529,56 @@ export const LeadDetailsPage: React.FC = () => {
         <div className="pt-4 grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs text-slate-600 dark:text-slate-300">
           <div>
             <span className="text-slate-400 dark:text-slate-500 block text-[11px]">Created By:</span>
-            <span className="font-semibold text-slate-800 dark:text-slate-200 block truncate" title={lead.createdBy?.name || 'System Admin'}>
-              {lead.createdBy?.name || 'System Admin'}
-            </span>
-            <span className="text-slate-400 dark:text-slate-500 text-[10px] font-mono block truncate">
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <EmployeeAvatar
+                name={lead.createdBy?.name || 'System Admin'}
+                avatar={lead.createdBy?.avatar}
+                profilePhoto={lead.createdBy?.profilePhoto}
+                email={lead.createdBy?.email}
+                size="xs"
+              />
+              <span className="font-semibold text-slate-800 dark:text-slate-200 block truncate" title={lead.createdBy?.name || 'System Admin'}>
+                {lead.createdBy?.name || 'System Admin'}
+              </span>
+            </div>
+            <span className="text-slate-400 dark:text-slate-500 text-[10px] font-mono block truncate mt-0.5">
               {lead.createdBy?.timestamp || lead.createdAt || lead.createdBy?.date || ''}
             </span>
           </div>
 
           <div>
             <span className="text-slate-400 dark:text-slate-500 block text-[11px]">Last Updated By:</span>
-            <span className="font-semibold text-purple-700 dark:text-purple-300 block truncate" title={lead.updatedBy?.name || lead.createdBy?.name || 'Admin'}>
-              {lead.updatedBy?.name || lead.createdBy?.name || 'Admin'}
-            </span>
-            <span className="text-slate-400 dark:text-slate-500 text-[10px] font-mono block truncate">
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <EmployeeAvatar
+                name={lead.updatedBy?.name || lead.createdBy?.name || 'Admin'}
+                avatar={lead.updatedBy?.avatar}
+                profilePhoto={lead.updatedBy?.profilePhoto}
+                email={lead.updatedBy?.email}
+                size="xs"
+              />
+              <span className="font-semibold text-purple-700 dark:text-purple-300 block truncate" title={lead.updatedBy?.name || lead.createdBy?.name || 'Admin'}>
+                {lead.updatedBy?.name || lead.createdBy?.name || 'Admin'}
+              </span>
+            </div>
+            <span className="text-slate-400 dark:text-slate-500 text-[10px] font-mono block truncate mt-0.5">
               {lead.updatedBy?.timestamp || lead.updatedAt || lead.updatedBy?.date || ''}
             </span>
           </div>
 
           <div>
             <span className="text-slate-400 dark:text-slate-500 block text-[11px]">Assigned BA:</span>
-            <span className="font-semibold text-slate-800 dark:text-slate-200 block truncate">
-              {lead.assignedBA ? lead.assignedBA.name : 'Unassigned'}
-            </span>
-            <span className="text-slate-400 dark:text-slate-500 text-[11px] block truncate">
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <EmployeeAvatar
+                name={lead.assignedBA?.name || 'Unassigned'}
+                avatar={lead.assignedBA?.avatar}
+                profilePhoto={lead.assignedBA?.profilePhoto}
+                size="xs"
+              />
+              <span className="font-semibold text-slate-800 dark:text-slate-200 block truncate">
+                {lead.assignedBA ? lead.assignedBA.name : 'Unassigned'}
+              </span>
+            </div>
+            <span className="text-slate-400 dark:text-slate-500 text-[11px] block truncate mt-0.5">
               {lead.assignedBA ? lead.assignedBA.role : 'Pending'}
             </span>
           </div>
@@ -926,10 +952,21 @@ export const LeadDetailsPage: React.FC = () => {
               {/* Created By Block */}
               <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-950/60 border border-slate-200/70 dark:border-slate-800 space-y-1">
                 <span className="text-[11px] font-semibold uppercase text-slate-400 dark:text-slate-500">Created By</span>
-                <p className="font-bold text-slate-900 dark:text-white text-sm">{lead.createdBy?.name || 'System Admin'}</p>
-                {lead.createdBy?.role && (
-                  <p className="text-[11px] text-purple-600 dark:text-purple-400 font-medium">{lead.createdBy.role}</p>
-                )}
+                <div className="flex items-center gap-2 pt-0.5">
+                  <EmployeeAvatar
+                    name={lead.createdBy?.name || 'System Admin'}
+                    avatar={lead.createdBy?.avatar}
+                    profilePhoto={lead.createdBy?.profilePhoto}
+                    email={lead.createdBy?.email}
+                    size="sm"
+                  />
+                  <div className="min-w-0">
+                    <p className="font-bold text-slate-900 dark:text-white text-sm leading-tight truncate">{lead.createdBy?.name || 'System Admin'}</p>
+                    {lead.createdBy?.role && (
+                      <p className="text-[11px] text-purple-600 dark:text-purple-400 font-medium truncate">{lead.createdBy.role}</p>
+                    )}
+                  </div>
+                </div>
                 {lead.createdBy?.email && (
                   <p className="text-[10px] text-slate-500 dark:text-slate-400 font-mono truncate">{lead.createdBy.email}</p>
                 )}
@@ -944,10 +981,21 @@ export const LeadDetailsPage: React.FC = () => {
               {/* Updated By Block */}
               <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-950/60 border border-slate-200/70 dark:border-slate-800 space-y-1">
                 <span className="text-[11px] font-semibold uppercase text-slate-400 dark:text-slate-500">Last Modified By</span>
-                <p className="font-bold text-slate-900 dark:text-white text-sm">{lead.updatedBy?.name || lead.createdBy?.name || 'Admin'}</p>
-                {lead.updatedBy?.role && (
-                  <p className="text-[11px] text-purple-600 dark:text-purple-400 font-medium">{lead.updatedBy.role}</p>
-                )}
+                <div className="flex items-center gap-2 pt-0.5">
+                  <EmployeeAvatar
+                    name={lead.updatedBy?.name || lead.createdBy?.name || 'Admin'}
+                    avatar={lead.updatedBy?.avatar}
+                    profilePhoto={lead.updatedBy?.profilePhoto}
+                    email={lead.updatedBy?.email}
+                    size="sm"
+                  />
+                  <div className="min-w-0">
+                    <p className="font-bold text-slate-900 dark:text-white text-sm leading-tight truncate">{lead.updatedBy?.name || lead.createdBy?.name || 'Admin'}</p>
+                    {lead.updatedBy?.role && (
+                      <p className="text-[11px] text-purple-600 dark:text-purple-400 font-medium truncate">{lead.updatedBy.role}</p>
+                    )}
+                  </div>
+                </div>
                 {lead.updatedBy?.email && (
                   <p className="text-[10px] text-slate-500 dark:text-slate-400 font-mono truncate">{lead.updatedBy.email}</p>
                 )}
@@ -962,8 +1010,19 @@ export const LeadDetailsPage: React.FC = () => {
               {/* Assigned Sales Employee */}
               <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-950/60 border border-slate-200/70 dark:border-slate-800 space-y-1">
                 <span className="text-[11px] font-semibold uppercase text-slate-400 dark:text-slate-500">Assigned Sales Executive</span>
-                <p className="font-bold text-slate-900 dark:text-white text-sm">{lead.assignedEmployee?.name || 'Unassigned'}</p>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400">{lead.assignedEmployee?.role || 'Sales Executive'}</p>
+                <div className="flex items-center gap-2 pt-0.5">
+                  <EmployeeAvatar
+                    name={lead.assignedEmployee?.name || 'Unassigned'}
+                    avatar={lead.assignedEmployee?.avatar}
+                    profilePhoto={lead.assignedEmployee?.profilePhoto}
+                    email={lead.assignedEmployee?.email}
+                    size="sm"
+                  />
+                  <div className="min-w-0">
+                    <p className="font-bold text-slate-900 dark:text-white text-sm leading-tight truncate">{lead.assignedEmployee?.name || 'Unassigned'}</p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">{lead.assignedEmployee?.role || 'Sales Executive'}</p>
+                  </div>
+                </div>
                 {lead.assignedEmployee?.email && (
                   <p className="text-[10px] text-slate-500 dark:text-slate-400 font-mono truncate">{lead.assignedEmployee.email}</p>
                 )}
@@ -972,8 +1031,18 @@ export const LeadDetailsPage: React.FC = () => {
               {/* Assigned BA */}
               <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-950/60 border border-slate-200/70 dark:border-slate-800 space-y-1">
                 <span className="text-[11px] font-semibold uppercase text-slate-400 dark:text-slate-500">Assigned Business Analyst</span>
-                <p className="font-bold text-slate-900 dark:text-white text-sm">{lead.assignedBA?.name || 'Unassigned'}</p>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400">{lead.assignedBA?.role || 'Pending Assignment'}</p>
+                <div className="flex items-center gap-2 pt-0.5">
+                  <EmployeeAvatar
+                    name={lead.assignedBA?.name || 'Unassigned'}
+                    avatar={lead.assignedBA?.avatar}
+                    profilePhoto={lead.assignedBA?.profilePhoto}
+                    size="sm"
+                  />
+                  <div className="min-w-0">
+                    <p className="font-bold text-slate-900 dark:text-white text-sm leading-tight truncate">{lead.assignedBA?.name || 'Unassigned'}</p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">{lead.assignedBA?.role || 'Pending Assignment'}</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -1009,7 +1078,18 @@ export const LeadDetailsPage: React.FC = () => {
           <div className="space-y-4">
             {/* Add Activity Quick Note Box */}
             <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl p-4 shadow-2xs">
-              <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200 mb-2">Log Quick Note / Call Outcome</h4>
+              <div className="flex items-center gap-2 mb-2.5">
+                <EmployeeAvatar
+                  name={authUser?.name || 'CRM User'}
+                  avatar={authUser?.avatar}
+                  profilePhoto={authUser?.profilePhoto}
+                  email={authUser?.email}
+                  size="xs"
+                />
+                <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                  Log Quick Note / Call Outcome {authUser?.name ? `as ${authUser.name}` : ''}
+                </h4>
+              </div>
               <div className="flex gap-2">
                 <input
                   type="text"
@@ -1137,9 +1217,16 @@ export const LeadDetailsPage: React.FC = () => {
                           </p>
 
                           <div className="pt-1.5 border-t border-slate-200/50 dark:border-slate-800/60 flex items-center justify-between text-[11px] text-slate-400 dark:text-slate-500">
-                            <span>
-                              Logged by: <strong className="text-slate-700 dark:text-slate-200">{act.employeeName || 'CRM User'}</strong>
-                            </span>
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-slate-400 dark:text-slate-500">Logged by:</span>
+                              <EmployeeAvatar
+                                name={act.employeeName || 'CRM User'}
+                                avatar={act.employeeAvatar}
+                                profilePhoto={act.employeeProfilePhoto}
+                                size="xs"
+                              />
+                              <strong className="text-slate-700 dark:text-slate-200">{act.employeeName || 'CRM User'}</strong>
+                            </div>
                             <span className="text-[#5B4DB7] dark:text-purple-400 font-semibold group-hover:underline flex items-center gap-1">
                               <span>View Full Note & Details</span>
                               <span>→</span>

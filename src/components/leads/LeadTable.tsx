@@ -6,7 +6,7 @@ import { LeadStatusBadge } from './LeadStatusBadge';
 import { LeadPriorityBadge } from './LeadPriorityBadge';
 import { LeadScoreBadge } from './LeadScoreBadge';
 import { LeadActionMenu } from './LeadActionMenu';
-import { getInitials, getAvatarColor } from '../../utils/avatarUtils';
+import { EmployeeAvatar } from '../common/EmployeeAvatar';
 
 interface LeadTableProps {
   leads: Lead[];
@@ -175,18 +175,13 @@ export const LeadTable: React.FC<LeadTableProps> = ({
                   <div className="flex flex-col gap-1 min-w-[130px] max-w-[180px]">
                     {/* Sales Representative */}
                     <div className="flex items-center gap-1.5" title={`Sales: ${lead.assignedEmployee?.name || 'Unassigned'}`}>
-                      {(() => {
-                        const empName = lead.assignedEmployee?.name || 'Unassigned';
-                        const initials = getInitials(empName, lead.assignedEmployee?.avatar);
-                        const avatarColors = getAvatarColor(empName);
-                        return (
-                          <div
-                            className={`w-5 h-5 rounded-full ${avatarColors.bg} ${avatarColors.text} ${avatarColors.border} border text-[9px] font-bold flex items-center justify-center shrink-0 shadow-2xs`}
-                          >
-                            {initials}
-                          </div>
-                        );
-                      })()}
+                      <EmployeeAvatar
+                        name={lead.assignedEmployee?.name || 'Unassigned'}
+                        avatar={lead.assignedEmployee?.avatar}
+                        profilePhoto={lead.assignedEmployee?.profilePhoto}
+                        email={lead.assignedEmployee?.email}
+                        size="xs"
+                      />
                       <span className="text-xs font-medium text-slate-800 dark:text-slate-200 truncate">
                         {lead.assignedEmployee?.name || 'Unassigned'}
                       </span>
@@ -195,13 +190,19 @@ export const LeadTable: React.FC<LeadTableProps> = ({
                     {/* Assigned Business Analyst (BA) */}
                     {lead.assignedBA?.name ? (
                       <div
-                        className="flex items-center gap-1 text-[11px] text-purple-700 dark:text-purple-300 font-medium truncate"
+                        className="flex items-center gap-1.5 text-[11px] text-purple-700 dark:text-purple-300 font-medium truncate"
                         title={`Business Analyst: ${lead.assignedBA.name} (${lead.assignedBA.role || 'BA'})`}
                       >
+                        <EmployeeAvatar
+                          name={lead.assignedBA.name}
+                          avatar={lead.assignedBA.avatar}
+                          profilePhoto={lead.assignedBA.profilePhoto}
+                          size="xs"
+                        />
+                        <span className="truncate">{lead.assignedBA.name}</span>
                         <span className="px-1 py-0.2 rounded text-[8.5px] font-bold uppercase bg-purple-100 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300 border border-purple-200/80 dark:border-purple-800/60 shrink-0">
                           BA
                         </span>
-                        <span className="truncate">{lead.assignedBA.name}</span>
                       </div>
                     ) : (
                       <span className="text-[10px] text-slate-400 dark:text-slate-500 italic pl-6">

@@ -1,5 +1,5 @@
 import React from 'react';
-import { GitCommit, TrendingUp, DollarSign } from 'lucide-react';
+import { GitCommit, TrendingUp } from 'lucide-react';
 import { PipelineStageStat } from '../../types/reports';
 import { formatLakhsINR } from '../../utils/currencyFormatters';
 

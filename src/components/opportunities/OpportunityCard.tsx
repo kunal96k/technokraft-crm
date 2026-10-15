@@ -15,6 +15,7 @@ import {
   Layers,
   GripVertical,
   Trash2,
+  Check,
 } from 'lucide-react';
 import { OpportunityRecord, OpportunityStage } from '../../types/opportunities';
 import { OpportunityValue } from './OpportunityValue';
@@ -185,7 +186,7 @@ export const OpportunityCard: React.FC<OpportunityCardProps> = ({
                             }`}
                           >
                             <span>{stg}</span>
-                            {stg === opportunity.stage && <span className="text-[10px]">✓</span>}
+                            {stg === opportunity.stage && <Check className="w-3.5 h-3.5 text-[#5B4DB7] dark:text-purple-400" />}
                           </button>
                         ))}
                       </div>

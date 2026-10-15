@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import * as employeeService from '../../services/employeeService';
 import { EmployeeSummaryData } from '../../services/employeeService';
+import { isSuperAdminRecord } from '../../utils/securityUtils';
 
 const INITIAL_FILTERS: EmployeeFiltersState = {
   searchQuery: '',
@@ -96,7 +97,10 @@ export const EmployeeListPage: React.FC = () => {
         sortDirection: sortOrder,
       });
 
-      setEmployees(res.content || []);
+      const valid = (res.content || []).filter(
+        (e) => e && ((e.name && e.name.trim().length > 0) || (e.email && e.email.trim().length > 0))
+      );
+      setEmployees(valid);
       setTotalElements(res.totalElements);
       setTotalPages(res.totalPages);
 
@@ -188,6 +192,9 @@ export const EmployeeListPage: React.FC = () => {
         const updated = await employeeService.updateEmployee(editingEmployee.id, empData);
         if (updated) {
           showToast(`Updated employee profile for ${updated.name}`);
+          if (selectedEmployee && (String(selectedEmployee.id) === String(editingEmployee.id) || selectedEmployee.employeeCode === editingEmployee.employeeCode)) {
+            setSelectedEmployee(updated);
+          }
         } else {
           showToast('Employee updated successfully');
         }
@@ -213,6 +220,11 @@ export const EmployeeListPage: React.FC = () => {
 
   // Deactivate handler
   const handleConfirmDeactivate = async (emp: Employee) => {
+    if (isSuperAdminRecord(emp)) {
+      showToast('System Administrator / Super Admin account cannot be deactivated.');
+      setDeactivatingEmployee(null);
+      return;
+    }
     try {
       await employeeService.updateEmployeeStatus(emp.id, 'Inactive');
       showToast(`Deactivated ${emp.name}. Past CRM records preserved.`);
@@ -230,6 +242,11 @@ export const EmployeeListPage: React.FC = () => {
   // Soft Delete handler
   const handleConfirmDelete = async () => {
     if (!deletingEmployee) return;
+    if (isSuperAdminRecord(deletingEmployee)) {
+      showToast('System Administrator / Super Admin account cannot be deleted.');
+      setDeletingEmployee(null);
+      return;
+    }
     try {
       const ok = await employeeService.deleteEmployee(deletingEmployee.id);
       if (ok) {
@@ -751,6 +768,7 @@ export const EmployeeListPage: React.FC = () => {
 
       {/* Add / Edit Employee Modal */}
       <AddEmployeeModal
+        key={editingEmployee ? `edit-${editingEmployee.id}` : 'new-employee'}
         isOpen={isAddModalOpen}
         initialEmployee={editingEmployee}
         onClose={() => {

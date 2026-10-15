@@ -44,46 +44,81 @@ export const AppRoutes: React.FC = () => {
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<DashboardPage />} />
 
-        {/* 2. Leads Module */}
+        {/* 2. Leads Module — all authenticated users */}
         <Route path="/leads" element={<LeadsListPage />} />
         <Route path="/leads/add" element={<AddLeadPage />} />
         <Route path="/leads/import" element={<BulkImportPage />} />
         <Route path="/leads/:leadId" element={<LeadDetailsPage />} />
 
-        {/* 3. Communication Module */}
+        {/* 3. Communication Module — all authenticated users */}
         <Route path="/communication/emails" element={<EmailsPage />} />
         <Route path="/communication/emails/compose" element={<EmailComposePage />} />
         <Route path="/communication/whatsapp" element={<WhatsAppPage />} />
         <Route path="/communication/calls" element={<CallsPage />} />
         <Route path="/communication/calls/:id" element={<CallDetailsPage />} />
 
-        {/* 4. Follow-ups Module */}
+        {/* 4. Follow-ups Module — all authenticated users */}
         <Route path="/follow-ups" element={<FollowUpsPage />} />
         <Route path="/follow-ups/tasks" element={<TasksPage />} />
         <Route path="/follow-ups/meetings" element={<MeetingsPage />} />
 
-        {/* 5. Opportunities Module */}
+        {/* 5. Opportunities Module — all authenticated users */}
         <Route path="/opportunities" element={<Navigate to="/opportunities/pipeline" replace />} />
         <Route path="/opportunities/pipeline" element={<PipelinePage />} />
         <Route path="/opportunities/proposals" element={<ProposalsPage />} />
         <Route path="/opportunities/:id" element={<OpportunityDetailsPage />} />
 
-        {/* 6. Reports Module */}
-        <Route path="/reports" element={<Navigate to="/reports/performance" replace />} />
-        <Route path="/reports/performance" element={<PerformanceReportPage />} />
-        <Route path="/reports/performance/:employeeId" element={<EmployeePerformanceDetailPage />} />
-        <Route path="/reports/analytics" element={<AnalyticsPage />} />
+        {/* 6. Reports Module — Managers and above only */}
+        <Route
+          path="/reports"
+          element={
+            <ProtectedRoute allowedRoles={['Super Admin', 'Admin', 'Sales Manager']}>
+              <Navigate to="/reports/performance" replace />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/reports/performance"
+          element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin', 'Sales Manager']}><PerformanceReportPage /></ProtectedRoute>}
+        />
+        <Route
+          path="/reports/performance/:employeeId"
+          element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin', 'Sales Manager']}><EmployeePerformanceDetailPage /></ProtectedRoute>}
+        />
+        <Route
+          path="/reports/analytics"
+          element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin', 'Sales Manager']}><AnalyticsPage /></ProtectedRoute>}
+        />
 
-        {/* 7. Employees Module */}
-        <Route path="/employees" element={<EmployeeListPage />} />
-        <Route path="/employees/attendance" element={<AttendancePage />} />
-        <Route path="/attendance" element={<AttendancePage />} />
+        {/* 7. Employees Module — Managers and above only */}
+        <Route
+          path="/employees"
+          element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin', 'Sales Manager']}><EmployeeListPage /></ProtectedRoute>}
+        />
+        <Route
+          path="/employees/attendance"
+          element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin', 'Sales Manager']}><AttendancePage /></ProtectedRoute>}
+        />
+        <Route
+          path="/attendance"
+          element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin', 'Sales Manager']}><AttendancePage /></ProtectedRoute>}
+        />
 
-        {/* 8. Settings Module */}
-        <Route path="/settings" element={<Navigate to="/settings/general" replace />} />
-        <Route path="/settings/general" element={<GeneralSettingsPage />} />
+        {/* 8. Settings Module — Super Admin / Admin only */}
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute allowedRoles={['Super Admin', 'Admin']}>
+              <Navigate to="/settings/general" replace />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings/general"
+          element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin']}><GeneralSettingsPage /></ProtectedRoute>}
+        />
 
-        {/* 9. Notification Center */}
+        {/* 9. Notification Center — all authenticated users */}
         <Route path="/notifications" element={<NotificationsPage />} />
 
         {/* Fallback Catch-all */}

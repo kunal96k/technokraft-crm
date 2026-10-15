@@ -14,13 +14,35 @@ export interface AuthUser {
   department: string;
   role: string;
   accessRole: UserRole | string;
+  isSuperAdmin?: boolean;
   reportingManager?: string;
   status: string;
   crmAccess: boolean;
   isAccountLocked?: boolean;
   forcePasswordReset?: boolean;
   workStatus: string;
+  lastLoginAt?: string;
+  lastLogoutAt?: string;
+  loginTime?: string;
+  logoutTime?: string;
+  joiningDate?: string;
+  personalEmail?: string;
+  dateOfBirth?: string;
+  gender?: string;
+  employmentType?: string;
+  todayAttendanceStatus?: string;
+  todayWorkingTime?: string;
   permissions: string[];
+}
+
+export interface UpdateProfilePayload {
+  name?: string;
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  personalEmail?: string;
+  gender?: string;
+  dateOfBirth?: string;
 }
 
 export interface LoginCredentials {
@@ -48,8 +70,23 @@ export interface ForgotPasswordPayload {
   emailOrUsername: string;
 }
 
+export interface ForgotPasswordResponse {
+  success: boolean;
+  message: string;
+  emailMasked?: string;
+  username?: string;
+  resetToken?: string;
+  expiresAt?: string;
+}
+
+export interface VerifyOtpPayload {
+  emailOrUsername: string;
+  otp: string;
+}
+
 export interface ResetPasswordPayload {
   token: string;
   newPassword: string;
   confirmPassword?: string;
+  emailOrUsername?: string;
 }

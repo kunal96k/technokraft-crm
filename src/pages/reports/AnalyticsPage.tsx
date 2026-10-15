@@ -113,7 +113,7 @@ export const AnalyticsPage: React.FC = () => {
         team: selectedTeam,
         scope: selectedScope,
       });
-      setExportToast(`✓ ${format} downloaded successfully!`);
+      setExportToast(`${format} downloaded successfully!`);
     } catch (err) {
       console.error('Export failed:', err);
       setExportToast(`Exporting ${format} failed. Please try again.`);

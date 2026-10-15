@@ -7,7 +7,6 @@ import {
   Mail,
   Phone,
   Calendar,
-  DollarSign,
   TrendingUp,
   FileText,
   Clock,

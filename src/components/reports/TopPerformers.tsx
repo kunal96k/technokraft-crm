@@ -1,18 +1,46 @@
 import React from 'react';
 import { Trophy } from 'lucide-react';
-import { TopPerformer } from '../../types/reports';
+import { TopPerformer, EmployeePerformanceRecord } from '../../types/reports';
 import { formatLakhsINR } from '../../utils/currencyFormatters';
+import { EmployeeAvatar } from '../common/EmployeeAvatar';
 
 interface TopPerformersProps {
   performers?: TopPerformer[];
+  employees?: EmployeePerformanceRecord[];
   onSelectEmployeeName?: (name: string) => void;
 }
 
 export const TopPerformers: React.FC<TopPerformersProps> = ({
-  performers = [],
+  performers,
+  employees,
   onSelectEmployeeName,
 }) => {
-  if (!performers || performers.length === 0) {
+  // If performers not passed directly, derive from employees
+  const displayList: TopPerformer[] = React.useMemo(() => {
+    if (performers && performers.length > 0) return performers;
+    if (employees && employees.length > 0) {
+      return [...employees]
+        .sort((a, b) => (b.wonValue || 0) - (a.wonValue || 0))
+        .slice(0, 5)
+        .map((emp, idx) => ({
+          id: emp.id,
+          name: emp.name,
+          avatar: emp.avatar,
+          profilePhoto: emp.profilePhoto,
+          role: emp.role,
+          team: emp.team,
+          wonRevenue: emp.wonValue,
+          dealsWon: emp.won,
+          conversionRate: emp.conversionRate,
+          targetAchievementRate: emp.targetAchievementRate,
+          rank: idx + 1,
+          badge: idx === 0 ? 'Top Closer' : idx === 1 ? 'Velocity Leader' : 'High Volume',
+        }));
+    }
+    return [];
+  }, [performers, employees]);
+
+  if (displayList.length === 0) {
     return null;
   }
 
@@ -32,7 +60,7 @@ export const TopPerformers: React.FC<TopPerformersProps> = ({
       </div>
 
       <div className="space-y-2.5">
-        {performers.map((rep) => {
+        {displayList.map((rep) => {
           const medalBg =
             rep.rank === 1
               ? 'bg-amber-100 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-700'
@@ -52,6 +80,12 @@ export const TopPerformers: React.FC<TopPerformersProps> = ({
                 >
                   {rep.rank}
                 </div>
+                <EmployeeAvatar
+                  name={rep.name}
+                  avatar={rep.avatar}
+                  profilePhoto={rep.profilePhoto}
+                  size="sm"
+                />
                 <div>
                   <div className="text-xs font-bold text-slate-900 dark:text-white hover:text-[#5B4DB7] dark:hover:text-purple-300">
                     {rep.name}

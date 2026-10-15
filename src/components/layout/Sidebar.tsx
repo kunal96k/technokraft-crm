@@ -6,7 +6,8 @@ import { SidebarItem } from './SidebarItem';
 import { NAVIGATION_CONFIG, canViewModule } from '../../config/navigation';
 import { UserRole } from '../../types/navigation';
 import { useTheme } from '../../context/ThemeContext';
-import { ConfirmationDialog } from '../settings/ConfirmationDialog';
+import { LogoutConfirmModal } from './LogoutConfirmModal';
+import { useLiveWorkingTime } from '../../utils/workingHoursUtils';
 import { fetchLeadSummary } from '../../services/leadService';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -31,6 +32,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const { resolvedTheme } = useTheme();
   const { logout, user: authUser } = useAuth();
   const navigate = useNavigate();
+  const liveWorking = useLiveWorkingTime(authUser, 5000);
 
   // If theme prop is explicitly passed, use it; otherwise synchronize with global theme
   const activeTheme = theme || (resolvedTheme === 'Dark' ? 'dark' : 'light');
@@ -179,8 +181,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <p className="text-xs font-semibold truncate leading-tight">
                     {authUser?.name || 'TechnoKraft'}
                   </p>
-                  <p className="text-[10px] text-slate-400 dark:text-slate-500 truncate leading-tight">
-                    {authUser?.accessRole || currentRole}
+                  <p className="text-[10px] text-slate-400 dark:text-slate-500 truncate leading-tight flex items-center gap-1 mt-0.5">
+                    <span className="truncate">{authUser?.accessRole || currentRole}</span>
+                    <span className="text-emerald-600 dark:text-emerald-400 font-mono font-bold shrink-0">• {liveWorking.formatted}</span>
                   </p>
                 </div>
               </div>
@@ -220,15 +223,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
         )}
       </div>
 
-      <ConfirmationDialog
+      <LogoutConfirmModal
         isOpen={showLogoutConfirm}
-        title="Log Out of TechnoKraft CRM"
-        description="Are you sure you want to end your current session? You will be redirected to the sign-in screen."
-        confirmLabel="Log Out"
-        cancelLabel="Cancel"
-        isDangerous={true}
+        onClose={() => setShowLogoutConfirm(false)}
         onConfirm={handleLogout}
-        onCancel={() => setShowLogoutConfirm(false)}
+        user={authUser}
       />
     </aside>
   );

@@ -45,6 +45,7 @@ export interface UserProfile {
   role: UserRole;
   department: string;
   avatarUrl?: string;
+  profilePhoto?: string;
 }
 
 export interface NotificationItem {

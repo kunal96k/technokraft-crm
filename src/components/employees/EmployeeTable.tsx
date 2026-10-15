@@ -13,6 +13,7 @@ import {
   ChevronUp,
   KeyRound,
   Trash2,
+  ShieldCheck,
 } from 'lucide-react';
 import { Employee } from '../../types/employees';
 import {
@@ -20,6 +21,9 @@ import {
   AttendanceStatusBadge,
   WorkStatusBadge,
 } from './EmployeeStatusBadge';
+import { buildSafeApiUrl } from '../../utils/urlUtils';
+import { useAuth } from '../../context/AuthContext';
+import { isSuperAdminRecord, shouldMaskForSecurity } from '../../utils/securityUtils';
 
 export type SortField = 'name' | 'employeeCode' | 'department' | 'role' | 'joiningDate' | 'status';
 export type SortOrder = 'asc' | 'desc';
@@ -61,6 +65,7 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
   sortOrder = 'asc',
   onSort,
 }) => {
+  const { user } = useAuth();
   const [openActionEmployee, setOpenActionEmployee] = useState<Employee | null>(null);
   const [menuPosition, setMenuPosition] = useState<{ top: number; right: number } | null>(null);
 
@@ -142,7 +147,11 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
     );
   };
 
-  if (employees.length === 0) {
+  const validEmployees = (employees || []).filter(
+    (emp) => emp && ((emp.name && emp.name.trim().length > 0) || (emp.email && emp.email.trim().length > 0))
+  );
+
+  if (validEmployees.length === 0) {
     return (
       <div className="p-12 text-center bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
         <div className="w-12 h-12 mx-auto rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 mb-3">
@@ -238,8 +247,9 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
-          {employees.map((emp) => {
+          {validEmployees.map((emp) => {
             const isMenuOpen = openActionEmployee?.id === emp.id;
+            const isMasked = shouldMaskForSecurity(emp, user);
 
             return (
               <tr
@@ -252,15 +262,38 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
                 {/* Employee Name & Contact */}
                 <td className="py-3.5 px-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 font-semibold text-xs flex items-center justify-center shrink-0 border border-purple-200 dark:border-purple-800/60">
-                      {emp.avatar}
+                    <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 font-semibold text-xs flex items-center justify-center shrink-0 border border-purple-200 dark:border-purple-800/60 overflow-hidden">
+                      {isMasked ? (
+                        <ShieldCheck className="w-4 h-4 text-[#5B4DB7] dark:text-purple-300" />
+                      ) : emp.profilePhoto ? (
+                        <img
+                          src={buildSafeApiUrl(emp.profilePhoto)}
+                          alt={emp.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        emp.avatar
+                      )}
                     </div>
                     <div className="min-w-0">
-                      <div className="font-semibold text-slate-900 dark:text-white truncate group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
-                        {emp.name}
+                      <div className="flex items-center gap-1.5 font-semibold text-slate-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                        {isMasked ? (
+                          <>
+                            <span className="blur-[3px] select-none">{emp.name}</span>
+                            <span className="px-1.5 py-0.5 rounded-full text-[9px] font-semibold bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300 border border-purple-200 dark:border-purple-800/60">
+                              Protected
+                            </span>
+                          </>
+                        ) : (
+                          emp.name
+                        )}
                       </div>
                       <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-                        {emp.email}
+                        {isMasked ? (
+                          <span className="blur-[3px] select-none">{emp.email}</span>
+                        ) : (
+                          emp.email
+                        )}
                       </div>
                     </div>
                   </div>
@@ -342,126 +375,158 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
           onClick={(e) => e.stopPropagation()}
           className="w-48 rounded-xl shadow-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 py-1.5 text-left animate-in fade-in zoom-in-95 duration-100"
         >
-          <button
-            type="button"
-            onClick={() => {
-              const emp = openActionEmployee;
-              setOpenActionEmployee(null);
-              setMenuPosition(null);
-              handleView(emp);
-            }}
-            className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 cursor-pointer"
-          >
-            <Eye className="w-3.5 h-3.5 text-slate-400" />
-            <span>View Details</span>
-          </button>
+          {(() => {
+            const isActionSuperAdmin = isSuperAdminRecord(openActionEmployee);
+            const isActionMasked = shouldMaskForSecurity(openActionEmployee, user);
 
-          <button
-            type="button"
-            onClick={() => {
-              const emp = openActionEmployee;
-              setOpenActionEmployee(null);
-              setMenuPosition(null);
-              handleEdit(emp);
-            }}
-            className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 cursor-pointer"
-          >
-            <Edit2 className="w-3.5 h-3.5 text-slate-400" />
-            <span>Edit Employee</span>
-          </button>
+            if (isActionMasked) {
+              return (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const emp = openActionEmployee;
+                    setOpenActionEmployee(null);
+                    setMenuPosition(null);
+                    handleView(emp);
+                  }}
+                  className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 cursor-pointer"
+                >
+                  <Eye className="w-3.5 h-3.5 text-slate-400" />
+                  <span>View Details (Protected)</span>
+                </button>
+              );
+            }
 
-          <button
-            type="button"
-            onClick={() => {
-              const emp = openActionEmployee;
-              setOpenActionEmployee(null);
-              setMenuPosition(null);
-              onResetPassword?.(emp);
-            }}
-            className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 cursor-pointer"
-          >
-            <KeyRound className="w-3.5 h-3.5 text-indigo-500" />
-            <span>Reset Password</span>
-          </button>
+            return (
+              <>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const emp = openActionEmployee;
+                    setOpenActionEmployee(null);
+                    setMenuPosition(null);
+                    handleView(emp);
+                  }}
+                  className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 cursor-pointer"
+                >
+                  <Eye className="w-3.5 h-3.5 text-slate-400" />
+                  <span>View Details</span>
+                </button>
 
-          <button
-            type="button"
-            onClick={() => {
-              const emp = openActionEmployee;
-              setOpenActionEmployee(null);
-              setMenuPosition(null);
-              (onViewPerformance || handleView)(emp);
-            }}
-            className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 cursor-pointer"
-          >
-            <TrendingUp className="w-3.5 h-3.5 text-purple-500" />
-            <span>View Performance</span>
-          </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const emp = openActionEmployee;
+                    setOpenActionEmployee(null);
+                    setMenuPosition(null);
+                    handleEdit(emp);
+                  }}
+                  className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 cursor-pointer"
+                >
+                  <Edit2 className="w-3.5 h-3.5 text-slate-400" />
+                  <span>Edit Employee</span>
+                </button>
 
-          <button
-            type="button"
-            onClick={() => {
-              const emp = openActionEmployee;
-              setOpenActionEmployee(null);
-              setMenuPosition(null);
-              (onViewAttendance || handleView)(emp);
-            }}
-            className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 cursor-pointer"
-          >
-            <Calendar className="w-3.5 h-3.5 text-blue-500" />
-            <span>View Attendance</span>
-          </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const emp = openActionEmployee;
+                    setOpenActionEmployee(null);
+                    setMenuPosition(null);
+                    onResetPassword?.(emp);
+                  }}
+                  className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 cursor-pointer"
+                >
+                  <KeyRound className="w-3.5 h-3.5 text-indigo-500" />
+                  <span>Reset Password</span>
+                </button>
 
-          <div className="my-1 border-t border-slate-100 dark:border-slate-700/80" />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const emp = openActionEmployee;
+                    setOpenActionEmployee(null);
+                    setMenuPosition(null);
+                    (onViewPerformance || handleView)(emp);
+                  }}
+                  className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 cursor-pointer"
+                >
+                  <TrendingUp className="w-3.5 h-3.5 text-purple-500" />
+                  <span>View Performance</span>
+                </button>
 
-          {openActionEmployee.status === 'Active' ? (
-            <button
-              type="button"
-              onClick={() => {
-                const emp = openActionEmployee;
-                setOpenActionEmployee(null);
-                setMenuPosition(null);
-                handleDeactivate(emp);
-              }}
-              className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 cursor-pointer"
-            >
-              <UserX className="w-3.5 h-3.5" />
-              <span>Deactivate</span>
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => {
-                const emp = openActionEmployee;
-                setOpenActionEmployee(null);
-                setMenuPosition(null);
-                handleActivate(emp);
-              }}
-              className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 cursor-pointer"
-            >
-              <UserCheck className="w-3.5 h-3.5" />
-              <span>Activate</span>
-            </button>
-          )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    const emp = openActionEmployee;
+                    setOpenActionEmployee(null);
+                    setMenuPosition(null);
+                    (onViewAttendance || handleView)(emp);
+                  }}
+                  className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 cursor-pointer"
+                >
+                  <Calendar className="w-3.5 h-3.5 text-blue-500" />
+                  <span>View Attendance</span>
+                </button>
 
-          {onDelete && (
-            <>
-              <div className="my-1 border-t border-slate-100 dark:border-slate-700/80" />
-              <button
-                type="button"
-                onClick={() => {
-                  const emp = openActionEmployee;
-                  setOpenActionEmployee(null);
-                  setMenuPosition(null);
-                  onDelete(emp);
-                }}
-                className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-                <span>Delete Employee</span>
-              </button>
-            </>
-          )}
+                {/* Primary Super Admin can never be deactivated */}
+                {!isActionSuperAdmin && (
+                  <>
+                    <div className="my-1 border-t border-slate-100 dark:border-slate-700/80" />
+                    {openActionEmployee.status === 'Active' ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const emp = openActionEmployee;
+                          setOpenActionEmployee(null);
+                          setMenuPosition(null);
+                          handleDeactivate(emp);
+                        }}
+                        className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 cursor-pointer"
+                      >
+                        <UserX className="w-3.5 h-3.5" />
+                        <span>Deactivate</span>
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const emp = openActionEmployee;
+                          setOpenActionEmployee(null);
+                          setMenuPosition(null);
+                          handleActivate(emp);
+                        }}
+                        className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 cursor-pointer"
+                      >
+                        <UserCheck className="w-3.5 h-3.5" />
+                        <span>Activate</span>
+                      </button>
+                    )}
+                  </>
+                )}
+
+                {/* Primary Super Admin can NEVER be deleted */}
+                {onDelete && !isActionSuperAdmin && (
+                  <>
+                    <div className="my-1 border-t border-slate-100 dark:border-slate-700/80" />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const emp = openActionEmployee;
+                        setOpenActionEmployee(null);
+                        setMenuPosition(null);
+                        onDelete(emp);
+                      }}
+                      className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Delete Employee</span>
+                    </button>
+                  </>
+                )}
+              </>
+            );
+          })()}
         </div>,
         document.body
       )}

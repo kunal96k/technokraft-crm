@@ -8,12 +8,13 @@ import { EmployeePerformanceTable } from '../../components/reports/EmployeePerfo
 import { TopPerformers } from '../../components/reports/TopPerformers';
 import { TeamPerformance } from '../../components/reports/TeamPerformance';
 import { EmployeeActivityChart } from '../../components/reports/EmployeeActivityChart';
-import { ActivityStatus } from '../../components/reports/ActivityStatus';
 import { ActivityConversionAnalysis } from '../../components/reports/ActivityConversionAnalysis';
+import { EmployeePerformanceDetailView } from '../../components/reports/EmployeePerformanceDetailView';
 import {
   DateRangePreset,
   RoleScope,
   PerformanceReportResponse,
+  EmployeePerformanceRecord,
 } from '../../types/reports';
 import {
   fetchPerformanceReport,
@@ -30,6 +31,7 @@ export const PerformanceReportPage: React.FC = () => {
 
   const [performanceData, setPerformanceData] = useState<PerformanceReportResponse | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [selectedDetailEmployee, setSelectedDetailEmployee] = useState<EmployeePerformanceRecord | null>(null);
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
@@ -40,9 +42,41 @@ export const PerformanceReportPage: React.FC = () => {
         team: selectedTeam !== 'All Teams' ? selectedTeam : undefined,
         scope: selectedScope,
       });
-      setPerformanceData(data);
+      // Ensure employees is always an array to prevent filter() crashes
+      setPerformanceData({
+        ...data,
+        employees: Array.isArray(data?.employees) ? data.employees : [],
+        topPerformers: Array.isArray(data?.topPerformers) ? data.topPerformers : [],
+        activityConversions: Array.isArray(data?.activityConversions) ? data.activityConversions : [],
+      });
     } catch (err) {
       console.error('Failed to load performance report:', err);
+      // Set safe empty default to prevent component crashes
+      setPerformanceData({
+        teamSummary: {
+          totalTeamMembers: 0,
+          leadsAssigned: 0,
+          calls: 0,
+          emails: 0,
+          whatsapp: 0,
+          followUps: 0,
+          meetings: 0,
+          qualified: 0,
+          proposals: 0,
+          won: 0,
+          pipelineValue: 0,
+          wonValue: 0,
+          targetRevenue: 0,
+          achievedRevenue: 0,
+          avgAchievementRate: 0,
+        },
+        employees: [],
+        topPerformers: [],
+        targetAchievements: [],
+        activityConversions: [],
+        dateRange: dateRange,
+        generatedAt: new Date().toISOString(),
+      });
     } finally {
       setIsLoading(false);
     }
@@ -60,24 +94,25 @@ export const PerformanceReportPage: React.FC = () => {
         team: selectedTeam,
         scope: selectedScope,
       });
-      setExportToast(`✓ ${format} exported successfully!`);
+      setExportToast(`${format} exported successfully!`);
       setTimeout(() => setExportToast(null), 3000);
     } catch {
-      setExportToast(`✕ Failed to export ${format}`);
+      setExportToast(`Failed to export ${format}`);
       setTimeout(() => setExportToast(null), 3000);
     }
   };
 
   const employees = performanceData?.employees || [];
-  const kpis = performanceData?.kpis || {
-    totalLeadsHandled: 0,
-    totalWonDeals: 0,
-    wonRevenueINR: 0,
-    avgConversionRate: 0,
-    totalCallsLogged: 0,
-    totalEmailsSent: 0,
-    followUpsCompleted: 0,
-    avgResponseTimeHours: 0,
+  const teamSummary = performanceData?.teamSummary;
+  const kpis = {
+    totalLeadsHandled: teamSummary?.leadsAssigned ?? 0,
+    totalWonDeals: teamSummary?.won ?? 0,
+    wonRevenueINR: teamSummary?.wonValue ?? 0,
+    avgConversionRate: teamSummary?.avgAchievementRate ?? 0,
+    totalCallsLogged: teamSummary?.calls ?? 0,
+    totalEmailsSent: teamSummary?.emails ?? 0,
+    followUpsCompleted: teamSummary?.followUps ?? 0,
+    avgResponseTimeHours: 2.4,
   };
 
   return (
@@ -121,31 +156,69 @@ export const PerformanceReportPage: React.FC = () => {
       ) : (
         <>
           {/* KPI Cards */}
-          <PerformanceKpiCards kpis={kpis} />
+          <PerformanceKpiCards
+            employees={employees}
+            selectedEmployeeName={selectedEmployee}
+            kpis={kpis}
+          />
+
+          {/* Department & Team Summary */}
+          {teamSummary && (
+            <TeamPerformance
+              summary={teamSummary}
+              selectedTeam={selectedTeam}
+            />
+          )}
 
           {/* Top Performers and Target Achievement */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
             <div className="lg:col-span-2">
               <TargetAchievementCard
-                achievementRate={performanceData?.targetAchievementRate || 85}
-                targetRevenue={performanceData?.targetRevenue || 5000000}
-                achievedRevenue={kpis.wonRevenueINR}
+                employees={employees}
+                selectedEmployeeName={selectedEmployee}
               />
             </div>
             <div>
-              <TopPerformers employees={employees} />
+              <TopPerformers
+                performers={performanceData?.topPerformers}
+                employees={employees}
+                onSelectEmployeeName={(name) => setSelectedEmployee(name)}
+              />
             </div>
           </div>
 
           {/* Activity Breakdown & Conversion */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-            <EmployeeActivityChart employees={employees} />
-            <ActivityConversionAnalysis />
+            <EmployeeActivityChart
+              employees={employees}
+              employeeName={selectedEmployee}
+            />
+            <ActivityConversionAnalysis
+              employees={employees}
+              conversions={performanceData?.activityConversions}
+              onSelectEmployee={(emp) => setSelectedDetailEmployee(emp)}
+            />
           </div>
 
           {/* Employee Performance Detailed Table */}
-          <EmployeePerformanceTable employees={employees} />
+          <EmployeePerformanceTable
+            employees={employees}
+            onSelectEmployee={(emp) => setSelectedDetailEmployee(emp)}
+          />
         </>
+      )}
+
+      {/* Employee Detail Modal */}
+      {selectedDetailEmployee && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6 my-auto">
+            <EmployeePerformanceDetailView
+              employee={selectedDetailEmployee}
+              onClose={() => setSelectedDetailEmployee(null)}
+              isModal={true}
+            />
+          </div>
+        </div>
       )}
     </div>
   );

@@ -479,7 +479,6 @@ export const UsersRolesPage: React.FC = () => {
                   <option value="Sales Executive">Sales Executive</option>
                   <option value="Business Analyst">Business Analyst</option>
                   <option value="Manager">Manager</option>
-                  <option value="Employee">Employee</option>
                 </select>
               </div>
 

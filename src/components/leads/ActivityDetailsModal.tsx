@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { LeadActivity, Lead } from '../../types/leads';
+import { EmployeeAvatar } from '../common/EmployeeAvatar';
 import {
   X,
   Phone,
@@ -178,9 +179,12 @@ export const ActivityDetailsModal: React.FC<ActivityDetailsModalProps> = ({
             {/* Author / Logged By Meta */}
             <div className="pt-2 border-t border-slate-200/60 dark:border-slate-800 flex items-center justify-between flex-wrap gap-2 text-[11px]">
               <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
-                <div className="w-6 h-6 rounded-full bg-[#5B4DB7]/10 dark:bg-purple-950/60 text-[#5B4DB7] dark:text-purple-300 font-bold text-[10px] flex items-center justify-center border border-[#5B4DB7]/20">
-                  {activity.employeeAvatar || (activity.employeeName ? activity.employeeName[0] : 'U')}
-                </div>
+                <EmployeeAvatar
+                  name={activity.employeeName || 'System User'}
+                  avatar={activity.employeeAvatar}
+                  profilePhoto={activity.employeeProfilePhoto}
+                  size="xs"
+                />
                 <span>
                   Logged by: <strong className="text-slate-800 dark:text-slate-100 font-semibold">{activity.employeeName || 'System User'}</strong>
                 </span>
