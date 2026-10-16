@@ -164,10 +164,30 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
   // Form Validation State
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+// Helper to format date into standard YYYY-MM-DD required by HTML5 date inputs
+const formatDateForDateInput = (val?: string | null): string => {
+  if (!val || !val.trim()) {
+    return new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+  }
+  const clean = val.trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(clean)) {
+    return clean;
+  }
+  if (clean.length >= 10 && clean.includes('T')) {
+    return clean.slice(0, 10);
+  }
+  const parsed = new Date(clean);
+  if (!isNaN(parsed.getTime())) {
+    try {
+      return parsed.toISOString().split('T')[0];
+    } catch {
+      // ignore
+    }
+  }
+  return new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+};
+
   // ─── Rehydrate all form fields whenever the modal opens or the record changes ───
-  // This is the critical fix: useState initializers only run on first mount,
-  // so switching from "Create" → "Edit" (or editing different records) would
-  // show stale / blank values without this effect.
   useEffect(() => {
     if (!isOpen) return;
 
@@ -193,23 +213,23 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
     setEstimatedValue(
       initialOpportunity?.estimatedValue != null
         ? String(initialOpportunity.estimatedValue)
-        : '800000'
+        : (initialOpportunity ? '0' : '800000')
     );
     setProbability(
       initialOpportunity?.probability !== undefined ? initialOpportunity.probability : 50
     );
-    setExpectedCloseDate(
-      initialOpportunity?.expectedCloseDate ||
-        new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-    );
+    setExpectedCloseDate(formatDateForDateInput(initialOpportunity?.expectedCloseDate));
     setPriority(initialOpportunity?.priority || 'High');
 
     // TAB 4
     setRequirementSummary(initialOpportunity?.requirement?.summary || '');
     setBusinessProblem(initialOpportunity?.requirement?.problemStatement || '');
     setExpectedUsers(initialOpportunity?.requirement?.expectedUsers || '');
-    setTimeline(initialOpportunity?.requirement?.timeline || '3 months');
-    setBudget(initialOpportunity?.requirement?.budget || '₹8,00,000 - ₹12,00,000');
+    setTimeline(initialOpportunity?.requirement?.timeline ?? (initialOpportunity ? '' : '3 months'));
+    setBudget(
+      initialOpportunity?.requirement?.budget ??
+        (initialOpportunity ? '' : '₹8,00,000 - ₹12,00,000')
+    );
     setTechnicalRequirements(initialOpportunity?.requirement?.technicalRequirements || '');
     setRequirementNotes(initialOpportunity?.requirement?.notes || '');
 
@@ -217,8 +237,7 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
     setOwnerName(initialOpportunity?.owner?.name || authUser?.name || '');
     setBusinessAnalystName(initialOpportunity?.businessAnalyst?.name || '');
     setTechnicalReviewerName(initialOpportunity?.technicalReviewer?.name || '');
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, initialOpportunity?.id]);
+  }, [isOpen, initialOpportunity, defaultStage, authUser?.name]);
 
   if (!isOpen) return null;
 

@@ -46,9 +46,9 @@ export const CallToolbar: React.FC<CallToolbarProps> = ({
   return (
     <div className="space-y-2.5">
       {/* Main search and desktop filter controls */}
-      <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-2.5">
-        {/* Search Bar */}
-        <div className="relative flex-1 min-w-[240px]">
+      <div className="flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-2.5">
+        {/* Search Bar: Full width on sm/md, flex-1 on xl */}
+        <div className="relative flex-1 min-w-0">
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             type="text"
@@ -68,8 +68,8 @@ export const CallToolbar: React.FC<CallToolbarProps> = ({
           )}
         </div>
 
-        {/* Filter Controls: In one line on lg screens, wrapped on next line on small & md screens */}
-        <div className="flex items-center gap-2 flex-wrap lg:flex-nowrap shrink-0">
+        {/* Filter Controls: In one line on xl screens, neatly wrapped on next line on small & md screens without awkward vertical stacking */}
+        <div className="flex items-center gap-2 flex-wrap xl:flex-nowrap shrink-0">
           {/* Date Filter */}
           <select
             value={filters.dateRange}
@@ -91,7 +91,7 @@ export const CallToolbar: React.FC<CallToolbarProps> = ({
             onChange={(e) => onFilterChange('employee', e.target.value || 'all')}
             placeholder="Employee: All"
             showRoleInLabel={false}
-            containerClassName="relative w-36 sm:w-40 lg:w-44 shrink-0"
+            containerClassName="relative w-36 sm:w-40 xl:w-44 shrink-0"
             className="px-2.5 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-lg text-xs font-medium text-slate-700 dark:text-slate-200 hover:border-slate-400 dark:hover:border-slate-700 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7] cursor-pointer"
           />
 
