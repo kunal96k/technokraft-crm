@@ -169,7 +169,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!user) return false;
     if (allowedRoles.length === 0) return true;
     const userRole = (user.accessRole || user.role || '').toLowerCase();
-    return allowedRoles.some((r) => r.toLowerCase() === userRole || userRole === 'super admin' || userRole === 'admin');
+    if (userRole === 'super admin' || userRole === 'admin') return true;
+    return allowedRoles.some((r) => {
+      const nr = r.toLowerCase();
+      if (nr === userRole) return true;
+      if ((nr === 'sales manager' || nr === 'manager') && (userRole === 'sales manager' || userRole === 'manager')) return true;
+      return false;
+    });
   }, [user]);
 
   const hasPermission = useCallback((permission: string): boolean => {

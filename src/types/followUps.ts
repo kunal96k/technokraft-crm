@@ -53,8 +53,13 @@ export interface FollowUpRecord {
   date: string; // YYYY-MM-DD or readable
   time: string; // e.g. 04:00 PM
   assignedTo: string;
+  assignedToName?: string;
   assignedAvatar?: string;
   assignedRole?: string;
+  assignedEmail?: string;
+  assignedProfilePhoto?: string;
+  createdBy?: string;
+  createdByEmail?: string;
   priority: FollowUpPriority;
   status: FollowUpStatus;
   reminder?: string;

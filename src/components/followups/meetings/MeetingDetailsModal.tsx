@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { MeetingRecord } from '../../../types/followUps';
 import { ConfirmationModal } from '../../common/ConfirmationModal';
+import { EmployeeAvatar } from '../../common/EmployeeAvatar';
 
 interface MeetingDetailsModalProps {
   isOpen: boolean;
@@ -145,10 +146,44 @@ export const MeetingDetailsModal: React.FC<MeetingDetailsModalProps> = ({
               <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block">
                 TechnoKraft Host
               </span>
-              <div className="font-bold text-slate-900 dark:text-white">{meeting.assignedEmployee}</div>
-              <div className="text-slate-500 dark:text-slate-400">Account Executive / Lead Host</div>
+              <div className="flex items-center gap-2 pt-1">
+                <EmployeeAvatar
+                  name={meeting.assignedEmployee}
+                  avatar={meeting.assignedAvatar}
+                  profilePhoto={meeting.assignedProfilePhoto}
+                  email={meeting.assignedEmail}
+                  size="sm"
+                  showRing={true}
+                />
+                <div>
+                  <div className="font-bold text-slate-900 dark:text-white text-xs">{meeting.assignedEmployee}</div>
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400">Account Executive / Lead Host</div>
+                </div>
+              </div>
             </div>
           </div>
+
+          {/* Record Metadata & Audit Trail */}
+          {(meeting.createdAt || meeting.createdBy) && (
+            <div className="p-3 bg-slate-50/70 dark:bg-slate-950/40 rounded-xl border border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-slate-500 dark:text-slate-400">
+              <div className="flex items-center gap-1.5">
+                <span className="text-[11px]">Created By:</span>
+                <EmployeeAvatar
+                  name={meeting.createdBy || meeting.assignedEmployee || 'System'}
+                  profilePhoto={meeting.assignedProfilePhoto}
+                  size="xs"
+                />
+                <span className="font-semibold text-slate-800 dark:text-slate-200 text-[11px]">
+                  {meeting.createdBy || meeting.assignedEmployee || 'System'}
+                </span>
+              </div>
+              {meeting.createdAt && (
+                <div className="text-[10px] font-mono text-slate-400">
+                  {meeting.createdAt}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Completed Minutes if available */}
           {meeting.status === 'Completed' && (

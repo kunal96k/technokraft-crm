@@ -27,6 +27,7 @@ import {
 import * as employeeService from '../../services/employeeService';
 import { EmployeeSummaryData } from '../../services/employeeService';
 import { isSuperAdminRecord } from '../../utils/securityUtils';
+import { useAuth } from '../../context/AuthContext';
 
 const INITIAL_FILTERS: EmployeeFiltersState = {
   searchQuery: '',
@@ -40,6 +41,7 @@ const INITIAL_FILTERS: EmployeeFiltersState = {
 };
 
 export const EmployeeListPage: React.FC = () => {
+  const { user: authUser, updateUser } = useAuth();
   const [searchParams] = useSearchParams();
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [summary, setSummary] = useState<EmployeeSummaryData | null>(null);
@@ -195,6 +197,9 @@ export const EmployeeListPage: React.FC = () => {
           if (selectedEmployee && (String(selectedEmployee.id) === String(editingEmployee.id) || selectedEmployee.employeeCode === editingEmployee.employeeCode)) {
             setSelectedEmployee(updated);
           }
+          if (authUser && (String(authUser.id) === String(editingEmployee.id) || authUser.employeeCode === editingEmployee.employeeCode)) {
+            updateUser(updated as any);
+          }
         } else {
           showToast('Employee updated successfully');
         }
@@ -214,7 +219,11 @@ export const EmployeeListPage: React.FC = () => {
       }
     } catch (err: any) {
       console.error('[EmployeeListPage] Save error:', err);
-      showToast(err.message || 'Failed to save employee profile');
+      const friendlyMsg = err?.message?.includes('HTTP 500')
+        ? 'The backend server is currently unavailable or restarting. Please try again shortly.'
+        : (err?.message || 'Failed to save employee profile. Please check the entered data.');
+      showToast(friendlyMsg);
+      throw new Error(friendlyMsg);
     }
   };
 
@@ -437,14 +446,13 @@ export const EmployeeListPage: React.FC = () => {
         <button
           type="button"
           onClick={() => handleTabChange('active_pool')}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-            filters.status === 'active_pool' || (!filters.status && !filters.workStatus)
-              ? 'bg-white dark:bg-slate-900 text-purple-700 dark:text-purple-300 shadow-xs ring-1 ring-slate-200 dark:ring-slate-700'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-          }`}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${filters.status === 'active_pool' || (!filters.status && !filters.workStatus)
+            ? 'bg-white dark:bg-slate-900 text-purple-700 dark:text-purple-300 shadow-xs ring-1 ring-slate-200 dark:ring-slate-700'
+            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+            }`}
         >
           <span className="w-2 h-2 rounded-full bg-emerald-500" />
-          <span>Active Staff (Default)</span>
+          <span>Active Staff</span>
           <span className="px-1.5 py-0.2 rounded-full bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 text-[10px]">
             {filters.status === 'active_pool' ? totalElements : (summary?.active ?? 0)}
           </span>
@@ -453,11 +461,10 @@ export const EmployeeListPage: React.FC = () => {
         <button
           type="button"
           onClick={() => handleTabChange('all')}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-            filters.status === 'all'
-              ? 'bg-white dark:bg-slate-900 text-purple-700 dark:text-purple-300 shadow-xs ring-1 ring-slate-200 dark:ring-slate-700'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-          }`}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${filters.status === 'all'
+            ? 'bg-white dark:bg-slate-900 text-purple-700 dark:text-purple-300 shadow-xs ring-1 ring-slate-200 dark:ring-slate-700'
+            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+            }`}
         >
           <span>All Roster</span>
           <span className="px-1.5 py-0.2 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-[10px]">
@@ -468,11 +475,10 @@ export const EmployeeListPage: React.FC = () => {
         <button
           type="button"
           onClick={() => handleTabChange('On Leave')}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-            filters.status === 'On Leave'
-              ? 'bg-white dark:bg-slate-900 text-purple-700 dark:text-purple-300 shadow-xs ring-1 ring-slate-200 dark:ring-slate-700'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-          }`}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${filters.status === 'On Leave'
+            ? 'bg-white dark:bg-slate-900 text-purple-700 dark:text-purple-300 shadow-xs ring-1 ring-slate-200 dark:ring-slate-700'
+            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+            }`}
         >
           <span className="w-2 h-2 rounded-full bg-amber-500" />
           <span>On Leave</span>
@@ -481,11 +487,10 @@ export const EmployeeListPage: React.FC = () => {
         <button
           type="button"
           onClick={() => handleTabChange('Inactive')}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-            filters.status === 'Inactive'
-              ? 'bg-white dark:bg-slate-900 text-rose-700 dark:text-rose-300 shadow-xs ring-1 ring-slate-200 dark:ring-slate-700'
-              : 'text-slate-600 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400'
-          }`}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${filters.status === 'Inactive'
+            ? 'bg-white dark:bg-slate-900 text-rose-700 dark:text-rose-300 shadow-xs ring-1 ring-slate-200 dark:ring-slate-700'
+            : 'text-slate-600 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400'
+            }`}
         >
           <span className="w-2 h-2 rounded-full bg-rose-500" />
           <span>Deactivated / Inactive</span>
@@ -497,11 +502,10 @@ export const EmployeeListPage: React.FC = () => {
         <button
           type="button"
           onClick={() => handleTabChange('Suspended')}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-            filters.status === 'Suspended'
-              ? 'bg-white dark:bg-slate-900 text-purple-700 dark:text-purple-300 shadow-xs ring-1 ring-slate-200 dark:ring-slate-700'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-          }`}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${filters.status === 'Suspended'
+            ? 'bg-white dark:bg-slate-900 text-purple-700 dark:text-purple-300 shadow-xs ring-1 ring-slate-200 dark:ring-slate-700'
+            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+            }`}
         >
           <span className="w-2 h-2 rounded-full bg-slate-400" />
           <span>Suspended</span>
@@ -659,7 +663,7 @@ export const EmployeeListPage: React.FC = () => {
                   className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 rounded-lg px-2 py-1 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-purple-500/50 cursor-pointer"
                 >
                   <option value={10}>10</option>
-                  <option value={25}>25 (Default)</option>
+                  <option value={25}>25</option>
                   <option value={50}>50</option>
                   <option value={100}>100</option>
                 </select>
@@ -707,11 +711,10 @@ export const EmployeeListPage: React.FC = () => {
                         type="button"
                         onClick={() => setCurrentPage(pageNum)}
                         disabled={isLoading}
-                        className={`min-w-[28px] h-7 px-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                          isActive
-                            ? 'bg-[#5B4DB7] text-white shadow-xs'
-                            : 'border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300'
-                        }`}
+                        className={`min-w-[28px] h-7 px-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${isActive
+                          ? 'bg-[#5B4DB7] text-white shadow-xs'
+                          : 'border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300'
+                          }`}
                       >
                         {pageNum + 1}
                       </button>

@@ -4,6 +4,7 @@ import { CallStatusBadge } from './CallStatusBadge';
 import { CallResultBadge } from './CallResultBadge';
 import { CallTypeBadge } from './CallTypeBadge';
 import { Clock, Phone, Building2, User, CalendarPlus, ExternalLink, MessageSquare } from 'lucide-react';
+import { EmployeeAvatar } from '../../common/EmployeeAvatar';
 
 interface CallTimelineProps {
   calls: CallRecord[];
@@ -132,17 +133,31 @@ export const CallTimeline: React.FC<CallTimelineProps> = ({
                         <div className="space-y-1 sm:text-right flex flex-col justify-between">
                           <div className="flex sm:justify-end items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400">
                             <span className="text-slate-400 dark:text-slate-500">Called by:</span>
-                            <div className="w-5 h-5 rounded-full bg-purple-100 dark:bg-purple-950/80 text-[#5B4DB7] dark:text-purple-300 font-bold text-[10px] flex items-center justify-center">
-                              {call.employeeAvatar}
-                            </div>
+                            <EmployeeAvatar
+                              name={call.employeeName}
+                              avatar={call.employeeAvatar}
+                              profilePhoto={call.employeeProfilePhoto}
+                              email={call.employeeEmail}
+                              size="xs"
+                              showRing={true}
+                            />
                             <span className="font-semibold text-slate-800 dark:text-slate-200">{call.employeeName}</span>
                           </div>
 
                           {call.nextFollowUp && (
-                            <div className="text-xs text-indigo-700 dark:text-indigo-300 bg-indigo-50/80 dark:bg-indigo-950/50 px-2.5 py-1 rounded-lg border border-indigo-100/80 dark:border-indigo-800 sm:self-end">
-                              <span className="font-medium">Next Follow-up: </span>
-                              <strong className="font-bold">{call.nextFollowUp.date}</strong> at{' '}
-                              <span>{call.nextFollowUp.time}</span> ({call.nextFollowUp.type})
+                            <div className="flex items-center gap-1.5 text-xs text-indigo-700 dark:text-indigo-300 bg-indigo-50/80 dark:bg-indigo-950/50 px-2.5 py-1 rounded-lg border border-indigo-100/80 dark:border-indigo-800 sm:self-end">
+                              <EmployeeAvatar
+                                name={call.nextFollowUp.assignedTo}
+                                avatar={call.nextFollowUp.assignedAvatar}
+                                profilePhoto={call.nextFollowUp.assignedProfilePhoto}
+                                email={call.nextFollowUp.assignedEmail}
+                                size="xs"
+                              />
+                              <div>
+                                <span className="font-medium">Next: </span>
+                                <strong className="font-bold">{call.nextFollowUp.date}</strong> at{' '}
+                                <span>{call.nextFollowUp.time}</span> ({call.nextFollowUp.type})
+                              </div>
                             </div>
                           )}
                         </div>

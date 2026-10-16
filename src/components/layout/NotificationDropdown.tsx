@@ -12,6 +12,7 @@ import {
   ExternalLink,
   Loader2,
   Inbox,
+  AlertCircle,
 } from 'lucide-react';
 import { NotificationItem } from '../../types/navigation';
 import {
@@ -27,6 +28,7 @@ export const NotificationDropdown: React.FC = () => {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [hasFetchError, setHasFetchError] = useState<boolean>(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const loadNotifications = useCallback(async () => {
@@ -35,8 +37,10 @@ export const NotificationDropdown: React.FC = () => {
       const res = await fetchNotifications({ size: 10 });
       setNotifications(res.content);
       setUnreadCount(res.unreadCount);
+      setHasFetchError(false);
     } catch (err) {
-      console.error('[NotificationDropdown] Failed to fetch notifications:', err);
+      setHasFetchError(true);
+      // Suppress unhandled crash in UI
     } finally {
       setIsLoading(false);
     }
@@ -185,6 +189,21 @@ export const NotificationDropdown: React.FC = () => {
               <div className="flex flex-col items-center justify-center py-8 text-slate-400 dark:text-slate-500">
                 <Loader2 className="w-6 h-6 animate-spin text-purple-600 dark:text-purple-400 mb-2" />
                 <span className="text-xs">Loading notifications...</span>
+              </div>
+            ) : hasFetchError && notifications.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 text-slate-400 dark:text-slate-500 px-4 text-center">
+                <AlertCircle className="w-7 h-7 text-amber-500/80 mb-2" />
+                <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">Notifications Temporarily Offline</p>
+                <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1 max-w-[210px] leading-relaxed">
+                  Connecting to backend services. Your alerts will appear as soon as the service connects.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => loadNotifications()}
+                  className="mt-3 px-3 py-1 bg-purple-50 dark:bg-purple-950/60 text-[#5B4DB7] dark:text-purple-300 border border-purple-200 dark:border-purple-800 rounded-lg text-xs font-semibold hover:bg-purple-100 dark:hover:bg-purple-900/40 transition-colors cursor-pointer"
+                >
+                  Retry Connection
+                </button>
               </div>
             ) : notifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8 text-slate-400 dark:text-slate-500 px-4 text-center">

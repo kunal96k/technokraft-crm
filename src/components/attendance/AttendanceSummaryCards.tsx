@@ -1,5 +1,5 @@
 import React from 'react';
-import { CalendarCheck, UserX, CalendarOff, ClockAlert, Clock } from 'lucide-react';
+import { CalendarCheck, UserX, CalendarOff, ClockAlert, Clock, Hourglass } from 'lucide-react';
 import { Employee } from '../../types/employees';
 
 import { AttendanceSummaryData } from '../../services/attendanceService';
@@ -20,6 +20,7 @@ export const AttendanceSummaryCards: React.FC<AttendanceSummaryCardsProps> = ({
   const presentToday = summary?.presentToday ?? employees.filter(
     (e) => e.todayAttendanceStatus === 'Present' || e.todayAttendanceStatus === 'Late'
   ).length;
+  const halfDay = summary?.halfDay ?? employees.filter((e) => e.todayAttendanceStatus === 'Half Day').length;
   const absent = summary?.absent ?? employees.filter((e) => e.todayAttendanceStatus === 'Absent').length;
   const onLeave = summary?.onLeave ?? employees.filter((e) => e.todayAttendanceStatus === 'Leave').length;
   const late = summary?.late ?? employees.filter((e) => e.todayAttendanceStatus === 'Late').length;
@@ -35,6 +36,16 @@ export const AttendanceSummaryCards: React.FC<AttendanceSummaryCardsProps> = ({
       color: 'text-emerald-600 dark:text-emerald-400',
       bgColor: 'bg-emerald-50 dark:bg-emerald-950/40',
       filterKey: 'Present',
+    },
+    {
+      id: 'half-day',
+      title: 'Half Day',
+      value: halfDay,
+      subtitle: 'Partial day shifts',
+      icon: Hourglass,
+      color: 'text-blue-600 dark:text-blue-400',
+      bgColor: 'bg-blue-50 dark:bg-blue-950/40',
+      filterKey: 'Half Day',
     },
     {
       id: 'absent',
@@ -79,7 +90,7 @@ export const AttendanceSummaryCards: React.FC<AttendanceSummaryCardsProps> = ({
   ];
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
       {cards.map((card) => {
         const Icon = card.icon;
         const isSelected = selectedFilter === card.filterKey;

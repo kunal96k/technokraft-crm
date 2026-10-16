@@ -23,6 +23,7 @@ import {
   formatISTDate,
   formatISTTime,
 } from '../../utils/dateUtils';
+import { EmployeeAvatar } from '../common/EmployeeAvatar';
 
 interface CalendarViewProps {
   followUps: FollowUpRecord[];
@@ -372,12 +373,17 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                   </div>
 
                   <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 pt-2 border-t border-slate-200/60 dark:border-slate-800">
-                    <div className="flex items-center gap-1.5 truncate">
-                      <span className="w-5 h-5 rounded-full bg-purple-100 dark:bg-purple-900/50 text-[#5B4DB7] dark:text-purple-300 text-[10px] font-bold flex items-center justify-center flex-shrink-0">
-                        {item.assignedAvatar || (item.assignedTo ? item.assignedTo.substring(0, 2).toUpperCase() : 'KP')}
-                      </span>
+                    <div className="flex items-center gap-1.5 truncate min-w-0">
+                      <EmployeeAvatar
+                        name={item.assignedTo || item.assignedToName || 'Unassigned'}
+                        avatar={item.assignedAvatar}
+                        profilePhoto={item.assignedProfilePhoto}
+                        email={item.assignedEmail}
+                        size="xs"
+                        showRing={true}
+                      />
                       <span className="truncate font-medium text-slate-700 dark:text-slate-300">
-                        {item.assignedTo || item.contactName}
+                        {item.assignedTo || item.assignedToName || item.contactName || 'Unassigned'}
                       </span>
                     </div>
 

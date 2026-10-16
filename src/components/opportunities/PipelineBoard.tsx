@@ -22,6 +22,7 @@ interface PipelineBoardProps {
   onMarkLost: (opp: OpportunityRecord) => void;
   onDelete: (opp: OpportunityRecord) => void;
   onQuickAdd: (stage: OpportunityStage) => void;
+  onViewStageInList?: (stage: OpportunityStage) => void;
 }
 
 interface StageColumnConfig {
@@ -94,6 +95,7 @@ export const PipelineBoard: React.FC<PipelineBoardProps> = ({
   onMarkLost,
   onDelete,
   onQuickAdd,
+  onViewStageInList,
 }) => {
   const [activeId, setActiveId] = useState<string | null>(null);
 
@@ -144,9 +146,9 @@ export const PipelineBoard: React.FC<PipelineBoardProps> = ({
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      {/* Horizontal scrolling Kanban columns with natural vertical expansion */}
-      <div className="w-full overflow-x-auto pb-6">
-        <div className="flex gap-4 items-start min-w-max">
+      {/* Viewport-locked Kanban container: fits screen, columns scroll internally */}
+      <div className="w-full overflow-x-auto pb-4 h-[calc(100vh-275px)] min-h-[580px]">
+        <div className="flex gap-4 items-stretch min-w-max h-full">
           {STAGES_CONFIG.map((col) => {
             const colOpportunities = opportunities.filter((o) => o.stage === col.id);
             return (
@@ -167,6 +169,7 @@ export const PipelineBoard: React.FC<PipelineBoardProps> = ({
                 onMarkLost={onMarkLost}
                 onDelete={onDelete}
                 onQuickAdd={onQuickAdd}
+                onViewStageInList={onViewStageInList}
               />
             );
           })}

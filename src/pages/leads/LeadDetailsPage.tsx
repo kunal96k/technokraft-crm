@@ -23,6 +23,7 @@ import {
   Trash2,
   UploadCloud,
   Paperclip,
+  UserCheck,
 } from 'lucide-react';
 import { LeadStatusBadge } from '../../components/leads/LeadStatusBadge';
 import { LeadPriorityBadge } from '../../components/leads/LeadPriorityBadge';
@@ -37,6 +38,7 @@ import { LogCallModal } from '../../components/communication/calls/LogCallModal'
 import { EmailComposerModal } from '../../components/communication/EmailComposerModal';
 import { CreateFollowUpModal } from '../../components/followups/CreateFollowUpModal';
 import { ActivityDetailsModal } from '../../components/leads/ActivityDetailsModal';
+import { AssignLeadModal } from '../../components/leads/AssignLeadModal';
 import { EmailRecord } from '../../types/communication';
 import { logCallApi } from '../../services/callService';
 import { useToast } from '../../context/ToastContext';
@@ -67,6 +69,7 @@ export const LeadDetailsPage: React.FC = () => {
   const [lead, setLead] = useState<Lead | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [currentStatus, setCurrentStatus] = useState<LeadStatus>('NEW');
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState<boolean>(false);
 
   // Server-side paginated activities state (25 timeline logs per page)
   const [paginatedActivities, setPaginatedActivities] = useState<LeadActivity[]>([]);
@@ -481,6 +484,13 @@ export const LeadDetailsPage: React.FC = () => {
                   {lead.assignedEmployee?.name || 'Unassigned'}
                 </p>
                 <p className="text-[10px] text-slate-500 dark:text-slate-400">{lead.assignedEmployee?.role || 'Sales Executive'}</p>
+                <button
+                  type="button"
+                  onClick={() => setIsAssignModalOpen(true)}
+                  className="text-[10px] text-[#5B4DB7] dark:text-purple-400 hover:underline font-semibold block text-left mt-0.5 cursor-pointer"
+                >
+                  Change Owner
+                </button>
               </div>
             </div>
 
@@ -511,6 +521,16 @@ export const LeadDetailsPage: React.FC = () => {
               >
                 <CalendarPlus className="w-3.5 h-3.5" />
                 <span>Follow-up</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsAssignModalOpen(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100/80 dark:hover:bg-indigo-900/60 text-indigo-800 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 text-xs font-semibold transition-colors cursor-pointer"
+                title="Assign active employee or BA to this lead"
+              >
+                <UserCheck className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                <span>Assign</span>
               </button>
 
               <button
@@ -1009,7 +1029,16 @@ export const LeadDetailsPage: React.FC = () => {
 
               {/* Assigned Sales Employee */}
               <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-950/60 border border-slate-200/70 dark:border-slate-800 space-y-1">
-                <span className="text-[11px] font-semibold uppercase text-slate-400 dark:text-slate-500">Assigned Sales Executive</span>
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-semibold uppercase text-slate-400 dark:text-slate-500">Assigned Sales Executive</span>
+                  <button
+                    type="button"
+                    onClick={() => setIsAssignModalOpen(true)}
+                    className="text-[11px] font-semibold text-[#5B4DB7] dark:text-purple-400 hover:underline cursor-pointer"
+                  >
+                    Change
+                  </button>
+                </div>
                 <div className="flex items-center gap-2 pt-0.5">
                   <EmployeeAvatar
                     name={lead.assignedEmployee?.name || 'Unassigned'}
@@ -1030,7 +1059,16 @@ export const LeadDetailsPage: React.FC = () => {
 
               {/* Assigned BA */}
               <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-950/60 border border-slate-200/70 dark:border-slate-800 space-y-1">
-                <span className="text-[11px] font-semibold uppercase text-slate-400 dark:text-slate-500">Assigned Business Analyst</span>
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-semibold uppercase text-slate-400 dark:text-slate-500">Assigned Business Analyst</span>
+                  <button
+                    type="button"
+                    onClick={() => setIsAssignModalOpen(true)}
+                    className="text-[11px] font-semibold text-[#5B4DB7] dark:text-purple-400 hover:underline cursor-pointer"
+                  >
+                    Change
+                  </button>
+                </div>
                 <div className="flex items-center gap-2 pt-0.5">
                   <EmployeeAvatar
                     name={lead.assignedBA?.name || 'Unassigned'}
@@ -2083,6 +2121,18 @@ export const LeadDetailsPage: React.FC = () => {
         onLogCall={() => setIsLogCallModalOpen(true)}
         onLogFollowUp={() => setIsFollowUpModalOpen(true)}
         onSendEmail={() => setIsEmailComposerOpen(true)}
+      />
+
+      {/* Assign Employee Modal with Active-Only Typeahead Debounced Search */}
+      <AssignLeadModal
+        lead={lead}
+        isOpen={isAssignModalOpen}
+        onClose={() => setIsAssignModalOpen(false)}
+        onSuccess={(updated) => {
+          setLead(updated);
+          setIsAssignModalOpen(false);
+          loadActivities(0);
+        }}
       />
     </div>
   );

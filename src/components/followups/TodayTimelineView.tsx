@@ -19,6 +19,7 @@ import { FollowUpStatusBadge } from './FollowUpStatusBadge';
 
 import { formatISTDate, formatISTTime } from '../../utils/dateUtils';
 import { FollowUpEmptyState } from './FollowUpEmptyState';
+import { EmployeeAvatar } from '../common/EmployeeAvatar';
 
 interface TodayTimelineViewProps {
   followUps: FollowUpRecord[];
@@ -164,11 +165,16 @@ export const TodayTimelineView: React.FC<TodayTimelineViewProps> = ({
                     )}
 
                     <div className="flex items-center gap-2 pt-1 border-t border-slate-200/60 dark:border-slate-800">
-                      <span className="w-5 h-5 rounded-full bg-purple-100 dark:bg-purple-900/50 text-[#5B4DB7] dark:text-purple-300 text-[10px] font-bold flex items-center justify-center">
-                        {item.assignedAvatar || item.assignedTo.substring(0, 2).toUpperCase()}
-                      </span>
+                      <EmployeeAvatar
+                        name={item.assignedTo || item.assignedToName || 'Unassigned'}
+                        avatar={item.assignedAvatar}
+                        profilePhoto={item.assignedProfilePhoto}
+                        email={item.assignedEmail}
+                        size="xs"
+                        showRing={true}
+                      />
                       <span className="text-[11px] text-slate-600 dark:text-slate-400 truncate">
-                        Assigned: <strong className="text-slate-700 dark:text-slate-200">{item.assignedTo}</strong>
+                        Assigned: <strong className="text-slate-700 dark:text-slate-200">{item.assignedTo || item.assignedToName || 'Unassigned'}</strong>
                       </span>
                     </div>
                   </div>

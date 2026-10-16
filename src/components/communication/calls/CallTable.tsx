@@ -5,6 +5,7 @@ import { CallResultBadge } from './CallResultBadge';
 import { CallTypeBadge } from './CallTypeBadge';
 import { CallActionMenu } from './CallActionMenu';
 import { PhoneCall, CalendarPlus, ExternalLink } from 'lucide-react';
+import { EmployeeAvatar } from '../../common/EmployeeAvatar';
 
 interface CallTableProps {
   calls: CallRecord[];
@@ -150,9 +151,14 @@ export const CallTable: React.FC<CallTableProps> = ({
                   {/* Employee */}
                   <td className="py-3 px-3 whitespace-nowrap">
                     <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-950/80 text-[#5B4DB7] dark:text-purple-300 font-bold text-[10px] flex items-center justify-center shrink-0">
-                        {call.employeeAvatar}
-                      </div>
+                      <EmployeeAvatar
+                        name={call.employeeName}
+                        avatar={call.employeeAvatar}
+                        profilePhoto={call.employeeProfilePhoto}
+                        email={call.employeeEmail}
+                        size="xs"
+                        showRing={true}
+                      />
                       <span className="text-slate-700 dark:text-slate-300 font-medium">{call.employeeName}</span>
                     </div>
                   </td>

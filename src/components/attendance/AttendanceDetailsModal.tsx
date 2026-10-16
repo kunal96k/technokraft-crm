@@ -208,21 +208,14 @@ export const AttendanceDetailsModal: React.FC<AttendanceDetailsModalProps> = ({
   const todayLabel = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
   const currentMonthYear = `${MONTH_NAMES[now.getMonth()]} ${now.getFullYear()}`;
 
-  // Check if session was < 1 minute or employee is marked On Leave
-  const isSubOneMinuteOrLeave =
-    employee.status === 'On Leave' ||
-    employee.workStatus === 'On Leave' ||
-    (employee.workStatus === 'Logged Out' &&
-      (!employee.todayWorkingTime ||
-        employee.todayWorkingTime === '0h 00m' ||
-        employee.todayWorkingTime === '00:00' ||
-        employee.todayWorkingTime === '0h 0m'));
+  const isOnLeave =
+    employee.status === 'On Leave' || employee.workStatus === 'On Leave';
 
-  const effectiveAttendanceStatus = isSubOneMinuteOrLeave
+  const effectiveAttendanceStatus = isOnLeave
     ? 'Leave'
     : (employee.todayAttendanceStatus || (employee.workStatus === 'Working' ? 'Present' : 'Absent'));
 
-  const displayDuration = isSubOneMinuteOrLeave ? '00:00' : (employee.todayWorkingTime || '00:00');
+  const displayDuration = isOnLeave ? '00:00' : (employee.todayWorkingTime || '00:00');
 
   // Resolve profile image URL
   const photoUrl = employee.profilePhoto
@@ -359,7 +352,7 @@ export const AttendanceDetailsModal: React.FC<AttendanceDetailsModalProps> = ({
                   <span>Break Duration</span>
                 </div>
                 <span className="font-mono font-bold text-amber-600 dark:text-amber-400 text-sm">
-                  {employee.attendanceSummary?.breakTime ?? '—'}
+                  {employee.todayBreakTime || employee.attendanceSummary?.todayBreakTime || '0m'}
                 </span>
               </div>
             </div>

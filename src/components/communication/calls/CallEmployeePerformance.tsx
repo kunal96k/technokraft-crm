@@ -1,6 +1,8 @@
 import React, { useMemo } from 'react';
 import { EmployeeCallStats, CallRecord } from '../../../types/calls';
 import { PhoneCall, CheckCircle2, PhoneMissed, ClockAlert, ArrowRight, Users } from 'lucide-react';
+import { EmployeeAvatar } from '../../common/EmployeeAvatar';
+import { findCachedEmployee } from '../../../services/employeeService';
 
 interface CallEmployeePerformanceProps {
   calls?: CallRecord[];
@@ -23,10 +25,13 @@ export const CallEmployeePerformance: React.FC<CallEmployeePerformanceProps> = (
             .join('')
             .slice(0, 2)
             .toUpperCase() || 'EM';
+          const cached = findCachedEmployee(empName);
           map.set(empName, {
             employeeName: empName,
-            role: 'Sales Representative',
-            avatar: initials,
+            role: cached?.role || c.employeeRole || 'Sales Representative',
+            avatar: cached?.avatar || c.employeeAvatar || initials,
+            profilePhoto: cached?.profilePhoto || c.employeeProfilePhoto,
+            email: cached?.email || c.employeeEmail,
             callsToday: 0,
             completed: 0,
             missed: 0,
@@ -77,9 +82,14 @@ export const CallEmployeePerformance: React.FC<CallEmployeePerformanceProps> = (
                 {/* Header */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-full bg-purple-100 dark:bg-purple-950/80 text-[#5B4DB7] dark:text-purple-300 font-bold text-xs flex items-center justify-center">
-                      {emp.avatar}
-                    </div>
+                    <EmployeeAvatar
+                      name={emp.employeeName}
+                      avatar={emp.avatar}
+                      profilePhoto={emp.profilePhoto}
+                      email={emp.email}
+                      size="md"
+                      showRing={true}
+                    />
                     <div>
                       <h4 className="text-xs font-bold text-slate-900 dark:text-white">{emp.employeeName}</h4>
                       <p className="text-[11px] text-slate-500 dark:text-slate-400">{emp.role}</p>

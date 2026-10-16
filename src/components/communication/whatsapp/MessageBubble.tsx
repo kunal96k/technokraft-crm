@@ -2,6 +2,7 @@ import React from 'react';
 import { FileText, Download } from 'lucide-react';
 import { WhatsAppMessage } from '../../../types/communication';
 import { CommunicationStatusBadge } from '../CommunicationStatusBadge';
+import { EmployeeAvatar } from '../../common/EmployeeAvatar';
 
 interface MessageBubbleProps {
   message: WhatsAppMessage;
@@ -16,10 +17,19 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
         isEmployee ? 'items-end' : 'items-start'
       }`}
     >
-      {/* Sender label */}
-      <span className="text-[10px] font-semibold text-slate-400 mb-1 px-1">
-        {message.senderName}
-      </span>
+      {/* Sender label with avatar */}
+      <div className={`flex items-center gap-1.5 mb-1 px-1 ${isEmployee ? 'flex-row-reverse' : 'flex-row'}`}>
+        <EmployeeAvatar
+          name={message.senderName}
+          avatar={message.senderAvatar}
+          profilePhoto={message.senderProfilePhoto}
+          size="xs"
+          isClient={!isEmployee}
+        />
+        <span className="text-[10px] font-semibold text-slate-400">
+          {message.senderName}
+        </span>
+      </div>
 
       {/* Bubble */}
       <div

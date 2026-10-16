@@ -17,6 +17,7 @@ import { FollowUpPriorityBadge } from './FollowUpPriorityBadge';
 import { FollowUpTypeBadge } from './FollowUpTypeBadge';
 import { FollowUpActionMenu } from './FollowUpActionMenu';
 import { FollowUpEmptyState } from './FollowUpEmptyState';
+import { EmployeeAvatar } from '../common/EmployeeAvatar';
 
 interface FollowUpTableProps {
   followUps: FollowUpRecord[];
@@ -190,7 +191,7 @@ export const FollowUpTable: React.FC<FollowUpTableProps> = ({
                       </div>
                       <div className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1.5 mt-0.5">
                         <User className="w-3 h-3 text-slate-400" />
-                        <span>{item.leadContactPerson || 'Client Contact'}</span>
+                        <span>{item.contactName || (item as any).leadContactPerson || 'Client Contact'}</span>
                         {item.leadCode && (
                           <span className="font-mono text-[10px] px-1 py-0.2 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
                             {item.leadCode}
@@ -207,11 +208,16 @@ export const FollowUpTable: React.FC<FollowUpTableProps> = ({
 
                   {/* Assigned To */}
                   <td className="p-3">
-                    <div className="flex items-center gap-1.5 font-medium text-slate-800 dark:text-slate-200">
-                      <div className="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[10px] font-bold text-slate-700 dark:text-slate-300">
-                        {item.assignedToName?.charAt(0) || 'U'}
-                      </div>
-                      <span>{item.assignedToName || 'Unassigned'}</span>
+                    <div className="flex items-center gap-2 font-medium text-slate-800 dark:text-slate-200">
+                      <EmployeeAvatar
+                        name={item.assignedTo || item.assignedToName || 'Unassigned'}
+                        avatar={item.assignedAvatar}
+                        profilePhoto={item.assignedProfilePhoto}
+                        email={item.assignedEmail}
+                        size="xs"
+                        showRing={true}
+                      />
+                      <span className="truncate max-w-[130px]">{item.assignedTo || item.assignedToName || 'Unassigned'}</span>
                     </div>
                   </td>
 

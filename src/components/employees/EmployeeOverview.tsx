@@ -50,7 +50,7 @@ export const EmployeeOverview: React.FC<EmployeeOverviewProps> = ({
 
   const username = employee.username || employee.email?.split('@')[0] || employee.employeeCode.toLowerCase();
   const effectiveAllowedModules =
-    employee.allowedModules && employee.allowedModules.length > 0
+    employee.allowedModules !== undefined && employee.allowedModules !== null && Array.isArray(employee.allowedModules)
       ? employee.allowedModules
       : getDefaultModulesForRole(employee.accessRole || 'Sales Executive');
 
@@ -64,20 +64,14 @@ export const EmployeeOverview: React.FC<EmployeeOverviewProps> = ({
     }
   };
 
-    const isSubOneMinuteOrLeave =
-      employee.status === 'On Leave' ||
-      employee.workStatus === 'On Leave' ||
-      (employee.workStatus === 'Logged Out' &&
-        (!employee.todayWorkingTime ||
-          employee.todayWorkingTime === '0h 00m' ||
-          employee.todayWorkingTime === '00:00' ||
-          employee.todayWorkingTime === '0h 0m'));
+    const isOnLeave =
+      employee.status === 'On Leave' || employee.workStatus === 'On Leave';
 
-    const effectiveAttendanceStatus = isSubOneMinuteOrLeave
+    const effectiveAttendanceStatus = isOnLeave
       ? 'Leave'
       : (employee.todayAttendanceStatus || (employee.workStatus === 'Working' ? 'Present' : 'Absent'));
 
-    const displayDuration = isSubOneMinuteOrLeave ? '00:00' : (employee.todayWorkingTime || '00:00');
+    const displayDuration = isOnLeave ? '00:00' : (employee.todayWorkingTime || '00:00');
 
     if (shouldMaskForSecurity(employee, user)) {
       return (

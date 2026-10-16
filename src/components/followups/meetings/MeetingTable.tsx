@@ -18,6 +18,7 @@ import { MeetingRecord, MeetingStatus } from '../../../types/followUps';
 import { FollowUpEmptyState } from '../FollowUpEmptyState';
 import { ConfirmationModal } from '../../common/ConfirmationModal';
 import { formatDisplayDate } from '../../../utils/dateUtils';
+import { EmployeeAvatar } from '../../common/EmployeeAvatar';
 
 interface MeetingTableProps {
   meetings: MeetingRecord[];
@@ -172,11 +173,14 @@ export const MeetingTable: React.FC<MeetingTableProps> = ({
 
                 {/* Host */}
                 <td className="py-3 px-3">
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900/40 text-[#5B4DB7] dark:text-purple-300 text-[10px] font-bold flex items-center justify-center">
-                      {item.assignedAvatar || item.assignedEmployee.substring(0, 2).toUpperCase()}
-                    </span>
-                    <span className="truncate text-slate-700 dark:text-slate-300">{item.assignedEmployee}</span>
+                  <div className="flex items-center gap-2">
+                    <EmployeeAvatar
+                      name={item.assignedEmployee}
+                      avatar={item.assignedAvatar}
+                      size="xs"
+                      showRing={true}
+                    />
+                    <span className="truncate text-slate-700 dark:text-slate-300 font-medium">{item.assignedEmployee}</span>
                   </div>
                 </td>
 

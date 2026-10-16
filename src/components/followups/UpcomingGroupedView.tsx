@@ -22,6 +22,7 @@ import {
   formatISTTime,
 } from '../../utils/dateUtils';
 import { FollowUpEmptyState } from './FollowUpEmptyState';
+import { EmployeeAvatar } from '../common/EmployeeAvatar';
 
 interface UpcomingGroupedViewProps {
   followUps: FollowUpRecord[];
@@ -145,9 +146,16 @@ export const UpcomingGroupedView: React.FC<UpcomingGroupedViewProps> = ({
                   </div>
 
                   <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2 text-xs">
-                    <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400 truncate">
-                      <User className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
-                      <span className="truncate">{item.contactName}</span>
+                    <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400 truncate min-w-0">
+                      <EmployeeAvatar
+                        name={item.assignedTo || item.assignedToName || 'Unassigned'}
+                        avatar={item.assignedAvatar}
+                        profilePhoto={item.assignedProfilePhoto}
+                        email={item.assignedEmail}
+                        size="xs"
+                        showRing={true}
+                      />
+                      <span className="truncate">{item.contactName} ({item.assignedTo || item.assignedToName || 'Unassigned'})</span>
                     </div>
 
                     <div className="flex items-center gap-1">

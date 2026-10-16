@@ -147,6 +147,44 @@ export async function fetchEmployeeById(id: string | number): Promise<Employee |
   }
 }
 
+async function extractErrorMessage(res: Response, fallback: string): Promise<string> {
+  try {
+    const text = await res.text();
+    try {
+      const json = JSON.parse(text);
+      if (json.message) return json.message;
+      if (json.error) return json.error;
+      if (json.detail) return json.detail;
+    } catch {
+      if (text && text.trim().length > 0 && text.length < 150 && !text.includes('<!DOCTYPE') && !text.includes('<html')) {
+        return text.trim();
+      }
+    }
+  } catch {
+    // Ignore text reading error
+  }
+
+  if (res.status === 401) {
+    return 'Authentication required. Please log in again to continue.';
+  }
+  if (res.status === 403) {
+    return 'Permission denied. You do not have administrative access to manage employees.';
+  }
+  if (res.status === 404) {
+    return 'Requested employee record was not found.';
+  }
+  if (res.status === 409) {
+    return 'An employee with this email address or employee code already exists in the system.';
+  }
+  if (res.status === 400) {
+    return 'Invalid employee information. Please check all required fields and try again.';
+  }
+  if (res.status >= 500) {
+    return 'The backend server is currently unavailable or restarting. Please try again in a few moments.';
+  }
+  return fallback;
+}
+
 /**
  * Create a new employee
  */
@@ -162,8 +200,8 @@ export async function createEmployee(payload: Partial<Employee>): Promise<Employ
     });
 
     if (!res.ok) {
-      const errBody = await res.json().catch(() => ({}));
-      throw new Error(errBody.message || `HTTP ${res.status}`);
+      const errMsg = await extractErrorMessage(res, `Failed to create employee (HTTP ${res.status})`);
+      throw new Error(errMsg);
     }
     return await res.json();
   } catch (error) {
@@ -188,8 +226,8 @@ export async function updateEmployee(id: string | number, payload: Partial<Emplo
     });
 
     if (!res.ok) {
-      const errBody = await res.json().catch(() => ({}));
-      throw new Error(errBody.message || `HTTP ${res.status}`);
+      const errMsg = await extractErrorMessage(res, `Failed to update employee (HTTP ${res.status})`);
+      throw new Error(errMsg);
     }
     return await res.json();
   } catch (error) {
@@ -213,11 +251,14 @@ export async function updateEmployeeStatus(id: string | number, status: string):
       body: JSON.stringify({ status }),
     });
 
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    if (!res.ok) {
+      const errMsg = await extractErrorMessage(res, `Failed to update employee status (HTTP ${res.status})`);
+      throw new Error(errMsg);
+    }
     return await res.json();
   } catch (error) {
     console.error(`[EmployeeService] Failed to update employee status ${id}:`, error);
-    return null;
+    throw error;
   }
 }
 
@@ -241,8 +282,8 @@ export async function resetEmployeePassword(
     });
 
     if (!res.ok) {
-      const errBody = await res.json().catch(() => ({}));
-      throw new Error(errBody.message || `HTTP ${res.status}`);
+      const errMsg = await extractErrorMessage(res, `Failed to reset password (HTTP ${res.status})`);
+      throw new Error(errMsg);
     }
     return await res.json();
   } catch (error) {
@@ -334,27 +375,22 @@ export const getTodayAttendanceRecords = (sourceEmployees: Employee[] = []): Dai
   return sourceEmployees.map((emp) => {
     let logoutTime = emp.logoutTime || '—';
     let workingMinutes = 0;
-    let breakTime = '0m';
+    let breakTime = emp.todayBreakTime && emp.todayBreakTime.trim() !== '' ? emp.todayBreakTime : '0m';
     let breakMinutes = 0;
     let session = emp.todayWorkingTime || '0h 00m';
 
+    if (emp.workStatus === 'Working') {
+      logoutTime = 'Active (Working)';
+    } else if (emp.logoutTime) {
+      logoutTime = emp.logoutTime;
+    }
+
     if (emp.todayAttendanceStatus === 'Present' || emp.todayAttendanceStatus === 'Late') {
       workingMinutes = emp.todayAttendanceStatus === 'Present' ? 480 : 420;
-      breakTime = '45m';
-      breakMinutes = 45;
-      if (emp.workStatus === 'Working') {
-        logoutTime = 'Active (Working)';
-      } else if (emp.logoutTime) {
-        logoutTime = emp.logoutTime;
-      }
     } else if (emp.todayAttendanceStatus === 'Half Day') {
       workingMinutes = 240;
-      breakTime = '20m';
-      breakMinutes = 20;
     } else {
       workingMinutes = 0;
-      breakTime = '0m';
-      breakMinutes = 0;
       session = emp.todayWorkingTime || '0h 00m';
     }
 

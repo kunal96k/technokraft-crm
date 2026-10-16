@@ -3,6 +3,8 @@ import { CallRecord } from '../../../types/calls';
 import { Lead } from '../../../types/leads';
 import { EmployeeSelect } from '../../common/EmployeeSelect';
 import { LeadSearchSelect } from '../../common/LeadSearchSelect';
+import { useAuth } from '../../../context/AuthContext';
+import { findCachedEmployee } from '../../../services/employeeService';
 import {
   X,
   Search,
@@ -29,6 +31,7 @@ export const ScheduleCallModal: React.FC<ScheduleCallModalProps> = ({
   onScheduleCall,
   initialLead,
 }) => {
+  const { user: authUser } = useAuth();
   const [selectedLead, setSelectedLead] = useState<Lead | null>(initialLead || null);
   const [contactName, setContactName] = useState(initialLead?.contact?.name || '');
   const [contactPhone, setContactPhone] = useState(initialLead?.contact?.phone || '');
@@ -84,18 +87,27 @@ export const ScheduleCallModal: React.FC<ScheduleCallModalProps> = ({
       contactDesignation: selectedLead.contact.designation,
       contactPhone: contactPhone || selectedLead.contact.phone,
       contactEmail: selectedLead.contact.email,
-      employeeId: 'emp-1',
+      employeeId: (authUser && authUser.name === assignedEmployee) ? authUser.id : (findCachedEmployee(assignedEmployee)?.id ? String(findCachedEmployee(assignedEmployee)?.id) : 'emp-1'),
       employeeName: assignedEmployee,
       employeeRole:
-        assignedEmployee === 'Kunal Patil'
+        (authUser && authUser.name === assignedEmployee ? authUser.role : findCachedEmployee(assignedEmployee)?.role) ||
+        (assignedEmployee === 'Kunal Patil'
           ? 'Sales Manager'
           : assignedEmployee === 'Shruti Raundal'
           ? 'Senior Sales Executive'
-          : 'Business Analyst',
-      employeeAvatar: assignedEmployee
-        .split(' ')
-        .map((n) => n[0])
-        .join(''),
+          : 'Business Analyst'),
+      employeeAvatar:
+        (authUser && authUser.name === assignedEmployee && authUser.profilePhoto)
+          ? authUser.profilePhoto
+          : (findCachedEmployee(assignedEmployee)?.profilePhoto ||
+             (authUser && authUser.name === assignedEmployee ? authUser.avatar : findCachedEmployee(assignedEmployee)?.avatar) ||
+             assignedEmployee.split(' ').map((n) => n[0]).join('')),
+      employeeProfilePhoto:
+        (authUser && authUser.name === assignedEmployee ? authUser.profilePhoto : undefined) ||
+        findCachedEmployee(assignedEmployee)?.profilePhoto,
+      employeeEmail:
+        (authUser && authUser.name === assignedEmployee ? authUser.email : undefined) ||
+        findCachedEmployee(assignedEmployee)?.email,
       type: 'outbound',
       status: 'scheduled',
       date: '09 Sep 2026',

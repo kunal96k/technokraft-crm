@@ -139,6 +139,12 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
           : (findCachedEmployee(assignedEmployee)?.profilePhoto ||
              (authUser && authUser.name === assignedEmployee ? authUser.avatar : findCachedEmployee(assignedEmployee)?.avatar) ||
              assignedEmployee.split(' ').map((n) => n[0]).join('')),
+      employeeProfilePhoto:
+        (authUser && authUser.name === assignedEmployee ? authUser.profilePhoto : undefined) ||
+        findCachedEmployee(assignedEmployee)?.profilePhoto,
+      employeeEmail:
+        (authUser && authUser.name === assignedEmployee ? authUser.email : undefined) ||
+        findCachedEmployee(assignedEmployee)?.email,
       type: callType,
       status: 'completed',
       date: date
@@ -157,6 +163,18 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
               time: followUpTime,
               type: followUpType,
               assignedTo: followUpAssignedTo,
+              assignedAvatar:
+                (authUser && authUser.name === followUpAssignedTo && authUser.avatar)
+                  ? authUser.avatar
+                  : findCachedEmployee(followUpAssignedTo)?.avatar,
+              assignedProfilePhoto:
+                (authUser && authUser.name === followUpAssignedTo && authUser.profilePhoto)
+                  ? authUser.profilePhoto
+                  : findCachedEmployee(followUpAssignedTo)?.profilePhoto,
+              assignedEmail:
+                (authUser && authUser.name === followUpAssignedTo && authUser.email)
+                  ? authUser.email
+                  : findCachedEmployee(followUpAssignedTo)?.email,
             }
           : undefined,
       service: selectedLead.service,

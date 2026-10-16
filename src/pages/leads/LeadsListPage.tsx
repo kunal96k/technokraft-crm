@@ -31,6 +31,8 @@ import { LeadTable } from '../../components/leads/LeadTable';
 import { LeadMobileCard } from '../../components/leads/LeadMobileCard';
 import { LeadFiltersModal } from '../../components/leads/LeadFiltersModal';
 import { ViewLeadModal } from '../../components/leads/ViewLeadModal';
+import { AssignLeadModal } from '../../components/leads/AssignLeadModal';
+import { EmployeeSelect } from '../../components/common/EmployeeSelect';
 import { useToast } from '../../context/ToastContext';
 import { Lead, LeadFilterState, LeadStatus } from '../../types/leads';
 import {
@@ -100,6 +102,9 @@ export const LeadsListPage: React.FC = () => {
 
   // Quick View Lead Modal state
   const [viewModalLead, setViewModalLead] = useState<Lead | null>(null);
+
+  // Assign Employee Modal state
+  const [assignModalLead, setAssignModalLead] = useState<Lead | null>(null);
 
   // AbortController & Request Sequence Counter for race-condition prevention with 10k+ leads
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -363,7 +368,7 @@ export const LeadsListPage: React.FC = () => {
         toast.info(`Opening email draft for ${lead.contact.email}...`, 'Email Draft');
         break;
       case 'assign':
-        toast.info(`Reassignment workflow opened for ${lead.company.name}.`, 'Reassign Lead');
+        setAssignModalLead(lead);
         break;
       default:
         break;
@@ -659,6 +664,20 @@ export const LeadsListPage: React.FC = () => {
               <option value="MEDIUM">Medium</option>
               <option value="LOW">Low</option>
             </select>
+
+            {/* Assigned Employee Filter with Typeahead Debounced Search */}
+            <div className="w-[180px]">
+              <EmployeeSelect
+                value={filters.assignedTo}
+                onChange={(e) => {
+                  const val = typeof e === 'string' ? e : e.target.value;
+                  handleFilterChange('assignedTo', val);
+                }}
+                placeholder="Assigned: All"
+                showAllOption="Assigned: All"
+                className="w-full text-xs"
+              />
+            </div>
 
             {/* Clear Filters Button */}
             {hasActiveFilters && (
@@ -1004,6 +1023,18 @@ export const LeadsListPage: React.FC = () => {
         isOpen={!!viewModalLead}
         onClose={() => setViewModalLead(null)}
         onOpenFullLead={(leadId) => navigate(`/leads/${leadId}`)}
+      />
+
+      {/* Assign Employee Modal with Active-Only Typeahead Debounced Search */}
+      <AssignLeadModal
+        lead={assignModalLead}
+        isOpen={Boolean(assignModalLead)}
+        onClose={() => setAssignModalLead(null)}
+        onSuccess={() => {
+          setAssignModalLead(null);
+          loadLeads(currentPage - 1, false);
+          loadSummary();
+        }}
       />
     </div>
   );

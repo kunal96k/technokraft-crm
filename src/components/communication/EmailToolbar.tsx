@@ -83,7 +83,8 @@ export const EmailToolbar: React.FC<EmailToolbarProps> = ({
               value={employeeFilter}
               onChange={(e) => onEmployeeFilterChange(e.target.value)}
               placeholder="All Senders / Employees"
-              className="text-xs font-medium px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40 shadow-2xs cursor-pointer max-w-[200px]"
+              containerClassName="relative w-44 lg:w-48 shrink-0"
+              className="text-xs font-medium px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40 shadow-2xs cursor-pointer"
             />
           </div>
 

@@ -14,12 +14,15 @@ import {
   AlertTriangle,
   FileText,
   Briefcase,
+  History,
+  ShieldCheck,
 } from 'lucide-react';
 import { FollowUpRecord } from '../../types/followUps';
 import { FollowUpStatusBadge } from './FollowUpStatusBadge';
 import { FollowUpPriorityBadge } from './FollowUpPriorityBadge';
 import { FollowUpTypeBadge } from './FollowUpTypeBadge';
 import { formatDisplayDate, formatISTTime } from '../../utils/dateUtils';
+import { EmployeeAvatar } from '../common/EmployeeAvatar';
 
 interface FollowUpDetailModalProps {
   isOpen: boolean;
@@ -127,18 +130,24 @@ export const FollowUpDetailModal: React.FC<FollowUpDetailModalProps> = ({
             </span>
             <div className="p-3 bg-white dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 rounded-xl grid grid-cols-1 sm:grid-cols-2 gap-2 text-slate-700 dark:text-slate-300">
               <div className="flex items-center gap-2">
-                <User className="w-4 h-4 text-slate-400 dark:text-slate-500" />
-                <div>
-                  <span className="font-semibold block text-slate-900 dark:text-white">{followUp.contactName}</span>
-                  <span className="text-[11px] text-slate-400 dark:text-slate-500 block">
+                <User className="w-4 h-4 text-slate-400 dark:text-slate-500 flex-shrink-0" />
+                <div className="min-w-0">
+                  <span className="font-semibold block text-slate-900 dark:text-white truncate">{followUp.contactName}</span>
+                  <span className="text-[11px] text-slate-400 dark:text-slate-500 block truncate">
                     {followUp.contactDesignation || 'Primary Contact'}
                   </span>
                 </div>
               </div>
               {followUp.contactPhone && (
                 <div className="flex items-center gap-2">
-                  <Phone className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+                  <Phone className="w-4 h-4 text-slate-400 dark:text-slate-500 flex-shrink-0" />
                   <span className="font-mono text-xs">{followUp.contactPhone}</span>
+                </div>
+              )}
+              {followUp.contactEmail && (
+                <div className="flex items-center gap-2 sm:col-span-2 pt-1 border-t border-slate-100 dark:border-slate-800/80">
+                  <Mail className="w-4 h-4 text-slate-400 dark:text-slate-500 flex-shrink-0" />
+                  <span className="text-xs text-slate-600 dark:text-slate-300 truncate">{followUp.contactEmail}</span>
                 </div>
               )}
             </div>
@@ -146,16 +155,21 @@ export const FollowUpDetailModal: React.FC<FollowUpDetailModalProps> = ({
 
           {/* Owner Details */}
           <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200/80 dark:border-slate-800">
-            <div className="flex items-center gap-2">
-              <span className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/40 text-[#5B4DB7] dark:text-purple-300 text-xs font-bold flex items-center justify-center">
-                {followUp.assignedAvatar || followUp.assignedTo.substring(0, 2).toUpperCase()}
-              </span>
+            <div className="flex items-center gap-3">
+              <EmployeeAvatar
+                name={followUp.assignedTo || followUp.assignedToName || 'Unassigned'}
+                avatar={followUp.assignedAvatar}
+                profilePhoto={followUp.assignedProfilePhoto}
+                email={followUp.assignedEmail}
+                size="md"
+                showRing={true}
+              />
               <div>
-                <span className="font-bold text-slate-800 dark:text-slate-200 block">
-                  {followUp.assignedTo}
+                <span className="font-bold text-slate-800 dark:text-slate-200 block text-xs">
+                  {followUp.assignedTo || followUp.assignedToName || 'Unassigned'}
                 </span>
                 <span className="text-[11px] text-slate-400 dark:text-slate-500 block">
-                  {followUp.assignedRole || 'Sales Rep'}
+                  {followUp.assignedRole || 'Sales Representative'}
                 </span>
               </div>
             </div>
@@ -168,12 +182,72 @@ export const FollowUpDetailModal: React.FC<FollowUpDetailModalProps> = ({
             </Link>
           </div>
 
+          {/* Creation & Record Audit Trail */}
+          <div className="p-3.5 bg-slate-50/80 dark:bg-slate-950/50 rounded-xl border border-slate-200/80 dark:border-slate-800 space-y-2.5">
+            <div className="flex items-center justify-between border-b border-slate-200/60 dark:border-slate-800/80 pb-2">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
+                <History className="w-3.5 h-3.5 text-[#5B4DB7] dark:text-purple-400" />
+                Record Creation & Audit Trail
+              </span>
+              {followUp.leadStatus && (
+                <span className="font-semibold px-2 py-0.5 rounded-full text-[10px] bg-purple-100 dark:bg-purple-900/40 text-[#5B4DB7] dark:text-purple-300">
+                  Lead Status: {followUp.leadStatus}
+                </span>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              {/* Created Date */}
+              <div className="flex items-start gap-2">
+                <Calendar className="w-4 h-4 text-slate-400 dark:text-slate-500 mt-0.5 flex-shrink-0" />
+                <div>
+                  <span className="text-[10px] text-slate-400 dark:text-slate-500 block font-medium">Created Date & Time</span>
+                  <span className="font-semibold text-slate-800 dark:text-slate-200 block">
+                    {formatDisplayDate(followUp.createdAt)}
+                  </span>
+                </div>
+              </div>
+
+              {/* Created By */}
+              <div className="flex items-center gap-2">
+                <EmployeeAvatar
+                  name={followUp.createdBy || followUp.assignedTo || 'System Admin'}
+                  size="xs"
+                  showRing={true}
+                />
+                <div>
+                  <span className="text-[10px] text-slate-400 dark:text-slate-500 block font-medium">Created By</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200 block">
+                    {followUp.createdBy || followUp.assignedTo || 'System Admin'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {followUp.leadScore !== undefined && followUp.leadScore !== null && (
+              <div className="pt-2 border-t border-slate-200/60 dark:border-slate-800/80 flex items-center justify-between text-[11px]">
+                <span className="text-slate-500 dark:text-slate-400">Lead Health / Conversion Score:</span>
+                <span className="font-bold text-[#5B4DB7] dark:text-purple-400 bg-purple-50 dark:bg-purple-950/60 px-2 py-0.5 rounded">
+                  {followUp.leadScore} / 100
+                </span>
+              </div>
+            )}
+          </div>
+
           {/* Past Outcome if completed */}
           {followUp.status === 'COMPLETED' && (
             <div className="p-3.5 bg-emerald-50 dark:bg-emerald-950/30 rounded-xl border border-emerald-200 dark:border-emerald-900/50 text-emerald-900 dark:text-emerald-300 space-y-1">
-              <div className="flex items-center gap-1.5 font-bold text-xs">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                <span>Outcome: {followUp.outcome || 'Completed Successfully'}</span>
+              <div className="flex items-center justify-between font-bold text-xs">
+                <div className="flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  <span>Outcome: {followUp.outcome || 'Completed Successfully'}</span>
+                </div>
+                {followUp.completedAt && (
+                  <span className="text-[10px] font-normal text-emerald-700 dark:text-emerald-400 flex items-center gap-1">
+                    <Clock className="w-3 h-3" />
+                    {formatDisplayDate(followUp.completedAt)}
+                  </span>
+                )}
               </div>
               {followUp.completionNotes && (
                 <p className="text-xs text-emerald-800/90 dark:text-emerald-300/90 mt-1">
@@ -188,7 +262,7 @@ export const FollowUpDetailModal: React.FC<FollowUpDetailModalProps> = ({
             <div className="p-3.5 bg-purple-50 dark:bg-purple-950/30 rounded-xl border border-purple-200 dark:border-purple-900/50 text-purple-900 dark:text-purple-300 space-y-1">
               <div className="flex items-center gap-1.5 font-bold text-xs">
                 <RotateCcw className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                <span>Rescheduled</span>
+                <span>Rescheduled Follow-up</span>
               </div>
               {followUp.rescheduleReason && (
                 <p className="text-xs text-purple-800/90 dark:text-purple-300/90 mt-1">

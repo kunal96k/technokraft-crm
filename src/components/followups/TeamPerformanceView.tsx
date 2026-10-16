@@ -1,6 +1,7 @@
 import React from 'react';
 import { Users, CheckCircle2, Clock, AlertTriangle, Calendar, Award } from 'lucide-react';
 import { EmployeePerformance } from '../../types/followUps';
+import { EmployeeAvatar } from '../common/EmployeeAvatar';
 
 interface TeamPerformanceViewProps {
   performanceData: EmployeePerformance[];
@@ -72,9 +73,12 @@ export const TeamPerformanceView: React.FC<TeamPerformanceViewProps> = ({
               <tr key={`${emp.name}-${emp.role || ''}-${index}`} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors">
                 <td className="py-3 px-4">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/50 text-[#5B4DB7] dark:text-purple-300 font-bold text-xs flex items-center justify-center flex-shrink-0">
-                      {emp.avatar}
-                    </div>
+                    <EmployeeAvatar
+                      name={emp.name}
+                      avatar={emp.avatar}
+                      size="sm"
+                      showRing={true}
+                    />
                     <div>
                       <div className="font-bold text-slate-900 dark:text-white">{emp.name}</div>
                       <div className="text-[11px] text-slate-400 dark:text-slate-500">{emp.role}</div>

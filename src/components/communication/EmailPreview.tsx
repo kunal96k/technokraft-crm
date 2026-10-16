@@ -21,6 +21,7 @@ import {
 import { EmailRecord } from '../../types/communication';
 import { CommunicationStatusBadge } from './CommunicationStatusBadge';
 import { renderBrandedEmailHtml } from '../../utils/emailTemplateRenderer';
+import { EmployeeAvatar } from '../common/EmployeeAvatar';
 
 interface EmailPreviewProps {
   email: EmailRecord | null;
@@ -168,11 +169,20 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({
 
       {/* Recipient Details & Sender Box */}
       <div className="flex-shrink-0 p-4 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-2 text-xs text-slate-600 dark:text-slate-400">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-          <div>
-            <span className="font-semibold text-slate-800 dark:text-slate-200">To: </span>
-            <span className="text-slate-900 dark:text-white font-medium">{email.recipientName}</span>
-            <span className="text-slate-500 dark:text-slate-400"> &lt;{email.recipientEmail}&gt;</span>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="flex items-center gap-2.5">
+            <EmployeeAvatar
+              name={email.recipientName}
+              email={email.recipientEmail}
+              size="sm"
+              showRing={true}
+              isClient={true}
+            />
+            <div>
+              <span className="font-semibold text-slate-800 dark:text-slate-200">To: </span>
+              <span className="text-slate-900 dark:text-white font-medium">{email.recipientName}</span>
+              <span className="text-slate-500 dark:text-slate-400"> &lt;{email.recipientEmail}&gt;</span>
+            </div>
           </div>
           <div className="text-[11px] text-slate-400 dark:text-slate-500">
             {email.date}, {email.time}
@@ -193,8 +203,15 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({
             <strong className="text-slate-700 dark:text-slate-200 font-semibold">{email.companyName}</strong>
           </div>
 
-          <div className="flex items-center gap-1">
-            <User className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
+          <div className="flex items-center gap-1.5">
+            <EmployeeAvatar
+              name={email.senderName}
+              avatar={email.senderAvatar}
+              profilePhoto={email.senderProfilePhoto}
+              email={email.senderEmail}
+              size="xs"
+              showRing={true}
+            />
             <span>Sent by: </span>
             <strong className="text-slate-700 dark:text-slate-200 font-semibold">{email.senderName}</strong>
             <span className="text-slate-400 dark:text-slate-500">&lt;{email.senderEmail}&gt;</span>

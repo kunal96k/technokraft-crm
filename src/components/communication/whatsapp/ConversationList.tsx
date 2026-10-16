@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { WhatsAppConversation } from '../../../types/communication';
 import { ConversationItem } from './ConversationItem';
+import { EmployeeSelect } from '../../common/EmployeeSelect';
 
 export interface ConversationListProps {
   conversations?: WhatsAppConversation[];
@@ -23,6 +24,8 @@ export interface ConversationListProps {
   onSearchChange?: (query: string) => void;
   statusFilter?: string;
   onStatusFilterChange?: (status: string) => void;
+  employeeFilter?: string;
+  onEmployeeFilterChange?: (employee: string) => void;
   filterType?: 'all' | 'unread';
   onFilterTypeChange?: (filterType: 'all' | 'unread') => void;
   page?: number;
@@ -57,6 +60,8 @@ export const ConversationList: React.FC<ConversationListProps> = ({
   onSearchChange = (_q: string) => {},
   statusFilter = 'all',
   onStatusFilterChange = (_s: string) => {},
+  employeeFilter = '',
+  onEmployeeFilterChange,
   filterType = 'all',
   onFilterTypeChange = (_f: 'all' | 'unread') => {},
   page = 0,
@@ -184,6 +189,22 @@ export const ConversationList: React.FC<ConversationListProps> = ({
             </select>
           </div>
         </div>
+
+        {/* Active Employee Filter (Debounced Typeahead Search) */}
+        {onEmployeeFilterChange && (
+          <div className="pt-0.5">
+            <EmployeeSelect
+              value={employeeFilter}
+              onChange={(e) => {
+                const val = typeof e === 'string' ? e : e.target.value;
+                onEmployeeFilterChange(val);
+              }}
+              placeholder="Filter by Assigned Employee"
+              showAllOption="All Assigned Employees"
+              className="w-full text-[11px]"
+            />
+          </div>
+        )}
       </div>
 
       {/* Fetching Progress Indicator */}

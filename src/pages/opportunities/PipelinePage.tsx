@@ -46,6 +46,10 @@ export const PipelinePage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'board' | 'list'>('board');
 
+  // List View Pagination State
+  const [page, setPage] = useState<number>(1);
+  const [rowsPerPage, setRowsPerPage] = useState<number>(25);
+
   // Filters State
   const [filters, setFilters] = useState<PipelineFilterState>({
     search: '',
@@ -86,7 +90,7 @@ export const PipelinePage: React.FC = () => {
     setIsLoading(true);
     try {
       const res = await fetchOpportunities({
-        size: 100,
+        size: 200,
       });
       setOpportunities(res.content);
     } catch (err) {
@@ -426,6 +430,25 @@ export const PipelinePage: React.FC = () => {
     return true;
   });
 
+  // Handler for jumping from terminal stage card to List View
+  const handleViewStageInList = (stg: OpportunityStage) => {
+    setFilters((prev) => ({ ...prev, stage: stg }));
+    setViewMode('list');
+    setPage(1);
+  };
+
+  // Reset page when filters change
+  useEffect(() => {
+    setPage(1);
+  }, [filters]);
+
+  // Pagination for List View
+  const paginatedListOpportunities = filteredOpportunities.slice(
+    (page - 1) * rowsPerPage,
+    page * rowsPerPage
+  );
+  const listTotalPages = Math.max(1, Math.ceil(filteredOpportunities.length / rowsPerPage));
+
   // Calculate metrics
   const totalCount = opportunities.length;
   const qualifiedCount = opportunities.filter((o) => o.stage === 'Qualified').length;
@@ -579,10 +602,11 @@ export const PipelinePage: React.FC = () => {
             setFormDefaultStage(stg);
             setIsFormOpen(true);
           }}
+          onViewStageInList={handleViewStageInList}
         />
       ) : (
         <OpportunityList
-          opportunities={filteredOpportunities}
+          opportunities={paginatedListOpportunities}
           onMoveStage={handleMoveStage}
           onEdit={(opp) => {
             setEditingOpportunity(opp);
@@ -593,6 +617,16 @@ export const PipelinePage: React.FC = () => {
           onMarkWon={(opp) => setWonTarget(opp)}
           onMarkLost={(opp) => setLostTarget(opp)}
           onDelete={(opp) => setDeleteTarget(opp)}
+          currentPage={page}
+          totalPages={listTotalPages}
+          totalElements={filteredOpportunities.length}
+          rowsPerPage={rowsPerPage}
+          onPageChange={(p) => setPage(p)}
+          onRowsPerPageChange={(s) => {
+            setRowsPerPage(s);
+            setPage(1);
+          }}
+          isLoading={isLoading}
         />
       )}
 

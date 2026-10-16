@@ -35,6 +35,8 @@ export interface EmailRecord {
   companyName: string;
   recipientName: string;
   recipientEmail: string;
+  recipientAvatar?: string;
+  recipientProfilePhoto?: string;
   cc?: string[];
   bcc?: string[];
   subject: string;
@@ -42,6 +44,8 @@ export interface EmailRecord {
   status: EmailStatus;
   senderName: string;
   senderEmail: string;
+  senderAvatar?: string;
+  senderProfilePhoto?: string;
   date: string;
   time: string;
   timestamp: string;
@@ -69,6 +73,8 @@ export interface WhatsAppMessage {
   id: string;
   sender: 'contact' | 'employee';
   senderName: string;
+  senderAvatar?: string;
+  senderProfilePhoto?: string;
   text: string;
   timestamp: string;
   time: string;
@@ -88,12 +94,17 @@ export interface WhatsAppConversation {
   contactName: string;
   contactPhone: string;
   contactDesignation: string;
+  contactAvatar?: string;
+  contactProfilePhoto?: string;
   companyName: string;
   companyWebsite?: string;
   service: string;
   leadStatus: string;
   leadScore: number;
   assignedEmployee: string;
+  assignedEmployeeAvatar?: string;
+  assignedEmployeeProfilePhoto?: string;
+  assignedEmployeeEmail?: string;
   nextFollowUp: string;
   unreadCount: number;
   lastMessage: string;

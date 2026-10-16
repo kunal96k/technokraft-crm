@@ -11,6 +11,9 @@ import { ConfirmationModal } from '../common/ConfirmationModal';
 import { LeadSearchSelect } from '../common/LeadSearchSelect';
 import { getTodayIST_YYYYMMDD } from '../../utils/dateUtils';
 
+import { useAuth } from '../../context/AuthContext';
+import { findCachedEmployee } from '../../services/employeeService';
+
 interface CreateFollowUpModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -40,13 +43,14 @@ export const CreateFollowUpModal: React.FC<CreateFollowUpModalProps> = ({
   preselectedLeadId,
   preselectedDate,
 }) => {
+  const { user } = useAuth();
   const [selectedLead, setSelectedLead] = React.useState<Lead | null>(null);
   const [leadId, setLeadId] = React.useState(preselectedLeadId || '');
   const [type, setType] = React.useState<FollowUpType>('Call');
   const [purpose, setPurpose] = React.useState('');
   const [date, setDate] = React.useState(() => preselectedDate || getTodayIST_YYYYMMDD());
   const [time, setTime] = React.useState('16:30');
-  const [assignedTo, setAssignedTo] = React.useState('');
+  const [assignedTo, setAssignedTo] = React.useState(() => user?.name || '');
   const [priority, setPriority] = React.useState<FollowUpPriority>('HIGH');
   const [reminder, setReminder] = React.useState('15 minutes before');
   const [notes, setNotes] = React.useState('');
@@ -54,13 +58,22 @@ export const CreateFollowUpModal: React.FC<CreateFollowUpModalProps> = ({
   const [showConfirmModal, setShowConfirmModal] = React.useState(false);
 
   React.useEffect(() => {
-    if (preselectedLeadId) {
-      setLeadId(preselectedLeadId);
+    if (isOpen) {
+      if (preselectedLeadId) setLeadId(preselectedLeadId);
+      if (preselectedDate) setDate(preselectedDate);
+      if (user?.name) {
+        setAssignedTo((prev) => prev || user.name);
+      }
+    } else {
+      setError('');
+      setPurpose('');
+      setNotes('');
+      setShowConfirmModal(false);
+      if (user?.name) {
+        setAssignedTo(user.name);
+      }
     }
-    if (preselectedDate) {
-      setDate(preselectedDate);
-    }
-  }, [preselectedLeadId, preselectedDate, isOpen]);
+  }, [isOpen, preselectedLeadId, preselectedDate, user?.name]);
 
   if (!isOpen) return null;
 
@@ -95,6 +108,9 @@ export const CreateFollowUpModal: React.FC<CreateFollowUpModalProps> = ({
     const lead = selectedLead;
     if (!lead) return;
 
+    const finalAssignedTo = assignedTo || user?.name || 'Unassigned';
+    const cachedEmp = findCachedEmployee(finalAssignedTo);
+
     onSubmit({
       leadId: lead.id,
       leadCode: lead.leadCode,
@@ -110,8 +126,14 @@ export const CreateFollowUpModal: React.FC<CreateFollowUpModalProps> = ({
       purpose,
       date,
       time: formatTo24HourTime(time),
-      assignedTo,
-      assignedAvatar: assignedTo ? assignedTo.split(' ').map((n) => n[0]).join('').toUpperCase() : 'FU',
+      assignedTo: finalAssignedTo,
+      assignedToName: finalAssignedTo,
+      assignedRole: cachedEmp?.role || cachedEmp?.accessRole || (finalAssignedTo === user?.name ? user?.role : 'Sales Representative'),
+      assignedAvatar: cachedEmp?.avatar || (finalAssignedTo === user?.name ? user?.avatar : undefined),
+      assignedEmail: cachedEmp?.email || (finalAssignedTo === user?.name ? user?.email : undefined),
+      assignedProfilePhoto: cachedEmp?.profilePhoto || (finalAssignedTo === user?.name ? user?.profilePhoto : undefined),
+      createdBy: user?.name || 'Current User',
+      createdByEmail: user?.email,
       priority,
       status: 'PENDING',
       reminder,

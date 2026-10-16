@@ -4,8 +4,9 @@ import { ConversationList } from '../../components/communication/whatsapp/Conver
 import { ChatWindow } from '../../components/communication/whatsapp/ChatWindow';
 import { LeadInfoPanel } from '../../components/communication/whatsapp/LeadInfoPanel';
 import { WhatsAppConversation, WhatsAppMessage } from '../../types/communication';
-import { fetchLeads } from '../../services/leadService';
+import { fetchLeads, assignLead } from '../../services/leadService';
 import { useAuth } from '../../context/AuthContext';
+import { findCachedEmployee } from '../../services/employeeService';
 import { Loader2 } from 'lucide-react';
 
 const STORAGE_KEY = 'technokraft_whatsapp_chats_v1';
@@ -27,6 +28,7 @@ export const WhatsAppPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [debouncedSearch, setDebouncedSearch] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [employeeFilter, setEmployeeFilter] = useState<string>('');
   const [filterType, setFilterType] = useState<'all' | 'unread'>('all');
 
   // Loading States
@@ -62,6 +64,7 @@ export const WhatsAppPage: React.FC = () => {
           size: pageSize,
           search: debouncedSearch || undefined,
           status: statusFilter !== 'all' ? statusFilter : undefined,
+          assignedTo: employeeFilter || undefined,
           sortBy: 'id',
           sortDirection: 'desc',
         });
@@ -86,11 +89,22 @@ export const WhatsAppPage: React.FC = () => {
                 ? `Requirement: ${lead.requirement.summary}`
                 : `Domain: ${lead.service || 'Technology Consulting'}`;
 
+            const assignedEmpName = lead.assignedEmployee?.name || user?.name || 'Sales Team';
+            const assignedEmp = findCachedEmployee(assignedEmpName);
+            const isAuthUser = user && user.name === assignedEmpName;
+            const assignedAvatar = (isAuthUser && user.profilePhoto)
+              ? user.profilePhoto
+              : (assignedEmp?.profilePhoto || (isAuthUser ? user.avatar : assignedEmp?.avatar) || assignedEmpName.split(' ').map((n) => n[0]).join(''));
+            const assignedProfilePhoto = isAuthUser ? user.profilePhoto : assignedEmp?.profilePhoto;
+            const assignedEmail = isAuthUser ? user.email : (assignedEmp?.email || lead.assignedEmployee?.email);
+
             return {
               id: convId,
               leadId: String(lead.id),
               leadCode,
               contactName: lead.contact?.name || 'Client Lead',
+              contactAvatar: (lead.contact as any)?.avatar,
+              contactProfilePhoto: (lead.contact as any)?.profilePhoto,
               contactPhone: lead.contact?.phone || '+91 93701 74424',
               contactDesignation: lead.contact?.designation || 'Stakeholder',
               companyName: lead.company?.name || 'Company',
@@ -98,7 +112,10 @@ export const WhatsAppPage: React.FC = () => {
               service: lead.service || 'Technology Consulting',
               leadStatus: lead.status || 'New',
               leadScore: lead.score || 50,
-              assignedEmployee: lead.assignedEmployee?.name || user?.name || 'Sales Team',
+              assignedEmployee: assignedEmpName,
+              assignedEmployeeAvatar: assignedAvatar,
+              assignedEmployeeProfilePhoto: assignedProfilePhoto,
+              assignedEmployeeEmail: assignedEmail,
               nextFollowUp: lead.nextFollowUp?.date
                 ? `${lead.nextFollowUp.date} ${lead.nextFollowUp.time || ''}`.trim()
                 : 'Pending',
@@ -137,8 +154,38 @@ export const WhatsAppPage: React.FC = () => {
         setIsFetching(false);
       }
     },
-    [page, pageSize, debouncedSearch, statusFilter, user]
+    [page, pageSize, debouncedSearch, statusFilter, employeeFilter, user]
   );
+
+  const handleReassignConversation = async (newEmployeeName: string) => {
+    if (!activeConversation) return;
+    try {
+      const emp = findCachedEmployee(newEmployeeName);
+      if (activeConversation.leadId) {
+        await assignLead(activeConversation.leadId, {
+          employeeName: newEmployeeName,
+          employeeEmail: emp?.email,
+          employeeRole: emp?.role || emp?.accessRole || 'Sales Representative',
+          employeeAvatar: emp?.avatar,
+        });
+      }
+      setConversations((prev) =>
+        prev.map((c) =>
+          c.id === activeConversation.id
+            ? {
+                ...c,
+                assignedEmployee: newEmployeeName,
+                assignedEmployeeAvatar: emp?.avatar || newEmployeeName.split(' ').map((n) => n[0]).join(''),
+                assignedEmployeeProfilePhoto: emp?.profilePhoto,
+                assignedEmployeeEmail: emp?.email,
+              }
+            : c
+        )
+      );
+    } catch (e) {
+      console.error('Failed to reassign WhatsApp conversation:', e);
+    }
+  };
 
   // Initial load & when pagination/filter parameters change
   useEffect(() => {
@@ -195,6 +242,8 @@ export const WhatsAppPage: React.FC = () => {
       id: `msg-${Date.now()}`,
       sender: 'employee',
       senderName: user?.name || 'Sales Representative',
+      senderAvatar: user?.avatar,
+      senderProfilePhoto: user?.profilePhoto,
       text,
       timestamp: new Date().toISOString(),
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -224,6 +273,8 @@ export const WhatsAppPage: React.FC = () => {
       id: `msg-doc-${Date.now()}`,
       sender: 'employee',
       senderName: user?.name || 'Sales Representative',
+      senderAvatar: user?.avatar,
+      senderProfilePhoto: user?.profilePhoto,
       text: `Attached file: ${filename}`,
       timestamp: new Date().toISOString(),
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -292,6 +343,8 @@ export const WhatsAppPage: React.FC = () => {
                   onSearchChange={handleSearchChange}
                   statusFilter={statusFilter}
                   onStatusFilterChange={handleStatusFilterChange}
+                  employeeFilter={employeeFilter}
+                  onEmployeeFilterChange={setEmployeeFilter}
                   filterType={filterType}
                   onFilterTypeChange={setFilterType}
                   page={page}
@@ -322,7 +375,10 @@ export const WhatsAppPage: React.FC = () => {
               {/* Right Column: Lead CRM Details Panel */}
               {isLeadPanelOpen && (
                 <div className="hidden xl:flex xl:col-span-3 h-full min-h-0 flex-col overflow-hidden animate-in fade-in slide-in-from-right-3 duration-200">
-                  <LeadInfoPanel conversation={activeConversation} />
+                  <LeadInfoPanel
+                    conversation={activeConversation}
+                    onReassign={handleReassignConversation}
+                  />
                 </div>
               )}
             </div>
@@ -340,6 +396,8 @@ export const WhatsAppPage: React.FC = () => {
                   onSearchChange={handleSearchChange}
                   statusFilter={statusFilter}
                   onStatusFilterChange={handleStatusFilterChange}
+                  employeeFilter={employeeFilter}
+                  onEmployeeFilterChange={setEmployeeFilter}
                   filterType={filterType}
                   onFilterTypeChange={setFilterType}
                   page={page}
@@ -364,6 +422,7 @@ export const WhatsAppPage: React.FC = () => {
                   <div className="absolute inset-y-0 right-0 w-80 z-20 shadow-2xl animate-in slide-in-from-right-4 duration-150">
                     <LeadInfoPanel
                       conversation={activeConversation}
+                      onReassign={handleReassignConversation}
                       onCloseMobile={() => setIsLeadPanelOpen(false)}
                     />
                   </div>
@@ -384,6 +443,8 @@ export const WhatsAppPage: React.FC = () => {
                   onSearchChange={handleSearchChange}
                   statusFilter={statusFilter}
                   onStatusFilterChange={handleStatusFilterChange}
+                  employeeFilter={employeeFilter}
+                  onEmployeeFilterChange={setEmployeeFilter}
                   filterType={filterType}
                   onFilterTypeChange={setFilterType}
                   page={page}
@@ -412,6 +473,7 @@ export const WhatsAppPage: React.FC = () => {
               {mobileView === 'lead' && (
                 <LeadInfoPanel
                   conversation={activeConversation}
+                  onReassign={handleReassignConversation}
                   onCloseMobile={() => setMobileView('chat')}
                 />
               )}

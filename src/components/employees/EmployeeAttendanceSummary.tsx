@@ -58,7 +58,7 @@ export const EmployeeAttendanceSummary: React.FC<EmployeeAttendanceSummaryProps>
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
           <span className="text-xs font-medium text-slate-500 dark:text-slate-400 block truncate">
             Present Days
@@ -67,6 +67,16 @@ export const EmployeeAttendanceSummary: React.FC<EmployeeAttendanceSummaryProps>
             {attendanceSummary.presentDays}
           </div>
           <span className="text-[11px] text-slate-400">On-time attendances</span>
+        </div>
+
+        <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+          <span className="text-xs font-medium text-slate-500 dark:text-slate-400 block truncate">
+            Half Day
+          </span>
+          <div className="text-2xl font-bold font-mono text-blue-600 dark:text-blue-400 mt-1">
+            {attendanceSummary.halfDayDays ?? 0}
+          </div>
+          <span className="text-[11px] text-slate-400">Partial day worked</span>
         </div>
 
         <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">

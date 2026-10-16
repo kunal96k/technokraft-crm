@@ -200,9 +200,13 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
                 {/* Break Time */}
                 <td className="py-3.5 px-3 whitespace-nowrap font-mono text-slate-500 dark:text-slate-400 text-[11px]">
                   {isMasked ? (
-                    <span className="blur-[3px] select-none text-slate-400">0h 00m</span>
+                    <span className="blur-[3px] select-none text-slate-400">0m</span>
+                  ) : rec.breakTime && rec.breakTime !== '0m' && rec.breakTime !== '---' ? (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200/50 dark:border-amber-800/40">
+                      ☕ {rec.breakTime}
+                    </span>
                   ) : (
-                    rec.breakTime
+                    <span className="text-slate-400 dark:text-slate-500">0m</span>
                   )}
                 </td>
 

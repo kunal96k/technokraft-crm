@@ -32,7 +32,9 @@ export interface AuthUser {
   employmentType?: string;
   todayAttendanceStatus?: string;
   todayWorkingTime?: string;
+  todayBreakTime?: string;
   permissions: string[];
+  allowedModules?: string[];
 }
 
 export interface UpdateProfilePayload {

@@ -19,6 +19,7 @@ import { FollowUpStatusBadge } from './FollowUpStatusBadge';
 
 import { formatDisplayDate, formatISTTime } from '../../utils/dateUtils';
 import { FollowUpEmptyState } from './FollowUpEmptyState';
+import { EmployeeAvatar } from '../common/EmployeeAvatar';
 
 interface OverdueListViewProps {
   followUps: FollowUpRecord[];
@@ -125,8 +126,16 @@ export const OverdueListView: React.FC<OverdueListViewProps> = ({
                       <span>{item.contactPhone}</span>
                     </span>
                   )}
-                  <span className="flex items-center gap-1">
-                    <span>Owner: <strong className="text-slate-700 dark:text-slate-200">{item.assignedTo}</strong></span>
+                  <span className="flex items-center gap-1.5">
+                    <EmployeeAvatar
+                      name={item.assignedTo || item.assignedToName || 'Unassigned'}
+                      avatar={item.assignedAvatar}
+                      profilePhoto={item.assignedProfilePhoto}
+                      email={item.assignedEmail}
+                      size="xs"
+                      showRing={true}
+                    />
+                    <span>Owner: <strong className="text-slate-700 dark:text-slate-200">{item.assignedTo || item.assignedToName || 'Unassigned'}</strong></span>
                   </span>
                 </div>
               </div>

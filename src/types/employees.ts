@@ -140,9 +140,11 @@ export interface EmployeeMonthlyAttendanceSummary {
   absentDays: number;
   leaveDays: number;
   lateDays: number;
+  halfDayDays?: number;
   workingDays: number;
   averageWorkingHours: string;
   totalWorkingHours: string;
+  todayBreakTime?: string;
   expectedDailyHours: string;
   overtimeHours: string;
   dailyRecords: EmployeeAttendanceDay[];
@@ -188,6 +190,7 @@ export interface Employee {
   logoutTime?: string;
   lastActivityTime: string;
   todayWorkingTime: string;
+  todayBreakTime?: string;
   currentActivity: string;
   todayAttendanceStatus: AttendanceStatus;
 

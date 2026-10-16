@@ -7,6 +7,7 @@ import {
   BarChart3,
   UserCheck,
   Settings,
+  ShieldCheck,
 } from 'lucide-react';
 import { NavigationSection, NavigationItem, UserRole } from '../types/navigation';
 
@@ -158,7 +159,7 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
         id: 'employees',
         title: 'Employees',
         icon: UserCheck,
-        roles: ['Super Admin', 'Admin', 'Sales Manager'],
+        roles: ['Super Admin', 'Admin', 'Sales Manager', 'Manager'],
         children: [
           {
             id: 'employee-list',
@@ -173,11 +174,18 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
         ],
       },
       {
+        id: 'audit-logs',
+        title: 'Audit Logs',
+        path: '/audit-logs',
+        icon: ShieldCheck,
+        roles: ['Super Admin'],
+      },
+      {
         id: 'settings',
         title: 'Settings',
         path: '/settings/general',
         icon: Settings,
-        roles: ['Super Admin', 'Admin', 'Sales Manager'],
+        roles: ['Super Admin', 'Admin', 'Sales Manager', 'Manager'],
       },
     ],
   },
@@ -189,43 +197,64 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
  */
 export function canViewModule(
   item: NavigationItem,
-  currentRole: UserRole,
+  currentRole: UserRole | string,
   allowedModules?: string[]
 ): boolean {
-  if (allowedModules && Array.isArray(allowedModules) && allowedModules.length > 0) {
-    if (!allowedModules.includes(item.id)) {
-      return false;
-    }
+  const normRole = (currentRole || '').trim().toLowerCase();
+  const isSuperOrSystemAdmin =
+    normRole === 'super admin' ||
+    normRole === 'superadmin' ||
+    normRole === 'system administrator' ||
+    normRole === 'system admin';
+
+  // Audit Logs is STRICTLY restricted to Super Admin / System Administrator ONLY
+  if (item.id === 'audit-logs') {
+    return isSuperOrSystemAdmin;
   }
+
+  if (isSuperOrSystemAdmin) {
+    return true;
+  }
+  // When allowedModules is explicitly configured for this user, it dictates link access
+  if (allowedModules !== undefined && allowedModules !== null && Array.isArray(allowedModules)) {
+    return allowedModules.includes(item.id);
+  }
+  // Fallback to role-based restrictions
   if (!item.roles || item.roles.length === 0) {
     return true;
   }
-  return item.roles.includes(currentRole);
+  return item.roles.some((r) => {
+    const nr = r.toLowerCase();
+    if (nr === normRole) return true;
+    if ((nr === 'sales manager' || nr === 'manager') && (normRole === 'sales manager' || normRole === 'manager')) return true;
+    if (normRole === 'admin' && nr === 'admin') return true;
+    return false;
+  });
 }
 
 /**
- * Helper to check route accessibility for the given role.
- * Returns false for any path not found in NAVIGATION_CONFIG (deny by default).
+ * Helper to check route accessibility for the given role and allowed modules.
  */
-export function canAccessRoute(path: string, currentRole: UserRole): boolean {
+export function canAccessRoute(
+  path: string,
+  currentRole: UserRole | string,
+  allowedModules?: string[]
+): boolean {
   for (const section of NAVIGATION_CONFIG) {
     for (const item of section.items) {
       if (item.path === path) {
-        return canViewModule(item, currentRole);
+        return canViewModule(item, currentRole, allowedModules);
       }
       if (item.children) {
         for (const child of item.children) {
           if (child.path === path) {
-            const childRoles = child.roles || item.roles;
-            if (!childRoles || childRoles.length === 0) return true;
-            return childRoles.includes(currentRole);
+            return canViewModule(item, currentRole, allowedModules);
           }
         }
       }
     }
   }
-  // Default DENY — unlisted routes are not accessible
-  return false;
+  return true;
 }
 
 export const INITIAL_USER_PROFILE = {

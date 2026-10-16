@@ -26,6 +26,7 @@ import { LeadStatusBadge } from './LeadStatusBadge';
 import { EmployeeAvatar } from '../common/EmployeeAvatar';
 import { LeadPriorityBadge } from './LeadPriorityBadge';
 import { LeadScoreBadge } from './LeadScoreBadge';
+import { AssignLeadModal } from './AssignLeadModal';
 import { viewAttachmentFile, downloadAttachmentFile } from '../../services/leadService';
 
 interface ViewLeadModalProps {
@@ -47,6 +48,7 @@ export const ViewLeadModal: React.FC<ViewLeadModalProps> = ({
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [leadData, setLeadData] = useState<Lead | null>(lead);
   const [isUploading, setIsUploading] = useState<boolean>(false);
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState<boolean>(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   // Sync and fetch full lead details on open to guarantee attachments are loaded
@@ -192,7 +194,16 @@ export const ViewLeadModal: React.FC<ViewLeadModalProps> = ({
               </span>
             </div>
             <div>
-              <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 block">Assigned To</span>
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 block">Assigned To</span>
+                <button
+                  type="button"
+                  onClick={() => setIsAssignModalOpen(true)}
+                  className="text-[10px] font-semibold text-[#5B4DB7] dark:text-purple-400 hover:underline cursor-pointer"
+                >
+                  Change
+                </button>
+              </div>
               <div className="flex items-center gap-1.5 mt-1">
                 <EmployeeAvatar
                   name={currentLead.assignedEmployee?.name || 'Unassigned'}
@@ -438,6 +449,18 @@ export const ViewLeadModal: React.FC<ViewLeadModalProps> = ({
           </button>
         </div>
       </div>
+
+      {/* Assign Employee Modal with Active-Only Typeahead Debounced Search */}
+      <AssignLeadModal
+        lead={currentLead}
+        isOpen={isAssignModalOpen}
+        onClose={() => setIsAssignModalOpen(false)}
+        onSuccess={(updated) => {
+          setLeadData(updated);
+          setIsAssignModalOpen(false);
+          if (onLeadUpdated) onLeadUpdated(updated);
+        }}
+      />
     </div>
   );
 };

@@ -14,6 +14,7 @@ import {
   Lock,
   Unlock,
   Loader2,
+  AlertCircle,
 } from 'lucide-react';
 import {
   Employee,
@@ -29,18 +30,27 @@ import { EmployeeSelect } from '../common/EmployeeSelect';
 import { isSuperAdminRecord } from '../../utils/securityUtils';
 
 export const SIDEBAR_MODULE_OPTIONS = [
-  { id: 'dashboard', label: 'CRM Dashboard', desc: 'KPI metrics, live team workload & conversion charts', defaultFor: ['Admin', 'Manager', 'Sales Executive', 'Business Analyst', 'Employee'] },
-  { id: 'leads', label: 'Leads Management', desc: 'Full leads directory, lead qualification, manual lead & bulk CSV import', defaultFor: ['Admin', 'Manager', 'Sales Executive', 'Business Analyst'] },
-  { id: 'communication', label: 'Communication Hub', desc: 'Corporate email dispatch, WhatsApp messaging & call logging', defaultFor: ['Admin', 'Manager', 'Sales Executive'] },
-  { id: 'follow-ups', label: 'Activity & Follow-ups', desc: 'Outbound follow-up schedule, task tracker & client meetings', defaultFor: ['Admin', 'Manager', 'Sales Executive', 'Business Analyst', 'Employee'] },
-  { id: 'opportunities', label: 'Sales Opportunities', desc: 'Deal pipeline stages, revenue forecasting & commercial proposal quotes', defaultFor: ['Admin', 'Manager', 'Sales Executive', 'Business Analyst'] },
-  { id: 'reports', label: 'Performance & Reports', desc: 'Executive KPI reporting & conversion funnel analytics', defaultFor: ['Admin', 'Manager'] },
-  { id: 'employees', label: 'Employee Administration', desc: 'Team member directory, attendance records & audits', defaultFor: ['Admin', 'Manager'] },
+  { id: 'dashboard', label: 'CRM Dashboard', desc: 'KPI metrics, live team workload & conversion charts', defaultFor: ['Admin', 'Manager', 'Sales Manager', 'Sales Executive', 'Business Analyst', 'Employee'] },
+  { id: 'leads', label: 'Leads Management', desc: 'Full leads directory, lead qualification, manual lead & bulk CSV import', defaultFor: ['Admin', 'Manager', 'Sales Manager', 'Sales Executive', 'Business Analyst'] },
+  { id: 'communication', label: 'Communication Hub', desc: 'Corporate email dispatch, WhatsApp messaging & call logging', defaultFor: ['Admin', 'Manager', 'Sales Manager', 'Sales Executive'] },
+  { id: 'follow-ups', label: 'Activity & Follow-ups', desc: 'Outbound follow-up schedule, task tracker & client meetings', defaultFor: ['Admin', 'Manager', 'Sales Manager', 'Sales Executive', 'Business Analyst', 'Employee'] },
+  { id: 'opportunities', label: 'Sales Opportunities', desc: 'Deal pipeline stages, revenue forecasting & commercial proposal quotes', defaultFor: ['Admin', 'Manager', 'Sales Manager', 'Sales Executive', 'Business Analyst'] },
+  { id: 'reports', label: 'Performance & Reports', desc: 'Executive KPI reporting & conversion funnel analytics', defaultFor: ['Admin', 'Manager', 'Sales Manager'] },
+  { id: 'employees', label: 'Employee Administration', desc: 'Team member directory, attendance records & audits', defaultFor: ['Admin', 'Manager', 'Sales Manager'] },
   { id: 'settings', label: 'System Settings', desc: 'System configuration, pipeline stages & master parameters', defaultFor: ['Admin'] },
 ];
 
-export const getDefaultModulesForRole = (role: CrmAccessRole): string[] => {
-  return SIDEBAR_MODULE_OPTIONS.filter((m) => m.defaultFor.includes(role)).map((m) => m.id);
+export const getDefaultModulesForRole = (role: string): string[] => {
+  const normRole = (role || '').trim().toLowerCase();
+  return SIDEBAR_MODULE_OPTIONS.filter((m) =>
+    m.defaultFor.some((df) => {
+      const ndf = df.toLowerCase();
+      if (ndf === normRole) return true;
+      if ((ndf === 'manager' || ndf === 'sales manager') && (normRole === 'manager' || normRole === 'sales manager')) return true;
+      if (normRole.includes('admin') && ndf.includes('admin')) return true;
+      return false;
+    })
+  ).map((m) => m.id);
 };
 
 interface AddEmployeeModalProps {
@@ -119,7 +129,7 @@ const getInitialFormValues = (emp?: Employee | null) => {
     crmAccess: emp.crmAccess ?? true,
     accessRole: empAccessRole,
     allowedModules:
-      emp.allowedModules && emp.allowedModules.length > 0
+      emp.allowedModules !== undefined && emp.allowedModules !== null && Array.isArray(emp.allowedModules)
         ? emp.allowedModules
         : getDefaultModulesForRole(empAccessRole),
     username: emp.username || (emp.email ? emp.email.split('@')[0] : ''),
@@ -179,6 +189,7 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
   const [monthlyProposals, setMonthlyProposals] = useState(initialValues.monthlyProposals);
   const [monthlyWonDeals, setMonthlyWonDeals] = useState(initialValues.monthlyWonDeals);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [serverError, setServerError] = useState('');
 
   // Synchronize state every time initialEmployee changes or modal is opened
   useEffect(() => {
@@ -213,6 +224,7 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
     setMonthlyProposals(values.monthlyProposals);
     setMonthlyWonDeals(values.monthlyWonDeals);
     setIsSubmitting(false);
+    setServerError('');
   }, [initialEmployee, isOpen]);
 
   // Dynamic dropdown options so current custom values are never lost
@@ -326,9 +338,11 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
 
     try {
       setIsSubmitting(true);
+      setServerError('');
       await onSave(employeeData);
-    } catch (err) {
+    } catch (err: any) {
       console.error('[AddEmployeeModal] Submit error:', err);
+      setServerError(err?.message || 'Failed to save employee profile. Please verify your details.');
     } finally {
       setIsSubmitting(false);
     }
@@ -360,6 +374,24 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
 
         {/* Modal Body Form */}
         <form id="add-employee-form" onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
+          {serverError && (
+            <div className="p-3.5 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900/60 rounded-xl flex items-start gap-3 text-rose-700 dark:text-rose-300 text-xs animate-in fade-in">
+              <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 mt-0.5 shrink-0" />
+              <div className="flex-1">
+                <p className="font-semibold">{isEditing ? 'Profile Update Notice' : 'Registration Notice'}</p>
+                <p className="mt-0.5 text-[11px] leading-relaxed text-rose-600 dark:text-rose-400">{serverError}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setServerError('')}
+                className="text-rose-400 hover:text-rose-700 dark:hover:text-rose-200 cursor-pointer"
+                aria-label="Dismiss error"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+
           {/* Section 1: Personal Information */}
           <div>
             <div className="flex items-center gap-2 pb-2 mb-3 border-b border-slate-100 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
@@ -629,7 +661,12 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
                     onChange={(e) => {
                       const newRole = e.target.value as CrmAccessRole;
                       setAccessRole(newRole);
-                      setAllowedModules(getDefaultModulesForRole(newRole));
+                      // Only auto-apply default modules for new employees.
+                      // When editing, keep existing custom selections — user can
+                      // click "Role Default" to reset to the new role's defaults.
+                      if (!isEditing) {
+                        setAllowedModules(getDefaultModulesForRole(newRole));
+                      }
                     }}
                     className="w-full text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500/50 outline-none disabled:opacity-60 disabled:cursor-not-allowed"
                   >
@@ -641,8 +678,9 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
                         <option value="Sales Executive">Sales Executive</option>
                         <option value="Business Analyst">Business Analyst</option>
                         <option value="Manager">Manager</option>
-                        <option value="Admin">Admin</option>
-                        {!['Super Admin', 'Employee', 'Sales Executive', 'Business Analyst', 'Manager', 'Admin'].includes(accessRole) && (
+                        <option value="Sales Manager">Sales Manager</option>
+                        <option value="Admin">Admin (Full System Access)</option>
+                        {!['Super Admin', 'Employee', 'Sales Executive', 'Business Analyst', 'Manager', 'Sales Manager', 'Admin'].includes(accessRole) && (
                           <option value={accessRole}>{accessRole}</option>
                         )}
                       </>

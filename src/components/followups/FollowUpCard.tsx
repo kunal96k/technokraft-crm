@@ -19,6 +19,7 @@ import { FollowUpPriorityBadge } from './FollowUpPriorityBadge';
 import { FollowUpTypeBadge } from './FollowUpTypeBadge';
 import { FollowUpActionMenu } from './FollowUpActionMenu';
 import { formatDisplayDate, formatISTTime } from '../../utils/dateUtils';
+import { EmployeeAvatar } from '../common/EmployeeAvatar';
 
 interface FollowUpCardProps {
   followUp: FollowUpRecord;
@@ -115,11 +116,18 @@ export const FollowUpCard: React.FC<FollowUpCardProps> = ({
           <span>{formatDisplayDate(followUp.date)}</span>
         </div>
 
-        <div className="flex items-center justify-end gap-1.5">
-          <span className="w-5 h-5 rounded-full bg-purple-100 dark:bg-purple-900/50 text-[#5B4DB7] dark:text-purple-300 text-[10px] font-bold flex items-center justify-center">
-            {followUp.assignedAvatar || followUp.assignedTo.substring(0, 2).toUpperCase()}
+        <div className="flex items-center justify-end gap-1.5 min-w-0">
+          <EmployeeAvatar
+            name={followUp.assignedTo || followUp.assignedToName || 'Unassigned'}
+            avatar={followUp.assignedAvatar}
+            profilePhoto={followUp.assignedProfilePhoto}
+            email={followUp.assignedEmail}
+            size="xs"
+            showRing={true}
+          />
+          <span className="truncate text-slate-600 dark:text-slate-400 text-[11px] max-w-[100px]">
+            {followUp.assignedTo || followUp.assignedToName || 'Unassigned'}
           </span>
-          <span className="truncate text-slate-600 dark:text-slate-400 text-[11px]">{followUp.assignedTo}</span>
         </div>
       </div>
 

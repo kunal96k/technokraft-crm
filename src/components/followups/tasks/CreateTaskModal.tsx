@@ -7,6 +7,9 @@ import { ConfirmationModal } from '../../common/ConfirmationModal';
 import { LeadSearchSelect } from '../../common/LeadSearchSelect';
 import { getTodayIST_YYYYMMDD } from '../../../utils/dateUtils';
 
+import { useAuth } from '../../../context/AuthContext';
+import { findCachedEmployee } from '../../../services/employeeService';
+
 interface CreateTaskModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -18,17 +21,35 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   onClose,
   onSubmit,
 }) => {
+  const { user } = useAuth();
   const [taskName, setTaskName] = React.useState('');
   const [description, setDescription] = React.useState('');
   const [selectedLead, setSelectedLead] = React.useState<Lead | null>(null);
   const [leadId, setLeadId] = React.useState('');
-  const [assignedTo, setAssignedTo] = React.useState('');
+  const [assignedTo, setAssignedTo] = React.useState(() => user?.name || '');
   const [priority, setPriority] = React.useState<TaskPriority>('MEDIUM');
   const [dueDate, setDueDate] = React.useState(() => getTodayIST_YYYYMMDD());
   const [dueTime, setDueTime] = React.useState('05:00 PM');
   const [notes, setNotes] = React.useState('');
   const [error, setError] = React.useState('');
   const [showConfirmModal, setShowConfirmModal] = React.useState(false);
+
+  React.useEffect(() => {
+    if (isOpen) {
+      if (user?.name) {
+        setAssignedTo((prev) => prev || user.name);
+      }
+    } else {
+      setError('');
+      setTaskName('');
+      setDescription('');
+      setNotes('');
+      setShowConfirmModal(false);
+      if (user?.name) {
+        setAssignedTo(user.name);
+      }
+    }
+  }, [isOpen, user?.name]);
 
   if (!isOpen) return null;
 
@@ -48,6 +69,14 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   };
 
   const handleConfirmSave = () => {
+    const isAuth = user && user.name === assignedTo;
+    const emp = findCachedEmployee(assignedTo);
+    const assignedPhoto = isAuth ? user.profilePhoto : emp?.profilePhoto;
+    const assignedEmail = isAuth ? user.email : emp?.email;
+    const assignedAvatar = isAuth
+      ? (user.profilePhoto || user.avatar)
+      : (emp?.profilePhoto || emp?.avatar || (assignedTo ? assignedTo.split(' ').map((n) => n[0]).join('').toUpperCase() : 'TK'));
+
     onSubmit({
       taskName,
       description,
@@ -55,7 +84,10 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
       leadCode: selectedLead?.leadCode,
       companyName: selectedLead?.company.name,
       assignedTo,
-      assignedAvatar: assignedTo ? assignedTo.split(' ').map((n) => n[0]).join('').toUpperCase() : 'TK',
+      assignedEmail,
+      assignedProfilePhoto: assignedPhoto,
+      assignedAvatar,
+      createdBy: user?.name,
       priority,
       dueDate,
       dueTime,

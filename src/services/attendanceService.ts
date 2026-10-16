@@ -38,6 +38,7 @@ export interface AttendanceSummaryData {
   absent: number;
   onLeave: number;
   late: number;
+  halfDay?: number;
   currentlyWorking: number;
   totalEmployees: number;
   attendanceRate: number;

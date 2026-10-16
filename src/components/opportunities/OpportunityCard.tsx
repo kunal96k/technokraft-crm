@@ -16,6 +16,7 @@ import {
   GripVertical,
   Trash2,
   Check,
+  Clock,
 } from 'lucide-react';
 import { OpportunityRecord, OpportunityStage } from '../../types/opportunities';
 import { OpportunityValue } from './OpportunityValue';
@@ -264,7 +265,7 @@ export const OpportunityCard: React.FC<OpportunityCardProps> = ({
           </div>
         </div>
 
-        {/* Service & Lead Tags */}
+        {/* Service & Lead Tags + Stale Warning */}
         <div className="flex items-center gap-1.5 flex-wrap mb-3">
           <span className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">
             <Briefcase className="w-3 h-3 text-slate-400 dark:text-slate-500" />
@@ -283,6 +284,32 @@ export const OpportunityCard: React.FC<OpportunityCardProps> = ({
               {opportunity.leadCode}
             </span>
           )}
+
+          {/* Stale / Inactive badge for active stages */}
+          {(() => {
+            const isTerminal = opportunity.stage === 'Won' || opportunity.stage === 'Lost';
+            const lastActive = opportunity.updatedAt || opportunity.createdAt;
+            if (isTerminal || !lastActive) return null;
+            const diffMs = Date.now() - new Date(lastActive).getTime();
+            if (isNaN(diffMs) || diffMs <= 0) return null;
+            const daysInactive = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+            if (daysInactive < 14) return null;
+
+            const isVeryStale = daysInactive >= 30;
+            return (
+              <span
+                className={`inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded border transition-colors ${
+                  isVeryStale
+                    ? 'text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/60 border-rose-200 dark:border-rose-900'
+                    : 'text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 border-amber-200 dark:border-amber-900'
+                }`}
+                title={`No activity in this stage for ${daysInactive} days — follow-up recommended!`}
+              >
+                <Clock className="w-2.5 h-2.5" />
+                <span>{daysInactive}d inactive</span>
+              </span>
+            );
+          })()}
         </div>
 
         {/* Financial Value + Probability */}

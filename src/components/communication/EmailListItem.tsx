@@ -2,6 +2,7 @@ import React from 'react';
 import { Paperclip, Building, User, ArrowRight } from 'lucide-react';
 import { EmailRecord } from '../../types/communication';
 import { CommunicationStatusBadge } from './CommunicationStatusBadge';
+import { EmployeeAvatar } from '../common/EmployeeAvatar';
 
 interface EmailListItemProps {
   email: EmailRecord;
@@ -45,6 +46,16 @@ export const EmailListItem: React.FC<EmailListItemProps> = ({
           />
         </div>
 
+        {/* Client API Avatar as per Name */}
+        <EmployeeAvatar
+          name={email.recipientName}
+          email={email.recipientEmail}
+          size="sm"
+          showRing={true}
+          isClient={true}
+          className="flex-shrink-0 hidden sm:inline-flex"
+        />
+
         {/* Core Email Metadata */}
         <div className="min-w-0 flex-1 space-y-1">
           {/* Top row: Recipient & Company + Lead Code */}
@@ -78,7 +89,14 @@ export const EmailListItem: React.FC<EmailListItemProps> = ({
           </div>
 
           {/* Bottom row on mobile: Sender & Time */}
-          <div className="flex items-center gap-2 text-[11px] text-slate-400 dark:text-slate-500 sm:hidden pt-0.5">
+          <div className="flex items-center gap-1.5 text-[11px] text-slate-400 dark:text-slate-500 sm:hidden pt-0.5">
+            <EmployeeAvatar
+              name={email.senderName}
+              avatar={email.senderAvatar}
+              profilePhoto={email.senderProfilePhoto}
+              email={email.senderEmail}
+              size="xs"
+            />
             <span>By: {email.senderName}</span>
             <span>•</span>
             <span>{email.date}, {email.time}</span>
@@ -90,12 +108,22 @@ export const EmailListItem: React.FC<EmailListItemProps> = ({
       <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 sm:gap-4 flex-shrink-0">
         <CommunicationStatusBadge status={email.status} type="email" />
 
-        <div className="hidden sm:block text-right">
-          <div className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
-            {email.date}, {email.time}
-          </div>
-          <div className="text-[10px] text-slate-400 dark:text-slate-500 truncate max-w-[120px]">
-            By {email.senderName}
+        <div className="hidden sm:flex items-center gap-2 text-right">
+          <EmployeeAvatar
+            name={email.senderName}
+            avatar={email.senderAvatar}
+            profilePhoto={email.senderProfilePhoto}
+            email={email.senderEmail}
+            size="xs"
+            showRing={true}
+          />
+          <div>
+            <div className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
+              {email.date}, {email.time}
+            </div>
+            <div className="text-[10px] text-slate-400 dark:text-slate-500 truncate max-w-[120px]">
+              By {email.senderName}
+            </div>
           </div>
         </div>
 

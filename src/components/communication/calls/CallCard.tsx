@@ -5,6 +5,7 @@ import { CallResultBadge } from './CallResultBadge';
 import { CallTypeBadge } from './CallTypeBadge';
 import { CallActionMenu } from './CallActionMenu';
 import { Clock, Phone, Building2, User, Sparkles } from 'lucide-react';
+import { EmployeeAvatar } from '../../common/EmployeeAvatar';
 
 interface CallCardProps {
   call: CallRecord;
@@ -115,9 +116,14 @@ export const CallCard: React.FC<CallCardProps> = ({
       {/* Caller / Employee */}
       <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 pt-1">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-950/80 text-[#5B4DB7] dark:text-purple-300 font-bold text-[10px] flex items-center justify-center">
-            {call.employeeAvatar}
-          </div>
+          <EmployeeAvatar
+            name={call.employeeName}
+            avatar={call.employeeAvatar}
+            profilePhoto={call.employeeProfilePhoto}
+            email={call.employeeEmail}
+            size="xs"
+            showRing={true}
+          />
           <span className="font-medium text-slate-700 dark:text-slate-300">{call.employeeName}</span>
         </div>
 

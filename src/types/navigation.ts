@@ -4,6 +4,7 @@ export type UserRole =
   | 'Super Admin'
   | 'Admin'
   | 'Sales Manager'
+  | 'Manager'
   | 'Sales Executive'
   | 'Business Analyst'
   | 'Technical Team'

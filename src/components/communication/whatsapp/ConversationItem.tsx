@@ -1,6 +1,7 @@
 import React from 'react';
 import { Building, Phone } from 'lucide-react';
 import { WhatsAppConversation } from '../../../types/communication';
+import { EmployeeAvatar } from '../../common/EmployeeAvatar';
 
 interface ConversationItemProps {
   conversation: WhatsAppConversation;
@@ -13,14 +14,6 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
   isActive,
   onClick,
 }) => {
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
 
   const getStatusColor = (status: string) => {
     const s = status.toLowerCase();
@@ -40,10 +33,14 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
           : 'bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/60'
       }`}
     >
-      {/* Avatar with Initials */}
-      <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#5B4DB7] to-indigo-500 text-white flex items-center justify-center font-bold text-xs flex-shrink-0 shadow-2xs">
-        {getInitials(conversation.contactName)}
-      </div>
+      {/* Client API Avatar as per Name */}
+      <EmployeeAvatar
+        name={conversation.contactName}
+        size="md"
+        showRing={true}
+        isClient={true}
+        className="flex-shrink-0"
+      />
 
       {/* Conversation Details */}
       <div className="flex-1 min-w-0">

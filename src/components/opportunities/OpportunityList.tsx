@@ -11,6 +11,9 @@ import {
   ArrowUpDown,
   Calendar,
   Trash2,
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
 } from 'lucide-react';
 import { OpportunityRecord, OpportunityStage } from '../../types/opportunities';
 import { OpportunityStageBadge } from './OpportunityStageBadge';
@@ -26,6 +29,14 @@ interface OpportunityListProps {
   onMarkWon?: (opp: OpportunityRecord) => void;
   onMarkLost?: (opp: OpportunityRecord) => void;
   onDelete?: (opp: OpportunityRecord) => void;
+  // Server-side Pagination Props
+  currentPage?: number;
+  totalPages?: number;
+  totalElements?: number;
+  rowsPerPage?: number;
+  onPageChange?: (page: number) => void;
+  onRowsPerPageChange?: (size: number) => void;
+  isLoading?: boolean;
 }
 
 export const OpportunityList: React.FC<OpportunityListProps> = ({
@@ -37,6 +48,13 @@ export const OpportunityList: React.FC<OpportunityListProps> = ({
   onMarkWon,
   onMarkLost,
   onDelete,
+  currentPage,
+  totalPages,
+  totalElements,
+  rowsPerPage,
+  onPageChange,
+  onRowsPerPageChange,
+  isLoading = false,
 }) => {
   const navigate = useNavigate();
   const [sortField, setSortField] = useState<'value' | 'prob' | 'date'>('value');
@@ -318,6 +336,68 @@ export const OpportunityList: React.FC<OpportunityListProps> = ({
           </div>
         )}
       </div>
+
+      {/* PAGINATION TOOLBAR */}
+      {totalPages !== undefined && totalPages > 0 && (
+        <div className="px-4 py-3 bg-slate-50 dark:bg-slate-800/90 border-t border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600 dark:text-slate-300">
+          <div className="flex items-center gap-2">
+            <span>
+              Showing <strong className="font-semibold text-slate-900 dark:text-white">
+                {totalElements ? Math.min((currentPage || 1) * (rowsPerPage || 25) - (rowsPerPage || 25) + 1, totalElements) : 0}
+              </strong> to <strong className="font-semibold text-slate-900 dark:text-white">
+                {Math.min((currentPage || 1) * (rowsPerPage || 25), totalElements || opportunities.length)}
+              </strong> of <strong className="font-semibold text-slate-900 dark:text-white">{totalElements || opportunities.length}</strong> opportunities
+            </span>
+            {isLoading && <Loader2 className="w-3.5 h-3.5 text-[#5B4DB7] animate-spin" />}
+          </div>
+
+          <div className="flex items-center gap-3">
+            {onRowsPerPageChange && (
+              <div className="flex items-center gap-1.5">
+                <span className="text-slate-500 text-[11px]">Rows per page:</span>
+                <select
+                  value={rowsPerPage || 25}
+                  onChange={(e) => onRowsPerPageChange(Number(e.target.value))}
+                  className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md px-2 py-1 text-xs font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-[#5B4DB7]"
+                >
+                  <option value={10}>10</option>
+                  <option value={25}>25</option>
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
+                </select>
+              </div>
+            )}
+
+            {onPageChange && (
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  disabled={(currentPage || 1) <= 1 || isLoading}
+                  onClick={() => onPageChange((currentPage || 1) - 1)}
+                  className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed text-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
+                  title="Previous Page"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+
+                <span className="px-2 font-mono text-xs font-semibold text-slate-800 dark:text-slate-200">
+                  {currentPage || 1} / {totalPages || 1}
+                </span>
+
+                <button
+                  type="button"
+                  disabled={(currentPage || 1) >= (totalPages || 1) || isLoading}
+                  onClick={() => onPageChange((currentPage || 1) + 1)}
+                  className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed text-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
+                  title="Next Page"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

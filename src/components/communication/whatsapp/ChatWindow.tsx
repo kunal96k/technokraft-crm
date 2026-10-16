@@ -13,6 +13,7 @@ import { WhatsAppConversation } from '../../../types/communication';
 import { MessageBubble } from './MessageBubble';
 import { ChatComposer } from './ChatComposer';
 import { WhatsAppTemplateModal } from './WhatsAppTemplateModal';
+import { EmployeeAvatar } from '../../common/EmployeeAvatar';
 
 interface ChatWindowProps {
   conversation: WhatsAppConversation | null;
@@ -98,14 +99,14 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
             </button>
           )}
 
-          {/* Contact avatar */}
-          <div className="w-9 h-9 rounded-full bg-[#5B4DB7] text-white font-bold text-xs flex items-center justify-center flex-shrink-0">
-            {conversation.contactName
-              .split(' ')
-              .map((n) => n[0])
-              .join('')
-              .slice(0, 2)}
-          </div>
+          {/* Contact avatar (Client API avatar) */}
+          <EmployeeAvatar
+            name={conversation.contactName}
+            size="md"
+            showRing={true}
+            isClient={true}
+            className="flex-shrink-0"
+          />
 
           <div className="min-w-0">
             <div className="flex items-center gap-2">

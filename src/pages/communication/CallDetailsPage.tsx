@@ -9,6 +9,9 @@ import { CallResultBadge } from '../../components/communication/calls/CallResult
 import { CallTypeBadge } from '../../components/communication/calls/CallTypeBadge';
 import { AddFollowUpModal } from '../../components/communication/calls/AddFollowUpModal';
 import { CreateOpportunityModal } from '../../components/communication/calls/CreateOpportunityModal';
+import { EmployeeAvatar } from '../../components/common/EmployeeAvatar';
+import { EmployeeSelect } from '../../components/common/EmployeeSelect';
+import { findCachedEmployee } from '../../services/employeeService';
 import {
   ArrowLeft,
   Building2,
@@ -28,6 +31,9 @@ import {
   IndianRupee,
   MapPin,
   Globe,
+  UserCheck,
+  X,
+  Loader2,
 } from 'lucide-react';
 
 export const CallDetailsPage: React.FC = () => {
@@ -39,6 +45,9 @@ export const CallDetailsPage: React.FC = () => {
   const [relatedLead, setRelatedLead] = useState<Lead | null>(null);
   const [isFollowUpModalOpen, setIsFollowUpModalOpen] = useState(false);
   const [isOpportunityModalOpen, setIsOpportunityModalOpen] = useState(false);
+  const [isReassignModalOpen, setIsReassignModalOpen] = useState(false);
+  const [newCallerName, setNewCallerName] = useState('');
+  const [isReassigning, setIsReassigning] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
 
   useEffect(() => {
@@ -247,8 +256,30 @@ export const CallDetailsPage: React.FC = () => {
               </div>
 
               <div className="p-3 bg-slate-50 dark:bg-slate-950/60 border border-slate-100 dark:border-slate-800 rounded-lg">
-                <span className="text-slate-400 dark:text-slate-500 text-[11px] block">Called By</span>
-                <span className="font-semibold text-slate-900 dark:text-white">{call.employeeName}</span>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-400 dark:text-slate-500 text-[11px] block">Called By</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setNewCallerName(call.employeeName || '');
+                      setIsReassignModalOpen(true);
+                    }}
+                    className="text-[10px] font-semibold text-[#5B4DB7] dark:text-purple-400 hover:underline cursor-pointer"
+                  >
+                    Change
+                  </button>
+                </div>
+                <div className="flex items-center gap-2 mt-1">
+                  <EmployeeAvatar
+                    name={call.employeeName}
+                    avatar={call.employeeAvatar}
+                    profilePhoto={call.employeeProfilePhoto}
+                    email={call.employeeEmail}
+                    size="xs"
+                    showRing={true}
+                  />
+                  <span className="font-semibold text-slate-900 dark:text-white truncate">{call.employeeName}</span>
+                </div>
               </div>
             </div>
 
@@ -314,9 +345,18 @@ export const CallDetailsPage: React.FC = () => {
                     Due date: <strong className="text-slate-800 dark:text-slate-200">{call.nextFollowUp.date}</strong> at{' '}
                     <span className="font-mono">{call.nextFollowUp.time}</span>
                   </p>
-                  <p className="text-slate-500 dark:text-slate-400 text-[11px]">
-                    Assigned representative: <strong className="text-slate-700 dark:text-slate-300">{call.nextFollowUp.assignedTo}</strong>
-                  </p>
+                  <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-[11px] pt-1">
+                    <span>Assigned representative:</span>
+                    <EmployeeAvatar
+                      name={call.nextFollowUp.assignedTo}
+                      avatar={call.nextFollowUp.assignedAvatar}
+                      profilePhoto={call.nextFollowUp.assignedProfilePhoto}
+                      email={call.nextFollowUp.assignedEmail}
+                      size="xs"
+                      showRing={true}
+                    />
+                    <strong className="text-slate-700 dark:text-slate-300">{call.nextFollowUp.assignedTo}</strong>
+                  </div>
                 </div>
 
                 <button
@@ -430,9 +470,14 @@ export const CallDetailsPage: React.FC = () => {
               Caller Account
             </span>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-950/80 text-[#5B4DB7] dark:text-purple-300 font-bold text-sm flex items-center justify-center">
-                {call.employeeAvatar}
-              </div>
+              <EmployeeAvatar
+                name={call.employeeName}
+                avatar={call.employeeAvatar}
+                profilePhoto={call.employeeProfilePhoto}
+                email={call.employeeEmail}
+                size="md"
+                showRing={true}
+              />
               <div>
                 <h4 className="text-xs font-bold text-slate-900 dark:text-white">{call.employeeName}</h4>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400">{call.employeeRole}</p>
@@ -453,10 +498,105 @@ export const CallDetailsPage: React.FC = () => {
 
       <CreateOpportunityModal
         isOpen={isOpportunityModalOpen}
-        onClose={() => setIsOpportunityModalOpen(false)}
+        onClose={() => {
+          setIsOpportunityModalOpen(false);
+          setSelectedCallForModal(null);
+        }}
         call={call}
         onSuccess={handleOpportunityCreated}
       />
+
+      {/* Caller Reassign Modal with Active-Only Typeahead Debounced Search */}
+      {isReassignModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
+          <div className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-indigo-50 dark:bg-indigo-950/60 text-[#5B4DB7] dark:text-purple-300 rounded-xl">
+                  <UserCheck className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-900 dark:text-white text-base">Reassign Call Representative</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Update the active employee associated with this call
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsReassignModalOpen(false)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                if (!newCallerName.trim()) {
+                  showToast('Please select an active employee.');
+                  return;
+                }
+                setIsReassigning(true);
+                try {
+                  const emp = findCachedEmployee(newCallerName.trim());
+                  const updated: CallRecord = {
+                    ...call,
+                    employeeName: newCallerName.trim(),
+                    employeeEmail: emp?.email || call.employeeEmail,
+                    employeeAvatar: emp?.avatar || call.employeeAvatar,
+                    employeeProfilePhoto: emp?.profilePhoto || call.employeeProfilePhoto,
+                  };
+                  const saved = await updateCallApi(call.id, updated);
+                  setCall(saved);
+                  setIsReassignModalOpen(false);
+                  showToast(`Call record reassigned to ${newCallerName.trim()}.`);
+                } catch (err) {
+                  console.error('Failed reassigning call:', err);
+                  showToast('Error reassigning call record.');
+                } finally {
+                  setIsReassigning(false);
+                }
+              }}
+              className="space-y-4 text-xs"
+            >
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Select Active Employee
+                </label>
+                <EmployeeSelect
+                  value={newCallerName}
+                  onChange={(e) => {
+                    const val = typeof e === 'string' ? e : e.target.value;
+                    setNewCallerName(val);
+                  }}
+                  placeholder="Search and select active employee..."
+                  className="w-full text-xs"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setIsReassignModalOpen(false)}
+                  className="px-3.5 py-2 rounded-lg border border-slate-300 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isReassigning || !newCallerName}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#5B4DB7] hover:bg-[#4E41A2] text-white text-xs font-semibold transition-colors disabled:opacity-50 cursor-pointer"
+                >
+                  {isReassigning && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                  <span>Save Reassignment</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

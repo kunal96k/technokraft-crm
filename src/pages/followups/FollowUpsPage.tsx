@@ -340,6 +340,9 @@ export const FollowUpsPage: React.FC = () => {
           time: nextFollowUpData.time,
           assignedTo: current.assignedTo,
           assignedAvatar: current.assignedAvatar,
+          assignedEmail: current.assignedEmail,
+          assignedProfilePhoto: current.assignedProfilePhoto,
+          createdBy: authUser?.name || current.assignedTo,
           priority: current.priority,
           status: 'PENDING',
           notes: nextFollowUpData.notes,
@@ -379,11 +382,11 @@ export const FollowUpsPage: React.FC = () => {
       iconType: 'trash',
       itemDetails: item
         ? [
-            { label: 'Client / Company', value: item.companyName },
-            { label: 'Follow-up Type', value: item.type },
-            { label: 'Scheduled Time', value: `${item.date} at ${item.time}` },
-            { label: 'Assignee', value: item.assignedTo },
-          ]
+          { label: 'Client / Company', value: item.companyName },
+          { label: 'Follow-up Type', value: item.type },
+          { label: 'Scheduled Time', value: `${item.date} at ${item.time}` },
+          { label: 'Assignee', value: item.assignedTo },
+        ]
         : undefined,
       onConfirm: async () => {
         await followUpService.deleteFollowUp(followUpId);
@@ -578,9 +581,6 @@ export const FollowUpsPage: React.FC = () => {
         <div>
           Showing <strong>1 to {followUps.length}</strong> of{' '}
           <strong>{stats.today + stats.upcoming + stats.overdue + stats.completed}</strong> total records
-        </div>
-        <div className="flex items-center gap-1">
-          <span className="text-slate-400 dark:text-slate-500">Live Database Connected</span>
         </div>
       </div>
 

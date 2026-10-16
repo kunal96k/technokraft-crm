@@ -17,6 +17,7 @@ import { FollowUpPriorityBadge } from '../FollowUpPriorityBadge';
 import { FollowUpEmptyState } from '../FollowUpEmptyState';
 import { ConfirmationModal } from '../../common/ConfirmationModal';
 import { formatDisplayDate, formatISTTime } from '../../../utils/dateUtils';
+import { EmployeeAvatar } from '../../common/EmployeeAvatar';
 
 interface TaskTableProps {
   tasks: TaskRecord[];
@@ -174,11 +175,14 @@ export const TaskTable: React.FC<TaskTableProps> = ({
 
                 {/* Assigned To */}
                 <td className="py-3 px-3">
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-950/80 text-[#5B4DB7] dark:text-purple-300 text-[10px] font-bold flex items-center justify-center">
-                      {task.assignedAvatar || task.assignedTo.substring(0, 2).toUpperCase()}
-                    </span>
-                    <span className="truncate text-slate-700 dark:text-slate-300">{task.assignedTo}</span>
+                  <div className="flex items-center gap-2">
+                    <EmployeeAvatar
+                      name={task.assignedTo}
+                      avatar={task.assignedAvatar}
+                      size="xs"
+                      showRing={true}
+                    />
+                    <span className="truncate text-slate-700 dark:text-slate-300 font-medium">{task.assignedTo}</span>
                   </div>
                 </td>
 

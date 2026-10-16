@@ -36,7 +36,10 @@ import { EmailVariablePreview } from './EmailVariablePreview';
 import { AttachmentUploader } from './AttachmentUploader';
 import { ScheduleEmailModal } from './ScheduleEmailModal';
 import { CreateTemplateModal } from './CreateTemplateModal';
-import { renderBrandedEmailHtml } from '../../utils/emailTemplateRenderer';
+import { useAuth } from '../../context/AuthContext';
+import { EmployeeAvatar } from '../common/EmployeeAvatar';
+import { EmployeeSelect } from '../common/EmployeeSelect';
+import { findCachedEmployee } from '../../services/employeeService';
 
 interface EmailComposerModalProps {
   isOpen: boolean;
@@ -61,6 +64,8 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
   defaultSubject,
   defaultBody,
 }) => {
+  const { user } = useAuth();
+
   // Selected CRM Lead
   const [selectedLeadId, setSelectedLeadId] = useState<string>(
     defaultLeadId || (initialLead?.id ? String(initialLead.id) : '')
@@ -75,6 +80,9 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
   const [bccInput, setBccInput] = useState('');
   const [subject, setSubject] = useState(defaultSubject || '');
   const [body, setBody] = useState(defaultBody || '');
+  const [senderEmployeeName, setSenderEmployeeName] = useState<string>(
+    initialLead?.assignedEmployee?.name || user?.name || ''
+  );
 
   // Template state
   const [availableTemplates, setAvailableTemplates] = useState<EmailTemplate[]>([]);
@@ -110,8 +118,13 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
       setSelectedLeadId(String(initialLead.id));
       setRecipientEmail(defaultRecipientEmail || initialLead.contact?.email || '');
       setRecipientName(initialLead.contact?.name || '');
+      if (initialLead.assignedEmployee?.name) {
+        setSenderEmployeeName(initialLead.assignedEmployee.name);
+      }
+    } else if (user?.name && !senderEmployeeName) {
+      setSenderEmployeeName(user.name);
     }
-  }, [initialLead, defaultRecipientEmail]);
+  }, [initialLead, defaultRecipientEmail, user]);
 
   // Apply default template or custom defaults on first load
   useEffect(() => {
@@ -188,6 +201,12 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
         base64Content: att.base64Content,
       }));
 
+      const senderEmp = findCachedEmployee(senderEmployeeName);
+      const senderName = senderEmployeeName || user?.name || 'TechnoKraft Services';
+      const senderEmail = senderEmp?.email || (senderEmployeeName === user?.name ? user?.email : undefined) || 'info@technokraftservices.com';
+      const senderAvatar = senderEmp?.avatar || user?.avatar;
+      const senderProfilePhoto = senderEmp?.profilePhoto || user?.profilePhoto;
+
       const res = await sendB2BEmail({
         leadId: selectedLead?.id,
         leadCode: selectedLead?.leadCode,
@@ -197,8 +216,10 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
         bcc: bccInput ? bccInput.split(',').map((s) => s.trim()).filter(Boolean) : undefined,
         subject,
         body,
-        senderName: 'TechnoKraft Services',
-        senderEmail: 'info@technokraftservices.com',
+        senderName,
+        senderEmail,
+        senderAvatar,
+        senderProfilePhoto,
         status: 'sent',
         attachments: formattedAttachments,
       });
@@ -211,13 +232,17 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
           companyName: selectedLead?.company?.name || 'Client Company',
           recipientName: recipientName || 'Valued Client',
           recipientEmail,
+          recipientAvatar: (selectedLead?.contact as any)?.avatar,
+          recipientProfilePhoto: (selectedLead?.contact as any)?.profilePhoto,
           cc: ccInput ? ccInput.split(',').map((s) => s.trim()).filter(Boolean) : undefined,
           bcc: bccInput ? bccInput.split(',').map((s) => s.trim()).filter(Boolean) : undefined,
           subject,
           body,
           status: 'sent',
-          senderName: 'TechnoKraft Services',
-          senderEmail: 'info@technokraftservices.com',
+          senderName,
+          senderEmail,
+          senderAvatar,
+          senderProfilePhoto,
           date: 'Today',
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           timestamp: new Date().toISOString(),
@@ -267,6 +292,12 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
         base64Content: att.base64Content,
       }));
 
+      const senderEmp = findCachedEmployee(senderEmployeeName);
+      const senderName = senderEmployeeName || user?.name || 'TechnoKraft Services';
+      const senderEmail = senderEmp?.email || (senderEmployeeName === user?.name ? user?.email : undefined) || 'info@technokraftservices.com';
+      const senderAvatar = senderEmp?.avatar || user?.avatar;
+      const senderProfilePhoto = senderEmp?.profilePhoto || user?.profilePhoto;
+
       const res = await sendB2BEmail({
         leadId: selectedLead?.id,
         leadCode: selectedLead?.leadCode,
@@ -274,8 +305,10 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
         recipientName: recipientName || selectedLead?.contact?.name || 'Valued Client',
         subject,
         body,
-        senderName: 'TechnoKraft Services',
-        senderEmail: 'info@technokraftservices.com',
+        senderName,
+        senderEmail,
+        senderAvatar,
+        senderProfilePhoto,
         status: 'scheduled',
         scheduledFor: `${dateStr}, ${timeStr}`,
         attachments: formattedAttachments,
@@ -288,11 +321,15 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
         companyName: selectedLead?.company?.name || 'Client Company',
         recipientName: recipientName || 'Valued Client',
         recipientEmail,
+        recipientAvatar: (selectedLead?.contact as any)?.avatar,
+        recipientProfilePhoto: (selectedLead?.contact as any)?.profilePhoto,
         subject,
         body,
         status: 'scheduled',
-        senderName: 'TechnoKraft Services',
-        senderEmail: 'info@technokraftservices.com',
+        senderName,
+        senderEmail,
+        senderAvatar,
+        senderProfilePhoto,
         date: dateStr,
         time: timeStr,
         timestamp: new Date().toISOString(),
@@ -337,6 +374,12 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
         base64Content: att.base64Content,
       }));
 
+      const senderEmp = findCachedEmployee(senderEmployeeName);
+      const senderName = senderEmployeeName || user?.name || 'TechnoKraft Services';
+      const senderEmail = senderEmp?.email || (senderEmployeeName === user?.name ? user?.email : undefined) || 'info@technokraftservices.com';
+      const senderAvatar = senderEmp?.avatar || user?.avatar;
+      const senderProfilePhoto = senderEmp?.profilePhoto || user?.profilePhoto;
+
       const res = await sendB2BEmail({
         leadId: selectedLead?.id,
         leadCode: selectedLead?.leadCode,
@@ -344,8 +387,10 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
         recipientName: recipientName || 'Draft Recipient',
         subject: subject || '(Untitled Draft)',
         body,
-        senderName: 'TechnoKraft Services',
-        senderEmail: 'info@technokraftservices.com',
+        senderName,
+        senderEmail,
+        senderAvatar,
+        senderProfilePhoto,
         status: 'draft',
         attachments: formattedAttachments,
       });
@@ -357,11 +402,15 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
         companyName: selectedLead?.company?.name || 'Client Company',
         recipientName: recipientName || 'Draft Recipient',
         recipientEmail,
+        recipientAvatar: (selectedLead?.contact as any)?.avatar,
+        recipientProfilePhoto: (selectedLead?.contact as any)?.profilePhoto,
         subject: subject || '(Untitled Draft)',
         body,
         status: 'draft',
-        senderName: 'TechnoKraft Services',
-        senderEmail: 'info@technokraftservices.com',
+        senderName,
+        senderEmail,
+        senderAvatar,
+        senderProfilePhoto,
         date: 'Today',
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         timestamp: new Date().toISOString(),
@@ -488,16 +537,45 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
 
           {/* Recipient inputs */}
           <div className="space-y-2">
+            {/* Active Sender Account with Typeahead Debounced Search */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+              <span className="text-xs font-semibold text-slate-600 dark:text-slate-300 sm:w-12 sm:text-right">From:</span>
+              <div className="flex-1">
+                <EmployeeSelect
+                  value={senderEmployeeName}
+                  onChange={(e) => {
+                    const val = typeof e === 'string' ? e : e.target.value;
+                    setSenderEmployeeName(val);
+                  }}
+                  placeholder="Select Sender Employee (Active only)"
+                  className="w-full text-xs"
+                />
+              </div>
+            </div>
+
             <div className="flex items-center gap-2">
               <span className="text-xs font-semibold text-slate-600 dark:text-slate-300 w-12 text-right">To:</span>
-              <input
-                type="email"
-                value={recipientEmail}
-                onChange={(e) => setRecipientEmail(e.target.value)}
-                placeholder="recipient@example.com"
-                className="flex-1 text-xs px-3 py-2 bg-white dark:bg-slate-850 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40 dark:focus:ring-purple-400/40"
-                required
-              />
+              <div className="flex-1 flex items-center gap-2">
+                <input
+                  type="email"
+                  value={recipientEmail}
+                  onChange={(e) => setRecipientEmail(e.target.value)}
+                  placeholder="recipient@example.com"
+                  className="flex-1 text-xs px-3 py-2 bg-white dark:bg-slate-850 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40 dark:focus:ring-purple-400/40"
+                  required
+                />
+                {recipientName && (
+                  <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs flex-shrink-0">
+                    <EmployeeAvatar
+                      name={recipientName}
+                      email={recipientEmail}
+                      size="xs"
+                      isClient={true}
+                    />
+                    <span className="font-medium truncate max-w-[140px]">{recipientName}</span>
+                  </div>
+                )}
+              </div>
             </div>
 
             {showCcBcc && (

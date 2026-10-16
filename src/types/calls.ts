@@ -26,6 +26,9 @@ export interface NextFollowUpDetails {
   time: string;
   type: 'Call' | 'Email' | 'Meeting' | 'Demo' | 'Document' | 'General';
   assignedTo: string;
+  assignedAvatar?: string;
+  assignedProfilePhoto?: string;
+  assignedEmail?: string;
 }
 
 export interface CallRecord {
@@ -44,6 +47,8 @@ export interface CallRecord {
   employeeName: string;
   employeeRole: string;
   employeeAvatar: string;
+  employeeProfilePhoto?: string;
+  employeeEmail?: string;
   type: CallType;
   status: CallStatus;
   date: string; // e.g. '07 Sep 2026' or '2026-09-07'
@@ -81,6 +86,8 @@ export interface EmployeeCallStats {
   employeeName: string;
   role: string;
   avatar: string;
+  profilePhoto?: string;
+  email?: string;
   callsToday: number;
   completed: number;
   missed: number;

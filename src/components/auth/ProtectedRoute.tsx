@@ -5,10 +5,17 @@ import { Loader2, ShieldAlert, ArrowLeft } from 'lucide-react';
 
 interface ProtectedRouteProps {
   allowedRoles?: string[];
+  moduleKey?: string;
+  requireSuperAdmin?: boolean;
   children?: React.ReactNode;
 }
 
-export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles, children }) => {
+export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
+  allowedRoles,
+  moduleKey,
+  requireSuperAdmin = false,
+  children,
+}) => {
   const { isAuthenticated, isLoading, user, hasRole } = useAuth();
   const location = useLocation();
 
@@ -33,8 +40,27 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles, ch
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Role authorization check
-  if (allowedRoles && allowedRoles.length > 0 && !hasRole(allowedRoles)) {
+  // Check authorization
+  const roleStr = (user.accessRole || user.role || '').toLowerCase();
+  const isSuperAdminOrSystemAdmin =
+    roleStr === 'super admin' ||
+    roleStr === 'superadmin' ||
+    roleStr === 'system administrator' ||
+    roleStr === 'system admin' ||
+    Boolean(user.isSuperAdmin);
+
+  let isAuthorized = true;
+  if (requireSuperAdmin) {
+    isAuthorized = isSuperAdminOrSystemAdmin;
+  } else if (!isSuperAdminOrSystemAdmin) {
+    if (moduleKey && user.allowedModules !== undefined && user.allowedModules !== null && Array.isArray(user.allowedModules)) {
+      isAuthorized = user.allowedModules.includes(moduleKey);
+    } else if (allowedRoles && allowedRoles.length > 0) {
+      isAuthorized = hasRole(allowedRoles);
+    }
+  }
+
+  if (!isAuthorized) {
     return (
       <div className="min-h-[70vh] flex items-center justify-center p-6">
         <div className="max-w-md w-full bg-white dark:bg-slate-900 border border-rose-200 dark:border-rose-900/40 rounded-2xl p-8 text-center shadow-lg">
@@ -43,7 +69,9 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles, ch
           </div>
           <h2 className="text-lg font-bold text-slate-900 dark:text-white">Access Restricted</h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
-            Your role (<strong className="text-slate-800 dark:text-slate-200">{user.accessRole || user.role}</strong>) does not have authorization permissions to access this CRM module.
+            {requireSuperAdmin
+              ? 'This module contains sensitive system audit logs and is strictly restricted to Super Admin and System Administrator roles only.'
+              : `Your role (${user.accessRole || user.role}) does not have authorization permissions to access this CRM module.`}
           </p>
           <div className="mt-6 flex justify-center">
             <a

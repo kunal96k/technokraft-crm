@@ -11,6 +11,9 @@ import { ConfirmationModal } from '../../common/ConfirmationModal';
 import { LeadSearchSelect } from '../../common/LeadSearchSelect';
 import { getTodayIST_YYYYMMDD } from '../../../utils/dateUtils';
 
+import { useAuth } from '../../../context/AuthContext';
+import { findCachedEmployee } from '../../../services/employeeService';
+
 interface CreateMeetingModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -24,6 +27,7 @@ export const CreateMeetingModal: React.FC<CreateMeetingModalProps> = ({
   onSubmit,
   preselectedLeadId,
 }) => {
+  const { user } = useAuth();
   const [selectedLead, setSelectedLead] = React.useState<Lead | null>(null);
   const [leadId, setLeadId] = React.useState(preselectedLeadId || '');
   const [title, setTitle] = React.useState('');
@@ -31,7 +35,7 @@ export const CreateMeetingModal: React.FC<CreateMeetingModalProps> = ({
   const [date, setDate] = React.useState(() => getTodayIST_YYYYMMDD());
   const [startTime, setStartTime] = React.useState('11:00 AM');
   const [endTime, setEndTime] = React.useState('12:00 PM');
-  const [assignedEmployee, setAssignedEmployee] = React.useState('');
+  const [assignedEmployee, setAssignedEmployee] = React.useState(() => user?.name || '');
   const [location, setLocation] = React.useState<MeetingLocation>('Online');
   const [meetingLink, setMeetingLink] = React.useState('https://meet.google.com/tk-client-sync');
   const [description, setDescription] = React.useState('');
@@ -40,8 +44,22 @@ export const CreateMeetingModal: React.FC<CreateMeetingModalProps> = ({
   const [showConfirmModal, setShowConfirmModal] = React.useState(false);
 
   React.useEffect(() => {
-    if (preselectedLeadId) setLeadId(preselectedLeadId);
-  }, [preselectedLeadId]);
+    if (isOpen) {
+      if (preselectedLeadId) setLeadId(preselectedLeadId);
+      if (user?.name) {
+        setAssignedEmployee((prev) => prev || user.name);
+      }
+    } else {
+      setError('');
+      setTitle('');
+      setDescription('');
+      setNotes('');
+      setShowConfirmModal(false);
+      if (user?.name) {
+        setAssignedEmployee(user.name);
+      }
+    }
+  }, [preselectedLeadId, isOpen, user?.name]);
 
   if (!isOpen) return null;
 
@@ -63,6 +81,14 @@ export const CreateMeetingModal: React.FC<CreateMeetingModalProps> = ({
   const handleConfirmSave = () => {
     if (!selectedLead) return;
 
+    const isAuth = user && user.name === assignedEmployee;
+    const emp = findCachedEmployee(assignedEmployee);
+    const assignedPhoto = isAuth ? user.profilePhoto : emp?.profilePhoto;
+    const assignedEmail = isAuth ? user.email : emp?.email;
+    const assignedAvatar = isAuth
+      ? (user.profilePhoto || user.avatar)
+      : (emp?.profilePhoto || emp?.avatar || (assignedEmployee ? assignedEmployee.split(' ').map((n) => n[0]).join('').toUpperCase() : 'ME'));
+
     onSubmit({
       leadId: selectedLead.id,
       leadCode: selectedLead.leadCode,
@@ -77,7 +103,10 @@ export const CreateMeetingModal: React.FC<CreateMeetingModalProps> = ({
       startTime,
       endTime,
       assignedEmployee,
-      assignedAvatar: assignedEmployee ? assignedEmployee.split(' ').map((n) => n[0]).join('').toUpperCase() : 'ME',
+      assignedEmail,
+      assignedProfilePhoto: assignedPhoto,
+      assignedAvatar,
+      createdBy: user?.name,
       location,
       meetingLink: location === 'Online' ? meetingLink : undefined,
       description,

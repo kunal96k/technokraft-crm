@@ -132,6 +132,8 @@ export interface SendEmailPayload {
   recipientName?: string;
   senderName?: string;
   senderEmail?: string;
+  senderAvatar?: string;
+  senderProfilePhoto?: string;
   subject: string;
   body: string;
   htmlBody?: string;
@@ -459,6 +461,48 @@ export async function updateLeadStatus(
   }
 
   return await res.json();
+}
+
+export interface AssignLeadPayload {
+  employeeName: string;
+  employeeEmail?: string;
+  employeeRole?: string;
+  employeeAvatar?: string;
+  assignedBAName?: string;
+  assignedBARole?: string;
+  note?: string;
+  updatedByName?: string;
+  updatedByEmail?: string;
+  updatedByRole?: string;
+}
+
+/**
+ * Reassign lead to an active employee or BA
+ */
+export async function assignLead(
+  idOrCode: string | number,
+  payload: AssignLeadPayload
+): Promise<Lead | null> {
+  try {
+    const res = await authFetch(`${LEADS_API_URL}/${idOrCode}/assign`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `Failed to assign lead (HTTP ${res.status})`);
+    }
+
+    return await res.json();
+  } catch (err: any) {
+    console.error(`[LeadService] Failed to assign lead ${idOrCode}:`, err);
+    throw err;
+  }
 }
 
 /**

@@ -24,6 +24,7 @@ import { AnalyticsPage } from '../pages/reports/AnalyticsPage';
 import { EmployeeListPage } from '../pages/employees/EmployeeListPage';
 import { AttendancePage } from '../pages/attendance/AttendancePage';
 import { GeneralSettingsPage } from '../pages/settings/GeneralSettingsPage';
+import { AuditLogsPage } from '../pages/audit/AuditLogsPage';
 import { NotificationsPage } from '../pages/notifications/NotificationsPage';
 import { LoginPage } from '../pages/auth/LoginPage';
 import { ForgotPasswordPage } from '../pages/auth/ForgotPasswordPage';
@@ -68,57 +69,67 @@ export const AppRoutes: React.FC = () => {
         <Route path="/opportunities/proposals" element={<ProposalsPage />} />
         <Route path="/opportunities/:id" element={<OpportunityDetailsPage />} />
 
-        {/* 6. Reports Module — Managers and above only */}
+        {/* 6. Reports Module */}
         <Route
           path="/reports"
           element={
-            <ProtectedRoute allowedRoles={['Super Admin', 'Admin', 'Sales Manager']}>
+            <ProtectedRoute allowedRoles={['Super Admin', 'Admin', 'Sales Manager', 'Manager']} moduleKey="reports">
               <Navigate to="/reports/performance" replace />
             </ProtectedRoute>
           }
         />
         <Route
           path="/reports/performance"
-          element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin', 'Sales Manager']}><PerformanceReportPage /></ProtectedRoute>}
+          element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin', 'Sales Manager', 'Manager']} moduleKey="reports"><PerformanceReportPage /></ProtectedRoute>}
         />
         <Route
           path="/reports/performance/:employeeId"
-          element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin', 'Sales Manager']}><EmployeePerformanceDetailPage /></ProtectedRoute>}
+          element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin', 'Sales Manager', 'Manager']} moduleKey="reports"><EmployeePerformanceDetailPage /></ProtectedRoute>}
         />
         <Route
           path="/reports/analytics"
-          element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin', 'Sales Manager']}><AnalyticsPage /></ProtectedRoute>}
+          element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin', 'Sales Manager', 'Manager']} moduleKey="reports"><AnalyticsPage /></ProtectedRoute>}
         />
 
-        {/* 7. Employees Module — Managers and above only */}
+        {/* 7. Employees Module */}
         <Route
           path="/employees"
-          element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin', 'Sales Manager']}><EmployeeListPage /></ProtectedRoute>}
+          element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin', 'Sales Manager', 'Manager']} moduleKey="employees"><EmployeeListPage /></ProtectedRoute>}
         />
         <Route
           path="/employees/attendance"
-          element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin', 'Sales Manager']}><AttendancePage /></ProtectedRoute>}
+          element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin', 'Sales Manager', 'Manager']} moduleKey="employees"><AttendancePage /></ProtectedRoute>}
         />
         <Route
           path="/attendance"
-          element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin', 'Sales Manager']}><AttendancePage /></ProtectedRoute>}
+          element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin', 'Sales Manager', 'Manager']} moduleKey="employees"><AttendancePage /></ProtectedRoute>}
         />
 
-        {/* 8. Settings Module — Super Admin / Admin only */}
+        {/* 8. Settings Module */}
         <Route
           path="/settings"
           element={
-            <ProtectedRoute allowedRoles={['Super Admin', 'Admin']}>
+            <ProtectedRoute allowedRoles={['Super Admin', 'Admin']} moduleKey="settings">
               <Navigate to="/settings/general" replace />
             </ProtectedRoute>
           }
         />
         <Route
           path="/settings/general"
-          element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin']}><GeneralSettingsPage /></ProtectedRoute>}
+          element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin']} moduleKey="settings"><GeneralSettingsPage /></ProtectedRoute>}
         />
 
-        {/* 9. Notification Center — all authenticated users */}
+        {/* 9. Audit Logs Module — Strictly restricted to Super Admin / System Administrator */}
+        <Route
+          path="/audit-logs"
+          element={
+            <ProtectedRoute requireSuperAdmin>
+              <AuditLogsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* 10. Notification Center — all authenticated users */}
         <Route path="/notifications" element={<NotificationsPage />} />
 
         {/* Fallback Catch-all */}
