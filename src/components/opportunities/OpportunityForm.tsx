@@ -164,12 +164,61 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
   // Form Validation State
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  // ─── Rehydrate all form fields whenever the modal opens or the record changes ───
+  // This is the critical fix: useState initializers only run on first mount,
+  // so switching from "Create" → "Edit" (or editing different records) would
+  // show stale / blank values without this effect.
   useEffect(() => {
-    if (isOpen) {
-      setActiveTab('company');
-      setErrors({});
-    }
-  }, [isOpen]);
+    if (!isOpen) return;
+
+    setActiveTab('company');
+    setErrors({});
+
+    // TAB 1
+    setName(initialOpportunity?.name || '');
+    setSelectedLeadId(initialOpportunity?.leadId || initialOpportunity?.leadCode || '');
+    setSelectedLeadObj(null);
+    setCompanyName(initialOpportunity?.companyName || '');
+    setIndustry(initialOpportunity?.industry || 'IT & Software');
+
+    // TAB 2
+    setContactName(initialOpportunity?.contactName || '');
+    setContactDesignation(initialOpportunity?.contactDesignation || '');
+    setContactEmail(initialOpportunity?.contactEmail || '');
+    setContactPhone(initialOpportunity?.contactPhone || '');
+
+    // TAB 3
+    setService(initialOpportunity?.service || 'Custom Software Development');
+    setStage(initialOpportunity?.stage || defaultStage);
+    setEstimatedValue(
+      initialOpportunity?.estimatedValue != null
+        ? String(initialOpportunity.estimatedValue)
+        : '800000'
+    );
+    setProbability(
+      initialOpportunity?.probability !== undefined ? initialOpportunity.probability : 50
+    );
+    setExpectedCloseDate(
+      initialOpportunity?.expectedCloseDate ||
+        new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+    );
+    setPriority(initialOpportunity?.priority || 'High');
+
+    // TAB 4
+    setRequirementSummary(initialOpportunity?.requirement?.summary || '');
+    setBusinessProblem(initialOpportunity?.requirement?.problemStatement || '');
+    setExpectedUsers(initialOpportunity?.requirement?.expectedUsers || '');
+    setTimeline(initialOpportunity?.requirement?.timeline || '3 months');
+    setBudget(initialOpportunity?.requirement?.budget || '₹8,00,000 - ₹12,00,000');
+    setTechnicalRequirements(initialOpportunity?.requirement?.technicalRequirements || '');
+    setRequirementNotes(initialOpportunity?.requirement?.notes || '');
+
+    // TAB 5
+    setOwnerName(initialOpportunity?.owner?.name || authUser?.name || '');
+    setBusinessAnalystName(initialOpportunity?.businessAnalyst?.name || '');
+    setTechnicalReviewerName(initialOpportunity?.technicalReviewer?.name || '');
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, initialOpportunity?.id]);
 
   if (!isOpen) return null;
 
@@ -488,6 +537,7 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
                   {/* Related Lead Selector */}
                   <div className="sm:col-span-2">
                     <LeadSearchSelect
+                      key={`lead-select-${initialOpportunity?.id ?? 'new'}`}
                       label="Linked Lead Record (Optional)"
                       value={selectedLeadId}
                       initialLeadName={
