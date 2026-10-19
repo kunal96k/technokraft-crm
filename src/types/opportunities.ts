@@ -44,6 +44,7 @@ export interface OpportunityActivity {
   time: string;
   employeeName: string;
   employeeAvatar?: string;
+  employeeProfilePhoto?: string;
   type: 'CREATED' | 'STAGE_CHANGE' | 'CALL' | 'EMAIL' | 'MEETING' | 'PROPOSAL' | 'NOTE' | 'STATUS';
   title: string;
   notes?: string;
@@ -55,6 +56,8 @@ export interface OpportunityFollowUp {
   time: string;
   type: 'Call' | 'Meeting' | 'Demo' | 'Email';
   assignedTo: string;
+  assignedToAvatar?: string;
+  assignedToProfilePhoto?: string;
   status: 'Pending' | 'Completed' | 'Overdue';
   notes?: string;
 }
@@ -98,18 +101,27 @@ export interface OpportunityRecord {
     avatar: string;
     role: string;
     email: string;
+    profilePhoto?: string;
   };
   businessAnalyst?: {
     name: string;
     role: string;
+    avatar?: string;
+    profilePhoto?: string;
+    email?: string;
   };
   technicalReviewer?: {
     name: string;
     role: string;
+    avatar?: string;
+    profilePhoto?: string;
+    email?: string;
   };
   createdBy: {
     name: string;
     date: string;
+    avatar?: string;
+    profilePhoto?: string;
   };
 
   // Outcome

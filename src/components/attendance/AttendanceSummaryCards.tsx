@@ -18,7 +18,7 @@ export const AttendanceSummaryCards: React.FC<AttendanceSummaryCardsProps> = ({
   onSelectFilter,
 }) => {
   const presentToday = summary?.presentToday ?? employees.filter(
-    (e) => e.todayAttendanceStatus === 'Present' || e.todayAttendanceStatus === 'Late'
+    (e) => e.todayAttendanceStatus === 'Present' || e.todayAttendanceStatus === 'Late' || e.todayAttendanceStatus === 'Early'
   ).length;
   const halfDay = summary?.halfDay ?? employees.filter((e) => e.todayAttendanceStatus === 'Half Day').length;
   const absent = summary?.absent ?? employees.filter((e) => e.todayAttendanceStatus === 'Absent').length;
@@ -71,7 +71,7 @@ export const AttendanceSummaryCards: React.FC<AttendanceSummaryCardsProps> = ({
       id: 'late',
       title: 'Late Logins',
       value: late,
-      subtitle: 'Arrived after 09:30 AM',
+      subtitle: 'Arrived > 15m after shift',
       icon: ClockAlert,
       color: 'text-amber-600 dark:text-amber-400',
       bgColor: 'bg-amber-50 dark:bg-amber-950/40',

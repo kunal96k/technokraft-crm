@@ -31,7 +31,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // Validate session against backend on mount
+  // Validate session against backend on mount and enforce IST midnight auto-logout
   useEffect(() => {
     let mounted = true;
     const checkAuth = async () => {
@@ -45,13 +45,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
 
+      // Check if session belongs to a previous Indian Time Zone (Asia/Kolkata) date
+      const sessionISTDate = authService.getStoredISTDate();
+      const currentISTDate = authService.getISTDateString();
+      if (sessionISTDate && sessionISTDate !== currentISTDate) {
+        console.warn(`[AuthContext] Session expired: day completed in Asia/Kolkata (stored=${sessionISTDate}, current=${currentISTDate}). Auto logging out.`);
+        sessionStorage.setItem(authService.LOGOUT_REASON_KEY, 'eod_auto_logout');
+        authService.clearStoredAuth();
+        if (mounted) {
+          setUser(null);
+          setToken(null);
+          setIsLoading(false);
+        }
+        return;
+      }
+
       try {
         const freshUser = await authService.getCurrentUser(storedToken);
         if (mounted) {
-          if (freshUser) {
+          if (freshUser && freshUser.workStatus?.toLowerCase() !== 'logged out') {
             setUser(freshUser);
             setToken(storedToken);
           } else {
+            console.warn('[AuthContext] Session closed or employee marked as Logged Out. Clearing credentials.');
+            sessionStorage.setItem(authService.LOGOUT_REASON_KEY, 'eod_auto_logout');
+            authService.clearStoredAuth();
             setUser(null);
             setToken(null);
           }
@@ -71,6 +89,54 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     checkAuth();
 
+    // 1. Midnight Watcher for Indian Standard Time (Asia/Kolkata)
+    // Runs every 10 seconds to detect 23:59:59 -> 00:00:00 IST rollover
+    const checkMidnightIST = () => {
+      const currentToken = authService.getStoredToken();
+      if (!currentToken) return;
+
+      const storedISTDate = authService.getStoredISTDate();
+      const currentISTDate = authService.getISTDateString();
+
+      if (storedISTDate && storedISTDate !== currentISTDate) {
+        console.warn(`[AuthContext] Working day completed in Asia/Kolkata timezone (stored=${storedISTDate}, current=${currentISTDate}). Auto-logging out.`);
+        sessionStorage.setItem(authService.LOGOUT_REASON_KEY, 'eod_auto_logout');
+        authService.clearStoredAuth();
+        if (mounted) {
+          setUser(null);
+          setToken(null);
+        }
+        window.dispatchEvent(new CustomEvent('crm-session-expired', { detail: { reason: 'eod_auto_logout' } }));
+      }
+    };
+
+    const midnightTimer = setInterval(checkMidnightIST, 10000);
+
+    // 2. Periodic heartbeat & tab focus verification against backend
+    const verifyActiveSession = async () => {
+      const currentToken = authService.getStoredToken();
+      if (!currentToken || document.visibilityState === 'hidden') return;
+
+      try {
+        const freshUser = await authService.getCurrentUser(currentToken);
+        if (!freshUser || freshUser.workStatus?.toLowerCase() === 'logged out') {
+          console.warn('[AuthContext] Periodic check detected inactive or logged out session.');
+          sessionStorage.setItem(authService.LOGOUT_REASON_KEY, 'eod_auto_logout');
+          authService.clearStoredAuth();
+          if (mounted) {
+            setUser(null);
+            setToken(null);
+          }
+          window.dispatchEvent(new CustomEvent('crm-session-expired', { detail: { reason: 'eod_auto_logout' } }));
+        }
+      } catch {
+        // Handled in getCurrentUser
+      }
+    };
+
+    const heartbeatTimer = setInterval(verifyActiveSession, 60000);
+    window.addEventListener('focus', verifyActiveSession);
+
     const handleSessionExpired = () => {
       if (mounted) {
         setUser(null);
@@ -82,6 +148,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     return () => {
       mounted = false;
+      clearInterval(midnightTimer);
+      clearInterval(heartbeatTimer);
+      window.removeEventListener('focus', verifyActiveSession);
       window.removeEventListener('crm-session-expired', handleSessionExpired);
     };
   }, []);

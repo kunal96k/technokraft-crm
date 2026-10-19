@@ -15,7 +15,16 @@ import {
   Unlock,
   Loader2,
   AlertCircle,
+  Clock,
 } from 'lucide-react';
+import {
+  toInputTime,
+  toDisplayTime,
+  DEFAULT_SHIFT_START_INPUT,
+  DEFAULT_SHIFT_END_INPUT,
+  DEFAULT_SHIFT_START,
+  DEFAULT_SHIFT_END,
+} from '../../utils/shiftUtils';
 import {
   Employee,
   DepartmentType,
@@ -95,6 +104,8 @@ const getInitialFormValues = (emp?: Employee | null) => {
       monthlyFollowUps: 35,
       monthlyProposals: 6,
       monthlyWonDeals: 3,
+      shiftStartTime: DEFAULT_SHIFT_START_INPUT,
+      shiftEndTime: DEFAULT_SHIFT_END_INPUT,
     };
   }
 
@@ -141,6 +152,8 @@ const getInitialFormValues = (emp?: Employee | null) => {
     monthlyFollowUps: emp.targets?.monthlyFollowUpTarget ?? 35,
     monthlyProposals: emp.targets?.monthlyProposalTarget ?? 6,
     monthlyWonDeals: emp.targets?.monthlyWonDealTarget ?? 3,
+    shiftStartTime: toInputTime(emp.shiftStartTime, DEFAULT_SHIFT_START_INPUT),
+    shiftEndTime: toInputTime(emp.shiftEndTime, DEFAULT_SHIFT_END_INPUT),
   };
 };
 
@@ -170,6 +183,8 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
   const [employmentType, setEmploymentType] = useState<EmploymentType>(initialValues.employmentType);
   const [joiningDate, setJoiningDate] = useState(initialValues.joiningDate);
   const [status, setStatus] = useState<EmployeeStatus>(initialValues.status);
+  const [shiftStartTime, setShiftStartTime] = useState(initialValues.shiftStartTime);
+  const [shiftEndTime, setShiftEndTime] = useState(initialValues.shiftEndTime);
 
   // CRM Access & Credentials
   const [crmAccess, setCrmAccess] = useState(initialValues.crmAccess);
@@ -209,6 +224,8 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
     setEmploymentType(values.employmentType);
     setJoiningDate(values.joiningDate);
     setStatus(values.status);
+    setShiftStartTime(values.shiftStartTime);
+    setShiftEndTime(values.shiftEndTime);
     setCrmAccess(values.crmAccess);
     setAccessRole(values.accessRole);
     setAllowedModules(values.allowedModules);
@@ -317,6 +334,8 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
       password: password.trim() || undefined,
       forcePasswordReset,
       isAccountLocked,
+      shiftStartTime: toDisplayTime(shiftStartTime, DEFAULT_SHIFT_START),
+      shiftEndTime: toDisplayTime(shiftEndTime, DEFAULT_SHIFT_END),
       targets: {
         period: 'Monthly',
         monthlyRevenueTarget: Number(monthlyRevenue) || 0,
@@ -611,6 +630,53 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
                   <option value="On Leave">On Leave</option>
                   <option value="Suspended">Suspended</option>
                 </select>
+              </div>
+
+              {/* Work Shift Schedule (Default: 10:00 AM – 04:00 PM) */}
+              <div className="col-span-full pt-3 mt-1 border-t border-slate-100 dark:border-slate-800">
+                <div className="flex items-center justify-between mb-2.5">
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-800 dark:text-slate-200">
+                    <Clock className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+                    <span>Work Shift Schedule & Attendance Rules</span>
+                  </div>
+                  <span className="text-[11px] font-medium text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/60 px-2 py-0.5 rounded-md border border-purple-200/60 dark:border-purple-800/60">
+                    Default: 10:00 AM – 04:00 PM (15m Grace)
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                      Shift Start Time *
+                    </label>
+                    <input
+                      type="time"
+                      required
+                      value={shiftStartTime}
+                      onChange={(e) => setShiftStartTime(e.target.value)}
+                      className="w-full text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500/50 outline-none font-mono"
+                    />
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">
+                      Punch-in after +15 min grace period will be marked <strong className="text-amber-600 dark:text-amber-400">Late</strong>. Before shift is marked <strong className="text-teal-600 dark:text-teal-400">Early</strong>.
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                      Shift End Time *
+                    </label>
+                    <input
+                      type="time"
+                      required
+                      value={shiftEndTime}
+                      onChange={(e) => setShiftEndTime(e.target.value)}
+                      className="w-full text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500/50 outline-none font-mono"
+                    />
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">
+                      Working less than full shift duration will be calculated as <strong className="text-indigo-600 dark:text-indigo-400">Half Day</strong> or <strong className="text-rose-600 dark:text-rose-400">Absent</strong>.
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

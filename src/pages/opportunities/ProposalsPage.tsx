@@ -29,6 +29,7 @@ import { ProposalDetailsModal } from '../../components/opportunities/ProposalDet
 import { SendProposalEmailModal } from '../../components/opportunities/SendProposalEmailModal';
 import { CreateProposalModal } from '../../components/opportunities/CreateProposalModal';
 import { ConfirmationModal } from '../../components/common/ConfirmationModal';
+import { EmployeeAvatar } from '../../components/common/EmployeeAvatar';
 import { ProposalRecord, ProposalStatus, OpportunityRecord } from '../../types/opportunities';
 import {
   fetchProposals,
@@ -445,9 +446,7 @@ export const ProposalsPage: React.FC = () => {
                     {/* Owner */}
                     <td className="p-3.5">
                       <div className="flex items-center gap-1.5 font-medium text-slate-800 dark:text-slate-200">
-                        <div className="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[10px] font-bold text-slate-700 dark:text-slate-300">
-                          {prop.ownerName?.charAt(0) || 'S'}
-                        </div>
+                        <EmployeeAvatar name={prop.ownerName || 'Sales Team'} size="xs" />
                         <span>{prop.ownerName || 'Sales Team'}</span>
                       </div>
                     </td>

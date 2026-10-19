@@ -317,14 +317,23 @@ export const EmployeeSelect: React.FC<EmployeeSelectProps> = ({
 
         <div className="flex items-center gap-1 shrink-0 text-slate-400">
           {allowEmpty && trimmedValue && !disabled && (
-            <button
-              type="button"
+            <span
+              role="button"
+              tabIndex={0}
               onClick={handleClear}
-              className="p-1 hover:text-slate-600 dark:hover:text-slate-200 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  emitChange('');
+                  setIsOpen(false);
+                }
+              }}
+              className="p-1 hover:text-slate-600 dark:hover:text-slate-200 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer inline-flex items-center justify-center"
               title="Clear selection"
             >
               <X className="w-3.5 h-3.5" />
-            </button>
+            </span>
           )}
           <ChevronDown
             className={`w-3.5 h-3.5 transition-transform duration-150 ${isOpen ? 'rotate-180 text-[#5B4DB7]' : ''}`}

@@ -29,7 +29,7 @@ export const EmployeeSummaryCards: React.FC<EmployeeSummaryCardsProps> = ({
   const presentToday =
     summary?.presentToday ??
     employees.filter(
-      (e) => e.todayAttendanceStatus === 'Present' || e.todayAttendanceStatus === 'Late'
+      (e) => e.todayAttendanceStatus === 'Present' || e.todayAttendanceStatus === 'Late' || e.todayAttendanceStatus === 'Early'
     ).length;
   const currentlyWorking =
     summary?.currentlyWorking ?? employees.filter((e) => e.workStatus === 'Working').length;

@@ -115,8 +115,17 @@ export const LeadSearchSelect: React.FC<LeadSearchSelectProps> = ({
     // Fetch single lead from backend
     let isMounted = true;
     fetchLeadById(valStr).then((res) => {
-      if (isMounted && res) {
-        setSelectedLead(res);
+      if (isMounted) {
+        if (res) {
+          setSelectedLead(res);
+        } else if (initialLeadName) {
+          setSelectedLead({
+            id: Number(valStr) || valStr,
+            leadCode: valStr,
+            company: { name: initialLeadName },
+            contact: { name: initialLeadName },
+          } as any);
+        }
       }
     });
 

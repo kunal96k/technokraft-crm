@@ -23,6 +23,7 @@ import {
   Briefcase,
   Share2,
   Pencil,
+  UserCheck,
 } from 'lucide-react';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { OpportunityStageBadge } from '../../components/opportunities/OpportunityStageBadge';
@@ -34,6 +35,7 @@ import { MarkWonModal } from '../../components/opportunities/MarkWonModal';
 import { MarkLostModal } from '../../components/opportunities/MarkLostModal';
 import { AddFollowUpModal } from '../../components/opportunities/AddFollowUpModal';
 import { ConfirmationModal } from '../../components/common/ConfirmationModal';
+import { EmployeeAvatar } from '../../components/common/EmployeeAvatar';
 import {
   OpportunityRecord,
   OpportunityStage,
@@ -249,6 +251,56 @@ export const OpportunityDetailsPage: React.FC = () => {
     );
   }
 
+  const hasValidOwner = Boolean(
+    opportunity.owner?.name && opportunity.owner.name.trim().toLowerCase() !== 'unassigned'
+  );
+  const hasValidBA = Boolean(
+    opportunity.businessAnalyst?.name &&
+      opportunity.businessAnalyst.name.trim().toLowerCase() !== 'unassigned'
+  );
+  const hasValidReviewer = Boolean(
+    opportunity.technicalReviewer?.name &&
+      opportunity.technicalReviewer.name.trim().toLowerCase() !== 'unassigned'
+  );
+
+  let displayPerson: {
+    name: string;
+    roleFullName: string;
+    avatar?: string;
+    profilePhoto?: string;
+    email?: string;
+  } = {
+    name: 'Unassigned',
+    roleFullName: 'No team member assigned',
+    avatar: 'UN',
+  };
+
+  if (hasValidOwner) {
+    displayPerson = {
+      name: opportunity.owner.name,
+      roleFullName: opportunity.owner.role || 'Sales Manager',
+      avatar: opportunity.owner.avatar,
+      profilePhoto: opportunity.owner.profilePhoto,
+      email: opportunity.owner.email,
+    };
+  } else if (hasValidBA) {
+    displayPerson = {
+      name: opportunity.businessAnalyst!.name,
+      roleFullName: opportunity.businessAnalyst!.role || 'Business Analyst',
+      avatar: opportunity.businessAnalyst!.avatar,
+      profilePhoto: opportunity.businessAnalyst!.profilePhoto,
+      email: opportunity.businessAnalyst!.email,
+    };
+  } else if (hasValidReviewer) {
+    displayPerson = {
+      name: opportunity.technicalReviewer!.name,
+      roleFullName: opportunity.technicalReviewer!.role || 'Solutions Architect',
+      avatar: opportunity.technicalReviewer!.avatar,
+      profilePhoto: opportunity.technicalReviewer!.profilePhoto,
+      email: opportunity.technicalReviewer!.email,
+    };
+  }
+
   return (
     <div className="space-y-5">
       {/* Toast Feedback */}
@@ -365,15 +417,28 @@ export const OpportunityDetailsPage: React.FC = () => {
 
         <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs">
           <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-            Commercial Owner
+            {hasValidOwner
+              ? 'Commercial Owner'
+              : hasValidBA
+              ? 'Business Analyst (BA)'
+              : hasValidReviewer
+              ? 'Solutions Architect'
+              : 'Deal Assignment'}
           </span>
-          <div className="mt-1 text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-            <div className="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[10px] font-bold text-slate-700 dark:text-slate-300">
-              {opportunity.owner.name.charAt(0)}
-            </div>
-            <span>{opportunity.owner.name}</span>
+          <div className="mt-1 text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5 truncate">
+            <EmployeeAvatar
+              name={displayPerson.name}
+              avatar={displayPerson.avatar}
+              profilePhoto={displayPerson.profilePhoto}
+              email={displayPerson.email}
+              size="xs"
+              className="shrink-0"
+            />
+            <span className="truncate">{displayPerson.name}</span>
           </div>
-          <span className="text-[10px] text-slate-400 mt-1 block">{opportunity.owner.role}</span>
+          <span className="text-[10px] text-slate-400 mt-1 block truncate">
+            {displayPerson.roleFullName}
+          </span>
         </div>
 
         <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs">
@@ -539,6 +604,94 @@ export const OpportunityDetailsPage: React.FC = () => {
                 </div>
               )}
             </div>
+
+            {/* Dedicated Assigned Deal Team Card */}
+            <div className="p-5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                  <UserCheck className="w-4 h-4 text-[#5B4DB7] dark:text-purple-400" />
+                  <span>Assigned Deal Team</span>
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setIsEditModalOpen(true)}
+                  className="text-[11px] font-semibold text-[#5B4DB7] dark:text-purple-400 hover:underline cursor-pointer"
+                >
+                  Edit Team
+                </button>
+              </div>
+
+              <div className="space-y-2.5 text-xs">
+                {/* Sales Owner */}
+                <div className="flex items-start gap-2.5 p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700/60">
+                  <EmployeeAvatar
+                    name={opportunity.owner?.name || 'Unassigned'}
+                    avatar={opportunity.owner?.avatar}
+                    profilePhoto={opportunity.owner?.profilePhoto}
+                    email={opportunity.owner?.email}
+                    size="sm"
+                    className="shrink-0"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider block">
+                      Lead Sales Owner
+                    </span>
+                    <span className="font-semibold text-slate-900 dark:text-white truncate block">
+                      {opportunity.owner?.name || 'Unassigned'}
+                    </span>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 block truncate">
+                      {opportunity.owner?.email || opportunity.owner?.role || 'Sales Manager'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Business Analyst */}
+                <div className="flex items-start gap-2.5 p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700/60">
+                  <EmployeeAvatar
+                    name={opportunity.businessAnalyst?.name || 'Unassigned'}
+                    avatar={opportunity.businessAnalyst?.avatar}
+                    profilePhoto={opportunity.businessAnalyst?.profilePhoto}
+                    email={opportunity.businessAnalyst?.email}
+                    size="sm"
+                    className="shrink-0"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider block">
+                      Business Analyst (BA)
+                    </span>
+                    <span className="font-semibold text-slate-900 dark:text-white truncate block">
+                      {opportunity.businessAnalyst?.name || 'Unassigned'}
+                    </span>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 block truncate">
+                      {opportunity.businessAnalyst?.role || 'Senior Business Analyst'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Technical Reviewer */}
+                <div className="flex items-start gap-2.5 p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700/60">
+                  <EmployeeAvatar
+                    name={opportunity.technicalReviewer?.name || 'Unassigned'}
+                    avatar={opportunity.technicalReviewer?.avatar}
+                    profilePhoto={opportunity.technicalReviewer?.profilePhoto}
+                    email={opportunity.technicalReviewer?.email}
+                    size="sm"
+                    className="shrink-0"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider block">
+                      Solutions Architect / Reviewer
+                    </span>
+                    <span className="font-semibold text-slate-900 dark:text-white truncate block">
+                      {opportunity.technicalReviewer?.name || 'Unassigned'}
+                    </span>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 block truncate">
+                      {opportunity.technicalReviewer?.role || 'Solutions Architect'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -691,8 +844,16 @@ export const OpportunityDetailsPage: React.FC = () => {
                       <div className="font-semibold text-slate-900 dark:text-white">
                         {f.type} on {f.date} {f.time ? `at ${f.time}` : ''}
                       </div>
-                      <div className="text-[11px] text-slate-500 dark:text-slate-400">
-                        Assigned to: {f.assignedTo} {f.notes ? `• ${f.notes}` : ''}
+                      <div className="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                        <EmployeeAvatar
+                          name={f.assignedTo}
+                          avatar={f.assignedToAvatar}
+                          profilePhoto={f.assignedToProfilePhoto}
+                          size="xs"
+                        />
+                        <span>
+                          Assigned to: <strong className="text-slate-700 dark:text-slate-300 font-medium">{f.assignedTo}</strong> {f.notes ? `• ${f.notes}` : ''}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -717,15 +878,23 @@ export const OpportunityDetailsPage: React.FC = () => {
           ) : (
             <div className="space-y-3">
               {opportunity.activities?.map((act, idx) => (
-                <div key={idx} className="flex gap-3 text-xs">
-                  <div className="w-2 h-2 rounded-full bg-[#5B4DB7] mt-1.5 shrink-0" />
-                  <div>
+                <div key={idx} className="flex gap-3 text-xs items-start">
+                  <EmployeeAvatar
+                    name={act.employeeName || (act as any).user || 'System'}
+                    avatar={act.employeeAvatar}
+                    profilePhoto={act.employeeProfilePhoto}
+                    size="xs"
+                    className="mt-0.5 shrink-0"
+                  />
+                  <div className="flex-1 min-w-0">
                     <div className="font-semibold text-slate-900 dark:text-white">{act.title}</div>
                     <div className="text-[11px] text-slate-500 dark:text-slate-400">
-                      {act.date} {act.time} • By {act.user}
+                      {act.date} {act.time} • By {act.employeeName || (act as any).user || 'System'}
                     </div>
-                    {act.description && (
-                      <p className="text-slate-600 dark:text-slate-300 mt-1">{act.description}</p>
+                    {(act.notes || (act as any).description) && (
+                      <p className="text-slate-600 dark:text-slate-300 mt-1">
+                        {act.notes || (act as any).description}
+                      </p>
                     )}
                   </div>
                 </div>

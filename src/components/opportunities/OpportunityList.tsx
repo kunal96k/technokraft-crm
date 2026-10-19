@@ -19,6 +19,7 @@ import { OpportunityRecord, OpportunityStage } from '../../types/opportunities';
 import { OpportunityStageBadge } from './OpportunityStageBadge';
 import { OpportunityValue } from './OpportunityValue';
 import { ProbabilityIndicator } from './ProbabilityIndicator';
+import { EmployeeAvatar } from '../common/EmployeeAvatar';
 
 interface OpportunityListProps {
   opportunities: OpportunityRecord[];
@@ -191,11 +192,16 @@ export const OpportunityList: React.FC<OpportunityListProps> = ({
                   {/* Owner */}
                   <td className="py-3 px-3">
                     <div className="flex items-center gap-1.5">
-                      <div className="w-5 h-5 rounded-full bg-[#5B4DB7] text-white flex items-center justify-center text-[10px] font-bold">
-                        {opp.owner.avatar || opp.owner.name.charAt(0)}
-                      </div>
+                      <EmployeeAvatar
+                        name={opp.owner?.name || 'Unassigned'}
+                        avatar={opp.owner?.avatar}
+                        profilePhoto={opp.owner?.profilePhoto}
+                        email={opp.owner?.email}
+                        size="xs"
+                        className="shrink-0"
+                      />
                       <span className="text-slate-700 dark:text-slate-300 font-medium truncate max-w-[90px]">
-                        {opp.owner.name}
+                        {opp.owner?.name || 'Unassigned'}
                       </span>
                     </div>
                   </td>

@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Eye, Clock, Calendar, ArrowRight, ArrowUpDown, ArrowUp, ArrowDown, ShieldCheck } from 'lucide-react';
 import { DailyAttendanceRecord } from '../../types/employees';
 import { AttendanceStatusBadge, WorkStatusBadge } from '../employees/EmployeeStatusBadge';
 import { useAuth } from '../../context/AuthContext';
 import { shouldMaskForSecurity } from '../../utils/securityUtils';
+import { calculateWorkingDuration } from '../../utils/workingHoursUtils';
 
 interface AttendanceTableProps {
   records: DailyAttendanceRecord[];
@@ -21,6 +22,13 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
   onSort,
 }) => {
   const { user } = useAuth();
+  const [, setTick] = useState(0);
+
+  // Periodic re-render every 30 seconds to tick active working timers
+  useEffect(() => {
+    const timer = setInterval(() => setTick((t) => t + 1), 30000);
+    return () => clearInterval(timer);
+  }, []);
   const renderSortIcon = (field: string) => {
     if (!onSort) return null;
     if (sortBy === field) {
@@ -192,9 +200,16 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
                 <td className="py-3.5 px-3 whitespace-nowrap font-mono font-medium text-slate-800 dark:text-slate-200">
                   {isMasked ? (
                     <span className="blur-[3px] select-none text-slate-400">08h 00m</span>
-                  ) : (
-                    rec.workingHours
-                  )}
+                  ) : (() => {
+                    const isWorking = (rec.logoutTime ?? '').includes('Active') || rec.workStatus === 'Working';
+                    if (isWorking && rec.loginTime && rec.loginTime !== '—' && rec.loginTime !== '---') {
+                      const live = calculateWorkingDuration(rec.loginTime, null, true, rec.workingHours);
+                      if (live.formatted !== '0h 00m' && (rec.workingHours === '0h 00m' || rec.workingHours === '00:00')) {
+                        return live.formatted;
+                      }
+                    }
+                    return rec.workingHours || '0h 00m';
+                  })()}
                 </td>
 
                 {/* Break Time */}
@@ -212,7 +227,12 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
 
                 {/* Status */}
                 <td className="py-3.5 px-3 whitespace-nowrap">
-                  <AttendanceStatusBadge status={rec.status} size="sm" />
+                  <div className="flex flex-col gap-0.5">
+                    <AttendanceStatusBadge status={rec.status} size="sm" />
+                    <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">
+                      {rec.shiftStartTime || '10:00 AM'} - {rec.shiftEndTime || '04:00 PM'}
+                    </span>
+                  </div>
                 </td>
 
                 {/* Current Activity */}

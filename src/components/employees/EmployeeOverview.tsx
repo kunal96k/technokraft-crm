@@ -138,6 +138,13 @@ export const EmployeeOverview: React.FC<EmployeeOverviewProps> = ({
               <span className="text-[11px] text-slate-400 block">Last Active</span>
               <span className="font-medium text-slate-500 dark:text-slate-400">{employee.lastActivityTime || 'Active'}</span>
             </div>
+            <div className="h-6 w-px bg-slate-200 dark:bg-slate-700" />
+            <div>
+              <span className="text-[11px] text-slate-400 block">Shift Hours</span>
+              <span className="font-mono font-medium text-purple-700 dark:text-purple-300">
+                {employee.shiftStartTime || '10:00 AM'} – {employee.shiftEndTime || '04:00 PM'}
+              </span>
+            </div>
           </div>
         </div>
 
@@ -517,6 +524,14 @@ export const EmployeeOverview: React.FC<EmployeeOverviewProps> = ({
               <span className="text-slate-400 text-[11px] block">Joining Date</span>
               <span className="font-medium text-slate-800 dark:text-slate-200">
                 {employee.joiningDate}
+              </span>
+            </div>
+
+            <div>
+              <span className="text-slate-400 text-[11px] block">Work Shift Schedule</span>
+              <span className="font-medium text-purple-700 dark:text-purple-300 flex items-center gap-1 mt-0.5">
+                <Clock className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+                {employee.shiftStartTime || '10:00 AM'} – {employee.shiftEndTime || '04:00 PM'}
               </span>
             </div>
 

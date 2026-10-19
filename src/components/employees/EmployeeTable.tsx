@@ -326,7 +326,12 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
 
                 {/* Today's Attendance */}
                 <td className="py-3.5 px-3 whitespace-nowrap">
-                  <AttendanceStatusBadge status={emp.todayAttendanceStatus} />
+                  <div className="flex flex-col gap-0.5">
+                    <AttendanceStatusBadge status={emp.todayAttendanceStatus} />
+                    <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">
+                      {emp.shiftStartTime || '10:00 AM'} - {emp.shiftEndTime || '04:00 PM'}
+                    </span>
+                  </div>
                 </td>
 
                 {/* Current Activity */}

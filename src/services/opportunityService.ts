@@ -286,22 +286,31 @@ function normalizeOpportunity(raw: any): OpportunityRecord {
       avatar: raw.owner?.avatar || 'UN',
       role: raw.owner?.role || 'Sales Manager',
       email: raw.owner?.email || '',
+      profilePhoto: raw.owner?.profilePhoto || undefined,
     },
     businessAnalyst: raw.businessAnalyst?.name
       ? {
           name: raw.businessAnalyst.name,
           role: raw.businessAnalyst.role || 'Senior Business Analyst',
+          avatar: raw.businessAnalyst.avatar || undefined,
+          profilePhoto: raw.businessAnalyst.profilePhoto || undefined,
+          email: raw.businessAnalyst.email || undefined,
         }
       : undefined,
     technicalReviewer: raw.technicalReviewer?.name
       ? {
           name: raw.technicalReviewer.name,
           role: raw.technicalReviewer.role || 'Solutions Architect',
+          avatar: raw.technicalReviewer.avatar || undefined,
+          profilePhoto: raw.technicalReviewer.profilePhoto || undefined,
+          email: raw.technicalReviewer.email || undefined,
         }
       : undefined,
     createdBy: {
       name: raw.createdBy?.name || 'CRM System',
       date: raw.createdBy?.date || 'Today',
+      avatar: raw.createdBy?.avatar || undefined,
+      profilePhoto: raw.createdBy?.profilePhoto || undefined,
     },
     wonDate: raw.wonDate || undefined,
     wonNotes: raw.wonNotes || undefined,

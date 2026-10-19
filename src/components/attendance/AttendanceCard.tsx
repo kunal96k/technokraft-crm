@@ -46,7 +46,12 @@ export const AttendanceCard: React.FC<AttendanceCardProps> = ({
           </div>
         </div>
 
-        <AttendanceStatusBadge status={record.status} size="sm" />
+        <div className="flex flex-col items-end gap-0.5">
+          <AttendanceStatusBadge status={record.status} size="sm" />
+          <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">
+            {record.shiftStartTime || '10:00 AM'} - {record.shiftEndTime || '04:00 PM'}
+          </span>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-2 text-xs py-2 px-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">

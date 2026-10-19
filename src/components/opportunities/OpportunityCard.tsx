@@ -22,6 +22,7 @@ import { OpportunityRecord, OpportunityStage } from '../../types/opportunities';
 import { OpportunityValue } from './OpportunityValue';
 import { ProbabilityIndicator } from './ProbabilityIndicator';
 import { OpportunityStageBadge } from './OpportunityStageBadge';
+import { EmployeeAvatar } from '../common/EmployeeAvatar';
 
 interface OpportunityCardProps {
   opportunity: OpportunityRecord;
@@ -74,6 +75,70 @@ export const OpportunityCard: React.FC<OpportunityCardProps> = ({
     'Won',
     'Lost',
   ];
+
+  // Intelligent fallback for Assigned Deal Team Member:
+  // Lead Sales Owner -> Business Analyst (BA) -> Solutions Architect -> Unassigned
+  const hasValidOwner = Boolean(
+    opportunity.owner?.name && opportunity.owner.name.trim().toLowerCase() !== 'unassigned'
+  );
+  const hasValidBA = Boolean(
+    opportunity.businessAnalyst?.name &&
+      opportunity.businessAnalyst.name.trim().toLowerCase() !== 'unassigned'
+  );
+  const hasValidReviewer = Boolean(
+    opportunity.technicalReviewer?.name &&
+      opportunity.technicalReviewer.name.trim().toLowerCase() !== 'unassigned'
+  );
+
+  let displayPerson: {
+    name: string;
+    roleTag: string;
+    roleFullName: string;
+    avatar?: string;
+    profilePhoto?: string;
+    email?: string;
+  } = {
+    name: 'Unassigned',
+    roleTag: '',
+    roleFullName: 'Unassigned',
+    avatar: 'UN',
+  };
+
+  if (hasValidOwner) {
+    displayPerson = {
+      name: opportunity.owner.name,
+      roleTag: '',
+      roleFullName: opportunity.owner.role || 'Sales Owner',
+      avatar: opportunity.owner.avatar,
+      profilePhoto: opportunity.owner.profilePhoto,
+      email: opportunity.owner.email,
+    };
+  } else if (hasValidBA) {
+    displayPerson = {
+      name: opportunity.businessAnalyst!.name,
+      roleTag: '(BA)',
+      roleFullName: opportunity.businessAnalyst!.role || 'Business Analyst',
+      avatar: opportunity.businessAnalyst!.avatar,
+      profilePhoto: opportunity.businessAnalyst!.profilePhoto,
+      email: opportunity.businessAnalyst!.email,
+    };
+  } else if (hasValidReviewer) {
+    displayPerson = {
+      name: opportunity.technicalReviewer!.name,
+      roleTag: '(Arch)',
+      roleFullName: opportunity.technicalReviewer!.role || 'Solutions Architect',
+      avatar: opportunity.technicalReviewer!.avatar,
+      profilePhoto: opportunity.technicalReviewer!.profilePhoto,
+      email: opportunity.technicalReviewer!.email,
+    };
+  }
+
+  const teamTooltipParts: string[] = [];
+  if (hasValidOwner) teamTooltipParts.push(`Sales Owner: ${opportunity.owner.name}`);
+  else teamTooltipParts.push('Sales Owner: Unassigned');
+  if (hasValidBA) teamTooltipParts.push(`BA: ${opportunity.businessAnalyst!.name}`);
+  if (hasValidReviewer) teamTooltipParts.push(`Solutions Architect: ${opportunity.technicalReviewer!.name}`);
+  const teamTooltip = teamTooltipParts.join(' • ');
 
   return (
     <div
@@ -339,13 +404,25 @@ export const OpportunityCard: React.FC<OpportunityCardProps> = ({
             <span className="truncate">Close: <strong className="text-slate-700 dark:text-slate-300 font-semibold">{opportunity.expectedCloseDate}</strong></span>
           </div>
 
-          <div className="flex items-center gap-1.5" title={`Owner: ${opportunity.owner.name}`}>
-            <div className="w-5 h-5 rounded-full bg-[#5B4DB7] text-white flex items-center justify-center text-[10px] font-bold">
-              {opportunity.owner.avatar || opportunity.owner.name.charAt(0)}
+          <div className="flex items-center gap-1.5" title={teamTooltip}>
+            <EmployeeAvatar
+              name={displayPerson.name}
+              avatar={displayPerson.avatar}
+              profilePhoto={displayPerson.profilePhoto}
+              email={displayPerson.email}
+              size="xs"
+              className="shrink-0"
+            />
+            <div className="flex items-center gap-1 min-w-0 max-w-[95px]">
+              <span className="text-slate-700 dark:text-slate-300 font-medium truncate">
+                {displayPerson.name.split(' ')[0]}
+              </span>
+              {displayPerson.roleTag && (
+                <span className="text-[9px] font-semibold text-emerald-600 dark:text-emerald-400 shrink-0">
+                  {displayPerson.roleTag}
+                </span>
+              )}
             </div>
-            <span className="text-slate-700 dark:text-slate-300 font-medium truncate max-w-[80px]">
-              {opportunity.owner.name.split(' ')[0]}
-            </span>
           </div>
         </div>
 

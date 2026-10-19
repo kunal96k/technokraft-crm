@@ -38,6 +38,7 @@ import {
 } from '../../utils/proposalPdfGenerator';
 import { SendProposalEmailModal } from './SendProposalEmailModal';
 import { ConfirmationModal } from '../common/ConfirmationModal';
+import { EmployeeAvatar } from '../common/EmployeeAvatar';
 
 interface ProposalDetailsModalProps {
   isOpen: boolean;
@@ -339,9 +340,12 @@ export const ProposalDetailsModal: React.FC<ProposalDetailsModalProps> = ({
                       <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 block">
                         Sales Representative
                       </span>
-                      <span className="text-xs font-medium text-slate-800 dark:text-slate-200 mt-0.5 block truncate">
-                        {proposal.ownerName}
-                      </span>
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <EmployeeAvatar name={proposal.ownerName} size="xs" />
+                        <span className="text-xs font-medium text-slate-800 dark:text-slate-200 truncate">
+                          {proposal.ownerName}
+                        </span>
+                      </div>
                     </div>
                   </div>
 

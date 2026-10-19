@@ -26,6 +26,7 @@ import {
 } from '../employees/EmployeeStatusBadge';
 import { fetchAttendanceRecords } from '../../services/attendanceService';
 import { buildSafeApiUrl } from '../../utils/urlUtils';
+import { getLateCutoffDisplay } from '../../utils/shiftUtils';
 
 interface AttendanceDetailsModalProps {
   isOpen: boolean;
@@ -308,6 +309,9 @@ export const AttendanceDetailsModal: React.FC<AttendanceDetailsModalProps> = ({
                 </h4>
               </div>
               <div className="flex items-center gap-2">
+                <span className="text-[11px] font-mono text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/60 px-2 py-0.5 rounded border border-purple-200 dark:border-purple-800">
+                  {employee.shiftStartTime || '10:00 AM'} – {employee.shiftEndTime || '04:00 PM'}
+                </span>
                 <AttendanceStatusBadge status={effectiveAttendanceStatus} size="sm" />
                 <WorkStatusBadge status={employee.workStatus || 'Offline'} size="sm" />
               </div>
@@ -386,7 +390,7 @@ export const AttendanceDetailsModal: React.FC<AttendanceDetailsModalProps> = ({
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-center">
                   {[
                     { label: 'Total Present', value: summaryMetrics.presentDays, color: 'text-emerald-600 dark:text-emerald-400', sub: 'Days on duty' },
-                    { label: 'Late Logins', value: summaryMetrics.lateDays, color: 'text-amber-600 dark:text-amber-400', sub: '> 09:30 AM' },
+                    { label: 'Late Logins', value: summaryMetrics.lateDays, color: 'text-amber-600 dark:text-amber-400', sub: `> ${getLateCutoffDisplay(employee?.shiftStartTime)}` },
                     { label: 'Leaves Taken', value: summaryMetrics.leaveDays, color: 'text-purple-600 dark:text-purple-400', sub: 'Approved' },
                     { label: 'Unreported Absent', value: summaryMetrics.absentDays, color: 'text-rose-600 dark:text-rose-400', sub: 'Days' },
                     { label: 'Working Days', value: summaryMetrics.workingDays, color: 'text-slate-900 dark:text-white', sub: 'Calendar days' },

@@ -142,6 +142,14 @@ export const AttendancePage: React.FC = () => {
     loadAttendanceData(true);
   }, [loadEmployeesRoster, loadAttendanceData]);
 
+  // Periodic background telemetry refresh (every 30 seconds)
+  useEffect(() => {
+    const timer = setInterval(() => {
+      loadAttendanceData(false);
+    }, 30000);
+    return () => clearInterval(timer);
+  }, [loadAttendanceData]);
+
   // Auto-open modal if employeeId is present in URL params
   useEffect(() => {
     const empParam = searchParams.get('employeeId');

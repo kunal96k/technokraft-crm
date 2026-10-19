@@ -385,10 +385,10 @@ export const getTodayAttendanceRecords = (sourceEmployees: Employee[] = []): Dai
       logoutTime = emp.logoutTime;
     }
 
-    if (emp.todayAttendanceStatus === 'Present' || emp.todayAttendanceStatus === 'Late') {
-      workingMinutes = emp.todayAttendanceStatus === 'Present' ? 480 : 420;
+    if (emp.todayAttendanceStatus === 'Present' || emp.todayAttendanceStatus === 'Late' || emp.todayAttendanceStatus === 'Early') {
+      workingMinutes = emp.todayAttendanceStatus === 'Late' ? 330 : 360;
     } else if (emp.todayAttendanceStatus === 'Half Day') {
-      workingMinutes = 240;
+      workingMinutes = 180;
     } else {
       workingMinutes = 0;
       session = emp.todayWorkingTime || '0h 00m';
@@ -413,6 +413,8 @@ export const getTodayAttendanceRecords = (sourceEmployees: Employee[] = []): Dai
       status: emp.todayAttendanceStatus || 'Absent',
       currentActivity: emp.currentActivity || '—',
       workStatus: emp.workStatus || 'Offline',
+      shiftStartTime: emp.shiftStartTime,
+      shiftEndTime: emp.shiftEndTime,
     };
   });
 };

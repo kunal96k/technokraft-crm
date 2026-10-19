@@ -20,6 +20,35 @@ function getAuthUrl(endpoint: string): string {
 
 export const TOKEN_STORAGE_KEY = 'tk_crm_auth_token';
 export const USER_STORAGE_KEY = 'tk_crm_auth_user';
+export const SESSION_IST_DATE_KEY = 'tk_crm_session_ist_date';
+export const LOGOUT_REASON_KEY = 'tk_crm_logout_reason';
+
+/**
+ * Returns current date string formatted as 'YYYY-MM-DD' in Indian Standard Time (Asia/Kolkata).
+ */
+export function getISTDateString(): string {
+  try {
+    return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(new Date());
+  } catch {
+    const now = new Date();
+    const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+    const ist = new Date(utc + 3600000 * 5.5);
+    return ist.toISOString().split('T')[0];
+  }
+}
+
+export function getStoredISTDate(): string | null {
+  return localStorage.getItem(SESSION_IST_DATE_KEY) || sessionStorage.getItem(SESSION_IST_DATE_KEY);
+}
+
+export function setStoredISTDate(dateStr: string): void {
+  try {
+    localStorage.setItem(SESSION_IST_DATE_KEY, dateStr);
+    sessionStorage.setItem(SESSION_IST_DATE_KEY, dateStr);
+  } catch (e) {
+    console.error('[AuthService] Storage write error for IST date:', e);
+  }
+}
 
 export function getStoredToken(): string | null {
   return localStorage.getItem(TOKEN_STORAGE_KEY) || sessionStorage.getItem(TOKEN_STORAGE_KEY);
@@ -31,6 +60,8 @@ export function setStoredAuth(token: string, user: AuthUser, rememberMe: boolean
     localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
     sessionStorage.setItem(TOKEN_STORAGE_KEY, token);
     sessionStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+    // Persist current Indian Standard Time date of session
+    setStoredISTDate(getISTDateString());
   } catch (e) {
     console.error('[AuthService] Storage write error:', e);
   }
@@ -40,8 +71,10 @@ export function clearStoredAuth(): void {
   try {
     localStorage.removeItem(TOKEN_STORAGE_KEY);
     localStorage.removeItem(USER_STORAGE_KEY);
+    localStorage.removeItem(SESSION_IST_DATE_KEY);
     sessionStorage.removeItem(TOKEN_STORAGE_KEY);
     sessionStorage.removeItem(USER_STORAGE_KEY);
+    sessionStorage.removeItem(SESSION_IST_DATE_KEY);
   } catch (e) {
     console.error('[AuthService] Storage clear error:', e);
   }

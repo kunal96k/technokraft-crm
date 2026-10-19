@@ -52,6 +52,16 @@ export const LoginPage: React.FC = () => {
     }
   }, [isAuthenticated, navigate, from]);
 
+  // Notify user if session ended due to Indian Time Zone End-of-Day auto-logout
+  useEffect(() => {
+    const reason = sessionStorage.getItem('tk_crm_logout_reason');
+    if (reason === 'eod_auto_logout') {
+      sessionStorage.removeItem('tk_crm_logout_reason');
+      setErrorMessage('Your session was safely closed because the working day completed (11:59 PM Indian Standard Time). Please sign in again.');
+      toast.info('Session auto-logged out at the end of the day (Asia/Kolkata).', 'Daily Auto-Logout');
+    }
+  }, [toast]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);

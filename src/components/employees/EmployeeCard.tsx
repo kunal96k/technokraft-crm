@@ -105,17 +105,15 @@ export const EmployeeCard: React.FC<EmployeeCardProps> = ({
       </div>
 
       {/* Live Activity & Attendance Row */}
-      <div className="flex flex-wrap items-center gap-2 py-2 px-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 text-xs">
+      <div className="flex flex-wrap items-center justify-between gap-2 py-2 px-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 text-xs">
         <div className="flex items-center gap-1.5">
           <span className="text-slate-500 text-[11px]">Today:</span>
           <AttendanceStatusBadge status={employee.todayAttendanceStatus} size="sm" />
-        </div>
-        <div className="h-3 w-px bg-slate-200 dark:bg-slate-700" />
-        <div className="flex items-center gap-1.5">
           <WorkStatusBadge status={employee.workStatus} size="sm" />
-          <span className="text-[11px] text-slate-600 dark:text-slate-300 truncate max-w-[140px]">
-            {isMasked ? 'Protected Activity' : employee.currentActivity}
-          </span>
+        </div>
+        <div className="flex items-center gap-1 text-[10px] text-purple-700 dark:text-purple-300 font-medium">
+          <Clock className="w-3 h-3 text-purple-600 dark:text-purple-400" />
+          <span>{employee.shiftStartTime || '10:00 AM'} - {employee.shiftEndTime || '04:00 PM'}</span>
         </div>
       </div>
 

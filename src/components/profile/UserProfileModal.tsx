@@ -620,6 +620,24 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
                         </p>
                       </div>
                     </div>
+
+                    {/* Shift Schedule */}
+                    <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-700/60 flex items-center gap-3 sm:col-span-2">
+                      <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/40 text-purple-600 shrink-0">
+                        <Clock className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0 flex-1 flex items-center justify-between">
+                        <div>
+                          <p className="text-[10px] text-slate-400">Assigned Shift Schedule</p>
+                          <p className="font-semibold text-purple-700 dark:text-purple-300 font-mono text-xs">
+                            {user.shiftStartTime || '10:00 AM'} – {user.shiftEndTime || '04:00 PM'}
+                          </p>
+                        </div>
+                        <span className="text-[10px] font-medium text-slate-500 bg-slate-200/60 dark:bg-slate-700/60 px-2 py-0.5 rounded">
+                          15m Late Grace Period
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

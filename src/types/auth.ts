@@ -35,6 +35,8 @@ export interface AuthUser {
   todayBreakTime?: string;
   permissions: string[];
   allowedModules?: string[];
+  shiftStartTime?: string;
+  shiftEndTime?: string;
 }
 
 export interface UpdateProfilePayload {

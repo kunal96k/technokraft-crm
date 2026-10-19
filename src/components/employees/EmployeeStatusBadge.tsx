@@ -70,6 +70,10 @@ export const AttendanceStatusBadge: React.FC<{
       colorClasses =
         'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800/60';
       break;
+    case 'Early':
+      colorClasses =
+        'bg-teal-50 text-teal-700 border-teal-200 dark:bg-teal-950/50 dark:text-teal-300 dark:border-teal-800/60';
+      break;
     case 'Late':
       colorClasses =
         'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800/60';

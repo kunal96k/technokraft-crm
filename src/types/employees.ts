@@ -71,7 +71,8 @@ export type AttendanceStatus =
   | 'Half Day'
   | 'Leave'
   | 'Late'
-  | 'Holiday';
+  | 'Holiday'
+  | 'Early';
 
 export type TargetMetricStatus = 'Achieved' | 'On Track' | 'At Risk' | 'Below Target';
 
@@ -171,6 +172,10 @@ export interface Employee {
   joiningDate: string;
   status: EmployeeStatus;
 
+  // Work Shift Timing
+  shiftStartTime?: string; // e.g. "10:00 AM" (Default: "10:00 AM")
+  shiftEndTime?: string;   // e.g. "04:00 PM" (Default: "04:00 PM")
+
   // CRM Access & Login Credentials configuration
   crmAccess: boolean;
   accessRole: CrmAccessRole;
@@ -237,6 +242,8 @@ export interface DailyAttendanceRecord {
   status: AttendanceStatus;
   currentActivity: string;
   workStatus: WorkStatus;
+  shiftStartTime?: string;
+  shiftEndTime?: string;
   isSuperAdmin?: boolean;
 }
 

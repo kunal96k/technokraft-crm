@@ -18,6 +18,7 @@ import {
   OpportunityPriority,
 } from '../../types/opportunities';
 import { Lead } from '../../types/leads';
+import { fetchLeadById } from '../../services/leadService';
 import { EmployeeSelect } from '../common/EmployeeSelect';
 import { ConfirmationModal } from '../common/ConfirmationModal';
 import { LeadSearchSelect } from '../common/LeadSearchSelect';
@@ -151,9 +152,13 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
   );
 
   // TAB 5: Team Assignment
-  const [ownerName, setOwnerName] = useState(
-    initialOpportunity?.owner?.name || authUser?.name || ''
-  );
+  const [ownerName, setOwnerName] = useState(() => {
+    const raw = initialOpportunity?.owner?.name?.trim();
+    if (raw && raw.toLowerCase() !== 'unassigned') {
+      return raw;
+    }
+    return authUser?.name || '';
+  });
   const [businessAnalystName, setBusinessAnalystName] = useState(
     initialOpportunity?.businessAnalyst?.name || ''
   );
@@ -234,39 +239,130 @@ const formatDateForDateInput = (val?: string | null): string => {
     setRequirementNotes(initialOpportunity?.requirement?.notes || '');
 
     // TAB 5
-    setOwnerName(initialOpportunity?.owner?.name || authUser?.name || '');
+    const initOwner = initialOpportunity?.owner?.name?.trim();
+    const hasExplicitOwner = Boolean(initOwner && initOwner.toLowerCase() !== 'unassigned');
+    setOwnerName(hasExplicitOwner ? initOwner! : authUser?.name || '');
     setBusinessAnalystName(initialOpportunity?.businessAnalyst?.name || '');
     setTechnicalReviewerName(initialOpportunity?.technicalReviewer?.name || '');
+
+    // If existing opportunity is linked to a lead and lacked dedicated team assignment, auto-fill from lead
+    const linkedLead = initialOpportunity?.leadId || initialOpportunity?.leadCode;
+    if (linkedLead && (!hasExplicitOwner || !initialOpportunity?.businessAnalyst?.name)) {
+      fetchLeadById(String(linkedLead))
+        .then((lead) => {
+          if (!lead) return;
+          const leadOwner =
+            lead.assignedEmployee?.name ||
+            (lead as any).assignedEmployeeName ||
+            '';
+          const leadBA =
+            lead.assignedBA?.name ||
+            (lead as any).assignedBAName ||
+            '';
+          const isValid = (n?: string) =>
+            Boolean(n && n.trim() !== '' && n.trim().toLowerCase() !== 'unassigned');
+
+          if (!hasExplicitOwner && isValid(leadOwner)) {
+            setOwnerName(leadOwner.trim());
+          } else if (!hasExplicitOwner && isValid(leadBA)) {
+            setOwnerName(leadBA.trim());
+          }
+          if (!initialOpportunity?.businessAnalyst?.name && isValid(leadBA)) {
+            setBusinessAnalystName(leadBA.trim());
+          }
+        })
+        .catch(() => {});
+    }
   }, [isOpen, initialOpportunity, defaultStage, authUser?.name]);
 
   if (!isOpen) return null;
+
+  // Helper to extract and apply Lead fields including Team Member inheritance
+  const populateFromLead = (leadObj: Lead) => {
+    if (leadObj.company?.name) setCompanyName(leadObj.company.name);
+    if (leadObj.contact?.name) setContactName(leadObj.contact.name);
+    if (leadObj.contact?.designation) setContactDesignation(leadObj.contact.designation);
+    if (leadObj.contact?.email) setContactEmail(leadObj.contact.email);
+    if (leadObj.contact?.phone) setContactPhone(leadObj.contact.phone);
+    if (leadObj.company?.industry) setIndustry(leadObj.company.industry);
+    setName((prev) => {
+      if (!prev || !prev.trim()) {
+        return `${leadObj.company?.name || 'Client'} - ${leadObj.service || 'Consulting'}`;
+      }
+      return prev;
+    });
+    if (leadObj.service) {
+      setService(leadObj.service as OpportunityService);
+    }
+    if (leadObj.requirement?.summary) {
+      setRequirementSummary(leadObj.requirement.summary);
+    }
+    if (leadObj.requirement?.problemStatement) {
+      setBusinessProblem(leadObj.requirement.problemStatement);
+    }
+    if (leadObj.requirement?.budgetRange) {
+      setBudget(leadObj.requirement.budgetRange);
+    }
+
+    // Auto-inherit team members from the selected Lead
+    const leadSalesOwner =
+      leadObj.assignedEmployee?.name ||
+      (leadObj as any).assignedEmployeeName ||
+      (typeof (leadObj as any).assignedEmployee === 'string'
+        ? (leadObj as any).assignedEmployee
+        : '') ||
+      '';
+
+    const leadBA =
+      leadObj.assignedBA?.name ||
+      (leadObj as any).assignedBAName ||
+      (typeof (leadObj as any).assignedBA === 'string'
+        ? (leadObj as any).assignedBA
+        : '') ||
+      '';
+
+    const isValidMember = (n?: string) =>
+      Boolean(n && n.trim() !== '' && n.trim().toLowerCase() !== 'unassigned');
+
+    if (isValidMember(leadSalesOwner)) {
+      setOwnerName(leadSalesOwner.trim());
+      setErrors((prev) => {
+        if (!prev.ownerName) return prev;
+        const copy = { ...prev };
+        delete copy.ownerName;
+        return copy;
+      });
+    } else if (isValidMember(leadBA) && (!ownerName || ownerName.trim().toLowerCase() === 'unassigned')) {
+      // If Lead has no sales owner assigned, default sales owner to the Lead's assigned BA
+      setOwnerName(leadBA.trim());
+      setErrors((prev) => {
+        if (!prev.ownerName) return prev;
+        const copy = { ...prev };
+        delete copy.ownerName;
+        return copy;
+      });
+    }
+
+    if (isValidMember(leadBA)) {
+      setBusinessAnalystName(leadBA.trim());
+    }
+  };
 
   // Auto-populate when Lead is picked
   const handleLeadChange = (leadVal: string, leadObj?: Lead | null) => {
     setSelectedLeadId(leadVal);
     setSelectedLeadObj(leadObj || null);
     if (leadObj) {
-      if (leadObj.company?.name) setCompanyName(leadObj.company.name);
-      if (leadObj.contact?.name) setContactName(leadObj.contact.name);
-      if (leadObj.contact?.designation) setContactDesignation(leadObj.contact.designation);
-      if (leadObj.contact?.email) setContactEmail(leadObj.contact.email);
-      if (leadObj.contact?.phone) setContactPhone(leadObj.contact.phone);
-      if (leadObj.company?.industry) setIndustry(leadObj.company.industry);
-      if (!name) {
-        setName(`${leadObj.company?.name || 'Client'} - ${leadObj.service || 'Consulting'}`);
-      }
-      if (leadObj.service) {
-        setService(leadObj.service as OpportunityService);
-      }
-      if (leadObj.requirement?.summary) {
-        setRequirementSummary(leadObj.requirement.summary);
-      }
-      if (leadObj.requirement?.problemStatement) {
-        setBusinessProblem(leadObj.requirement.problemStatement);
-      }
-      if (leadObj.requirement?.budgetRange) {
-        setBudget(leadObj.requirement.budgetRange);
-      }
+      populateFromLead(leadObj);
+    } else if (leadVal && String(leadVal).trim() !== '') {
+      fetchLeadById(String(leadVal))
+        .then((res) => {
+          if (res) {
+            setSelectedLeadObj(res);
+            populateFromLead(res);
+          }
+        })
+        .catch(() => {});
     }
   };
 
@@ -394,23 +490,29 @@ const formatDateForDateInput = (val?: string | null): string => {
         notes: requirementNotes.trim() || undefined,
       },
       owner: {
-        name: ownerName.trim() || 'Sales Team',
+        name: ownerName.trim() || authUser?.name || 'Sales Team',
         avatar: ownerInitials,
         role: 'Sales Manager',
-        email: `${(ownerName || 'sales').toLowerCase().replace(/\s+/g, '.')}@technokraft.com`,
+        email: `${(ownerName || authUser?.name || 'sales').toLowerCase().replace(/\s+/g, '.')}@technokraft.com`,
       },
-      businessAnalyst: businessAnalystName
-        ? {
-            name: businessAnalystName.trim(),
-            role: 'Senior Business Analyst',
-          }
-        : undefined,
-      technicalReviewer: technicalReviewerName
-        ? {
-            name: technicalReviewerName.trim(),
-            role: 'Solutions Architect',
-          }
-        : undefined,
+      businessAnalyst:
+        businessAnalystName &&
+        businessAnalystName.trim() &&
+        businessAnalystName.trim().toLowerCase() !== 'unassigned'
+          ? {
+              name: businessAnalystName.trim(),
+              role: 'Senior Business Analyst',
+            }
+          : undefined,
+      technicalReviewer:
+        technicalReviewerName &&
+        technicalReviewerName.trim() &&
+        technicalReviewerName.trim().toLowerCase() !== 'unassigned'
+          ? {
+              name: technicalReviewerName.trim(),
+              role: 'Solutions Architect',
+            }
+          : undefined,
       createdBy: initialOpportunity?.createdBy || {
         name: authUser?.name || 'CRM System',
         date: currentFormattedDate,
@@ -459,10 +561,10 @@ const formatDateForDateInput = (val?: string | null): string => {
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-2 sm:p-4 overflow-y-auto">
-        <div className="bg-white dark:bg-slate-900 w-full max-w-4xl max-h-[92vh] rounded-2xl shadow-2xl flex flex-col border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-150 my-auto">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-2 sm:p-4 overflow-hidden">
+        <div className="bg-white dark:bg-slate-900 w-[80vw] h-[80vh] max-w-[80vw] max-h-[80vh] rounded-2xl shadow-2xl flex flex-col border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-150 overflow-hidden my-auto">
           {/* Modal Header */}
-          <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/80 dark:bg-slate-950/70 rounded-t-2xl">
+          <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/80 dark:bg-slate-950/70 rounded-t-2xl shrink-0">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl bg-purple-50 dark:bg-purple-950/50 border border-purple-200 dark:border-purple-800 flex items-center justify-center text-[#5B4DB7] dark:text-purple-300">
                 <Briefcase className="w-5 h-5" />
@@ -486,7 +588,7 @@ const formatDateForDateInput = (val?: string | null): string => {
           </div>
 
           {/* Tabs Navigation Switch Bar */}
-          <div className="border-b border-slate-200 dark:border-slate-800 bg-slate-100/60 dark:bg-slate-900/80 px-4 sm:px-6 py-2 overflow-x-auto scrollbar-thin">
+          <div className="border-b border-slate-200 dark:border-slate-800 bg-slate-100/60 dark:bg-slate-900/80 px-4 sm:px-6 py-2 overflow-x-auto scrollbar-thin shrink-0">
             <nav className="flex space-x-2 min-w-max" aria-label="Tabs">
               {TABS.map((tab, idx) => {
                 const Icon = tab.icon;
@@ -515,7 +617,7 @@ const formatDateForDateInput = (val?: string | null): string => {
           </div>
 
           {/* Tab Subtitle Banner */}
-          <div className="px-6 py-2 bg-purple-50/50 dark:bg-purple-950/20 border-b border-purple-100 dark:border-purple-900/30 flex items-center justify-between text-xs">
+          <div className="px-6 py-2 bg-purple-50/50 dark:bg-purple-950/20 border-b border-purple-100 dark:border-purple-900/30 flex items-center justify-between text-xs shrink-0">
             <span className="font-semibold text-[#5B4DB7] dark:text-purple-300">
               {TABS.find((t) => t.key === activeTab)?.description}
             </span>
@@ -525,7 +627,7 @@ const formatDateForDateInput = (val?: string | null): string => {
           </div>
 
           {/* Scrollable Tab Body Content */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-4 text-xs text-slate-700 dark:text-slate-300">
+          <div className="flex-1 min-h-0 overflow-y-auto p-6 space-y-4 text-xs text-slate-700 dark:text-slate-300">
             {/* TAB 1: DEAL & COMPANY */}
             {activeTab === 'company' && (
               <div className="space-y-4 animate-in fade-in duration-150">
@@ -995,16 +1097,25 @@ const formatDateForDateInput = (val?: string | null): string => {
                 </div>
 
                 <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700 mt-4 space-y-2">
-                  <h4 className="text-xs font-bold text-slate-900 dark:text-white">
-                    Deal Summary Verification
+                  <h4 className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                    <UserCheck className="w-3.5 h-3.5 text-[#5B4DB7] dark:text-purple-400" />
+                    <span>Deal Team Assignment & Lead Synchronization</span>
                   </h4>
                   <p className="text-xs text-slate-600 dark:text-slate-400">
-                    You are configuring <strong>{name || 'Untitled Opportunity'}</strong> for client{' '}
-                    <strong>{companyName || 'Not Specified'}</strong> with an estimated pipeline value of{' '}
-                    <strong>
-                      ₹{parseInt(estimatedValue.replace(/[^0-9]/g, ''), 10).toLocaleString('en-IN') || '0'}
-                    </strong>{' '}
-                    under <strong>{service}</strong>.
+                    {selectedLeadId ? (
+                      <>
+                        Linked to Lead <strong>{selectedLeadObj?.leadCode || selectedLeadId}</strong>. Sales Owner and Business Analyst are automatically inherited from the Lead. You can customize them as required.
+                      </>
+                    ) : (
+                      <>
+                        You are configuring <strong>{name || 'Untitled Opportunity'}</strong> for client{' '}
+                        <strong>{companyName || 'Not Specified'}</strong> with an estimated pipeline value of{' '}
+                        <strong>
+                          ₹{parseInt(estimatedValue.replace(/[^0-9]/g, ''), 10).toLocaleString('en-IN') || '0'}
+                        </strong>{' '}
+                        under <strong>{service}</strong>.
+                      </>
+                    )}
                   </p>
                 </div>
               </div>
@@ -1012,7 +1123,7 @@ const formatDateForDateInput = (val?: string | null): string => {
           </div>
 
           {/* Modal Footer with Stepper Controls */}
-          <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/70 flex items-center justify-between rounded-b-2xl">
+          <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/70 flex items-center justify-between rounded-b-2xl shrink-0">
             <button
               type="button"
               onClick={onClose}
