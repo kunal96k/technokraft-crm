@@ -21,6 +21,21 @@ import {
   ChevronDown,
 } from 'lucide-react';
 
+// Helper to convert 24-hr time (HH:mm) to 12-hr AM/PM format for display/saving
+function formatTo12Hour(timeStr: string): string {
+  if (!timeStr) return '';
+  if (/am|pm/i.test(timeStr)) return timeStr;
+  const parts = timeStr.split(':');
+  if (parts.length >= 2) {
+    let hours = parseInt(parts[0], 10);
+    const minutes = parts[1].slice(0, 2);
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12 || 12;
+    return `${hours.toString().padStart(2, '0')}:${minutes} ${ampm}`;
+  }
+  return timeStr;
+}
+
 interface LogCallModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -47,12 +62,15 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
   const [contactDesignation, setContactDesignation] = useState(initialLead?.contact?.designation || '');
   const [callType, setCallType] = useState<CallType>('outbound');
   const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
-  const [time, setTime] = useState(() => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
-  const [durationMinutes, setDurationMinutes] = useState('12');
-  const [durationSeconds, setDurationSeconds] = useState('34');
+  const [time, setTime] = useState(() => {
+    const now = new Date();
+    return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+  });
+  const [durationMinutes, setDurationMinutes] = useState('05');
+  const [durationSeconds, setDurationSeconds] = useState('30');
   const [result, setResult] = useState<CallResult>('Interested');
   const [notes, setNotes] = useState('');
-  const [assignedEmployee, setAssignedEmployee] = useState(initialLead?.assignedEmployee?.name || authUser?.name || 'Kunal Patil');
+  const [assignedEmployee, setAssignedEmployee] = useState(initialLead?.assignedEmployee?.name || authUser?.name || '');
 
   // Next action
   const [nextAction, setNextAction] = useState<NextActionType>('none');
@@ -61,7 +79,7 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
     d.setDate(d.getDate() + 2);
     return d.toISOString().split('T')[0];
   });
-  const [followUpTime, setFollowUpTime] = useState('11:00 AM');
+  const [followUpTime, setFollowUpTime] = useState('11:00');
   const [followUpType, setFollowUpType] = useState<'Call' | 'Email' | 'Meeting' | 'Demo' | 'Document'>('Email');
   const [followUpAssignedTo, setFollowUpAssignedTo] = useState(initialLead?.assignedEmployee?.name || '');
 
@@ -128,17 +146,14 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
       employeeName: assignedEmployee,
       employeeRole:
         (authUser && authUser.name === assignedEmployee ? authUser.role : findCachedEmployee(assignedEmployee)?.role) ||
-        (assignedEmployee === 'Kunal Patil'
-          ? 'Sales Manager'
-          : assignedEmployee === 'Shruti Raundal'
-          ? 'Senior Sales Executive'
-          : 'Business Analyst'),
+        findCachedEmployee(assignedEmployee)?.accessRole ||
+        'Sales Executive',
       employeeAvatar:
         (authUser && authUser.name === assignedEmployee && authUser.profilePhoto)
           ? authUser.profilePhoto
           : (findCachedEmployee(assignedEmployee)?.profilePhoto ||
              (authUser && authUser.name === assignedEmployee ? authUser.avatar : findCachedEmployee(assignedEmployee)?.avatar) ||
-             assignedEmployee.split(' ').map((n) => n[0]).join('')),
+             (assignedEmployee ? assignedEmployee.split(' ').map((n) => n[0]).join('') : 'SR')),
       employeeProfilePhoto:
         (authUser && authUser.name === assignedEmployee ? authUser.profilePhoto : undefined) ||
         findCachedEmployee(assignedEmployee)?.profilePhoto,
@@ -150,7 +165,7 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
       date: date
         ? new Date(date + 'T00:00:00').toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
         : new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
-      time,
+      time: formatTo12Hour(time) || time,
       duration: formattedDuration,
       durationSeconds: totalDurationSeconds,
       result,
@@ -160,7 +175,7 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
         nextAction === 'followup'
           ? {
               date: followUpDate,
-              time: followUpTime,
+              time: formatTo12Hour(followUpTime) || followUpTime,
               type: followUpType,
               assignedTo: followUpAssignedTo,
               assignedAvatar:
@@ -247,14 +262,14 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
                 Contact Person <span className="text-rose-500">*</span>
               </label>
               <div className="relative">
-                <User className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <User className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
                   type="text"
                   required
                   value={contactName}
                   onChange={(e) => setContactName(e.target.value)}
                   className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-slate-100 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
-                  placeholder="e.g. Nikita Patil"
+                  placeholder="Enter client contact name"
                 />
               </div>
             </div>
@@ -262,13 +277,13 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
             <div>
               <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Phone Number</label>
               <div className="relative">
-                <Phone className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <Phone className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
                   type="text"
                   value={contactPhone}
                   onChange={(e) => setContactPhone(e.target.value)}
                   className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-mono text-slate-900 dark:text-slate-100 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
-                  placeholder="+91 98230 45612"
+                  placeholder="Enter client phone number"
                 />
               </div>
             </div>
@@ -292,24 +307,35 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Date</label>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-mono text-slate-900 dark:text-slate-100 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
-              />
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                Call Date <span className="text-rose-500">*</span>
+              </label>
+              <div className="relative">
+                <Calendar className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  type="date"
+                  required
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-mono text-slate-900 dark:text-slate-100 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
+                />
+              </div>
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Time</label>
-              <input
-                type="text"
-                value={time}
-                onChange={(e) => setTime(e.target.value)}
-                placeholder="11:30 AM"
-                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-mono text-slate-900 dark:text-slate-100 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
-              />
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                Call Time <span className="text-rose-500">*</span>
+              </label>
+              <div className="relative">
+                <Clock className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  type="time"
+                  required
+                  value={time}
+                  onChange={(e) => setTime(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-mono text-slate-900 dark:text-slate-100 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
+                />
+              </div>
             </div>
 
             <div>
@@ -410,7 +436,7 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
               rows={3}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="e.g. Customer is interested in ERP solution. Requested proposal by tomorrow..."
+              placeholder="Enter call notes, client requirements, discussion points..."
               className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
             />
           </div>
@@ -467,14 +493,18 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1">Time</label>
-                    <input
-                      type="text"
-                      value={followUpTime}
-                      onChange={(e) => setFollowUpTime(e.target.value)}
-                      placeholder="11:00 AM"
-                      className="w-full px-2.5 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-mono text-slate-900 dark:text-slate-100 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
-                    />
+                    <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1">
+                      Time <span className="text-rose-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <Clock className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      <input
+                        type="time"
+                        value={followUpTime}
+                        onChange={(e) => setFollowUpTime(e.target.value)}
+                        className="w-full pl-8 pr-2 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-mono text-slate-900 dark:text-slate-100 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
+                      />
+                    </div>
                   </div>
 
                   <div>

@@ -266,10 +266,30 @@ function normalizeOpportunity(raw: any): OpportunityRecord {
     contactPhone: raw.contactPhone || '',
     service: (raw.service as OppServiceType) || 'Custom Software Development',
     stage: (raw.stage as OpportunityStage) || 'Qualified',
-    estimatedValue: Number(raw.estimatedValue) || 0,
-    finalValue: raw.finalValue !== null && raw.finalValue !== undefined ? Number(raw.finalValue) : undefined,
+    estimatedValue: (() => {
+      let val = Number(raw.estimatedValue) || 0;
+      if (val > 0 && val <= 500) {
+        val = val * 100000;
+      }
+      return val;
+    })(),
+    finalValue: (() => {
+      if (raw.finalValue === null || raw.finalValue === undefined) return undefined;
+      let val = Number(raw.finalValue) || 0;
+      if (val > 0 && val <= 500) {
+        val = val * 100000;
+      }
+      return val;
+    })(),
     probability: Number(raw.probability) || 50,
-    expectedCloseDate: raw.expectedCloseDate || '',
+    expectedCloseDate: (() => {
+      if (raw.expectedCloseDate && String(raw.expectedCloseDate).trim() !== '') {
+        return String(raw.expectedCloseDate).trim();
+      }
+      const d = new Date();
+      d.setDate(d.getDate() + 30);
+      return d.toISOString().split('T')[0];
+    })(),
     priority: (raw.priority as OpportunityPriority) || 'Medium',
     industry: raw.industry || 'IT & Software',
     requirement: {

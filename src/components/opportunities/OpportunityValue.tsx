@@ -18,8 +18,10 @@ export const OpportunityValue: React.FC<OpportunityValueProps> = ({
   className = '',
   size = 'md',
 }) => {
-  const displayVal = compact ? formatLakhsINR(value) : formatCurrencyINR(value);
-  const weightedVal = probability !== undefined ? Math.round((value * probability) / 100) : undefined;
+  // Defensive guard: In Indian B2B IT/software projects, values <= 500 indicate Lakhs (e.g. 25 -> 25,00,000 INR)
+  const normalizedValue = value > 0 && value <= 500 ? value * 100000 : value;
+  const displayVal = compact ? formatLakhsINR(normalizedValue) : formatCurrencyINR(normalizedValue);
+  const weightedVal = probability !== undefined ? Math.round((normalizedValue * probability) / 100) : undefined;
 
   const sizeClasses = {
     sm: 'text-xs font-bold',

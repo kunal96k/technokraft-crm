@@ -35,6 +35,12 @@ import {
   DEPARTMENTS,
   EMPLOYEE_ROLES,
 } from '../../types/employees';
+import {
+  getAllDepartments,
+  getAllRoles,
+  saveCustomDepartment,
+  saveCustomRole,
+} from '../../utils/customEmployeeFields';
 import { EmployeeSelect } from '../common/EmployeeSelect';
 import { isSuperAdminRecord } from '../../utils/securityUtils';
 
@@ -196,6 +202,12 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
   const [forcePasswordReset, setForcePasswordReset] = useState(initialValues.forcePasswordReset);
   const [isAccountLocked, setIsAccountLocked] = useState(initialValues.isAccountLocked);
 
+  // Manual 'Other' input state for Department and Role/Designation
+  const [isOtherDepartment, setIsOtherDepartment] = useState(false);
+  const [customDepartment, setCustomDepartment] = useState('');
+  const [isOtherRole, setIsOtherRole] = useState(false);
+  const [customRole, setCustomRole] = useState('');
+
   // Target Settings
   const [monthlyRevenue, setMonthlyRevenue] = useState(initialValues.monthlyRevenue);
   const [monthlyLeads, setMonthlyLeads] = useState(initialValues.monthlyLeads);
@@ -240,30 +252,28 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
     setMonthlyFollowUps(values.monthlyFollowUps);
     setMonthlyProposals(values.monthlyProposals);
     setMonthlyWonDeals(values.monthlyWonDeals);
+    setIsOtherDepartment(false);
+    setCustomDepartment('');
+    setIsOtherRole(false);
+    setCustomRole('');
     setIsSubmitting(false);
     setServerError('');
   }, [initialEmployee, isOpen]);
 
-  // Dynamic dropdown options so current custom values are never lost
+  // Dynamic dropdown options combining defaults + previously saved custom entries + initial employee
   const departmentOptions = useMemo(() => {
-    return Array.from(
-      new Set([
-        ...DEPARTMENTS,
-        ...(department ? [department] : []),
-        ...(initialEmployee?.department ? [initialEmployee.department] : []),
-      ])
-    );
-  }, [department, initialEmployee?.department]);
+    return getAllDepartments([
+      department,
+      initialEmployee?.department,
+    ]);
+  }, [department, initialEmployee?.department, isOtherDepartment]);
 
   const roleOptions = useMemo(() => {
-    return Array.from(
-      new Set([
-        ...EMPLOYEE_ROLES,
-        ...(role ? [role] : []),
-        ...(initialEmployee?.role ? [initialEmployee.role] : []),
-      ])
-    );
-  }, [role, initialEmployee?.role]);
+    return getAllRoles([
+      role,
+      initialEmployee?.role,
+    ]);
+  }, [role, initialEmployee?.role, isOtherRole]);
 
   // Auto-generate company email & username if first & last name typed
   const handleNameBlur = () => {
@@ -307,6 +317,34 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
     e.preventDefault();
     if (isSubmitting) return;
 
+    // Resolve final Department (manual 'Other' or selected)
+    let finalDepartment = (department || '').trim();
+    if (isOtherDepartment) {
+      const cleanCustomDept = customDepartment.trim();
+      if (!cleanCustomDept) {
+        setServerError('Please enter a custom department name or choose an existing department.');
+        return;
+      }
+      finalDepartment = cleanCustomDept;
+      saveCustomDepartment(cleanCustomDept);
+    } else if (finalDepartment) {
+      saveCustomDepartment(finalDepartment);
+    }
+
+    // Resolve final Designation / Role (manual 'Other' or selected)
+    let finalRole = (role || '').trim();
+    if (isOtherRole) {
+      const cleanCustomRole = customRole.trim();
+      if (!cleanCustomRole) {
+        setServerError('Please enter a custom designation / role name or choose an existing role.');
+        return;
+      }
+      finalRole = cleanCustomRole;
+      saveCustomRole(cleanCustomRole);
+    } else if (finalRole) {
+      saveCustomRole(finalRole);
+    }
+
     const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
     const initials = `${firstName[0] || ''}${lastName[0] || ''}`.toUpperCase();
 
@@ -321,8 +359,8 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
       gender,
       dateOfBirth: dob || undefined,
       employeeCode: employeeCode.trim(),
-      department,
-      role,
+      department: finalDepartment,
+      role: finalRole,
       reportingManager: typeof reportingManager === 'string' ? reportingManager : (reportingManager as any)?.target?.value || '',
       employmentType,
       joiningDate,
@@ -546,8 +584,16 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
                   Department *
                 </label>
                 <select
-                  value={department}
-                  onChange={(e) => setDepartment(e.target.value as any)}
+                  value={isOtherDepartment ? '__OTHER__' : department}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === '__OTHER__') {
+                      setIsOtherDepartment(true);
+                    } else {
+                      setIsOtherDepartment(false);
+                      setDepartment(val);
+                    }
+                  }}
                   className="w-full text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500/50 outline-none"
                 >
                   {departmentOptions.map((dept) => (
@@ -555,7 +601,35 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
                       {dept}
                     </option>
                   ))}
+                  <option value="__OTHER__">+ Other (Enter manually)...</option>
                 </select>
+
+                {isOtherDepartment && (
+                  <div className="mt-2 animate-in fade-in duration-150">
+                    <input
+                      type="text"
+                      required
+                      value={customDepartment}
+                      onChange={(e) => setCustomDepartment(e.target.value)}
+                      placeholder="Enter custom department name..."
+                      className="w-full text-xs rounded-xl border border-purple-300 dark:border-purple-600 bg-purple-50/20 dark:bg-slate-800/80 px-3 py-2 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500/50 outline-none font-medium"
+                      autoFocus
+                    />
+                    <div className="flex items-center justify-between mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                      <span>Saved for future selection</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsOtherDepartment(false);
+                          setCustomDepartment('');
+                        }}
+                        className="text-purple-600 dark:text-purple-400 hover:underline cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div>
@@ -563,8 +637,16 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
                   Designation / Role *
                 </label>
                 <select
-                  value={role}
-                  onChange={(e) => setRole(e.target.value as any)}
+                  value={isOtherRole ? '__OTHER__' : role}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === '__OTHER__') {
+                      setIsOtherRole(true);
+                    } else {
+                      setIsOtherRole(false);
+                      setRole(val);
+                    }
+                  }}
                   className="w-full text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500/50 outline-none"
                 >
                   {roleOptions.map((r) => (
@@ -572,7 +654,35 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
                       {r}
                     </option>
                   ))}
+                  <option value="__OTHER__">+ Other (Enter manually)...</option>
                 </select>
+
+                {isOtherRole && (
+                  <div className="mt-2 animate-in fade-in duration-150">
+                    <input
+                      type="text"
+                      required
+                      value={customRole}
+                      onChange={(e) => setCustomRole(e.target.value)}
+                      placeholder="Enter custom designation / role name..."
+                      className="w-full text-xs rounded-xl border border-purple-300 dark:border-purple-600 bg-purple-50/20 dark:bg-slate-800/80 px-3 py-2 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500/50 outline-none font-medium"
+                      autoFocus
+                    />
+                    <div className="flex items-center justify-between mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                      <span>Saved for future selection</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsOtherRole(false);
+                          setCustomRole('');
+                        }}
+                        className="text-purple-600 dark:text-purple-400 hover:underline cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div>

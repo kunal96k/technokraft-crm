@@ -24,6 +24,7 @@ import {
   UploadCloud,
   Paperclip,
   UserCheck,
+  ExternalLink,
 } from 'lucide-react';
 import { LeadStatusBadge } from '../../components/leads/LeadStatusBadge';
 import { LeadPriorityBadge } from '../../components/leads/LeadPriorityBadge';
@@ -207,6 +208,18 @@ export const LeadDetailsPage: React.FC = () => {
     if (allActivities.length > 0) return allActivities.length;
     return 0;
   }, [activityTotalCount, allActivities]);
+
+  // Deduplicate attachments to prevent rendering duplicate files
+  const uniqueAttachments = useMemo(() => {
+    if (!lead?.attachments || !Array.isArray(lead.attachments)) return [];
+    const seen = new Set<string>();
+    return lead.attachments.filter((att) => {
+      const key = `${(att.name || '').trim().toLowerCase()}_${(att.size || '').trim()}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, [lead?.attachments]);
 
   const followUpsCount = lead?.followUps?.length || 0;
   const emailsCount = leadEmails.length;
@@ -658,7 +671,7 @@ export const LeadDetailsPage: React.FC = () => {
           { id: 'followups', label: `Follow-ups (${followUpsCount})` },
           { id: 'emails', label: `Email History (${emailsCount})` },
           { id: 'calls', label: `Calls (${callsCount})` },
-          { id: 'requirements', label: `Requirements & Attachments (${lead?.attachments?.length || 0})` },
+          { id: 'requirements', label: `Requirements & Attachments (${uniqueAttachments.length})` },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -696,7 +709,23 @@ export const LeadDetailsPage: React.FC = () => {
 
               <div>
                 <dt className="text-slate-400 dark:text-slate-500 text-[11px]">Website</dt>
-                <dd className="font-medium text-[#5B4DB7] dark:text-purple-400 mt-0.5">{lead.company?.website || 'N/A'}</dd>
+                <dd className="font-medium text-[#5B4DB7] dark:text-purple-400 mt-0.5">
+                  {lead.company?.website ? (
+                    <a
+                      href={lead.company.website.startsWith('http') ? lead.company.website : `https://${lead.company.website}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="hover:underline inline-flex items-center gap-1.5 break-all text-xs"
+                      title={lead.company.website}
+                    >
+                      <Globe className="w-3.5 h-3.5 shrink-0" />
+                      <span className="break-all">{lead.company.website}</span>
+                      <ExternalLink className="w-3 h-3 shrink-0 opacity-70" />
+                    </a>
+                  ) : (
+                    'N/A'
+                  )}
+                </dd>
               </div>
 
               <div>
@@ -716,11 +745,24 @@ export const LeadDetailsPage: React.FC = () => {
                 </dd>
               </div>
 
-              <div>
-                <dt className="text-slate-400 dark:text-slate-500 text-[11px]">LinkedIn</dt>
-                <dd className="font-medium text-slate-700 dark:text-slate-300 mt-0.5 flex items-center gap-1">
-                  <Linkedin className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-                  <span className="truncate">{lead.company?.linkedIn || 'N/A'}</span>
+              <div className="sm:col-span-2">
+                <dt className="text-slate-400 dark:text-slate-500 text-[11px]">LinkedIn Profile / Page</dt>
+                <dd className="font-medium text-blue-600 dark:text-blue-400 mt-0.5">
+                  {lead.company?.linkedIn ? (
+                    <a
+                      href={lead.company.linkedIn.startsWith('http') ? lead.company.linkedIn : `https://${lead.company.linkedIn}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="hover:underline inline-flex items-center gap-1.5 break-all text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+                      title={lead.company.linkedIn}
+                    >
+                      <Linkedin className="w-3.5 h-3.5 shrink-0 text-blue-600 dark:text-blue-400" />
+                      <span className="break-all font-mono text-[11.5px]">{lead.company.linkedIn}</span>
+                      <ExternalLink className="w-3 h-3 shrink-0 opacity-70" />
+                    </a>
+                  ) : (
+                    <span className="text-slate-400">N/A</span>
+                  )}
                 </dd>
               </div>
             </dl>
@@ -758,7 +800,7 @@ export const LeadDetailsPage: React.FC = () => {
 
               <div>
                 <dt className="text-slate-400 dark:text-slate-500 text-[11px]">Email Address</dt>
-                <dd className="font-mono font-medium text-slate-800 dark:text-slate-200 mt-0.5">{lead.contact?.email || 'N/A'}</dd>
+                <dd className="font-mono font-medium text-slate-800 dark:text-slate-200 mt-0.5 break-all">{lead.contact?.email || 'N/A'}</dd>
               </div>
 
               <div>
@@ -777,6 +819,27 @@ export const LeadDetailsPage: React.FC = () => {
                 <dt className="text-slate-400 dark:text-slate-500 text-[11px]">Preferred Channel</dt>
                 <dd className="font-medium text-[#5B4DB7] dark:text-purple-400 mt-0.5">
                   {lead.contact?.preferredChannel || 'Any'}
+                </dd>
+              </div>
+
+              <div className="sm:col-span-2">
+                <dt className="text-slate-400 dark:text-slate-500 text-[11px]">Contact LinkedIn Profile</dt>
+                <dd className="font-medium text-blue-600 dark:text-blue-400 mt-0.5">
+                  {lead.contact?.linkedIn ? (
+                    <a
+                      href={lead.contact.linkedIn.startsWith('http') ? lead.contact.linkedIn : `https://${lead.contact.linkedIn}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="hover:underline inline-flex items-center gap-1.5 break-all text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+                      title={lead.contact.linkedIn}
+                    >
+                      <Linkedin className="w-3.5 h-3.5 shrink-0 text-blue-600 dark:text-blue-400" />
+                      <span className="break-all font-mono text-[11.5px]">{lead.contact.linkedIn}</span>
+                      <ExternalLink className="w-3 h-3 shrink-0 opacity-70" />
+                    </a>
+                  ) : (
+                    <span className="text-slate-400">N/A</span>
+                  )}
                 </dd>
               </div>
             </dl>
@@ -868,7 +931,7 @@ export const LeadDetailsPage: React.FC = () => {
                   Uploaded Documents & RFP Attachments
                 </h3>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 dark:bg-purple-950/60 text-[#5B4DB7] dark:text-purple-300">
-                  {lead.attachments?.length || 0} Files
+                  {uniqueAttachments.length} Files
                 </span>
               </div>
               <div className="flex items-center gap-2">
@@ -890,9 +953,9 @@ export const LeadDetailsPage: React.FC = () => {
               </div>
             </div>
 
-            {lead.attachments && lead.attachments.length > 0 ? (
+            {uniqueAttachments.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 pt-1">
-                {lead.attachments.map((att) => (
+                {uniqueAttachments.map((att) => (
                   <div
                     key={att.id}
                     className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 flex items-center justify-between gap-2 text-xs hover:border-purple-300 dark:hover:border-purple-700/60 transition-all shadow-2xs"
@@ -1367,7 +1430,7 @@ export const LeadDetailsPage: React.FC = () => {
                     Uploaded Documents & RFP Attachments
                   </h3>
                   <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-purple-50 dark:bg-purple-950/40 text-[#5B4DB7] dark:text-purple-300 border border-purple-200/60 dark:border-purple-800/60">
-                    {lead.attachments?.length || 0} Files
+                    {uniqueAttachments.length} Files
                   </span>
                 </div>
                 <button
@@ -1380,9 +1443,9 @@ export const LeadDetailsPage: React.FC = () => {
                 </button>
               </div>
 
-              {lead.attachments && lead.attachments.length > 0 ? (
+              {uniqueAttachments.length > 0 ? (
                 <div className="space-y-2">
-                  {lead.attachments.map((att) => (
+                  {uniqueAttachments.map((att) => (
                     <div
                       key={att.id}
                       className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/60 flex items-center justify-between gap-3 text-xs"
@@ -2002,8 +2065,8 @@ export const LeadDetailsPage: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {lead.attachments && lead.attachments.length > 0 ? (
-                lead.attachments.map((att) => (
+              {uniqueAttachments.length > 0 ? (
+                uniqueAttachments.map((att) => (
                   <div
                     key={att.id}
                     className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 flex items-center justify-between text-xs"

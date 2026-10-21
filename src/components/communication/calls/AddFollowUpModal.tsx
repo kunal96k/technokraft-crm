@@ -3,6 +3,21 @@ import { CallRecord } from '../../../types/calls';
 import { X, CalendarPlus, Calendar, Clock, User, CheckCircle2 } from 'lucide-react';
 import { EmployeeSelect } from '../../common/EmployeeSelect';
 
+// Helper to convert 24-hr time (HH:mm) to 12-hr AM/PM format
+function formatTo12Hour(timeStr: string): string {
+  if (!timeStr) return '';
+  if (/am|pm/i.test(timeStr)) return timeStr;
+  const parts = timeStr.split(':');
+  if (parts.length >= 2) {
+    let hours = parseInt(parts[0], 10);
+    const minutes = parts[1].slice(0, 2);
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12 || 12;
+    return `${hours.toString().padStart(2, '0')}:${minutes} ${ampm}`;
+  }
+  return timeStr;
+}
+
 interface AddFollowUpModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -16,8 +31,12 @@ export const AddFollowUpModal: React.FC<AddFollowUpModalProps> = ({
   call,
   onSuccess,
 }) => {
-  const [date, setDate] = useState('2026-09-09');
-  const [time, setTime] = useState('11:00 AM');
+  const [date, setDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    return d.toISOString().split('T')[0];
+  });
+  const [time, setTime] = useState('11:00');
   const [type, setType] = useState<'Call' | 'Email' | 'Meeting' | 'Demo' | 'Document'>('Email');
   const [assignedTo, setAssignedTo] = useState(call.employeeName || '');
   const [notes, setNotes] = useState('');
@@ -32,7 +51,7 @@ export const AddFollowUpModal: React.FC<AddFollowUpModalProps> = ({
       nextAction: 'followup',
       nextFollowUp: {
         date,
-        time,
+        time: formatTo12Hour(time) || time,
         type,
         assignedTo,
       },
@@ -84,24 +103,35 @@ export const AddFollowUpModal: React.FC<AddFollowUpModalProps> = ({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Date</label>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-slate-100 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
-              />
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                Date <span className="text-rose-500">*</span>
+              </label>
+              <div className="relative">
+                <Calendar className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  type="date"
+                  required
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-mono text-slate-900 dark:text-slate-100 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
+                />
+              </div>
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Time</label>
-              <input
-                type="text"
-                value={time}
-                onChange={(e) => setTime(e.target.value)}
-                placeholder="11:00 AM"
-                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-mono text-slate-900 dark:text-slate-100 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
-              />
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                Time <span className="text-rose-500">*</span>
+              </label>
+              <div className="relative">
+                <Clock className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  type="time"
+                  required
+                  value={time}
+                  onChange={(e) => setTime(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-mono text-slate-900 dark:text-slate-100 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
+                />
+              </div>
             </div>
           </div>
 
@@ -140,7 +170,7 @@ export const AddFollowUpModal: React.FC<AddFollowUpModalProps> = ({
               rows={2}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="e.g. Send updated pricing sheet and follow up via phone..."
+              placeholder="Enter follow-up action notes, requirements, and instructions..."
               className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
             />
           </div>

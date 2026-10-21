@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowUpDown, Globe, AlertCircle, Calendar } from 'lucide-react';
+import { ArrowUpDown, Globe, AlertCircle, Calendar, Linkedin } from 'lucide-react';
 import { Lead } from '../../types/leads';
 import { LeadStatusBadge } from './LeadStatusBadge';
 import { LeadPriorityBadge } from './LeadPriorityBadge';
@@ -120,25 +120,60 @@ export const LeadTable: React.FC<LeadTableProps> = ({
                   </span>
                 </td>
 
-                {/* Company Name & Website */}
+                {/* Company Name & Website / LinkedIn */}
                 <td className="py-3 px-3">
                   <div className="font-semibold text-slate-900 dark:text-white text-xs hover:text-[#5B4DB7] dark:hover:text-purple-400 transition-colors leading-tight">
                     {lead.company.name}
                   </div>
-                  {lead.company.website && (
-                    <div className="flex items-center gap-1 text-[11px] text-slate-400 dark:text-slate-500 mt-0.5 font-normal">
-                      <Globe className="w-3 h-3 flex-shrink-0" />
-                      <span className="truncate max-w-[160px]">{lead.company.website}</span>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2 mt-0.5">
+                    {lead.company.website && (
+                      <div className="flex items-center gap-1 text-[11px] text-slate-400 dark:text-slate-500 font-normal">
+                        <Globe className="w-3 h-3 flex-shrink-0" />
+                        <a
+                          href={lead.company.website.startsWith('http') ? lead.company.website : `https://${lead.company.website}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="truncate max-w-[130px] hover:text-[#5B4DB7] dark:hover:text-purple-300 hover:underline"
+                          title={lead.company.website}
+                        >
+                          {lead.company.website}
+                        </a>
+                      </div>
+                    )}
+                    {lead.company.linkedIn && (
+                      <a
+                        href={lead.company.linkedIn.startsWith('http') ? lead.company.linkedIn : `https://${lead.company.linkedIn}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors inline-flex items-center"
+                        title={`LinkedIn: ${lead.company.linkedIn}`}
+                      >
+                        <Linkedin className="w-3 h-3 shrink-0" />
+                      </a>
+                    )}
+                  </div>
                 </td>
 
-                {/* Contact Person & Designation */}
+                {/* Contact Person & Designation / LinkedIn */}
                 <td className="py-3 px-3">
-                  <div className="font-medium text-slate-800 dark:text-slate-200 text-xs leading-tight">
-                    {lead.contact.name}
+                  <div className="flex items-center gap-1.5 font-medium text-slate-800 dark:text-slate-200 text-xs leading-tight">
+                    <span>{lead.contact.name}</span>
+                    {lead.contact.linkedIn && (
+                      <a
+                        href={lead.contact.linkedIn.startsWith('http') ? lead.contact.linkedIn : `https://${lead.contact.linkedIn}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors inline-flex items-center"
+                        title={`LinkedIn: ${lead.contact.linkedIn}`}
+                      >
+                        <Linkedin className="w-3 h-3 shrink-0" />
+                      </a>
+                    )}
                   </div>
-                  <div className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5 truncate max-w-[150px]">
+                  <div className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5 truncate max-w-[150px]" title={lead.contact.designation}>
                     {lead.contact.designation}
                   </div>
                 </td>

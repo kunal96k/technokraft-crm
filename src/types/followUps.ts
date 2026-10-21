@@ -24,6 +24,8 @@ export type FollowUpType =
   | 'Proposal Discussion'
   | 'Negotiation'
   | 'Internal Meeting'
+  | 'Casual Meeting'
+  | 'Vendor / Partner Sync'
   | 'Other';
 
 export type FollowUpOutcome =
@@ -118,6 +120,8 @@ export type MeetingType =
   | 'Proposal Discussion'
   | 'Negotiation'
   | 'Internal Meeting'
+  | 'Casual Meeting'
+  | 'Vendor / Partner Sync'
   | 'Other';
 
 export type MeetingStatus =
@@ -141,8 +145,8 @@ export type MeetingOutcome =
 
 export interface MeetingRecord {
   id: string;
-  leadId: string;
-  leadCode: string;
+  leadId?: string;
+  leadCode?: string;
   companyName: string;
   contactName: string;
   contactDesignation?: string;
@@ -155,6 +159,9 @@ export interface MeetingRecord {
   endTime: string;
   assignedEmployee: string;
   assignedAvatar?: string;
+  assignedEmail?: string;
+  assignedProfilePhoto?: string;
+  createdBy?: string;
   location: MeetingLocation;
   meetingLink?: string;
   description?: string;

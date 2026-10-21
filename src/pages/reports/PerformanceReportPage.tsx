@@ -115,6 +115,13 @@ export const PerformanceReportPage: React.FC = () => {
     avgResponseTimeHours: 2.4,
   };
 
+  const handleResetFilters = () => {
+    setSelectedEmployee('All Employees');
+    setSelectedTeam('All Teams');
+    setSelectedScope('Company Overview');
+    setDateRange('This Month');
+  };
+
   return (
     <div className="space-y-6">
       {/* Toast Notification */}
@@ -144,6 +151,7 @@ export const PerformanceReportPage: React.FC = () => {
         onEmployeeChange={setSelectedEmployee}
         onTeamChange={setSelectedTeam}
         onScopeChange={setSelectedScope}
+        onReset={handleResetFilters}
       />
 
       {isLoading && !performanceData ? (
@@ -176,6 +184,7 @@ export const PerformanceReportPage: React.FC = () => {
               <TargetAchievementCard
                 employees={employees}
                 selectedEmployeeName={selectedEmployee}
+                onSelectEmployeeName={(name) => setSelectedEmployee(name)}
               />
             </div>
             <div>

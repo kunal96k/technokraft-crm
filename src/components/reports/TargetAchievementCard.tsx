@@ -1,31 +1,60 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Target, CheckCircle, AlertTriangle, AlertCircle, Sparkles } from 'lucide-react';
 import { EmployeePerformanceRecord, TargetStatus } from '../../types/reports';
 import { formatCurrencyINR } from '../../utils/currencyFormatters';
 import { EmployeeAvatar } from '../common/EmployeeAvatar';
+import { EmployeeSelect } from '../common/EmployeeSelect';
 
 interface TargetAchievementCardProps {
   employees: EmployeePerformanceRecord[];
   selectedEmployeeName?: string;
+  onSelectEmployeeName?: (name: string) => void;
 }
 
 export const TargetAchievementCard: React.FC<TargetAchievementCardProps> = ({
   employees,
   selectedEmployeeName = 'All Employees',
+  onSelectEmployeeName,
 }) => {
   if (!employees || employees.length === 0) {
     return null;
   }
 
   const activeEmployee =
-    selectedEmployeeName !== 'All Employees'
-      ? employees.find((e) => e.name === selectedEmployeeName) || employees[0]
+    selectedEmployeeName && selectedEmployeeName !== 'All Employees'
+      ? employees.find(
+          (e) =>
+            e.name.toLowerCase() === selectedEmployeeName.toLowerCase() ||
+            String(e.id) === selectedEmployeeName
+        ) || employees[0]
       : employees[0]; // defaults to top rep when All is selected
 
-  const [currentEmpId, setCurrentEmpId] = useState(activeEmployee?.id || '');
+  const [currentEmpName, setCurrentEmpName] = useState<string>(activeEmployee?.name || '');
+
+  // Synchronize when parent changes selected employee
+  useEffect(() => {
+    if (selectedEmployeeName && selectedEmployeeName !== 'All Employees') {
+      const match = employees.find(
+        (e) =>
+          e.name.toLowerCase() === selectedEmployeeName.toLowerCase() ||
+          String(e.id) === selectedEmployeeName
+      );
+      if (match) {
+        setCurrentEmpName(match.name);
+      }
+    } else if (employees.length > 0 && !currentEmpName) {
+      setCurrentEmpName(employees[0].name);
+    }
+  }, [selectedEmployeeName, employees, currentEmpName]);
 
   const displayEmployee =
-    employees.find((e) => e.id === currentEmpId) || activeEmployee;
+    employees.find(
+      (e) =>
+        e.name.toLowerCase() === currentEmpName.toLowerCase() ||
+        String(e.id) === currentEmpName
+    ) ||
+    activeEmployee ||
+    employees[0];
 
   if (!displayEmployee) {
     return null;
@@ -88,20 +117,26 @@ export const TargetAchievementCard: React.FC<TargetAchievementCardProps> = ({
           </p>
         </div>
 
-        {/* Employee Switcher */}
-        <div className="flex items-center gap-2">
-          <label className="text-xs text-slate-500 dark:text-slate-400 font-medium">Rep:</label>
-          <select
-            value={displayEmployee.id}
-            onChange={(e) => setCurrentEmpId(e.target.value)}
-            className="text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1 text-slate-800 dark:text-slate-100 font-semibold focus:outline-none focus:ring-1 focus:ring-[#5B4DB7]"
-          >
-            {employees.map((emp) => (
-              <option key={emp.id} value={emp.id}>
-                {emp.name} ({emp.targetAchievementRate}%)
-              </option>
-            ))}
-          </select>
+        {/* Employee Switcher with Typeahead Debounced Search */}
+        <div className="flex items-center gap-2 min-w-[200px] sm:min-w-[260px] max-w-xs">
+          <label className="text-xs text-slate-500 dark:text-slate-400 font-medium shrink-0">Rep:</label>
+          <div className="flex-1">
+            <EmployeeSelect
+              value={displayEmployee.name}
+              valueField="name"
+              allowEmpty={false}
+              onChange={(e) => {
+                const val = typeof e === 'string' ? e : e?.target?.value;
+                if (!val) return;
+                setCurrentEmpName(val);
+                if (onSelectEmployeeName) {
+                  onSelectEmployeeName(val);
+                }
+              }}
+              placeholder="Search active rep..."
+              className="h-8 w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-xs shadow-2xs font-semibold"
+            />
+          </div>
         </div>
       </div>
 

@@ -242,7 +242,6 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({
                 body: email.body || '',
                 senderName: email.senderName || 'TechnoKraft Services LLP',
                 recipientEmail: email.recipientEmail || 'client@example.com',
-                category: 'B2B Enterprise Communication',
                 companyName: email.companyName,
                 leadCode: email.leadCode,
               }),

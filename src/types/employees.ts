@@ -247,10 +247,30 @@ export interface DailyAttendanceRecord {
   isSuperAdmin?: boolean;
 }
 
+export interface ManagerOption {
+  id?: string;
+  name: string;
+  employeeCode?: string;
+  role?: string;
+  department?: string;
+}
+
+export interface EmployeeFilterOptions {
+  departments: string[];
+  roles: string[];
+  accessRoles: string[];
+  statuses: string[];
+  workStatuses: string[];
+  employmentTypes: string[];
+  managers: ManagerOption[];
+  crmAccessOptions: string[];
+}
+
 export interface EmployeeFiltersState {
   searchQuery: string;
   department: string;
   role: string;
+  accessRole?: string;
   status: string;
   employmentType: string;
   manager: string;

@@ -498,10 +498,7 @@ export const CallDetailsPage: React.FC = () => {
 
       <CreateOpportunityModal
         isOpen={isOpportunityModalOpen}
-        onClose={() => {
-          setIsOpportunityModalOpen(false);
-          setSelectedCallForModal(null);
-        }}
+        onClose={() => setIsOpportunityModalOpen(false)}
         call={call}
         onSuccess={handleOpportunityCreated}
       />

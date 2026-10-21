@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Employee, EmployeeFiltersState } from '../../types/employees';
+import { Employee, EmployeeFiltersState, EmployeeFilterOptions } from '../../types/employees';
 import { EmployeeSummaryCards } from '../../components/employees/EmployeeSummaryCards';
 import { EmployeeToolbar } from '../../components/employees/EmployeeToolbar';
 import { EmployeeFilters } from '../../components/employees/EmployeeFilters';
@@ -33,6 +33,7 @@ const INITIAL_FILTERS: EmployeeFiltersState = {
   searchQuery: '',
   department: '',
   role: '',
+  accessRole: '',
   status: 'active_pool', // Default to active operational force (Active, On Leave - excludes Inactive and Suspended)
   employmentType: '',
   manager: '',
@@ -45,6 +46,7 @@ export const EmployeeListPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [summary, setSummary] = useState<EmployeeSummaryData | null>(null);
+  const [filterOptions, setFilterOptions] = useState<EmployeeFilterOptions | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [filters, setFilters] = useState<EmployeeFiltersState>(INITIAL_FILTERS);
   const [showFilters, setShowFilters] = useState(false);
@@ -81,6 +83,15 @@ export const EmployeeListPage: React.FC = () => {
     }
   }, []);
 
+  const loadFilterOptions = useCallback(async () => {
+    try {
+      const opts = await employeeService.fetchEmployeeFilterOptions();
+      setFilterOptions(opts);
+    } catch (err) {
+      console.error('[EmployeeListPage] Error loading dynamic filter options:', err);
+    }
+  }, []);
+
   const loadEmployees = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -88,6 +99,7 @@ export const EmployeeListPage: React.FC = () => {
         search: filters.searchQuery || undefined,
         department: filters.department || undefined,
         role: filters.role || undefined,
+        accessRole: filters.accessRole || undefined,
         status: filters.status || undefined,
         workStatus: filters.workStatus || undefined,
         crmAccess: filters.crmAccess || undefined,
@@ -121,7 +133,8 @@ export const EmployeeListPage: React.FC = () => {
 
   useEffect(() => {
     loadSummary();
-  }, [loadSummary]);
+    loadFilterOptions();
+  }, [loadSummary, loadFilterOptions]);
 
   useEffect(() => {
     loadEmployees();
@@ -161,6 +174,7 @@ export const EmployeeListPage: React.FC = () => {
     filters.searchQuery ||
     filters.department ||
     filters.role ||
+    filters.accessRole ||
     (filters.status && filters.status !== 'active_pool') ||
     filters.workStatus ||
     filters.crmAccess ||
@@ -522,6 +536,7 @@ export const EmployeeListPage: React.FC = () => {
           [
             filters.department,
             filters.role,
+            filters.accessRole,
             filters.status && filters.status !== 'active_pool' ? filters.status : '',
             filters.workStatus,
             filters.crmAccess,
@@ -544,6 +559,8 @@ export const EmployeeListPage: React.FC = () => {
           filters={filters}
           onChange={handleFilterChange}
           onReset={() => handleFilterChange(INITIAL_FILTERS)}
+          filterOptions={filterOptions}
+          onClose={() => setShowFilters(false)}
         />
       )}
 

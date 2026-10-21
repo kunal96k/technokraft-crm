@@ -18,11 +18,27 @@ import {
   PhoneCall,
 } from 'lucide-react';
 
+// Helper to convert 24-hr time (HH:mm) to 12-hr AM/PM format
+function formatTo12Hour(timeStr: string): string {
+  if (!timeStr) return '';
+  if (/am|pm/i.test(timeStr)) return timeStr;
+  const parts = timeStr.split(':');
+  if (parts.length >= 2) {
+    let hours = parseInt(parts[0], 10);
+    const minutes = parts[1].slice(0, 2);
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12 || 12;
+    return `${hours.toString().padStart(2, '0')}:${minutes} ${ampm}`;
+  }
+  return timeStr;
+}
+
 interface ScheduleCallModalProps {
   isOpen: boolean;
   onClose: () => void;
   onScheduleCall: (call: CallRecord) => void;
   initialLead?: Lead | null;
+  callToEdit?: CallRecord | null;
 }
 
 export const ScheduleCallModal: React.FC<ScheduleCallModalProps> = ({
@@ -30,24 +46,71 @@ export const ScheduleCallModal: React.FC<ScheduleCallModalProps> = ({
   onClose,
   onScheduleCall,
   initialLead,
+  callToEdit,
 }) => {
   const { user: authUser } = useAuth();
   const [selectedLead, setSelectedLead] = useState<Lead | null>(initialLead || null);
   const [contactName, setContactName] = useState(initialLead?.contact?.name || '');
   const [contactPhone, setContactPhone] = useState(initialLead?.contact?.phone || '');
-  const [date, setDate] = useState('2026-09-09');
-  const [time, setTime] = useState('11:00 AM');
-  const [assignedEmployee, setAssignedEmployee] = useState(initialLead?.assignedEmployee?.name || '');
+  const [date, setDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    return d.toISOString().split('T')[0];
+  });
+  const [time, setTime] = useState('11:00');
+  const [assignedEmployee, setAssignedEmployee] = useState(initialLead?.assignedEmployee?.name || authUser?.name || '');
   const [purpose, setPurpose] = useState('Discuss proposal');
   const [reminder, setReminder] = useState('15 minutes before');
   const [notes, setNotes] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
-    if (initialLead) {
+    if (callToEdit) {
+      setContactName(callToEdit.contactName || '');
+      setContactPhone(callToEdit.contactPhone || '');
+      setAssignedEmployee(callToEdit.employeeName || '');
+      setPurpose(callToEdit.purpose || 'Discuss proposal');
+      setReminder(callToEdit.reminder || '15 minutes before');
+      setNotes(callToEdit.notes || '');
+
+      // Parse date to YYYY-MM-DD
+      if (callToEdit.date) {
+        const parsed = new Date(callToEdit.date);
+        if (!isNaN(parsed.getTime())) {
+          setDate(parsed.toISOString().split('T')[0]);
+        }
+      }
+
+      // Parse time to HH:mm (24h)
+      if (callToEdit.time) {
+        const timeMatch = callToEdit.time.match(/(\d+):(\d+)\s*(AM|PM)?/i);
+        if (timeMatch) {
+          let h = parseInt(timeMatch[1], 10);
+          const m = timeMatch[2];
+          const ap = timeMatch[3];
+          if (ap) {
+            if (ap.toUpperCase() === 'PM' && h < 12) h += 12;
+            if (ap.toUpperCase() === 'AM' && h === 12) h = 0;
+          }
+          setTime(`${h.toString().padStart(2, '0')}:${m}`);
+        }
+      }
+
+      setSelectedLead({
+        id: callToEdit.leadId,
+        leadCode: callToEdit.leadCode,
+        company: { name: callToEdit.companyName },
+        contact: {
+          name: callToEdit.contactName,
+          phone: callToEdit.contactPhone,
+          designation: callToEdit.contactDesignation,
+          email: callToEdit.contactEmail,
+        },
+      } as any);
+    } else if (initialLead) {
       applyLead(initialLead);
     }
-  }, [initialLead]);
+  }, [callToEdit, initialLead]);
 
   const applyLead = (lead: Lead | null) => {
     setSelectedLead(lead);
@@ -77,51 +140,53 @@ export const ScheduleCallModal: React.FC<ScheduleCallModalProps> = ({
     }
 
     const scheduledCall: CallRecord = {
-      id: `call-sched-${Date.now()}`,
-      callCode: `CALL-2026-${Math.floor(10000 + Math.random() * 90000)}`,
+      id: callToEdit ? callToEdit.id : `call-sched-${Date.now()}`,
+      callCode: callToEdit ? callToEdit.callCode : `CALL-2026-${Math.floor(10000 + Math.random() * 90000)}`,
       leadId: selectedLead.id,
       leadCode: selectedLead.leadCode,
       companyName: selectedLead.company.name,
-      contactId: `ct-${Date.now()}`,
+      contactId: callToEdit?.contactId || `ct-${Date.now()}`,
       contactName,
-      contactDesignation: selectedLead.contact.designation,
+      contactDesignation: selectedLead.contact.designation || callToEdit?.contactDesignation,
       contactPhone: contactPhone || selectedLead.contact.phone,
-      contactEmail: selectedLead.contact.email,
-      employeeId: (authUser && authUser.name === assignedEmployee) ? authUser.id : (findCachedEmployee(assignedEmployee)?.id ? String(findCachedEmployee(assignedEmployee)?.id) : 'emp-1'),
+      contactEmail: selectedLead.contact.email || callToEdit?.contactEmail,
+      employeeId: (authUser && authUser.name === assignedEmployee) ? authUser.id : (findCachedEmployee(assignedEmployee)?.id ? String(findCachedEmployee(assignedEmployee)?.id) : (callToEdit?.employeeId || 'emp-1')),
       employeeName: assignedEmployee,
       employeeRole:
         (authUser && authUser.name === assignedEmployee ? authUser.role : findCachedEmployee(assignedEmployee)?.role) ||
-        (assignedEmployee === 'Kunal Patil'
-          ? 'Sales Manager'
-          : assignedEmployee === 'Shruti Raundal'
-          ? 'Senior Sales Executive'
-          : 'Business Analyst'),
+        findCachedEmployee(assignedEmployee)?.accessRole ||
+        callToEdit?.employeeRole ||
+        'Sales Executive',
       employeeAvatar:
         (authUser && authUser.name === assignedEmployee && authUser.profilePhoto)
           ? authUser.profilePhoto
           : (findCachedEmployee(assignedEmployee)?.profilePhoto ||
              (authUser && authUser.name === assignedEmployee ? authUser.avatar : findCachedEmployee(assignedEmployee)?.avatar) ||
-             assignedEmployee.split(' ').map((n) => n[0]).join('')),
+             (assignedEmployee ? assignedEmployee.split(' ').map((n) => n[0]).join('') : callToEdit?.employeeAvatar || 'SR')),
       employeeProfilePhoto:
         (authUser && authUser.name === assignedEmployee ? authUser.profilePhoto : undefined) ||
-        findCachedEmployee(assignedEmployee)?.profilePhoto,
+        findCachedEmployee(assignedEmployee)?.profilePhoto ||
+        callToEdit?.employeeProfilePhoto,
       employeeEmail:
         (authUser && authUser.name === assignedEmployee ? authUser.email : undefined) ||
-        findCachedEmployee(assignedEmployee)?.email,
-      type: 'outbound',
+        findCachedEmployee(assignedEmployee)?.email ||
+        callToEdit?.employeeEmail,
+      type: callToEdit?.type || 'outbound',
       status: 'scheduled',
-      date: '09 Sep 2026',
-      time,
-      duration: '0m 00s',
-      durationSeconds: 0,
+      date: date
+        ? new Date(date + 'T00:00:00').toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+        : new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+      time: formatTo12Hour(time) || time,
+      duration: callToEdit?.duration || '0m 00s',
+      durationSeconds: callToEdit?.durationSeconds || 0,
       purpose,
       reminder,
       notes: notes || `Scheduled discovery call to ${purpose.toLowerCase()}.`,
-      service: selectedLead.service,
-      leadStatus: selectedLead.status,
-      leadScore: selectedLead.score,
-      recordingAvailable: false,
-      createdAt: new Date().toISOString(),
+      service: selectedLead.service || callToEdit?.service,
+      leadStatus: selectedLead.status || callToEdit?.leadStatus,
+      leadScore: selectedLead.score || callToEdit?.leadScore,
+      recordingAvailable: callToEdit?.recordingAvailable ?? false,
+      createdAt: callToEdit?.createdAt || new Date().toISOString(),
     };
 
     onScheduleCall(scheduledCall);
@@ -143,8 +208,12 @@ export const ScheduleCallModal: React.FC<ScheduleCallModalProps> = ({
               <PhoneCall className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="font-bold text-slate-900 dark:text-white text-base">Schedule Upcoming Call</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Plan a future outbound or client check-in call</p>
+              <h3 className="font-bold text-slate-900 dark:text-white text-base">
+                {callToEdit ? 'Edit Scheduled Call' : 'Schedule Upcoming Call'}
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                {callToEdit ? 'Update scheduled date, time, representative, or agenda' : 'Plan a future outbound or client check-in call'}
+              </p>
             </div>
           </div>
           <button
@@ -183,49 +252,66 @@ export const ScheduleCallModal: React.FC<ScheduleCallModalProps> = ({
               <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Contact Person <span className="text-rose-500">*</span>
               </label>
-              <input
-                type="text"
-                required
-                value={contactName}
-                onChange={(e) => setContactName(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-slate-100 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
-                placeholder="Nikita Patil"
-              />
+              <div className="relative">
+                <User className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  type="text"
+                  required
+                  value={contactName}
+                  onChange={(e) => setContactName(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-slate-100 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
+                  placeholder="Enter client contact name"
+                />
+              </div>
             </div>
 
             <div>
               <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Phone</label>
-              <input
-                type="text"
-                value={contactPhone}
-                onChange={(e) => setContactPhone(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-mono text-slate-900 dark:text-slate-100 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
-                placeholder="+91 98230 45612"
-              />
+              <div className="relative">
+                <PhoneCall className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  type="text"
+                  value={contactPhone}
+                  onChange={(e) => setContactPhone(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-mono text-slate-900 dark:text-slate-100 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
+                  placeholder="Enter client phone number"
+                />
+              </div>
             </div>
           </div>
 
           {/* Date & Time */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Date</label>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-mono text-slate-900 dark:text-slate-100 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
-              />
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                Call Date <span className="text-rose-500">*</span>
+              </label>
+              <div className="relative">
+                <Calendar className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  type="date"
+                  required
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-mono text-slate-900 dark:text-slate-100 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
+                />
+              </div>
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Time</label>
-              <input
-                type="text"
-                value={time}
-                onChange={(e) => setTime(e.target.value)}
-                placeholder="11:00 AM"
-                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-mono text-slate-900 dark:text-slate-100 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
-              />
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                Call Time <span className="text-rose-500">*</span>
+              </label>
+              <div className="relative">
+                <Clock className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  type="time"
+                  required
+                  value={time}
+                  onChange={(e) => setTime(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-mono text-slate-900 dark:text-slate-100 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
+                />
+              </div>
             </div>
           </div>
 
@@ -247,7 +333,7 @@ export const ScheduleCallModal: React.FC<ScheduleCallModalProps> = ({
                 type="text"
                 value={purpose}
                 onChange={(e) => setPurpose(e.target.value)}
-                placeholder="e.g. Discuss proposal"
+                placeholder="Enter call purpose / objective"
                 className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-slate-100 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
               />
             </div>
@@ -278,7 +364,7 @@ export const ScheduleCallModal: React.FC<ScheduleCallModalProps> = ({
               rows={2}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="e.g. Review commercial terms, milestone breakdown, and timeline..."
+              placeholder="Enter scheduled agenda, requirements, and talking points..."
               className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
             />
           </div>
@@ -299,7 +385,7 @@ export const ScheduleCallModal: React.FC<ScheduleCallModalProps> = ({
             className="px-6 py-2.5 bg-[#5B4DB7] hover:bg-[#4E41A2] text-white text-xs rounded-xl font-semibold shadow-md min-h-[42px] flex items-center justify-center gap-2 cursor-pointer transition-colors"
           >
             <CheckCircle2 className="w-4 h-4" />
-            <span>Schedule Call</span>
+            <span>{callToEdit ? 'Save Changes' : 'Schedule Call'}</span>
           </button>
         </div>
       </div>

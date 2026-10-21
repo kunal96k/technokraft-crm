@@ -399,9 +399,9 @@ export const OpportunityCard: React.FC<OpportunityCardProps> = ({
       {/* Card Footer: Expected Close + Assigned Owner */}
       <div>
         <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 pt-2 border-t border-slate-100 dark:border-slate-800">
-          <div className="flex items-center gap-1.5" title={`Expected Close: ${opportunity.expectedCloseDate}`}>
+          <div className="flex items-center gap-1.5" title={`Expected Close: ${opportunity.expectedCloseDate || 'In 30 days'}`}>
             <Calendar className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
-            <span className="truncate">Close: <strong className="text-slate-700 dark:text-slate-300 font-semibold">{opportunity.expectedCloseDate}</strong></span>
+            <span className="truncate">Close: <strong className="text-slate-700 dark:text-slate-300 font-semibold">{opportunity.expectedCloseDate || 'In 30 days'}</strong></span>
           </div>
 
           <div className="flex items-center gap-1.5" title={teamTooltip}>

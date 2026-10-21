@@ -17,6 +17,8 @@ interface CallCardProps {
   onScheduleMeeting: (call: CallRecord) => void;
   onOpenLead: (leadId: string) => void;
   onCreateOpportunity?: (call: CallRecord) => void;
+  onDelete?: (call: CallRecord) => void;
+  onComplete?: (call: CallRecord) => void;
 }
 
 export const CallCard: React.FC<CallCardProps> = ({
@@ -29,6 +31,8 @@ export const CallCard: React.FC<CallCardProps> = ({
   onScheduleMeeting,
   onOpenLead,
   onCreateOpportunity,
+  onDelete,
+  onComplete,
 }) => {
   const isOpportunityEligible =
     call.result === 'Requirement Received' || call.result === 'Proposal Requested';
@@ -66,6 +70,8 @@ export const CallCard: React.FC<CallCardProps> = ({
             onScheduleMeeting={onScheduleMeeting}
             onOpenLead={onOpenLead}
             onCreateOpportunity={onCreateOpportunity}
+            onDelete={onDelete}
+            onComplete={onComplete}
           />
         </div>
       </div>

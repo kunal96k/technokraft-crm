@@ -114,37 +114,49 @@ export const EmployeeActivityChart: React.FC<EmployeeActivityChartProps> = ({
 
   return (
     <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 sm:p-5 shadow-2xs space-y-4">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-slate-100 dark:border-slate-800">
-        <div>
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-lg bg-purple-50 dark:bg-purple-950/40 text-[#5B4DB7] dark:text-purple-300 flex items-center justify-center">
-              <Activity className="w-3.5 h-3.5" />
+      {/* Card Header & Filter Tabs */}
+      <div className="flex flex-col gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-lg bg-purple-50 dark:bg-purple-950/40 text-[#5B4DB7] dark:text-purple-300 flex items-center justify-center shrink-0">
+                <Activity className="w-3.5 h-3.5" />
+              </div>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                Daily Activity Velocity Trend
+              </h3>
             </div>
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-              Daily Activity Velocity Trend
-            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              Operational activity distribution over the last 7 days for{' '}
+              <span className="font-semibold text-slate-700 dark:text-slate-200">{displayName}</span>
+            </p>
           </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Operational activity distribution over the last 7 days for {displayName}
-          </p>
         </div>
 
-        {/* Filter Pills */}
-        <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg text-xs overflow-x-auto">
-          {filterOptions.map((opt) => (
-            <button
-              key={opt}
-              type="button"
-              onClick={() => setFilter(opt)}
-              className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors cursor-pointer whitespace-nowrap ${
-                filter === opt
-                  ? 'bg-white dark:bg-slate-900 text-[#5B4DB7] dark:text-purple-300 shadow-2xs'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-              }`}
-            >
-              {opt}
-            </button>
-          ))}
+        {/* Filter Pills - Responsive wrap without horizontal scrollbar */}
+        <div className="flex flex-wrap items-center gap-1.5 p-1 bg-slate-100/90 dark:bg-slate-800/90 rounded-xl">
+          {filterOptions.map((opt) => {
+            const isSelected = filter === opt;
+            const barColor = getBarColor(opt);
+            return (
+              <button
+                key={opt}
+                type="button"
+                onClick={() => setFilter(opt)}
+                className={`flex-1 sm:flex-initial min-w-max px-2.5 py-1.5 rounded-lg text-xs transition-all duration-150 cursor-pointer inline-flex items-center justify-center gap-1.5 whitespace-nowrap ${
+                  isSelected
+                    ? 'bg-white dark:bg-slate-900 text-[#5B4DB7] dark:text-purple-300 font-semibold shadow-xs ring-1 ring-slate-200/80 dark:ring-slate-700/80'
+                    : 'text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-700/60'
+                }`}
+              >
+                <span
+                  className="w-1.5 h-1.5 rounded-full shrink-0"
+                  style={{ backgroundColor: barColor }}
+                />
+                <span>{opt}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 

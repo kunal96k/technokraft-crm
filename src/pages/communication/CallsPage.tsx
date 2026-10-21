@@ -255,15 +255,23 @@ export const CallsPage: React.FC = () => {
     }
   };
 
-  // Add scheduled call to database
-  const handleSaveScheduledCall = async (newCall: CallRecord) => {
+  // Add or update scheduled call in database
+  const handleSaveScheduledCall = async (callData: CallRecord) => {
     try {
-      const saved = await scheduleCallApi(newCall);
-      setCalls((prev) => [saved, ...prev]);
-      showToast(`Call with ${saved.companyName} scheduled for ${saved.date}!`);
+      if (selectedCallForModal && selectedCallForModal.id === callData.id) {
+        const saved = await updateCallApi(callData.id, callData);
+        setCalls((prev) => prev.map((c) => (c.id === saved.id ? saved : c)));
+        showToast(`Call record for ${saved.companyName} updated successfully!`);
+      } else {
+        const saved = await scheduleCallApi(callData);
+        setCalls((prev) => [saved, ...prev]);
+        showToast(`Call with ${saved.companyName} scheduled for ${saved.date}!`);
+      }
+      setSelectedCallForModal(null);
+      setIsScheduleModalOpen(false);
     } catch (err) {
-      console.error('Failed to schedule call:', err);
-      showToast('Error scheduling call on server.');
+      console.error('Failed to save scheduled call:', err);
+      showToast('Error saving call on server.');
     }
   };
 
@@ -545,6 +553,8 @@ export const CallsPage: React.FC = () => {
                         onScheduleMeeting={handleScheduleMeeting}
                         onOpenLead={handleOpenLead}
                         onCreateOpportunity={handleTriggerOpportunity}
+                        onDelete={handleDeleteCall}
+                        onComplete={handleCompleteCall}
                       />
                     ))}
                   </div>
@@ -644,6 +654,7 @@ export const CallsPage: React.FC = () => {
       {/* Schedule Call Modal */}
       <ScheduleCallModal
         isOpen={isScheduleModalOpen}
+        callToEdit={selectedCallForModal}
         onClose={() => {
           setIsScheduleModalOpen(false);
           setSelectedCallForModal(null);
@@ -672,9 +683,12 @@ export const CallsPage: React.FC = () => {
             setIsOpportunityModalOpen(false);
             setSelectedCallForModal(null);
           }}
-        call={selectedCallForModal}
-      />
-    )}
+          call={selectedCallForModal}
+          onSuccess={(oppTitle) => {
+            showToast(`Opportunity "${oppTitle}" created successfully!`);
+          }}
+        />
+      )}
 
     {/* Bulk Assign Modal with Active-Only Typeahead Debounced Search */}
     {isBulkAssignModalOpen && (

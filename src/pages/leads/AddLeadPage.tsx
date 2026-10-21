@@ -602,11 +602,15 @@ export const AddLeadPage: React.FC = () => {
       initialFollowUpDate: followUpDate,
       initialFollowUpTime: followUpTime,
       initialFollowUpNotes: 'Scheduled discovery discussion',
-      attachments: attachments.map((a) => ({
-        name: a.name,
-        size: a.size,
-        type: a.type,
-      })),
+      // Only include already-persisted attachments in the JSON payload (those without a pending raw .file).
+      // Any new raw files with .file are physically uploaded right below via uploadAttachment to prevent duplicate records!
+      attachments: attachments
+        .filter((a) => !a.file)
+        .map((a) => ({
+          name: a.name,
+          size: a.size,
+          type: a.type,
+        })),
     };
 
     setErrorMessage(null);

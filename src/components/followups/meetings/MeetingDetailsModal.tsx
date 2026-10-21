@@ -71,13 +71,22 @@ export const MeetingDetailsModal: React.FC<MeetingDetailsModalProps> = ({
             <h3 className="text-lg font-bold text-slate-900 dark:text-white">
               {meeting.title}
             </h3>
-            <Link
-              to={`/leads/${meeting.leadId}`}
-              className="text-[#5B4DB7] dark:text-purple-400 font-semibold flex items-center gap-1 mt-0.5"
-            >
-              <span>{meeting.companyName}</span>
-              <ExternalLink className="w-3 h-3 text-[#5B4DB7]/60 dark:text-purple-400" />
-            </Link>
+            {meeting.leadId ? (
+              <Link
+                to={`/leads/${meeting.leadId}`}
+                className="text-[#5B4DB7] dark:text-purple-400 font-semibold flex items-center gap-1 mt-0.5"
+              >
+                <span>{meeting.companyName}</span>
+                <ExternalLink className="w-3 h-3 text-[#5B4DB7]/60 dark:text-purple-400" />
+              </Link>
+            ) : (
+              <div className="text-slate-700 dark:text-slate-300 font-medium flex items-center gap-1.5 mt-0.5">
+                <span>{meeting.companyName || 'Internal / Casual Meeting'}</span>
+                <span className="inline-flex items-center text-[10px] font-semibold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/60 px-1.5 py-0.2 rounded">
+                  Internal / Casual
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Time & Location Banner */}
@@ -133,10 +142,10 @@ export const MeetingDetailsModal: React.FC<MeetingDetailsModalProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="p-3 bg-white dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 rounded-xl space-y-1">
               <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block">
-                Customer Attendee
+                {meeting.leadId ? 'Customer Attendee' : 'Attendee / Participant'}
               </span>
-              <div className="font-bold text-slate-900 dark:text-white">{meeting.contactName}</div>
-              <div className="text-slate-500 dark:text-slate-400">{meeting.contactDesignation || 'Contact'}</div>
+              <div className="font-bold text-slate-900 dark:text-white">{meeting.contactName || 'Internal Team'}</div>
+              <div className="text-slate-500 dark:text-slate-400">{meeting.contactDesignation || 'Participant'}</div>
               {meeting.contactPhone && (
                 <div className="font-mono text-[11px] text-slate-400 dark:text-slate-500">{meeting.contactPhone}</div>
               )}

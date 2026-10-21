@@ -20,6 +20,7 @@ import {
   FileCode,
   Loader2,
   UploadCloud,
+  Linkedin,
 } from 'lucide-react';
 import { Lead } from '../../types/leads';
 import { LeadStatusBadge } from './LeadStatusBadge';
@@ -76,6 +77,18 @@ export const ViewLeadModal: React.FC<ViewLeadModalProps> = ({
   if (!isOpen || !leadData) return null;
 
   const currentLead = leadData;
+
+  // Deduplicate attachments to prevent rendering duplicate files
+  const uniqueAttachments = React.useMemo(() => {
+    if (!currentLead.attachments || !Array.isArray(currentLead.attachments)) return [];
+    const seen = new Set<string>();
+    return currentLead.attachments.filter((att) => {
+      const key = `${(att.name || '').trim().toLowerCase()}_${(att.size || '').trim()}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, [currentLead.attachments]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
@@ -239,18 +252,36 @@ export const ViewLeadModal: React.FC<ViewLeadModalProps> = ({
                   </span>
                 </p>
                 {currentLead.company.website && (
-                  <p className="flex items-center justify-between">
-                    <span className="text-slate-400 dark:text-slate-500">Website:</span>
+                  <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+                    <span className="text-slate-400 dark:text-slate-500 text-[11px] block mb-1">Company Website</span>
                     <a
                       href={currentLead.company.website.startsWith('http') ? currentLead.company.website : `https://${currentLead.company.website}`}
                       target="_blank"
                       rel="noreferrer"
-                      className="font-medium text-[#5B4DB7] dark:text-purple-400 hover:underline flex items-center gap-1"
+                      className="font-medium text-[#5B4DB7] dark:text-purple-400 hover:underline flex items-start gap-1.5 break-all text-xs bg-purple-50/50 dark:bg-purple-950/30 p-2 rounded-lg border border-purple-100 dark:border-purple-900/40"
+                      title={currentLead.company.website}
                     >
-                      <Globe className="w-3 h-3" />
-                      <span className="truncate max-w-[150px]">{currentLead.company.website}</span>
+                      <Globe className="w-3.5 h-3.5 shrink-0 mt-0.5 text-[#5B4DB7] dark:text-purple-400" />
+                      <span className="break-all font-mono text-[11px] flex-1">{currentLead.company.website}</span>
+                      <ExternalLink className="w-3 h-3 shrink-0 mt-0.5 opacity-70" />
                     </a>
-                  </p>
+                  </div>
+                )}
+                {currentLead.company.linkedIn && (
+                  <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+                    <span className="text-slate-400 dark:text-slate-500 text-[11px] block mb-1">Company LinkedIn</span>
+                    <a
+                      href={currentLead.company.linkedIn.startsWith('http') ? currentLead.company.linkedIn : `https://${currentLead.company.linkedIn}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="font-medium text-blue-600 dark:text-blue-400 hover:underline flex items-start gap-1.5 break-all text-xs bg-blue-50/50 dark:bg-blue-950/30 p-2 rounded-lg border border-blue-100 dark:border-blue-900/40 hover:text-blue-700 dark:hover:text-blue-300"
+                      title={currentLead.company.linkedIn}
+                    >
+                      <Linkedin className="w-3.5 h-3.5 shrink-0 mt-0.5 text-blue-600 dark:text-blue-400" />
+                      <span className="break-all font-mono text-[11px] flex-1">{currentLead.company.linkedIn}</span>
+                      <ExternalLink className="w-3 h-3 shrink-0 mt-0.5 opacity-70" />
+                    </a>
+                  </div>
                 )}
               </div>
             </div>
@@ -270,9 +301,9 @@ export const ViewLeadModal: React.FC<ViewLeadModalProps> = ({
                   <span className="text-slate-400 dark:text-slate-500">Designation:</span>
                   <span className="font-medium">{currentLead.contact.designation || 'Key Decision Maker'}</span>
                 </p>
-                <p className="flex items-center justify-between">
-                  <span className="text-slate-400 dark:text-slate-500">Email:</span>
-                  <a href={`mailto:${currentLead.contact.email}`} className="font-medium text-[#5B4DB7] dark:text-purple-400 hover:underline">
+                <p className="flex items-center justify-between gap-2">
+                  <span className="text-slate-400 dark:text-slate-500 shrink-0">Email:</span>
+                  <a href={`mailto:${currentLead.contact.email}`} className="font-medium text-[#5B4DB7] dark:text-purple-400 hover:underline break-all text-right" title={currentLead.contact.email}>
                     {currentLead.contact.email}
                   </a>
                 </p>
@@ -282,6 +313,28 @@ export const ViewLeadModal: React.FC<ViewLeadModalProps> = ({
                     {currentLead.contact.phone}
                   </a>
                 </p>
+                {currentLead.contact.alternatePhone && (
+                  <p className="flex items-center justify-between">
+                    <span className="text-slate-400 dark:text-slate-500">Alt Phone:</span>
+                    <span className="font-medium font-mono">{currentLead.contact.alternatePhone}</span>
+                  </p>
+                )}
+                {currentLead.contact.linkedIn && (
+                  <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+                    <span className="text-slate-400 dark:text-slate-500 text-[11px] block mb-1">Contact LinkedIn Profile</span>
+                    <a
+                      href={currentLead.contact.linkedIn.startsWith('http') ? currentLead.contact.linkedIn : `https://${currentLead.contact.linkedIn}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="font-medium text-blue-600 dark:text-blue-400 hover:underline flex items-start gap-1.5 break-all text-xs bg-blue-50/50 dark:bg-blue-950/30 p-2 rounded-lg border border-blue-100 dark:border-blue-900/40 hover:text-blue-700 dark:hover:text-blue-300"
+                      title={currentLead.contact.linkedIn}
+                    >
+                      <Linkedin className="w-3.5 h-3.5 shrink-0 mt-0.5 text-blue-600 dark:text-blue-400" />
+                      <span className="break-all font-mono text-[11px] flex-1">{currentLead.contact.linkedIn}</span>
+                      <ExternalLink className="w-3 h-3 shrink-0 mt-0.5 opacity-70" />
+                    </a>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -297,7 +350,7 @@ export const ViewLeadModal: React.FC<ViewLeadModalProps> = ({
               </div>
               <div className="flex items-center gap-2">
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 dark:bg-purple-950/60 text-[#5B4DB7] dark:text-purple-300">
-                  {currentLead.attachments?.length || 0} Files
+                  {uniqueAttachments.length} Files
                 </span>
                 <input
                   ref={fileInputRef}
@@ -329,9 +382,9 @@ export const ViewLeadModal: React.FC<ViewLeadModalProps> = ({
               </div>
             </div>
 
-            {currentLead.attachments && currentLead.attachments.length > 0 ? (
+            {uniqueAttachments.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                {currentLead.attachments.map((att) => {
+                {uniqueAttachments.map((att) => {
                   const isCurProcessing = isProcessing && activeAttId === String(att.id);
                   return (
                     <div

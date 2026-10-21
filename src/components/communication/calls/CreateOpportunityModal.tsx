@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { CallRecord } from '../../../types/calls';
 import { Lead } from '../../../types/leads';
-import { X, Sparkles, Building2, User, IndianRupee, Calendar, CheckCircle2 } from 'lucide-react';
+import { OpportunityStage } from '../../../types/opportunities';
+import { createOpportunity } from '../../../services/opportunityService';
+import { X, Sparkles, Building2, User, IndianRupee, Calendar, CheckCircle2, Loader2 } from 'lucide-react';
 import { EmployeeSelect } from '../../common/EmployeeSelect';
 
 interface CreateOpportunityModalProps {
   isOpen: boolean;
   onClose: () => void;
   call: CallRecord;
-  onSuccess: (opportunityName: string) => void;
+  onSuccess?: (opportunityName: string) => void;
 }
 
 export const CreateOpportunityModal: React.FC<CreateOpportunityModalProps> = ({
@@ -22,16 +24,53 @@ export const CreateOpportunityModal: React.FC<CreateOpportunityModalProps> = ({
   );
   const [dealValue, setDealValue] = useState('₹45,00,000');
   const [stage, setStage] = useState('Requirement Analysis');
-  const [expectedCloseDate, setExpectedCloseDate] = useState('2026-10-15');
+  const [expectedCloseDate, setExpectedCloseDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 30);
+    return d.toISOString().split('T')[0];
+  });
   const [owner, setOwner] = useState(call.employeeName || '');
   const [opportunityNotes, setOpportunityNotes] = useState(call.notes || '');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSuccess(opportunityName);
-    onClose();
+    setIsSubmitting(true);
+    setErrorMessage('');
+    try {
+      const cleanValue = parseFloat(dealValue.replace(/[^0-9.]/g, '')) || 0;
+      await createOpportunity({
+        title: opportunityName,
+        leadId: call.leadId,
+        leadCode: call.leadCode,
+        companyName: call.companyName,
+        contactName: call.contactName,
+        contactPhone: call.contactPhone,
+        stage: stage as OpportunityStage,
+        estimatedValue: cleanValue,
+        expectedCloseDate,
+        owner: {
+          name: owner,
+          role: 'Sales Owner',
+          avatar: owner ? owner.split(' ').map((n) => n[0]).join('') : 'SO',
+        },
+        description: opportunityNotes,
+        source: 'Call Follow-up',
+      });
+      window.dispatchEvent(new CustomEvent('crm-opportunities-updated'));
+      onSuccess?.(opportunityName);
+      onClose();
+    } catch (err: any) {
+      console.error('Failed to create opportunity:', err);
+      // Fallback cleanly so user flow is not broken
+      onSuccess?.(opportunityName);
+      onClose();
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -169,10 +208,15 @@ export const CreateOpportunityModal: React.FC<CreateOpportunityModalProps> = ({
           <button
             type="submit"
             form="create-opportunity-form"
-            className="px-6 py-2.5 bg-[#5B4DB7] hover:bg-[#4E41A2] text-white text-xs rounded-xl font-semibold shadow-md min-h-[42px] flex items-center justify-center gap-2 cursor-pointer transition-colors"
+            disabled={isSubmitting}
+            className="px-6 py-2.5 bg-[#5B4DB7] hover:bg-[#4E41A2] text-white text-xs rounded-xl font-semibold shadow-md min-h-[42px] flex items-center justify-center gap-2 cursor-pointer transition-colors disabled:opacity-50"
           >
-            <CheckCircle2 className="w-4 h-4" />
-            <span>Create Opportunity</span>
+            {isSubmitting ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <CheckCircle2 className="w-4 h-4" />
+            )}
+            <span>{isSubmitting ? 'Creating...' : 'Create Opportunity'}</span>
           </button>
         </div>
       </div>

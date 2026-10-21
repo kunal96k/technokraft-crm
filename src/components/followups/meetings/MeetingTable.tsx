@@ -137,16 +137,27 @@ export const MeetingTable: React.FC<MeetingTableProps> = ({
 
                 {/* Company & Title */}
                 <td className="py-3 px-3">
-                  <div className="font-mono text-[10px] text-slate-400 dark:text-slate-500">
-                    {item.leadCode}
-                  </div>
-                  <Link
-                    to={`/leads/${item.leadId}`}
-                    className="font-bold text-slate-900 dark:text-white hover:text-[#5B4DB7] dark:hover:text-purple-400 flex items-center gap-1"
-                  >
-                    <span className="truncate">{item.companyName}</span>
-                    <ExternalLink className="w-2.5 h-2.5 text-slate-400" />
-                  </Link>
+                  {item.leadCode && (
+                    <div className="font-mono text-[10px] text-slate-400 dark:text-slate-500">
+                      {item.leadCode}
+                    </div>
+                  )}
+                  {item.leadId ? (
+                    <Link
+                      to={`/leads/${item.leadId}`}
+                      className="font-bold text-slate-900 dark:text-white hover:text-[#5B4DB7] dark:hover:text-purple-400 flex items-center gap-1"
+                    >
+                      <span className="truncate">{item.companyName}</span>
+                      <ExternalLink className="w-2.5 h-2.5 text-slate-400" />
+                    </Link>
+                  ) : (
+                    <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                      <span className="truncate">{item.companyName || 'Internal / Casual'}</span>
+                      <span className="inline-flex items-center text-[9px] font-semibold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/60 px-1.5 py-0.2 rounded">
+                        Internal
+                      </span>
+                    </div>
+                  )}
                   <span className="text-[11px] text-slate-600 dark:text-slate-300 truncate block mt-0.5">
                     {item.title}
                   </span>

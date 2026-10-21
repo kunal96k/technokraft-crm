@@ -673,7 +673,6 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
                       body: body || 'No body content entered yet.',
                       senderName: 'TechnoKraft Consulting Team',
                       recipientEmail: recipientEmail || 'client@example.com',
-                      category: 'B2B Enterprise Communication',
                       companyName: selectedLead?.company?.name,
                       leadCode: selectedLead?.leadCode,
                     }),

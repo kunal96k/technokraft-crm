@@ -19,6 +19,7 @@ import { MeetingDetailsModal } from '../../components/followups/meetings/Meeting
 import { useAuth } from '../../context/AuthContext';
 import { useActiveEmployees } from '../../hooks/useActiveEmployees';
 import * as followUpService from '../../services/followUpService';
+import { createNotification, notifyNotificationStateChanged } from '../../services/notificationService';
 import {
   MeetingRecord,
   MeetingStatus,
@@ -144,12 +145,30 @@ export const MeetingsPage: React.FC = () => {
       status: 'PENDING',
     });
 
+    // Create in-app notification so it appears immediately in bell dropdown & notifications page
+    try {
+      const companyOrEntity = newMeetingData.companyName || 'Internal / Casual Meeting';
+      const timeInfo = `${newMeetingData.date} at ${newMeetingData.startTime}`;
+      await createNotification({
+        title: `Meeting Scheduled: ${newMeetingData.title}`,
+        description: `${companyOrEntity} • ${timeInfo} (${newMeetingData.assignedEmployee || currentUserName})`,
+        type: 'followup',
+        linkUrl: newMeetingData.leadId ? `/leads/${newMeetingData.leadId}` : '/follow-ups/meetings',
+        leadId: newMeetingData.leadId ? Number(newMeetingData.leadId) : undefined,
+        leadCode: newMeetingData.leadCode,
+        priority: 'NORMAL',
+      });
+    } catch (notifErr) {
+      console.warn('[MeetingsPage] Notification creation error:', notifErr);
+    }
+
     if (created) {
       showToast(`Scheduled meeting: "${newMeetingData.title}".`);
     } else {
       showToast('Meeting scheduled successfully.');
     }
     await loadMeetings();
+    notifyNotificationStateChanged();
   };
 
   const handleCompleteMeeting = async (
@@ -164,10 +183,24 @@ export const MeetingsPage: React.FC = () => {
       notes?: string;
     }
   ) => {
+    const current = meetings.find((m) => m.id === meetingId);
     await followUpService.completeFollowUp(meetingId, outcomeNotes, outcome);
 
+    try {
+      await createNotification({
+        title: `Meeting Completed: ${current?.title || 'Meeting'}`,
+        description: `${current?.companyName || 'Internal Meeting'} • Outcome: ${outcome}${outcomeNotes ? ` - ${outcomeNotes}` : ''}`,
+        type: 'followup',
+        linkUrl: current?.leadId ? `/leads/${current.leadId}` : '/follow-ups/meetings',
+        leadId: current?.leadId ? Number(current.leadId) : undefined,
+        leadCode: current?.leadCode,
+        priority: 'NORMAL',
+      });
+    } catch (e) {
+      console.warn('[MeetingsPage] Complete notification notice:', e);
+    }
+
     if (nextFollowUp) {
-      const current = meetings.find((m) => m.id === meetingId);
       await followUpService.createFollowUp({
         type: nextFollowUp.type,
         purpose: nextFollowUp.purpose,
@@ -192,18 +225,35 @@ export const MeetingsPage: React.FC = () => {
       showToast('Meeting outcome recorded.');
     }
     await loadMeetings();
+    notifyNotificationStateChanged();
   };
 
   const handleCancelMeeting = async (meetingId: string) => {
+    const current = meetings.find((m) => m.id === meetingId);
     await followUpService.cancelFollowUp(meetingId);
+
+    try {
+      await createNotification({
+        title: `Meeting Cancelled: ${current?.title || 'Meeting'}`,
+        description: `${current?.companyName || 'Meeting'} scheduled for ${current?.date || 'today'} was cancelled.`,
+        type: 'followup',
+        linkUrl: '/follow-ups/meetings',
+        priority: 'LOW',
+      });
+    } catch (e) {
+      console.warn('[MeetingsPage] Cancel notification notice:', e);
+    }
+
     showToast('Meeting cancelled.');
     await loadMeetings();
+    notifyNotificationStateChanged();
   };
 
   const handleDeleteMeeting = async (meetingId: string) => {
     await followUpService.deleteFollowUp(meetingId);
     showToast('Meeting record deleted permanently.');
     await loadMeetings();
+    notifyNotificationStateChanged();
   };
 
   // Metrics

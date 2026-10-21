@@ -1,5 +1,6 @@
-import { Employee, EmployeeFiltersState, DailyAttendanceRecord } from '../types/employees';
+import { Employee, EmployeeFiltersState, DailyAttendanceRecord, EmployeeFilterOptions } from '../types/employees';
 import { authFetch } from './apiClient';
+import { getAllDepartments, getAllRoles } from '../utils/customEmployeeFields';
 
 const API_BASE_URL = (import.meta.env?.VITE_API_BASE_URL as string)?.replace(/\/leads$/, '') || '';
 const EMPLOYEES_API_URL = `${API_BASE_URL}/api/employees`;
@@ -8,6 +9,7 @@ export interface EmployeeQueryParams {
   search?: string;
   department?: string;
   role?: string;
+  accessRole?: string;
   status?: string;
   workStatus?: string;
   crmAccess?: string;
@@ -40,6 +42,46 @@ export interface EmployeeSummaryData {
 }
 
 /**
+ * Fetch dynamic filter options from backend
+ */
+export async function fetchEmployeeFilterOptions(): Promise<EmployeeFilterOptions> {
+  try {
+    const res = await authFetch(`${EMPLOYEES_API_URL}/filter-options`, {
+      method: 'GET',
+      headers: { Accept: 'application/json' },
+    });
+
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+    }
+
+    const data: EmployeeFilterOptions = await res.json();
+    return {
+      departments: getAllDepartments(data.departments || []),
+      roles: getAllRoles(data.roles || []),
+      accessRoles: data.accessRoles?.length ? data.accessRoles : ['Super Admin', 'Admin', 'Manager', 'Sales Executive', 'Business Analyst', 'Employee'],
+      statuses: data.statuses?.length ? data.statuses : ['Active', 'On Leave', 'Inactive', 'Suspended'],
+      workStatuses: data.workStatuses?.length ? data.workStatuses : ['Working', 'Break', 'Logged Out', 'Offline', 'On Leave'],
+      employmentTypes: data.employmentTypes?.length ? data.employmentTypes : ['Full Time', 'Part Time', 'Contract', 'Intern'],
+      managers: data.managers || [],
+      crmAccessOptions: data.crmAccessOptions?.length ? data.crmAccessOptions : ['Enabled', 'Disabled'],
+    };
+  } catch (error) {
+    console.warn('[EmployeeService] Failed to fetch dynamic filter options from backend, using fallbacks:', error);
+    return {
+      departments: getAllDepartments(),
+      roles: getAllRoles(),
+      accessRoles: ['Super Admin', 'Admin', 'Manager', 'Sales Executive', 'Business Analyst', 'Employee'],
+      statuses: ['Active', 'On Leave', 'Inactive', 'Suspended'],
+      workStatuses: ['Working', 'Break', 'Logged Out', 'Offline', 'On Leave'],
+      employmentTypes: ['Full Time', 'Part Time', 'Contract', 'Intern'],
+      managers: [],
+      crmAccessOptions: ['Enabled', 'Disabled'],
+    };
+  }
+}
+
+/**
  * Fetch paginated, filtered, sorted employees from Spring Boot backend
  */
 export async function fetchEmployees(params: EmployeeQueryParams = {}): Promise<EmployeesPageResponse> {
@@ -47,6 +89,7 @@ export async function fetchEmployees(params: EmployeeQueryParams = {}): Promise<
   if (params.search?.trim()) query.append('search', params.search.trim());
   if (params.department && params.department !== 'all') query.append('department', params.department);
   if (params.role && params.role !== 'all') query.append('role', params.role);
+  if (params.accessRole && params.accessRole !== 'all') query.append('accessRole', params.accessRole);
   if (params.status && params.status !== 'all') query.append('status', params.status);
   if (params.workStatus && params.workStatus !== 'all') query.append('workStatus', params.workStatus);
   if (params.crmAccess && params.crmAccess !== 'all') query.append('crmAccess', params.crmAccess);

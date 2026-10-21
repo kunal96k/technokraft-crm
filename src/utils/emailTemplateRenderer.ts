@@ -3,7 +3,7 @@
  * Matches the design and structure of hiring-campaign.html:
  * - Fluid hybrid table layout (max 620px)
  * - Top brand gradient accent bar
- * - Official TechnoKraft logo & category badge
+ * - Official TechnoKraft logo & brand identity
  * - Header subheader & notice title
  * - Clean content card with proper spacing and typography
  * - Formal corporate signature block
@@ -46,7 +46,6 @@ export function renderBrandedEmailHtml(options: RenderEmailOptions): string {
     body = '',
     senderName = 'TechnoKraft Services LLP',
     recipientEmail = 'client@example.com',
-    category = 'B2B Enterprise Communication',
   } = options;
 
   const formattedBody = formatBodyContent(body);
@@ -129,17 +128,6 @@ export function renderBrandedEmailHtml(options: RenderEmailOptions): string {
                           <div style="font-size: 10.5px; font-weight: 700; color: #5B4DB7; text-align: right; line-height: 1; margin-top: 2px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
                             Services LLP
                           </div>
-                        </td>
-                      </tr>
-                    </table>
-                  </td>
-                  <td valign="middle" align="right">
-                    <table role="presentation" cellpadding="0" cellspacing="0" border="0">
-                      <tr>
-                        <td style="background-color: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 4px; padding: 5px 12px;">
-                          <span style="font-size: 11px; font-weight: 700; color: #334155; letter-spacing: 0.8px; text-transform: uppercase; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-                            ${escapeHtml(category)}
-                          </span>
                         </td>
                       </tr>
                     </table>

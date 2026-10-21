@@ -41,7 +41,7 @@ export const CallTable: React.FC<CallTableProps> = ({
   return (
     <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl shadow-2xs overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-xs text-slate-700 dark:text-slate-300">
+        <table className="w-full min-w-[950px] text-left text-xs text-slate-700 dark:text-slate-300">
           <thead className="bg-slate-50/80 dark:bg-slate-950/60 text-slate-500 dark:text-slate-400 font-semibold border-b border-slate-200 dark:border-slate-800 uppercase text-[11px] tracking-wider">
             <tr>
               <th className="py-3.5 pl-4 pr-2 w-10">
