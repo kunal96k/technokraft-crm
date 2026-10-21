@@ -135,6 +135,13 @@ export const EmployeeOverview: React.FC<EmployeeOverviewProps> = ({
             </div>
             <div className="h-6 w-px bg-slate-200 dark:bg-slate-700" />
             <div>
+              <span className="text-[11px] text-slate-400 block">Break Time</span>
+              <span className="font-mono font-medium text-amber-600 dark:text-amber-400">
+                {employee.todayBreakTime || '0m'}
+              </span>
+            </div>
+            <div className="h-6 w-px bg-slate-200 dark:bg-slate-700" />
+            <div>
               <span className="text-[11px] text-slate-400 block">Last Active</span>
               <span className="font-medium text-slate-500 dark:text-slate-400">{employee.lastActivityTime || 'Active'}</span>
             </div>

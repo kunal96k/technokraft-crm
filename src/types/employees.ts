@@ -261,6 +261,8 @@ export interface EmployeeFiltersState {
 export interface AttendanceFiltersState {
   searchQuery: string;
   datePreset: 'Today' | 'This Week' | 'This Month' | 'Custom Range';
+  startDate?: string;
+  endDate?: string;
   employeeId: string;
   department: string;
   status: string;

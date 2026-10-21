@@ -189,7 +189,7 @@ export const EmployeeAttendanceSummary: React.FC<EmployeeAttendanceSummaryProps>
               <div className="text-[10px] uppercase font-bold text-slate-400">
                 {rec.dayLabel} {rec.dayNumber}
               </div>
-              <div className="my-1">
+              <div className="my-1 flex justify-center">
                 <AttendanceStatusBadge status={rec.status} size="sm" />
               </div>
               <div className="text-[10px] font-mono text-slate-500 dark:text-slate-400">

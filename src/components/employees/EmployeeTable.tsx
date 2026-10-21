@@ -321,12 +321,14 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
 
                 {/* Status */}
                 <td className="py-3.5 px-3 whitespace-nowrap">
-                  <EmployeeStatusBadge status={emp.status} />
+                  <div className="w-fit">
+                    <EmployeeStatusBadge status={emp.status} />
+                  </div>
                 </td>
 
                 {/* Today's Attendance */}
                 <td className="py-3.5 px-3 whitespace-nowrap">
-                  <div className="flex flex-col gap-0.5">
+                  <div className="flex flex-col items-start gap-0.5 w-fit">
                     <AttendanceStatusBadge status={emp.todayAttendanceStatus} />
                     <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">
                       {emp.shiftStartTime || '10:00 AM'} - {emp.shiftEndTime || '04:00 PM'}
@@ -336,7 +338,9 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
 
                 {/* Current Activity */}
                 <td className="py-3.5 px-3 whitespace-nowrap">
-                  <WorkStatusBadge status={emp.workStatus} />
+                  <div className="w-fit">
+                    <WorkStatusBadge status={emp.workStatus} />
+                  </div>
                 </td>
 
                 {/* Joined Date */}

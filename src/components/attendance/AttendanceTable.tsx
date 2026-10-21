@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Eye, Clock, Calendar, ArrowRight, ArrowUpDown, ArrowUp, ArrowDown, ShieldCheck } from 'lucide-react';
+import { Eye, Clock, Calendar, ArrowRight, ArrowUpDown, ArrowUp, ArrowDown, ShieldCheck, Coffee } from 'lucide-react';
 import { DailyAttendanceRecord } from '../../types/employees';
 import { AttendanceStatusBadge, WorkStatusBadge } from '../employees/EmployeeStatusBadge';
 import { useAuth } from '../../context/AuthContext';
@@ -169,89 +169,104 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
                   {rec.date}
                 </td>
 
-                {/* Login Time */}
-                <td className="py-3.5 px-3 whitespace-nowrap font-mono text-[11px]">
-                  {isMasked ? (
-                    <span className="blur-[3px] select-none text-slate-400">09:00 AM</span>
-                  ) : rec.loginTime === '—' ? (
-                    <span className="text-slate-400">—</span>
-                  ) : (
-                    <span className="text-slate-800 dark:text-slate-200 font-medium">
-                      {rec.loginTime}
-                    </span>
-                  )}
-                </td>
+                {(() => {
+                  const hasNotLoggedIn = !rec.loginTime || rec.loginTime === '—' || rec.loginTime === '---' || rec.loginTime.trim() === '';
+                  const displayStatus = hasNotLoggedIn ? (rec.status === 'Leave' ? 'Leave' : 'Absent') : rec.status;
+                  const displayActivity = hasNotLoggedIn ? 'Offline' : (rec.currentActivity || 'Offline');
 
-                {/* Logout Time */}
-                <td className="py-3.5 px-3 whitespace-nowrap font-mono text-[11px]">
-                  {isMasked ? (
-                    <span className="blur-[3px] select-none text-slate-400">Active</span>
-                  ) : (rec.logoutTime ?? '').includes('Active') || rec.workStatus === 'Working' ? (
-                    <span className="text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                      Active
-                    </span>
-                  ) : (
-                    <span className="text-slate-600 dark:text-slate-400">{rec.logoutTime || '—'}</span>
-                  )}
-                </td>
+                  return (
+                    <>
+                      {/* Login Time */}
+                      <td className="py-3.5 px-3 whitespace-nowrap font-mono text-[11px]">
+                        {isMasked ? (
+                          <span className="blur-[3px] select-none text-slate-400">09:00 AM</span>
+                        ) : hasNotLoggedIn ? (
+                          <span className="text-slate-400">—</span>
+                        ) : (
+                          <span className="text-slate-800 dark:text-slate-200 font-medium">
+                            {rec.loginTime}
+                          </span>
+                        )}
+                      </td>
 
-                {/* Working Hours */}
-                <td className="py-3.5 px-3 whitespace-nowrap font-mono font-medium text-slate-800 dark:text-slate-200">
-                  {isMasked ? (
-                    <span className="blur-[3px] select-none text-slate-400">08h 00m</span>
-                  ) : (() => {
-                    const isWorking = (rec.logoutTime ?? '').includes('Active') || rec.workStatus === 'Working';
-                    if (isWorking && rec.loginTime && rec.loginTime !== '—' && rec.loginTime !== '---') {
-                      const live = calculateWorkingDuration(rec.loginTime, null, true, rec.workingHours);
-                      if (live.formatted !== '0h 00m' && (rec.workingHours === '0h 00m' || rec.workingHours === '00:00')) {
-                        return live.formatted;
-                      }
-                    }
-                    return rec.workingHours || '0h 00m';
-                  })()}
-                </td>
+                      {/* Logout Time */}
+                      <td className="py-3.5 px-3 whitespace-nowrap font-mono text-[11px]">
+                        {isMasked ? (
+                          <span className="blur-[3px] select-none text-slate-400">Active</span>
+                        ) : hasNotLoggedIn ? (
+                          <span className="text-slate-400">—</span>
+                        ) : (rec.logoutTime ?? '').includes('Active') || rec.workStatus === 'Working' ? (
+                          <span className="text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                            Active
+                          </span>
+                        ) : (
+                          <span className="text-slate-600 dark:text-slate-400">{rec.logoutTime || '—'}</span>
+                        )}
+                      </td>
 
-                {/* Break Time */}
-                <td className="py-3.5 px-3 whitespace-nowrap font-mono text-slate-500 dark:text-slate-400 text-[11px]">
-                  {isMasked ? (
-                    <span className="blur-[3px] select-none text-slate-400">0m</span>
-                  ) : rec.breakTime && rec.breakTime !== '0m' && rec.breakTime !== '---' ? (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200/50 dark:border-amber-800/40">
-                      ☕ {rec.breakTime}
-                    </span>
-                  ) : (
-                    <span className="text-slate-400 dark:text-slate-500">0m</span>
-                  )}
-                </td>
+                      {/* Working Hours */}
+                      <td className="py-3.5 px-3 whitespace-nowrap font-mono font-medium text-slate-800 dark:text-slate-200">
+                        {isMasked ? (
+                          <span className="blur-[3px] select-none text-slate-400">08h 00m</span>
+                        ) : hasNotLoggedIn ? (
+                          <span className="text-slate-400 font-mono">0h 00m</span>
+                        ) : (() => {
+                          const isWorking = (rec.logoutTime ?? '').includes('Active') || rec.workStatus === 'Working';
+                          if (isWorking && rec.loginTime && rec.loginTime !== '—' && rec.loginTime !== '---') {
+                            const live = calculateWorkingDuration(rec.loginTime, null, true, rec.workingHours);
+                            if (live.formatted !== '0h 00m' && (rec.workingHours === '0h 00m' || rec.workingHours === '00:00')) {
+                              return live.formatted;
+                            }
+                          }
+                          return rec.workingHours || '0h 00m';
+                        })()}
+                      </td>
 
-                {/* Status */}
-                <td className="py-3.5 px-3 whitespace-nowrap">
-                  <div className="flex flex-col gap-0.5">
-                    <AttendanceStatusBadge status={rec.status} size="sm" />
-                    <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">
-                      {rec.shiftStartTime || '10:00 AM'} - {rec.shiftEndTime || '04:00 PM'}
-                    </span>
-                  </div>
-                </td>
+                      {/* Break Time */}
+                      <td className="py-3.5 px-3 whitespace-nowrap font-mono text-slate-500 dark:text-slate-400 text-[11px]">
+                        {isMasked ? (
+                          <span className="blur-[3px] select-none text-slate-400">0m</span>
+                        ) : !hasNotLoggedIn && rec.breakTime && rec.breakTime !== '0m' && rec.breakTime !== '---' ? (
+                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200/50 dark:border-amber-800/40 w-fit max-w-fit shrink-0">
+                            <Coffee className="w-3 h-3 text-amber-600 dark:text-amber-400 shrink-0" />
+                            <span>{rec.breakTime}</span>
+                          </span>
+                        ) : (
+                          <span className="text-slate-400 dark:text-slate-500">0m</span>
+                        )}
+                      </td>
 
-                {/* Current Activity */}
-                <td className="py-3.5 px-3 max-w-[200px]">
-                  <div className="flex items-center gap-1.5 truncate">
-                    {isMasked ? (
-                      <span className="text-[11px] text-slate-400 italic">
-                        Confidential Session
-                      </span>
-                    ) : (
-                      <span
-                        className="text-[11px] text-slate-500 dark:text-slate-400 truncate"
-                        title={rec.currentActivity}
-                      >
-                        {rec.currentActivity}
-                      </span>
-                    )}
-                  </div>
-                </td>
+                      {/* Status */}
+                      <td className="py-3.5 px-3 whitespace-nowrap">
+                        <div className="flex flex-col items-start gap-0.5 w-fit">
+                          <AttendanceStatusBadge status={displayStatus} size="sm" />
+                          <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">
+                            {rec.shiftStartTime || '10:00 AM'} - {rec.shiftEndTime || '04:00 PM'}
+                          </span>
+                        </div>
+                      </td>
+
+                      {/* Current Activity */}
+                      <td className="py-3.5 px-3 max-w-[200px]">
+                        <div className="flex items-center gap-1.5 truncate">
+                          {isMasked ? (
+                            <span className="text-[11px] text-slate-400 italic">
+                              Confidential Session
+                            </span>
+                          ) : (
+                            <span
+                              className="text-[11px] text-slate-500 dark:text-slate-400 truncate"
+                              title={displayActivity}
+                            >
+                              {displayActivity}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                    </>
+                  );
+                })()}
 
                 {/* Action Button */}
                 <td className="py-3.5 px-3 text-right whitespace-nowrap">

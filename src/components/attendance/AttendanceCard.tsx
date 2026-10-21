@@ -1,7 +1,7 @@
 import React from 'react';
-import { Eye, Clock, Calendar, ShieldCheck } from 'lucide-react';
+import { Eye, ShieldCheck, Coffee } from 'lucide-react';
 import { DailyAttendanceRecord } from '../../types/employees';
-import { AttendanceStatusBadge, WorkStatusBadge } from '../employees/EmployeeStatusBadge';
+import { AttendanceStatusBadge } from '../employees/EmployeeStatusBadge';
 import { useAuth } from '../../context/AuthContext';
 import { shouldMaskForSecurity } from '../../utils/securityUtils';
 
@@ -16,6 +16,12 @@ export const AttendanceCard: React.FC<AttendanceCardProps> = ({
 }) => {
   const { user } = useAuth();
   const isMasked = shouldMaskForSecurity(record, user);
+
+  const hasNotLoggedIn = !record.loginTime || record.loginTime === '—' || record.loginTime === '---' || record.loginTime.trim() === '';
+  const displayStatus = hasNotLoggedIn ? (record.status === 'Leave' ? 'Leave' : 'Absent') : record.status;
+  const displayLoginLogout = hasNotLoggedIn ? '—' : `${record.loginTime} – ${record.logoutTime || '—'}`;
+  const displayHours = hasNotLoggedIn ? '0h 00m' : (record.workingHours || '0h 00m');
+  const displayActivity = hasNotLoggedIn ? 'Offline' : (record.currentActivity || 'Offline');
 
   return (
     <div
@@ -47,7 +53,7 @@ export const AttendanceCard: React.FC<AttendanceCardProps> = ({
         </div>
 
         <div className="flex flex-col items-end gap-0.5">
-          <AttendanceStatusBadge status={record.status} size="sm" />
+          <AttendanceStatusBadge status={displayStatus} size="sm" />
           <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">
             {record.shiftStartTime || '10:00 AM'} - {record.shiftEndTime || '04:00 PM'}
           </span>
@@ -61,17 +67,25 @@ export const AttendanceCard: React.FC<AttendanceCardProps> = ({
             {isMasked ? (
               <span className="blur-[3px] select-none text-slate-400">09:00 AM – Active</span>
             ) : (
-              `${record.loginTime} – ${record.logoutTime}`
+              displayLoginLogout
             )}
           </span>
         </div>
         <div>
           <span className="text-[10px] text-slate-400 block">Working Hours</span>
-          <span className="font-mono text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">
+          <span className="font-mono text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1.5 flex-wrap">
             {isMasked ? (
               <span className="blur-[3px] select-none text-slate-400">08h 00m</span>
             ) : (
-              `${record.workingHours} (Break: ${record.breakTime})`
+              <>
+                <span>{displayHours}</span>
+                {!hasNotLoggedIn && record.breakTime && record.breakTime !== '0m' && record.breakTime !== '---' && (
+                  <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full text-[10px] bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200/50 dark:border-amber-800/40 font-normal">
+                    <Coffee className="w-2.5 h-2.5 text-amber-600 dark:text-amber-400" />
+                    <span>{record.breakTime}</span>
+                  </span>
+                )}
+              </>
             )}
           </span>
         </div>
@@ -82,7 +96,7 @@ export const AttendanceCard: React.FC<AttendanceCardProps> = ({
           {isMasked ? (
             <span className="italic text-slate-400">Confidential Session</span>
           ) : (
-            record.currentActivity
+            displayActivity
           )}
         </span>
         <button

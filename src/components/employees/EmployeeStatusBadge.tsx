@@ -47,7 +47,7 @@ export const EmployeeStatusBadge: React.FC<EmployeeStatusBadgeProps> = ({
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 font-medium rounded-full border ${sizeClasses} ${colorClasses} whitespace-nowrap`}
+      className={`inline-flex items-center gap-1.5 font-medium rounded-full border w-fit max-w-fit shrink-0 ${sizeClasses} ${colorClasses} whitespace-nowrap`}
     >
       <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />
       {status}
@@ -98,7 +98,7 @@ export const AttendanceStatusBadge: React.FC<{
 
   return (
     <span
-      className={`inline-flex items-center font-medium rounded-md border ${sizeClasses} ${colorClasses} whitespace-nowrap`}
+      className={`inline-flex items-center justify-center font-medium rounded-md border w-fit max-w-fit shrink-0 ${sizeClasses} ${colorClasses} whitespace-nowrap`}
     >
       {status}
     </span>
@@ -142,7 +142,7 @@ export const WorkStatusBadge: React.FC<{
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 font-medium rounded-full border ${sizeClasses} ${colorClasses} whitespace-nowrap`}
+      className={`inline-flex items-center gap-1.5 font-medium rounded-full border w-fit max-w-fit shrink-0 ${sizeClasses} ${colorClasses} whitespace-nowrap`}
     >
       <span className="relative flex h-2 w-2">
         {pulse && (
@@ -196,7 +196,7 @@ export const TargetStatusBadge: React.FC<{
 
   return (
     <span
-      className={`inline-flex items-center font-medium rounded-full border ${sizeClasses} ${colorClasses} whitespace-nowrap`}
+      className={`inline-flex items-center font-medium rounded-full border w-fit max-w-fit shrink-0 ${sizeClasses} ${colorClasses} whitespace-nowrap`}
     >
       {status}
     </span>

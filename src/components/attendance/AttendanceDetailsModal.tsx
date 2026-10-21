@@ -451,7 +451,7 @@ export const AttendanceDetailsModal: React.FC<AttendanceDetailsModalProps> = ({
                         <div className="text-[10px] font-bold text-slate-400 uppercase">
                           {day.dayLabel} {day.dayNumber}
                         </div>
-                        <div className="my-1">
+                        <div className="my-1 flex justify-center">
                           <AttendanceStatusBadge status={day.status} size="sm" />
                         </div>
                         <div className="text-[10px] font-mono text-slate-500">

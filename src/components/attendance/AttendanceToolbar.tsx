@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Filter, Calendar, Download, X } from 'lucide-react';
+import { Search, Filter, Calendar, Download, X, ArrowRight, CheckCircle2, RotateCcw, Clock } from 'lucide-react';
 import { AttendanceFiltersState, Employee, DEPARTMENTS } from '../../types/employees';
 import { useAuth } from '../../context/AuthContext';
 import { shouldMaskForSecurity } from '../../utils/securityUtils';
@@ -27,6 +27,83 @@ export const AttendanceToolbar: React.FC<AttendanceToolbarProps> = ({
     'Custom Range',
   ];
 
+  const getToday = (): string => {
+    return new Date().toISOString().split('T')[0];
+  };
+
+  const getDaysAgo = (days: number): string => {
+    const d = new Date();
+    d.setDate(d.getDate() - days);
+    return d.toISOString().split('T')[0];
+  };
+
+  const getStartOfMonth = (): string => {
+    const now = new Date();
+    const d = new Date(now.getFullYear(), now.getMonth(), 1);
+    return d.toISOString().split('T')[0];
+  };
+
+  const handlePresetClick = (preset: 'Today' | 'This Week' | 'This Month' | 'Custom Range') => {
+    if (preset === 'Custom Range') {
+      const today = getToday();
+      const defaultStart = filters.startDate || getDaysAgo(6);
+      const defaultEnd = filters.endDate || today;
+      onChange({
+        ...filters,
+        datePreset: 'Custom Range',
+        startDate: defaultStart,
+        endDate: defaultEnd,
+      });
+    } else {
+      onChange({
+        ...filters,
+        datePreset: preset,
+        startDate: '',
+        endDate: '',
+      });
+    }
+  };
+
+  const handleDateChange = (newStart: string, newEnd: string) => {
+    let start = newStart;
+    let end = newEnd;
+    if (start && end && start > end) {
+      end = start;
+    }
+    onChange({
+      ...filters,
+      datePreset: 'Custom Range',
+      startDate: start,
+      endDate: end,
+    });
+  };
+
+  const formatDateLabel = (dateStr?: string) => {
+    if (!dateStr) return '';
+    try {
+      const [y, m, d] = dateStr.split('-').map(Number);
+      const date = new Date(y, m - 1, d);
+      return date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+    } catch {
+      return dateStr;
+    }
+  };
+
+  const getRangeDayCount = (start?: string, end?: string): number => {
+    if (!start || !end) return 0;
+    try {
+      const d1 = new Date(start);
+      const d2 = new Date(end);
+      const diffTime = Math.abs(d2.getTime() - d1.getTime());
+      return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    } catch {
+      return 0;
+    }
+  };
+
+  const isCustomRange = filters.datePreset === 'Custom Range';
+  const rangeDayCount = getRangeDayCount(filters.startDate, filters.endDate);
+
   return (
     <div className="space-y-3">
       {/* Top Controls Row */}
@@ -39,14 +116,20 @@ export const AttendanceToolbar: React.FC<AttendanceToolbarProps> = ({
               <button
                 key={preset}
                 type="button"
-                onClick={() => onChange({ ...filters, datePreset: preset })}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
+                onClick={() => handlePresetClick(preset)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
                   isSelected
-                    ? 'bg-white dark:bg-slate-900 text-purple-700 dark:text-purple-300 shadow-xs'
+                    ? 'bg-white dark:bg-slate-900 text-purple-700 dark:text-purple-300 shadow-xs ring-1 ring-purple-500/20'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
-                {preset}
+                {preset === 'Custom Range' && <Calendar className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />}
+                <span>{preset}</span>
+                {preset === 'Custom Range' && isSelected && filters.startDate && filters.endDate && (
+                  <span className="hidden sm:inline-block text-[10px] font-mono font-normal opacity-80">
+                    ({rangeDayCount}d)
+                  </span>
+                )}
               </button>
             );
           })}
@@ -84,6 +167,130 @@ export const AttendanceToolbar: React.FC<AttendanceToolbarProps> = ({
           </button>
         </div>
       </div>
+
+      {/* Custom Range Calendar UI Selector Box */}
+      {isCustomRange && (
+        <div className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-purple-50/90 via-indigo-50/40 to-slate-50 dark:from-purple-950/30 dark:via-slate-900/60 dark:to-slate-900 border border-purple-200/80 dark:border-purple-800/60 shadow-xs animate-in fade-in slide-in-from-top-2 duration-200 space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-purple-100 dark:border-purple-900/40 pb-2.5">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-purple-600/10 dark:bg-purple-400/10 flex items-center justify-center text-purple-600 dark:text-purple-400">
+                <Calendar className="w-4 h-4" />
+              </div>
+              <div>
+                <div className="text-xs font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                  <span>Custom Date Range Filter</span>
+                  {filters.startDate && filters.endDate && (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/40">
+                      <CheckCircle2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                      {rangeDayCount} {rangeDayCount === 1 ? 'day' : 'days'} selected
+                    </span>
+                  )}
+                </div>
+                <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                  {filters.startDate && filters.endDate ? (
+                    <span>
+                      Filtering records from{' '}
+                      <strong className="text-purple-700 dark:text-purple-300 font-semibold">{formatDateLabel(filters.startDate)}</strong> to{' '}
+                      <strong className="text-purple-700 dark:text-purple-300 font-semibold">{formatDateLabel(filters.endDate)}</strong>
+                    </span>
+                  ) : (
+                    <span>Choose start and end dates to filter attendance across that period</span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Presets inside Custom Range */}
+            <div className="flex items-center gap-1 flex-wrap self-end sm:self-auto">
+              <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mr-1 hidden lg:inline">
+                Quick:
+              </span>
+              <button
+                type="button"
+                onClick={() => handleDateChange(getDaysAgo(6), getToday())}
+                className="px-2 py-1 text-[11px] font-medium rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-purple-50 dark:hover:bg-purple-950/40 text-slate-700 dark:text-slate-300 hover:text-purple-700 dark:hover:text-purple-300 transition-colors cursor-pointer shadow-2xs"
+              >
+                Last 7 Days
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDateChange(getDaysAgo(13), getToday())}
+                className="px-2 py-1 text-[11px] font-medium rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-purple-50 dark:hover:bg-purple-950/40 text-slate-700 dark:text-slate-300 hover:text-purple-700 dark:hover:text-purple-300 transition-colors cursor-pointer shadow-2xs"
+              >
+                Last 14 Days
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDateChange(getDaysAgo(29), getToday())}
+                className="px-2 py-1 text-[11px] font-medium rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-purple-50 dark:hover:bg-purple-950/40 text-slate-700 dark:text-slate-300 hover:text-purple-700 dark:hover:text-purple-300 transition-colors cursor-pointer shadow-2xs"
+              >
+                Last 30 Days
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDateChange(getStartOfMonth(), getToday())}
+                className="px-2 py-1 text-[11px] font-medium rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-purple-50 dark:hover:bg-purple-950/40 text-slate-700 dark:text-slate-300 hover:text-purple-700 dark:hover:text-purple-300 transition-colors cursor-pointer shadow-2xs"
+              >
+                This Month
+              </button>
+            </div>
+          </div>
+
+          {/* Calendar Date Selectors Row */}
+          <div className="flex flex-wrap items-center gap-3">
+            {/* From Date Picker */}
+            <div className="flex-1 min-w-[200px] flex items-center gap-2 p-2 rounded-xl bg-white dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700/80 shadow-2xs focus-within:ring-2 focus-within:ring-purple-500/40 transition-all">
+              <div className="flex items-center gap-1.5 pl-1 shrink-0">
+                <Calendar className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  From:
+                </span>
+              </div>
+              <input
+                type="date"
+                value={filters.startDate || ''}
+                max={filters.endDate || undefined}
+                onChange={(e) => handleDateChange(e.target.value, filters.endDate || '')}
+                className="w-full text-xs font-semibold bg-transparent text-slate-800 dark:text-slate-100 outline-none cursor-pointer"
+              />
+            </div>
+
+            <div className="hidden sm:flex items-center justify-center text-slate-400">
+              <ArrowRight className="w-4 h-4" />
+            </div>
+
+            {/* To Date Picker */}
+            <div className="flex-1 min-w-[200px] flex items-center gap-2 p-2 rounded-xl bg-white dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700/80 shadow-2xs focus-within:ring-2 focus-within:ring-purple-500/40 transition-all">
+              <div className="flex items-center gap-1.5 pl-1 shrink-0">
+                <Calendar className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  To:
+                </span>
+              </div>
+              <input
+                type="date"
+                value={filters.endDate || ''}
+                min={filters.startDate || undefined}
+                onChange={(e) => handleDateChange(filters.startDate || '', e.target.value)}
+                className="w-full text-xs font-semibold bg-transparent text-slate-800 dark:text-slate-100 outline-none cursor-pointer"
+              />
+            </div>
+
+            {/* Reset to 7 Days Button */}
+            {(filters.startDate || filters.endDate) && (
+              <button
+                type="button"
+                onClick={() => handleDateChange(getDaysAgo(6), getToday())}
+                className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors cursor-pointer shrink-0"
+                title="Reset to default 7 days"
+              >
+                <RotateCcw className="w-3.5 h-3.5 text-slate-400" />
+                <span>Reset</span>
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Filter Selects Row */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 p-3 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 text-xs">

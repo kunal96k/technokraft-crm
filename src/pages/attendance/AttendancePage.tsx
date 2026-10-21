@@ -29,6 +29,8 @@ import {
 
 const INITIAL_ATTENDANCE_FILTERS: AttendanceFiltersState = {
   datePreset: 'Today',
+  startDate: '',
+  endDate: '',
   searchQuery: '',
   department: '',
   status: '',
@@ -95,6 +97,10 @@ export const AttendancePage: React.FC = () => {
     }
 
     try {
+      const isCustom = filters.datePreset === 'Custom Range';
+      const customStart = isCustom && filters.startDate ? filters.startDate : undefined;
+      const customEnd = isCustom && filters.endDate ? filters.endDate : undefined;
+
       const [recordsRes, summaryRes] = await Promise.all([
         fetchAttendanceRecords({
           page,
@@ -104,12 +110,17 @@ export const AttendancePage: React.FC = () => {
           status: filters.status || undefined,
           employeeId: filters.employeeId || undefined,
           datePreset: filters.datePreset || undefined,
+          startDate: customStart,
+          endDate: customEnd,
           sortBy,
           sortDirection,
         }),
         fetchAttendanceSummary({
           department: filters.department || undefined,
+          status: filters.status || undefined,
           datePreset: filters.datePreset || undefined,
+          startDate: customStart,
+          endDate: customEnd,
         }),
       ]);
 
@@ -217,7 +228,15 @@ export const AttendancePage: React.FC = () => {
     }
 
     if (emp) {
-      setSelectedEmployeeForModal(emp);
+      setSelectedEmployeeForModal({
+        ...emp,
+        todayBreakTime: rec.breakTime || emp.todayBreakTime || '0m',
+        todayWorkingTime: rec.workingHours || emp.todayWorkingTime,
+        todayAttendanceStatus: rec.status || emp.todayAttendanceStatus,
+        loginTime: rec.loginTime || emp.loginTime,
+        logoutTime: rec.logoutTime || emp.logoutTime,
+        currentActivity: rec.currentActivity || emp.currentActivity,
+      });
     } else {
       // Construct lightweight fallback Employee object if not in database
       const fallbackEmp = {
@@ -238,6 +257,7 @@ export const AttendancePage: React.FC = () => {
         workStatus: rec.workStatus,
         todayAttendanceStatus: rec.status,
         todayWorkingTime: rec.workingHours,
+        todayBreakTime: rec.breakTime || '0m',
         loginTime: rec.loginTime,
         logoutTime: rec.logoutTime,
         currentActivity: rec.currentActivity,
