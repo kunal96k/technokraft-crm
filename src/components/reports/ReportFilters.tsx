@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Filter, RotateCcw, ChevronDown } from 'lucide-react';
 import { RoleScope } from '../../types/reports';
 import { EmployeeSelect } from '../common/EmployeeSelect';
+import { useActiveEmployees } from '../../hooks/useActiveEmployees';
 
 interface ReportFiltersProps {
   selectedEmployee: string;
@@ -20,13 +21,6 @@ interface ReportFiltersProps {
   onReset?: () => void;
   isAnalytics?: boolean;
 }
-
-const TEAMS = [
-  'All Teams',
-  'Enterprise Sales',
-  'Inside Sales',
-  'Solutions & BA',
-];
 
 const SCOPES: RoleScope[] = [
   'Company Overview',
@@ -86,6 +80,17 @@ export const ReportFilters: React.FC<ReportFiltersProps> = ({
   onReset,
   isAnalytics = false,
 }) => {
+  const { employees } = useActiveEmployees();
+  const availableTeams = useMemo(() => {
+    const depts = new Set<string>();
+    employees.forEach((emp) => {
+      if (emp.department && emp.department.trim()) {
+        depts.add(emp.department.trim());
+      }
+    });
+    return ['All Teams', ...Array.from(depts).sort()];
+  }, [employees]);
+
   const isFiltered =
     selectedEmployee !== 'All Employees' ||
     selectedTeam !== 'All Teams' ||
@@ -170,7 +175,7 @@ export const ReportFilters: React.FC<ReportFiltersProps> = ({
                 onChange={(e) => onTeamChange(e.target.value)}
                 className="h-9 w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-600 rounded-lg pl-3 pr-8 text-xs text-slate-900 dark:text-slate-100 font-medium focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/20 focus:border-[#5B4DB7] dark:focus:border-purple-500 shadow-2xs appearance-none transition-all cursor-pointer"
               >
-                {TEAMS.map((tm) => (
+                {availableTeams.map((tm) => (
                   <option key={tm} value={tm}>
                     {tm}
                   </option>
@@ -266,9 +271,9 @@ export const ReportFilters: React.FC<ReportFiltersProps> = ({
           </div>
         </div>
       ) : (
-        <div className="flex flex-wrap items-end gap-3 text-xs">
+        <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-end gap-3 text-xs min-w-0">
           {/* Employee Search - Generous width */}
-          <div className="flex-1 min-w-[220px] sm:min-w-[260px] max-w-sm">
+          <div className="w-full sm:flex-1 min-w-0 sm:min-w-[240px] max-w-sm">
             <label className="block text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 mb-1.5 tracking-wider">
               Employee
             </label>
@@ -286,7 +291,7 @@ export const ReportFilters: React.FC<ReportFiltersProps> = ({
           </div>
 
           {/* Team / Unit */}
-          <div className="flex-1 min-w-[180px] sm:min-w-[220px] max-w-xs">
+          <div className="w-full sm:flex-1 min-w-0 sm:min-w-[200px] max-w-xs">
             <label className="block text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 mb-1.5 tracking-wider">
               Team / Unit
             </label>
@@ -296,7 +301,7 @@ export const ReportFilters: React.FC<ReportFiltersProps> = ({
                 onChange={(e) => onTeamChange(e.target.value)}
                 className="h-9 w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-600 rounded-lg pl-3 pr-8 text-xs text-slate-900 dark:text-slate-100 font-medium focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/20 focus:border-[#5B4DB7] dark:focus:border-purple-500 shadow-2xs appearance-none transition-all cursor-pointer"
               >
-                {TEAMS.map((tm) => (
+                {availableTeams.map((tm) => (
                   <option key={tm} value={tm}>
                     {tm}
                   </option>
@@ -307,11 +312,11 @@ export const ReportFilters: React.FC<ReportFiltersProps> = ({
           </div>
 
           {/* Reset Filters Button */}
-          <div className="shrink-0">
+          <div className="shrink-0 w-full sm:w-auto">
             <button
               type="button"
               onClick={handleReset}
-              className={`h-9 px-4 inline-flex items-center justify-center gap-1.5 font-semibold rounded-lg transition-all duration-150 cursor-pointer text-xs border shadow-2xs hover:shadow-xs ${
+              className={`h-9 w-full sm:w-auto px-4 inline-flex items-center justify-center gap-1.5 font-semibold rounded-lg transition-all duration-150 cursor-pointer text-xs border shadow-2xs hover:shadow-xs ${
                 isFiltered
                   ? 'bg-purple-50 dark:bg-purple-950/40 text-[#5B4DB7] dark:text-purple-300 border-purple-200 dark:border-purple-800 hover:bg-purple-100 dark:hover:bg-purple-950/60'
                   : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'

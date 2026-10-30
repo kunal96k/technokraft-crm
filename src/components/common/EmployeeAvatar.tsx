@@ -97,6 +97,8 @@ export const EmployeeAvatar: React.FC<EmployeeAvatarProps> = ({
   const [photoError, setPhotoError] = useState(false);
   const [apiAvatarError, setApiAvatarError] = useState(false);
   const [, setDirectoryVersion] = useState(0);
+  const authContext = useContext(AuthContext);
+  const authUser = authContext?.user;
 
   useEffect(() => {
     if (!isClient && getCachedActiveEmployees().length === 0) {
@@ -165,9 +167,6 @@ export const EmployeeAvatar: React.FC<EmployeeAvatarProps> = ({
   // For employees/users, only use image avatar if an image is uploaded in our
   // server; otherwise show the API avatar as per our employee or user name.
   // =========================================================================
-  const authContext = useContext(AuthContext);
-  const authUser = authContext?.user;
-
   let effectivePhoto = profilePhoto;
   let effectiveAvatar = avatar;
 

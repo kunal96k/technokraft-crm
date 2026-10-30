@@ -142,6 +142,14 @@ export const LogoutConfirmModal: React.FC<LogoutConfirmModalProps> = ({
               </div>
             </div>
 
+            {/* Break Time Today */}
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-slate-500 dark:text-slate-400 font-medium">Today's Break Time:</span>
+              <span className="font-semibold text-amber-700 dark:text-amber-400 font-mono">
+                {user?.todayBreakTime && user.todayBreakTime !== '---' ? user.todayBreakTime : '0m'}
+              </span>
+            </div>
+
             {/* Status Change Notice */}
             <div className="pt-2 border-t border-slate-200/60 dark:border-slate-700/60 text-[11px] text-slate-400 dark:text-slate-500">
               Status upon sign out: <strong className="text-rose-600 dark:text-rose-400">Logged Out</strong>

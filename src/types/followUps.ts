@@ -102,6 +102,9 @@ export interface TaskRecord {
   companyName?: string;
   assignedTo: string;
   assignedAvatar?: string;
+  assignedEmail?: string;
+  assignedProfilePhoto?: string;
+  createdBy?: string;
   priority: TaskPriority;
   dueDate: string;
   dueTime?: string;

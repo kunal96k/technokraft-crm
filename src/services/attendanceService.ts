@@ -76,10 +76,11 @@ export async function fetchAttendanceRecords(
  * Fetch real-time attendance telemetry summary for dashboard cards
  */
 export async function fetchAttendanceSummary(
-  params: { department?: string; datePreset?: string; startDate?: string; endDate?: string } = {}
+  params: { department?: string; status?: string; datePreset?: string; startDate?: string; endDate?: string } = {}
 ): Promise<AttendanceSummaryData> {
   const query = new URLSearchParams();
   if (params.department && params.department !== 'All') query.append('department', params.department);
+  if (params.status && params.status !== 'All') query.append('status', params.status);
   if (params.datePreset) query.append('datePreset', params.datePreset);
   if (params.startDate) query.append('startDate', params.startDate);
   if (params.endDate) query.append('endDate', params.endDate);

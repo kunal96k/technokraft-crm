@@ -32,8 +32,16 @@ export const EmployeeFilters: React.FC<EmployeeFiltersProps> = ({
       'Super Admin',
       'Admin',
       'Manager',
-      'Sales Executive',
+      'Sales Manager',
+      'Project Manager',
+      'Tech Lead / Solutions Architect',
+      'Software Developer',
+      'DevOps / AWS Cloud Engineer',
+      'QA / Test Automation Engineer',
+      'UI/UX Designer',
+      'Technical Intern',
       'Business Analyst',
+      'Sales Executive',
       'Employee',
     ];
     return Array.from(new Set(list));

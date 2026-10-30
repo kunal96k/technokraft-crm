@@ -20,6 +20,11 @@ export default defineConfig(() => {
           changeOrigin: true,
           secure: false,
         },
+        '/uploads': {
+          target: 'http://127.0.0.1:8080',
+          changeOrigin: true,
+          secure: false,
+        },
       },
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
       // Do not modifyâ€”file watching is disabled to prevent flickering during agent edits.

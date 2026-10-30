@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Search,
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
+  ChevronLeft,
   ChevronRight,
   TrendingUp,
   ExternalLink,
@@ -38,6 +39,8 @@ export const EmployeePerformanceTable: React.FC<EmployeePerformanceTableProps> =
   const [searchQuery, setSearchQuery] = useState('');
   const [sortField, setSortField] = useState<SortField>('targetAchievementRate');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -46,6 +49,7 @@ export const EmployeePerformanceTable: React.FC<EmployeePerformanceTableProps> =
       setSortField(field);
       setSortOrder('desc');
     }
+    setCurrentPage(1);
   };
 
   const filtered = employees.filter(
@@ -63,6 +67,18 @@ export const EmployeePerformanceTable: React.FC<EmployeePerformanceTableProps> =
     }
     return sortOrder === 'asc' ? aVal - bVal : bVal - aVal;
   });
+
+  const totalItems = sorted.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+  const activePage = Math.min(currentPage, totalPages);
+
+  const paginatedEmployees = useMemo(() => {
+    const start = (activePage - 1) * pageSize;
+    return sorted.slice(start, start + pageSize);
+  }, [sorted, activePage, pageSize]);
+
+  const startRecord = totalItems === 0 ? 0 : (activePage - 1) * pageSize + 1;
+  const endRecord = Math.min(activePage * pageSize, totalItems);
 
   const renderSortIndicator = (field: SortField) => {
     if (sortField !== field) {
@@ -94,14 +110,155 @@ export const EmployeePerformanceTable: React.FC<EmployeePerformanceTableProps> =
             type="text"
             placeholder="Search employee or role..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setCurrentPage(1);
+            }}
             className="w-full pl-8 pr-3 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-1 focus:ring-[#5B4DB7]"
           />
         </div>
       </div>
 
+      {/* Mobile Card Layout */}
+      <div className="block lg:hidden divide-y divide-slate-100 dark:divide-slate-800">
+        {paginatedEmployees.length > 0 ? (
+          paginatedEmployees.map((emp) => {
+            const hasTarget = (emp.targetRevenue || 0) > 0;
+            const achievement = emp.targetAchievementRate;
+            const statusBadgeClass = !hasTarget
+              ? 'bg-slate-100 dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-700'
+              : achievement >= 90
+              ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/80'
+              : achievement >= 75
+              ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800/80'
+              : achievement >= 60
+              ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800/80'
+              : 'bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800/80';
+
+            const statusText = !hasTarget
+              ? 'No Quota'
+              : achievement >= 100
+              ? 'Achieved'
+              : achievement >= 80
+              ? 'On Track'
+              : achievement >= 60
+              ? 'At Risk'
+              : 'Below Target';
+
+            return (
+              <div
+                key={emp.id}
+                onClick={() => onSelectEmployee?.(emp)}
+                className="p-4 hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors cursor-pointer space-y-3"
+              >
+                {/* Employee Header */}
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <EmployeeAvatar
+                      name={emp.name}
+                      avatar={emp.avatar}
+                      profilePhoto={emp.profilePhoto}
+                      size="md"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="font-bold text-sm text-slate-900 dark:text-white truncate">
+                          {emp.name}
+                        </span>
+                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 shrink-0">
+                          {emp.team}
+                        </span>
+                      </div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">
+                        {emp.role}
+                      </div>
+                    </div>
+                  </div>
+
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[10px] font-bold shrink-0 ${statusBadgeClass}`}>
+                    {statusText} ({achievement}%)
+                  </span>
+                </div>
+
+                {/* Target & Won Financials */}
+                <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-3 grid grid-cols-2 gap-3 border border-slate-100 dark:border-slate-800">
+                  <div>
+                    <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Revenue Target</div>
+                    <div className="text-sm font-bold font-mono text-slate-700 dark:text-slate-300">
+                      {hasTarget ? formatLakhsINR(emp.targetRevenue) : 'Not Configured'}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Won Revenue</div>
+                    <div className="text-sm font-bold font-mono text-emerald-600 dark:text-emerald-400">
+                      {formatLakhsINR(emp.wonValue || 0)}
+                    </div>
+                  </div>
+
+                  {/* Quota Progress Bar */}
+                  {hasTarget && (
+                    <div className="col-span-2 pt-1">
+                      <div className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-[#5B4DB7] dark:bg-purple-400 rounded-full transition-all duration-300"
+                          style={{ width: `${Math.min(achievement, 100)}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* 6 Key Activity Metrics Grid */}
+                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 text-center">
+                  <div className="bg-white dark:bg-slate-800/80 p-2 rounded-lg border border-slate-100 dark:border-slate-700/60 shadow-2xs">
+                    <div className="text-[10px] text-slate-400">Leads</div>
+                    <div className="text-xs font-bold font-mono text-slate-800 dark:text-slate-200 mt-0.5">{emp.leadsAssigned}</div>
+                  </div>
+                  <div className="bg-white dark:bg-slate-800/80 p-2 rounded-lg border border-slate-100 dark:border-slate-700/60 shadow-2xs">
+                    <div className="text-[10px] text-slate-400">Calls</div>
+                    <div className="text-xs font-bold font-mono text-slate-800 dark:text-slate-200 mt-0.5">{emp.calls}</div>
+                  </div>
+                  <div className="bg-white dark:bg-slate-800/80 p-2 rounded-lg border border-slate-100 dark:border-slate-700/60 shadow-2xs">
+                    <div className="text-[10px] text-slate-400">Follow-ups</div>
+                    <div className="text-xs font-bold font-mono text-slate-800 dark:text-slate-200 mt-0.5">{emp.followUps}</div>
+                  </div>
+                  <div className="bg-white dark:bg-slate-800/80 p-2 rounded-lg border border-slate-100 dark:border-slate-700/60 shadow-2xs">
+                    <div className="text-[10px] text-slate-400">Qualified</div>
+                    <div className="text-xs font-bold font-mono text-[#5B4DB7] dark:text-purple-300 mt-0.5">{emp.qualified}</div>
+                  </div>
+                  <div className="bg-white dark:bg-slate-800/80 p-2 rounded-lg border border-slate-100 dark:border-slate-700/60 shadow-2xs">
+                    <div className="text-[10px] text-slate-400">Proposals</div>
+                    <div className="text-xs font-bold font-mono text-slate-800 dark:text-slate-200 mt-0.5">{emp.proposals}</div>
+                  </div>
+                  <div className="bg-white dark:bg-slate-800/80 p-2 rounded-lg border border-slate-100 dark:border-slate-700/60 shadow-2xs">
+                    <div className="text-[10px] text-slate-400">Deals Won</div>
+                    <div className="text-xs font-bold font-mono text-emerald-600 dark:text-emerald-400 mt-0.5">{emp.won}</div>
+                  </div>
+                </div>
+
+                {/* Footer with Conversion and Action */}
+                <div className="flex items-center justify-between pt-1 text-xs">
+                  <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+                    <TrendingUp className="w-3.5 h-3.5 text-[#5B4DB7]" />
+                    <span>Conversion: <strong className="text-slate-800 dark:text-slate-200">{emp.conversionRate}%</strong></span>
+                  </div>
+                  <span className="inline-flex items-center gap-1 font-semibold text-[#5B4DB7] dark:text-purple-300 text-[11px]">
+                    View Details
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </span>
+                </div>
+              </div>
+            );
+          })
+        ) : (
+          <div className="p-8 text-center text-slate-400 dark:text-slate-500 text-xs">
+            No employee records matched your search query.
+          </div>
+        )}
+      </div>
+
       {/* Desktop Table View */}
-      <div className="overflow-x-auto">
+      <div className="hidden lg:block overflow-x-auto">
         <table className="w-full text-left text-xs text-slate-700 dark:text-slate-300 whitespace-nowrap">
           <thead className="bg-slate-50/80 dark:bg-slate-950/60 border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold uppercase text-slate-500 dark:text-slate-400 tracking-wider">
             <tr>
@@ -182,8 +339,8 @@ export const EmployeePerformanceTable: React.FC<EmployeePerformanceTableProps> =
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-medium">
-            {sorted.length > 0 ? (
-              sorted.map((emp) => {
+            {paginatedEmployees.length > 0 ? (
+              paginatedEmployees.map((emp) => {
                 const achievement = emp.targetAchievementRate;
                 const statusColor =
                   achievement >= 90
@@ -262,6 +419,70 @@ export const EmployeePerformanceTable: React.FC<EmployeePerformanceTableProps> =
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Pagination Footer */}
+      <div className="p-4 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400">
+        <div className="flex items-center gap-2">
+          <span>
+            Showing <strong className="text-slate-800 dark:text-slate-200">{startRecord}</strong> to{' '}
+            <strong className="text-slate-800 dark:text-slate-200">{endRecord}</strong> of{' '}
+            <strong className="text-slate-800 dark:text-slate-200">{totalItems}</strong> contributors
+          </span>
+
+          <div className="flex items-center gap-1 ml-2">
+            <select
+              value={pageSize}
+              onChange={(e) => {
+                setPageSize(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+              className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded px-2 py-1 text-xs text-slate-700 dark:text-slate-300 focus:outline-none"
+            >
+              <option value={5}>5 / page</option>
+              <option value={10}>10 / page</option>
+              <option value={20}>20 / page</option>
+              <option value={50}>50 / page</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-1 self-end sm:self-auto">
+          <button
+            type="button"
+            disabled={activePage <= 1}
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            className="p-1 rounded border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            title="Previous Page"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            <button
+              key={page}
+              type="button"
+              onClick={() => setCurrentPage(page)}
+              className={`min-w-[28px] h-7 px-2 text-xs font-medium rounded border transition-colors ${
+                page === activePage
+                  ? 'bg-[#5B4DB7] text-white border-[#5B4DB7]'
+                  : 'border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300'
+              }`}
+            >
+              {page}
+            </button>
+          ))}
+
+          <button
+            type="button"
+            disabled={activePage >= totalPages}
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            className="p-1 rounded border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            title="Next Page"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -74,21 +74,21 @@ export const ViewLeadModal: React.FC<ViewLeadModalProps> = ({
     }
   }, [isOpen, lead?.id]);
 
-  if (!isOpen || !leadData) return null;
-
-  const currentLead = leadData;
-
   // Deduplicate attachments to prevent rendering duplicate files
   const uniqueAttachments = React.useMemo(() => {
-    if (!currentLead.attachments || !Array.isArray(currentLead.attachments)) return [];
+    if (!leadData?.attachments || !Array.isArray(leadData.attachments)) return [];
     const seen = new Set<string>();
-    return currentLead.attachments.filter((att) => {
+    return leadData.attachments.filter((att) => {
       const key = `${(att.name || '').trim().toLowerCase()}_${(att.size || '').trim()}`;
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
     });
-  }, [currentLead.attachments]);
+  }, [leadData?.attachments]);
+
+  if (!isOpen || !leadData) return null;
+
+  const currentLead = leadData;
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;

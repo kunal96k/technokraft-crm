@@ -116,7 +116,9 @@ export const EmployeePerformanceDetailView: React.FC<EmployeePerformanceDetailVi
           <div className="flex items-center gap-2 self-start sm:self-center">
             <div className="text-right pr-2">
               <div className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500">Reporting Window</div>
-              <div className="text-xs font-semibold text-slate-800 dark:text-slate-200">September 2026 (This Month)</div>
+              <div className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+                {new Date().toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })} (Current Period)
+              </div>
             </div>
             {isModal && onClose && (
               <button
@@ -195,6 +197,8 @@ export const EmployeePerformanceDetailView: React.FC<EmployeePerformanceDetailVi
                           ? 'bg-indigo-100 dark:bg-indigo-950/50 text-indigo-800 dark:text-indigo-300'
                           : row.status === 'At Risk'
                           ? 'bg-amber-100 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300'
+                          : row.status === 'Not Set'
+                          ? 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
                           : 'bg-rose-100 dark:bg-rose-950/50 text-rose-800 dark:text-rose-300'
                       }`}
                     >

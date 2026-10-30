@@ -45,27 +45,52 @@ import { EmployeeSelect } from '../common/EmployeeSelect';
 import { isSuperAdminRecord } from '../../utils/securityUtils';
 
 export const SIDEBAR_MODULE_OPTIONS = [
-  { id: 'dashboard', label: 'CRM Dashboard', desc: 'KPI metrics, live team workload & conversion charts', defaultFor: ['Admin', 'Manager', 'Sales Manager', 'Sales Executive', 'Business Analyst', 'Employee'] },
+  { id: 'dashboard', label: 'CRM Dashboard', desc: 'KPI metrics, live team workload & conversion charts', defaultFor: ['Admin', 'Manager', 'Sales Manager', 'Sales Executive', 'Business Analyst', 'Software Developer', 'DevOps / AWS Cloud Engineer', 'QA / Test Automation Engineer', 'UI/UX Designer', 'Technical Intern', 'Project Manager', 'Tech Lead / Solutions Architect', 'Employee'] },
+  { id: 'projects', label: 'Delivery & Projects', desc: 'Project boards, Kanban work item tracking & technical delivery', defaultFor: ['Admin', 'Manager', 'Project Manager', 'Tech Lead / Solutions Architect', 'Software Developer', 'DevOps / AWS Cloud Engineer', 'QA / Test Automation Engineer', 'UI/UX Designer', 'Technical Intern', 'Business Analyst'] },
+  { id: 'follow-ups', label: 'Activity & Follow-ups', desc: 'Outbound follow-up schedule, task tracker & client meetings', defaultFor: ['Admin', 'Manager', 'Sales Manager', 'Sales Executive', 'Business Analyst', 'Software Developer', 'DevOps / AWS Cloud Engineer', 'QA / Test Automation Engineer', 'UI/UX Designer', 'Technical Intern', 'Project Manager', 'Tech Lead / Solutions Architect', 'Employee'] },
   { id: 'leads', label: 'Leads Management', desc: 'Full leads directory, lead qualification, manual lead & bulk CSV import', defaultFor: ['Admin', 'Manager', 'Sales Manager', 'Sales Executive', 'Business Analyst'] },
-  { id: 'communication', label: 'Communication Hub', desc: 'Corporate email dispatch, WhatsApp messaging & call logging', defaultFor: ['Admin', 'Manager', 'Sales Manager', 'Sales Executive'] },
-  { id: 'follow-ups', label: 'Activity & Follow-ups', desc: 'Outbound follow-up schedule, task tracker & client meetings', defaultFor: ['Admin', 'Manager', 'Sales Manager', 'Sales Executive', 'Business Analyst', 'Employee'] },
-  { id: 'opportunities', label: 'Sales Opportunities', desc: 'Deal pipeline stages, revenue forecasting & commercial proposal quotes', defaultFor: ['Admin', 'Manager', 'Sales Manager', 'Sales Executive', 'Business Analyst'] },
-  { id: 'reports', label: 'Performance & Reports', desc: 'Executive KPI reporting & conversion funnel analytics', defaultFor: ['Admin', 'Manager', 'Sales Manager'] },
+  { id: 'opportunities', label: 'Sales Opportunities', desc: 'Deal pipeline stages, revenue forecasting & commercial proposal quotes', defaultFor: ['Admin', 'Manager', 'Sales Manager', 'Sales Executive', 'Business Analyst', 'Project Manager', 'Tech Lead / Solutions Architect'] },
+  { id: 'communication', label: 'Communication Hub', desc: 'Corporate email dispatch, WhatsApp messaging & call logging', defaultFor: ['Admin', 'Manager', 'Sales Manager', 'Sales Executive', 'Project Manager'] },
+  { id: 'reports', label: 'Performance & Reports', desc: 'Executive KPI reporting & conversion funnel analytics', defaultFor: ['Admin', 'Manager', 'Sales Manager', 'Project Manager'] },
   { id: 'employees', label: 'Employee Administration', desc: 'Team member directory, attendance records & audits', defaultFor: ['Admin', 'Manager', 'Sales Manager'] },
   { id: 'settings', label: 'System Settings', desc: 'System configuration, pipeline stages & master parameters', defaultFor: ['Admin'] },
 ];
 
 export const getDefaultModulesForRole = (role: string): string[] => {
   const normRole = (role || '').trim().toLowerCase();
-  return SIDEBAR_MODULE_OPTIONS.filter((m) =>
-    m.defaultFor.some((df) => {
-      const ndf = df.toLowerCase();
-      if (ndf === normRole) return true;
-      if ((ndf === 'manager' || ndf === 'sales manager') && (normRole === 'manager' || normRole === 'sales manager')) return true;
-      if (normRole.includes('admin') && ndf.includes('admin')) return true;
-      return false;
-    })
-  ).map((m) => m.id);
+  if (normRole.includes('admin') || normRole.includes('super admin')) {
+    return ['dashboard', 'leads', 'communication', 'follow-ups', 'opportunities', 'projects', 'reports', 'employees', 'settings'];
+  }
+  if (normRole.includes('project manager')) {
+    return ['dashboard', 'projects', 'follow-ups', 'opportunities', 'communication', 'reports'];
+  }
+  if (normRole.includes('manager') || normRole.includes('sales manager')) {
+    return ['dashboard', 'leads', 'communication', 'follow-ups', 'opportunities', 'projects', 'reports', 'employees'];
+  }
+  if (normRole.includes('analyst')) {
+    return ['dashboard', 'leads', 'opportunities', 'projects', 'follow-ups'];
+  }
+  if (
+    normRole.includes('dev') ||
+    normRole.includes('developer') ||
+    normRole.includes('aws') ||
+    normRole.includes('cloud') ||
+    normRole.includes('qa') ||
+    normRole.includes('tester') ||
+    normRole.includes('testing') ||
+    normRole.includes('designer') ||
+    normRole.includes('ui') ||
+    normRole.includes('ux') ||
+    normRole.includes('intern') ||
+    normRole.includes('architect') ||
+    normRole.includes('tech lead')
+  ) {
+    return ['dashboard', 'projects', 'follow-ups'];
+  }
+  if (normRole.includes('sales') || normRole.includes('executive')) {
+    return ['dashboard', 'leads', 'communication', 'follow-ups', 'opportunities'];
+  }
+  return ['dashboard', 'projects', 'follow-ups'];
 };
 
 interface AddEmployeeModalProps {
@@ -850,13 +875,31 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
                       <option value="Super Admin">Super Admin (Primary System Role)</option>
                     ) : (
                       <>
-                        <option value="Employee">Employee (Standard Access)</option>
-                        <option value="Sales Executive">Sales Executive</option>
-                        <option value="Business Analyst">Business Analyst</option>
-                        <option value="Manager">Manager</option>
-                        <option value="Sales Manager">Sales Manager</option>
-                        <option value="Admin">Admin (Full System Access)</option>
-                        {!['Super Admin', 'Employee', 'Sales Executive', 'Business Analyst', 'Manager', 'Sales Manager', 'Admin'].includes(accessRole) && (
+                        <optgroup label="Management & Administration">
+                          <option value="Admin">Admin (Full System Access)</option>
+                          <option value="Manager">Manager (General / Operations)</option>
+                          <option value="Sales Manager">Sales Manager</option>
+                          <option value="Project Manager">Project Manager / Delivery Lead</option>
+                        </optgroup>
+                        <optgroup label="Software Engineering & Cloud">
+                          <option value="Software Developer">Software Developer (Full Stack / Frontend / Backend)</option>
+                          <option value="DevOps / AWS Cloud Engineer">DevOps / AWS Cloud Engineer</option>
+                          <option value="Tech Lead / Solutions Architect">Tech Lead / Solutions Architect</option>
+                          <option value="QA / Test Automation Engineer">QA / Test Automation Engineer</option>
+                          <option value="UI/UX Designer">UI/UX Designer</option>
+                          <option value="Technical Intern">Technical Intern (Developer / QA / DevOps)</option>
+                        </optgroup>
+                        <optgroup label="Sales & Business Analysis">
+                          <option value="Sales Executive">Sales Executive</option>
+                          <option value="Business Analyst">Business Analyst</option>
+                          <option value="Employee">Employee (Standard Access)</option>
+                        </optgroup>
+                        {![
+                          'Super Admin', 'Admin', 'Manager', 'Sales Manager', 'Project Manager',
+                          'Software Developer', 'DevOps / AWS Cloud Engineer', 'Tech Lead / Solutions Architect',
+                          'QA / Test Automation Engineer', 'UI/UX Designer', 'Technical Intern',
+                          'Sales Executive', 'Business Analyst', 'Employee'
+                        ].includes(accessRole) && (
                           <option value={accessRole}>{accessRole}</option>
                         )}
                       </>

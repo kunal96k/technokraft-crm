@@ -18,6 +18,10 @@ import { MeetingsPage } from '../pages/followups/MeetingsPage';
 import { PipelinePage } from '../pages/opportunities/PipelinePage';
 import { ProposalsPage } from '../pages/opportunities/ProposalsPage';
 import { OpportunityDetailsPage } from '../pages/opportunities/OpportunityDetailsPage';
+import { ProjectsListPage } from '../pages/projects/ProjectsListPage';
+import { ProjectDetailsPage } from '../pages/projects/ProjectDetailsPage';
+import { ProjectKanbanPage } from '../pages/projects/ProjectKanbanPage';
+import { MyWorkPage } from '../pages/work/MyWorkPage';
 import { PerformanceReportPage } from '../pages/reports/PerformanceReportPage';
 import { EmployeePerformanceDetailPage } from '../pages/reports/EmployeePerformanceDetailPage';
 import { AnalyticsPage } from '../pages/reports/AnalyticsPage';
@@ -69,7 +73,15 @@ export const AppRoutes: React.FC = () => {
         <Route path="/opportunities/proposals" element={<ProposalsPage />} />
         <Route path="/opportunities/:id" element={<OpportunityDetailsPage />} />
 
-        {/* 6. Reports Module */}
+        {/* 6. Delivery & Projects Module */}
+        <Route path="/projects" element={<ProjectsListPage />} />
+        <Route path="/projects/:id" element={<ProjectDetailsPage />} />
+        <Route path="/projects/board" element={<ProjectKanbanPage />} />
+        <Route path="/projects/:id/board" element={<ProjectKanbanPage />} />
+        <Route path="/work" element={<Navigate to="/work/my-tasks" replace />} />
+        <Route path="/work/my-tasks" element={<MyWorkPage />} />
+
+        {/* 7. Reports Module */}
         <Route
           path="/reports"
           element={

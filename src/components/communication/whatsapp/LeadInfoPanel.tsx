@@ -14,6 +14,7 @@ import {
 import { EmployeeAvatar } from '../../common/EmployeeAvatar';
 import { EmployeeSelect } from '../../common/EmployeeSelect';
 import { UserCheck, Loader2 } from 'lucide-react';
+import { WhatsAppConversation } from '../../../types/communication';
 
 interface LeadInfoPanelProps {
   conversation: WhatsAppConversation | null;

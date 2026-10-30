@@ -43,7 +43,7 @@ export const CreateOpportunityModal: React.FC<CreateOpportunityModalProps> = ({
     try {
       const cleanValue = parseFloat(dealValue.replace(/[^0-9.]/g, '')) || 0;
       await createOpportunity({
-        title: opportunityName,
+        name: opportunityName,
         leadId: call.leadId,
         leadCode: call.leadCode,
         companyName: call.companyName,
@@ -56,9 +56,13 @@ export const CreateOpportunityModal: React.FC<CreateOpportunityModalProps> = ({
           name: owner,
           role: 'Sales Owner',
           avatar: owner ? owner.split(' ').map((n) => n[0]).join('') : 'SO',
+          email: '',
         },
-        description: opportunityNotes,
-        source: 'Call Follow-up',
+        service: 'Custom Software Development',
+        requirement: {
+          summary: opportunityName,
+          notes: opportunityNotes,
+        },
       });
       window.dispatchEvent(new CustomEvent('crm-opportunities-updated'));
       onSuccess?.(opportunityName);

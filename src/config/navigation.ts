@@ -4,6 +4,8 @@ import {
   Send,
   CalendarClock,
   ChartNoAxesCombined,
+  FolderKanban,
+  CheckSquare,
   BarChart3,
   UserCheck,
   Settings,
@@ -129,6 +131,37 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
     ],
   },
   {
+    id: 'delivery-section',
+    sectionTitle: 'DELIVERY & PROJECTS',
+    items: [
+      {
+        id: 'projects',
+        title: 'Projects',
+        icon: FolderKanban,
+        badgeColor: 'blue',
+        children: [
+          {
+            id: 'projects-list',
+            title: 'All Projects',
+            path: '/projects',
+          },
+          {
+            id: 'kanban-board',
+            title: 'Kanban Board',
+            path: '/projects/board',
+          },
+        ],
+      },
+      {
+        id: 'my-work',
+        title: 'My Work',
+        path: '/work/my-tasks',
+        icon: CheckSquare,
+        badgeColor: 'green',
+      },
+    ],
+  },
+  {
     id: 'reports-section',
     sectionTitle: 'REPORTS',
     items: [
@@ -216,7 +249,10 @@ export function canViewModule(
     return true;
   }
   // When allowedModules is explicitly configured for this user, it dictates link access
-  if (allowedModules !== undefined && allowedModules !== null && Array.isArray(allowedModules)) {
+  if (allowedModules !== undefined && allowedModules !== null && Array.isArray(allowedModules) && allowedModules.length > 0) {
+    if (item.id === 'projects' || item.id === 'my-work') {
+      return allowedModules.includes('projects');
+    }
     return allowedModules.includes(item.id);
   }
   // Fallback to role-based restrictions

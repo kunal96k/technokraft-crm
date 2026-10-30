@@ -102,13 +102,34 @@ export const ResetPasswordPage: React.FC = () => {
 
   return (
     <div className="min-h-screen w-full flex bg-[#F8FAFC] dark:bg-[#0B1120] text-slate-900 dark:text-slate-100 font-sans transition-colors duration-200 selection:bg-[#5B4DB7]/20 selection:text-[#5B4DB7]">
-      {/* Theme Toggle Button */}
-      <div className="absolute top-4 right-4 z-30 flex items-center gap-2">
+      {/* Mobile Android Top App Bar (< sm) with Back Button, Brand Logo, and Theme Toggle */}
+      <div className="sm:hidden fixed top-0 inset-x-0 z-30 h-14 bg-white/95 dark:bg-[#0B1120]/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-3.5 flex items-center justify-between shadow-2xs transition-colors">
+        <Link
+          to="/login"
+          aria-label="Back to Login"
+          className="w-9 h-9 rounded-full flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 active:scale-95 transition-all"
+        >
+          <ArrowLeft className="w-4.5 h-4.5" />
+        </Link>
+        <BrandLogo collapsed={false} theme={isDark ? 'dark' : 'light'} size="sm" />
         <button
           type="button"
           onClick={() => setTheme(isDark ? 'Light' : 'Dark')}
           aria-label={isDark ? 'Switch to Light mode' : 'Switch to Dark mode'}
-          className="p-2 rounded-xl bg-white/90 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 shadow-xs hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors cursor-pointer"
+          className="w-9 h-9 rounded-full flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 active:scale-95 transition-all cursor-pointer"
+          title={isDark ? 'Switch to Light mode' : 'Switch to Dark mode'}
+        >
+          {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
+        </button>
+      </div>
+
+      {/* Desktop Floating Theme Toggle Button */}
+      <div className="hidden sm:flex absolute top-4 right-4 z-30 items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setTheme(isDark ? 'Light' : 'Dark')}
+          aria-label={isDark ? 'Switch to Light mode' : 'Switch to Dark mode'}
+          className="p-2.5 rounded-xl bg-white/90 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 shadow-xs hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors cursor-pointer"
           title={isDark ? 'Switch to Light mode' : 'Switch to Dark mode'}
         >
           {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
@@ -120,9 +141,11 @@ export const ResetPasswordPage: React.FC = () => {
         <div className="absolute -top-24 -left-24 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none" />
 
-        {/* Brand Logo */}
+        {/* Brand Logo with bottom border matching logo width only */}
         <div className="relative z-10">
-          <BrandLogo collapsed={false} theme="dark" size="lg" />
+          <div className="inline-flex pb-2.5 border-b-2 border-white/30 transition-colors">
+            <BrandLogo collapsed={false} theme="dark" size="lg" />
+          </div>
         </div>
 
         {/* Middle Proposition */}
@@ -158,17 +181,30 @@ export const ResetPasswordPage: React.FC = () => {
 
         {/* Bottom */}
         <div className="relative z-10 flex items-center justify-end text-xs text-purple-200/70 border-t border-white/10 pt-4">
-          <span>&copy; {new Date().getFullYear()} TechnoKraft Services LLP</span>
+          <span>
+            &copy; {new Date().getFullYear()}{' '}
+            <a
+              href="https://www.technokraftservices.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-white hover:text-purple-200 underline font-medium transition-colors"
+            >
+              TechnoKraft Services LLP
+            </a>
+            . All rights reserved.
+          </span>
         </div>
       </div>
 
-      {/* Right Column: Form Container */}
-      <div className="w-full lg:w-1/2 xl:w-7/12 flex items-center justify-center p-4 sm:p-8 lg:p-12">
-        <div className="w-full max-w-md space-y-6 sm:space-y-7">
+      {/* Right Column: Form Container (Android Mobile Friendly) */}
+      <div className="w-full lg:w-1/2 xl:w-7/12 flex flex-col items-center justify-center p-3.5 sm:p-8 lg:p-12 pt-16 sm:pt-8 min-h-screen">
+        <div className="w-full max-w-md space-y-5 sm:space-y-6 max-sm:bg-white max-sm:dark:bg-[#111827] max-sm:rounded-3xl max-sm:p-5 max-sm:shadow-sm max-sm:border max-sm:border-slate-200/80 max-sm:dark:border-slate-800 transition-all">
           {/* Header */}
           <div className="space-y-4">
-            <div className="flex items-center justify-start pb-1">
-              <BrandLogo collapsed={false} theme={isDark ? 'dark' : 'light'} size="md" />
+            <div className="flex items-center justify-start">
+              <div className="inline-flex pb-2.5 border-b-2 border-slate-300 dark:border-slate-600 transition-colors">
+                <BrandLogo collapsed={false} theme={isDark ? 'dark' : 'light'} size="md" />
+              </div>
             </div>
 
             <div>
@@ -382,7 +418,7 @@ export const ResetPasswordPage: React.FC = () => {
           )}
 
           {/* Links */}
-          <div className="flex items-center justify-between text-xs pt-2">
+          <div className="flex items-center justify-between text-xs pt-1">
             <Link
               to="/forgot-password"
               className="inline-flex items-center gap-1 font-medium text-slate-500 dark:text-slate-400 hover:underline"
@@ -398,6 +434,22 @@ export const ResetPasswordPage: React.FC = () => {
               <span>Back to Sign In</span>
             </Link>
           </div>
+
+          {/* Footer Copyright with Hyperlink */}
+          <footer className="pt-2 text-center text-xs text-slate-500 dark:text-slate-400">
+            <p>
+              &copy; {new Date().getFullYear()}{' '}
+              <a
+                href="https://www.technokraftservices.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-[#5B4DB7] dark:text-purple-400 hover:text-[#4d3fa5] dark:hover:text-purple-300 hover:underline transition-colors"
+              >
+                TechnoKraft Services LLP
+              </a>
+              . All rights reserved.
+            </p>
+          </footer>
         </div>
       </div>
     </div>

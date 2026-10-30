@@ -244,13 +244,34 @@ export const ForgotPasswordPage: React.FC = () => {
 
   return (
     <div className="min-h-screen w-full flex bg-[#F8FAFC] dark:bg-[#0B1120] text-slate-900 dark:text-slate-100 font-sans transition-colors duration-200 selection:bg-[#5B4DB7]/20 selection:text-[#5B4DB7]">
-      {/* Theme Toggle Button */}
-      <div className="absolute top-4 right-4 z-30 flex items-center gap-2">
+      {/* Mobile Android Top App Bar (< sm) with Back Button, Brand Logo, and Theme Toggle */}
+      <div className="sm:hidden fixed top-0 inset-x-0 z-30 h-14 bg-white/95 dark:bg-[#0B1120]/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-3.5 flex items-center justify-between shadow-2xs transition-colors">
+        <Link
+          to="/login"
+          aria-label="Back to Login"
+          className="w-9 h-9 rounded-full flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 active:scale-95 transition-all"
+        >
+          <ArrowLeft className="w-4.5 h-4.5" />
+        </Link>
+        <BrandLogo collapsed={false} theme={isDark ? 'dark' : 'light'} size="sm" />
         <button
           type="button"
           onClick={() => setTheme(isDark ? 'Light' : 'Dark')}
           aria-label={isDark ? 'Switch to Light mode' : 'Switch to Dark mode'}
-          className="p-2 rounded-xl bg-white/90 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 shadow-xs hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors cursor-pointer"
+          className="w-9 h-9 rounded-full flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 active:scale-95 transition-all cursor-pointer"
+          title={isDark ? 'Switch to Light mode' : 'Switch to Dark mode'}
+        >
+          {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
+        </button>
+      </div>
+
+      {/* Desktop Floating Theme Toggle Button */}
+      <div className="hidden sm:flex absolute top-4 right-4 z-30 items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setTheme(isDark ? 'Light' : 'Dark')}
+          aria-label={isDark ? 'Switch to Light mode' : 'Switch to Dark mode'}
+          className="p-2.5 rounded-xl bg-white/90 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 shadow-xs hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors cursor-pointer"
           title={isDark ? 'Switch to Light mode' : 'Switch to Dark mode'}
         >
           {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
@@ -262,9 +283,11 @@ export const ForgotPasswordPage: React.FC = () => {
         <div className="absolute -top-24 -left-24 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none" />
 
-        {/* Brand Logo */}
+        {/* Brand Logo with bottom border matching logo width only */}
         <div className="relative z-10">
-          <BrandLogo collapsed={false} theme="dark" size="lg" />
+          <div className="inline-flex pb-2.5 border-b-2 border-white/30 transition-colors">
+            <BrandLogo collapsed={false} theme="dark" size="lg" />
+          </div>
         </div>
 
         {/* Middle Proposition */}
@@ -288,9 +311,8 @@ export const ForgotPasswordPage: React.FC = () => {
           <div className="p-4 rounded-xl bg-white/5 backdrop-blur-md border border-white/10 space-y-3 text-xs text-purple-100/90">
             <div className="flex items-center gap-2.5">
               <span
-                className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                  currentStep === 'IDENTIFIER' ? 'bg-[#5B4DB7] text-white ring-2 ring-purple-300' : 'bg-emerald-500 text-white'
-                }`}
+                className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${currentStep === 'IDENTIFIER' ? 'bg-[#5B4DB7] text-white ring-2 ring-purple-300' : 'bg-emerald-500 text-white'
+                  }`}
               >
                 1
               </span>
@@ -301,13 +323,12 @@ export const ForgotPasswordPage: React.FC = () => {
 
             <div className="flex items-center gap-2.5">
               <span
-                className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                  currentStep === 'OTP'
-                    ? 'bg-[#5B4DB7] text-white ring-2 ring-purple-300'
-                    : currentStep === 'NEW_PASSWORD' || currentStep === 'SUCCESS'
+                className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${currentStep === 'OTP'
+                  ? 'bg-[#5B4DB7] text-white ring-2 ring-purple-300'
+                  : currentStep === 'NEW_PASSWORD' || currentStep === 'SUCCESS'
                     ? 'bg-emerald-500 text-white'
                     : 'bg-white/20 text-purple-300'
-                }`}
+                  }`}
               >
                 2
               </span>
@@ -318,13 +339,12 @@ export const ForgotPasswordPage: React.FC = () => {
 
             <div className="flex items-center gap-2.5">
               <span
-                className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                  currentStep === 'NEW_PASSWORD'
-                    ? 'bg-[#5B4DB7] text-white ring-2 ring-purple-300'
-                    : currentStep === 'SUCCESS'
+                className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${currentStep === 'NEW_PASSWORD'
+                  ? 'bg-[#5B4DB7] text-white ring-2 ring-purple-300'
+                  : currentStep === 'SUCCESS'
                     ? 'bg-emerald-500 text-white'
                     : 'bg-white/20 text-purple-300'
-                }`}
+                  }`}
               >
                 3
               </span>
@@ -337,18 +357,31 @@ export const ForgotPasswordPage: React.FC = () => {
 
         {/* Bottom */}
         <div className="relative z-10 flex items-center justify-between text-xs text-purple-200/70 border-t border-white/10 pt-4">
-          <span>&copy; {new Date().getFullYear()} TechnoKraft Services LLP</span>
+          <span>
+            &copy; {new Date().getFullYear()}{' '}
+            <a
+              href="https://www.technokraftservices.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-white hover:text-purple-200 underline font-medium transition-colors"
+            >
+              TechnoKraft Services LLP
+            </a>
+            . All rights reserved.
+          </span>
           <span className="font-semibold text-emerald-300">Protected by 256-Bit SSL</span>
         </div>
       </div>
 
-      {/* Right Column: Form Container */}
-      <div className="w-full lg:w-1/2 xl:w-7/12 flex items-center justify-center p-4 sm:p-8 lg:p-12">
-        <div className="w-full max-w-md space-y-6 sm:space-y-7">
+      {/* Right Column: Form Container (Android Mobile Friendly) */}
+      <div className="w-full lg:w-1/2 xl:w-7/12 flex flex-col items-center justify-center p-3.5 sm:p-8 lg:p-12 pt-16 sm:pt-8 min-h-screen">
+        <div className="w-full max-w-md space-y-5 sm:space-y-6 max-sm:bg-white max-sm:dark:bg-[#111827] max-sm:rounded-3xl max-sm:p-5 max-sm:shadow-sm max-sm:border max-sm:border-slate-200/80 max-sm:dark:border-slate-800 transition-all">
           {/* Header */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between pb-1">
-              <BrandLogo collapsed={false} theme={isDark ? 'dark' : 'light'} size="md" />
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="inline-flex pb-2.5 border-b-2 border-slate-300 dark:border-slate-600 transition-colors">
+                <BrandLogo collapsed={false} theme={isDark ? 'dark' : 'light'} size="md" />
+              </div>
               <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-purple-50 dark:bg-purple-950/60 text-[#5B4DB7] dark:text-purple-300 border border-purple-200 dark:border-purple-800">
                 Super Admin Only
               </span>
@@ -411,7 +444,7 @@ export const ForgotPasswordPage: React.FC = () => {
                     type="text"
                     required
                     autoFocus
-                    placeholder="e.g. kunall11 or kunalpatil192001@gmail.com"
+                    placeholder="Enter your username or corporate email"
                     value={emailOrUsername}
                     onChange={(e) => setEmailOrUsername(e.target.value)}
                     className="w-full pl-10 pr-3.5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40 focus:border-[#5B4DB7] shadow-xs transition-colors"
@@ -479,7 +512,7 @@ export const ForgotPasswordPage: React.FC = () => {
                     required
                     autoFocus
                     maxLength={6}
-                    placeholder="e.g. 123456"
+                    placeholder="Enter the 6-digit verification OTP"
                     value={otp}
                     onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
                     className="w-full pl-10 pr-3.5 py-3 font-mono text-center tracking-[8px] text-lg font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-purple-700 dark:text-purple-300 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/40 focus:border-[#5B4DB7] shadow-xs"
@@ -602,11 +635,10 @@ export const ForgotPasswordPage: React.FC = () => {
                 {/* Match indicator */}
                 {confirmPassword && (
                   <span
-                    className={`text-[11px] mt-1.5 flex items-center gap-1 font-medium ${
-                      isPasswordMatch
-                        ? 'text-emerald-600 dark:text-emerald-400'
-                        : 'text-rose-600 dark:text-rose-400'
-                    }`}
+                    className={`text-[11px] mt-1.5 flex items-center gap-1 font-medium ${isPasswordMatch
+                      ? 'text-emerald-600 dark:text-emerald-400'
+                      : 'text-rose-600 dark:text-rose-400'
+                      }`}
                   >
                     {isPasswordMatch ? (
                       <>
@@ -630,9 +662,8 @@ export const ForgotPasswordPage: React.FC = () => {
                 </span>
                 <div className="flex items-center gap-2">
                   <span
-                    className={`w-3.5 h-3.5 rounded-full flex items-center justify-center ${
-                      hasMinLength ? 'bg-emerald-500 text-white' : 'bg-slate-300 dark:bg-slate-700 text-slate-500'
-                    }`}
+                    className={`w-3.5 h-3.5 rounded-full flex items-center justify-center ${hasMinLength ? 'bg-emerald-500 text-white' : 'bg-slate-300 dark:bg-slate-700 text-slate-500'
+                      }`}
                   >
                     <Check className="w-2.5 h-2.5" />
                   </span>
@@ -642,9 +673,8 @@ export const ForgotPasswordPage: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <span
-                    className={`w-3.5 h-3.5 rounded-full flex items-center justify-center ${
-                      hasUppercase ? 'bg-emerald-500 text-white' : 'bg-slate-300 dark:bg-slate-700 text-slate-500'
-                    }`}
+                    className={`w-3.5 h-3.5 rounded-full flex items-center justify-center ${hasUppercase ? 'bg-emerald-500 text-white' : 'bg-slate-300 dark:bg-slate-700 text-slate-500'
+                      }`}
                   >
                     <Check className="w-2.5 h-2.5" />
                   </span>
@@ -654,9 +684,8 @@ export const ForgotPasswordPage: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <span
-                    className={`w-3.5 h-3.5 rounded-full flex items-center justify-center ${
-                      hasNumber ? 'bg-emerald-500 text-white' : 'bg-slate-300 dark:bg-slate-700 text-slate-500'
-                    }`}
+                    className={`w-3.5 h-3.5 rounded-full flex items-center justify-center ${hasNumber ? 'bg-emerald-500 text-white' : 'bg-slate-300 dark:bg-slate-700 text-slate-500'
+                      }`}
                   >
                     <Check className="w-2.5 h-2.5" />
                   </span>
@@ -721,7 +750,7 @@ export const ForgotPasswordPage: React.FC = () => {
 
           {/* Back to Login Link */}
           {currentStep !== 'SUCCESS' && (
-            <div className="text-center pt-2">
+            <div className="text-center pt-1">
               <Link
                 to="/login"
                 className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#5B4DB7] dark:text-purple-400 hover:underline"
@@ -731,6 +760,22 @@ export const ForgotPasswordPage: React.FC = () => {
               </Link>
             </div>
           )}
+
+          {/* Footer Copyright with Hyperlink */}
+          <footer className="pt-2 text-center text-xs text-slate-500 dark:text-slate-400">
+            <p>
+              &copy; {new Date().getFullYear()}{' '}
+              <a
+                href="https://www.technokraftservices.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-[#5B4DB7] dark:text-purple-400 hover:text-[#4d3fa5] dark:hover:text-purple-300 hover:underline transition-colors"
+              >
+                TechnoKraft Services LLP
+              </a>
+              . All rights reserved.
+            </p>
+          </footer>
         </div>
       </div>
     </div>

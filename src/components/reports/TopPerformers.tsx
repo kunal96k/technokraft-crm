@@ -34,7 +34,7 @@ export const TopPerformers: React.FC<TopPerformersProps> = ({
           conversionRate: emp.conversionRate,
           targetAchievementRate: emp.targetAchievementRate,
           rank: idx + 1,
-          badge: idx === 0 ? 'Top Closer' : idx === 1 ? 'Velocity Leader' : 'High Volume',
+          badge: (emp.won || 0) > 0 ? (idx === 0 ? 'Top Closer' : idx === 1 ? 'Velocity Leader' : 'Deal Producer') : 'Active Pipeline',
         }));
     }
     return [];
@@ -45,18 +45,18 @@ export const TopPerformers: React.FC<TopPerformersProps> = ({
   }
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 sm:p-5 shadow-2xs space-y-3.5">
-      <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 flex items-center justify-center">
+    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 sm:p-5 shadow-2xs space-y-3.5 min-w-0 overflow-hidden">
+      <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800 min-w-0">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          <div className="w-6 h-6 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 flex items-center justify-center shrink-0">
             <Trophy className="w-3.5 h-3.5" />
           </div>
-          <div>
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white">Top Performers</h3>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400">Highest quota pacing for current period</p>
+          <div className="min-w-0 flex-1">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white truncate">Top Performers</h3>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">Highest quota pacing for current period</p>
           </div>
         </div>
-        <span className="text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500">Pacing Leaderboard</span>
+        <span className="text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500 shrink-0">Pacing Leaderboard</span>
       </div>
 
       <div className="space-y-2.5">
@@ -70,11 +70,11 @@ export const TopPerformers: React.FC<TopPerformersProps> = ({
 
           return (
             <div
-              key={rep.name || rep.id}
+              key={`${rep.id || rep.name}-${rep.rank}`}
               onClick={() => onSelectEmployeeName && onSelectEmployeeName(rep.name)}
-              className="flex items-center justify-between p-2.5 rounded-lg border border-slate-100 dark:border-slate-800 hover:border-purple-200 dark:hover:border-purple-800 hover:bg-purple-50/30 dark:hover:bg-purple-950/20 transition-all cursor-pointer"
+              className="flex items-center justify-between gap-2 p-2.5 rounded-lg border border-slate-100 dark:border-slate-800 hover:border-purple-200 dark:hover:border-purple-800 hover:bg-purple-50/30 dark:hover:bg-purple-950/20 transition-all cursor-pointer min-w-0"
             >
-              <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-2.5 min-w-0 flex-1 overflow-hidden">
                 <div
                   className={`w-6 h-6 rounded-full border flex items-center justify-center text-xs font-bold font-mono shrink-0 ${medalBg}`}
                 >
@@ -86,17 +86,17 @@ export const TopPerformers: React.FC<TopPerformersProps> = ({
                   profilePhoto={rep.profilePhoto}
                   size="sm"
                 />
-                <div>
-                  <div className="text-xs font-bold text-slate-900 dark:text-white hover:text-[#5B4DB7] dark:hover:text-purple-300">
+                <div className="min-w-0 flex-1">
+                  <div className="text-xs font-bold text-slate-900 dark:text-white hover:text-[#5B4DB7] dark:hover:text-purple-300 truncate">
                     {rep.name}
                   </div>
-                  <div className="text-[10px] text-slate-500 dark:text-slate-400">
+                  <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
                     {rep.role} • {rep.dealsWon} deals ({formatLakhsINR(rep.wonRevenue)})
                   </div>
                 </div>
               </div>
 
-              <div className="text-right">
+              <div className="text-right shrink-0">
                 <div className="text-xs font-bold font-mono text-emerald-700 dark:text-emerald-400">
                   {rep.targetAchievementRate}% Target
                 </div>

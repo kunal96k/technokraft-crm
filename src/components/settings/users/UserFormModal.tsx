@@ -14,6 +14,13 @@ interface UserFormModalProps {
 
 const ROLES: UserRoleType[] = [
   'Admin',
+  'Project Manager',
+  'Tech Lead / Solutions Architect',
+  'Software Developer',
+  'DevOps / AWS Cloud Engineer',
+  'QA / Test Automation Engineer',
+  'UI/UX Designer',
+  'Technical Intern',
   'Sales Manager',
   'Sales Executive',
   'Business Analyst',

@@ -40,7 +40,7 @@ export function buildSafeApiUrl(inputUrl: string): string {
 
 /**
  * Sanitizes the current browser location if credentials exist in the address bar
- * (for instance if a user navigates to `http://ec2-user@18.143.152.101/...`).
+ * (for instance if a user navigates to `http://ec2-user@13.212.120.172/...`).
  */
 export function sanitizeBrowserLocation(): void {
   if (typeof window === 'undefined') return;

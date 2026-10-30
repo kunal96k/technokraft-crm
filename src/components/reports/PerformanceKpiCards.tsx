@@ -22,7 +22,6 @@ interface PerformanceKpiCardsProps {
     totalCallsLogged?: number;
     totalEmailsSent?: number;
     followUpsCompleted?: number;
-    avgResponseTimeHours?: number;
   };
 }
 

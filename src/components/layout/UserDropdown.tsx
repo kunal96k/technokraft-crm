@@ -175,6 +175,16 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({ user, onRoleChange }
                       {liveWorking.formatted}
                     </span>
                   </div>
+                  {authUser?.todayBreakTime && authUser.todayBreakTime !== '0m' && authUser.todayBreakTime !== '---' && (
+                    <div className="flex items-center justify-between text-[10px] bg-amber-50/70 dark:bg-amber-950/40 px-2 py-1 rounded-md border border-amber-200/60 dark:border-amber-800/50">
+                      <span className="flex items-center gap-1 text-amber-700 dark:text-amber-400 font-semibold">
+                        Break Today:
+                      </span>
+                      <span className="font-mono font-bold text-slate-800 dark:text-slate-100">
+                        {authUser.todayBreakTime}
+                      </span>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

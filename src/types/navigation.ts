@@ -5,10 +5,17 @@ export type UserRole =
   | 'Admin'
   | 'Sales Manager'
   | 'Manager'
-  | 'Sales Executive'
-  | 'Business Analyst'
-  | 'Technical Team'
   | 'Project Manager'
+  | 'Tech Lead / Solutions Architect'
+  | 'Software Developer'
+  | 'DevOps / AWS Cloud Engineer'
+  | 'QA / Test Automation Engineer'
+  | 'UI/UX Designer'
+  | 'Technical Intern'
+  | 'Technical Team'
+  | 'Developer'
+  | 'Business Analyst'
+  | 'Sales Executive'
   | 'Employee';
 
 export interface NavigationChildItem {

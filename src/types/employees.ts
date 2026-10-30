@@ -3,24 +3,26 @@ export type EmployeeStatus = 'Active' | 'Inactive' | 'On Leave' | 'Suspended';
 export type EmploymentType = 'Full Time' | 'Part Time' | 'Contract' | 'Intern';
 
 export type DepartmentType =
+  | 'Development'
+  | 'DevOps & Cloud'
+  | 'QA / Testing'
+  | 'UI/UX Design'
+  | 'Project Management'
   | 'Sales'
   | 'Business Analysis'
-  | 'Development'
-  | 'QA / Testing'
-  | 'DevOps'
-  | 'UI/UX'
   | 'HR'
   | 'Finance'
   | 'Administration'
   | 'Management';
 
 export const DEPARTMENTS: DepartmentType[] = [
+  'Development',
+  'DevOps & Cloud',
+  'QA / Testing',
+  'UI/UX Design',
+  'Project Management',
   'Sales',
   'Business Analysis',
-  'Development',
-  'QA / Testing',
-  'DevOps',
-  'UI/UX',
   'HR',
   'Finance',
   'Administration',
@@ -28,27 +30,45 @@ export const DEPARTMENTS: DepartmentType[] = [
 ];
 
 export type EmployeeRole =
-  | 'Sales Executive'
-  | 'Business Analyst'
-  | 'Sales Manager'
-  | 'Project Manager'
   | 'Software Developer'
-  | 'QA Engineer'
+  | 'Full Stack Developer'
+  | 'Frontend Developer'
+  | 'Backend Developer'
   | 'DevOps Engineer'
+  | 'AWS / Cloud Engineer'
+  | 'QA Engineer'
   | 'UI/UX Designer'
+  | 'Solutions Architect'
+  | 'Tech Lead'
+  | 'Project Manager'
+  | 'Developer Intern'
+  | 'DevOps Intern'
+  | 'QA Intern'
+  | 'Business Analyst'
+  | 'Sales Executive'
+  | 'Sales Manager'
   | 'HR Executive'
   | 'Admin'
   | 'Manager';
 
 export const EMPLOYEE_ROLES: EmployeeRole[] = [
-  'Sales Executive',
-  'Business Analyst',
-  'Sales Manager',
-  'Project Manager',
   'Software Developer',
-  'QA Engineer',
+  'Full Stack Developer',
+  'Frontend Developer',
+  'Backend Developer',
   'DevOps Engineer',
+  'AWS / Cloud Engineer',
+  'QA Engineer',
   'UI/UX Designer',
+  'Solutions Architect',
+  'Tech Lead',
+  'Project Manager',
+  'Developer Intern',
+  'DevOps Intern',
+  'QA Intern',
+  'Business Analyst',
+  'Sales Executive',
+  'Sales Manager',
   'HR Executive',
   'Admin',
   'Manager',
@@ -57,11 +77,20 @@ export const EMPLOYEE_ROLES: EmployeeRole[] = [
 export const MANAGERS: string[] = [];
 
 export type CrmAccessRole =
-  | 'Employee'
-  | 'Sales Executive'
+  | 'Super Admin'
+  | 'Admin'
+  | 'Project Manager'
+  | 'Tech Lead / Solutions Architect'
+  | 'Software Developer'
+  | 'DevOps / AWS Cloud Engineer'
+  | 'QA / Test Automation Engineer'
+  | 'UI/UX Designer'
+  | 'Technical Intern'
   | 'Business Analyst'
+  | 'Sales Manager'
   | 'Manager'
-  | 'Admin';
+  | 'Sales Executive'
+  | 'Employee';
 
 export type WorkStatus = 'Working' | 'Break' | 'Logged Out' | 'Offline' | 'On Leave';
 

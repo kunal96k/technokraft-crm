@@ -15,8 +15,6 @@ export const MarkLostModal: React.FC<MarkLostModalProps> = ({
   opportunity,
   onConfirmLost,
 }) => {
-  if (!isOpen || !opportunity) return null;
-
   const [reason, setReason] = useState<LossReason>('Budget');
   const [notes, setNotes] = useState<string>('');
 
@@ -31,9 +29,12 @@ export const MarkLostModal: React.FC<MarkLostModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!opportunity) return;
     onConfirmLost(opportunity.id, reason, notes);
     onClose();
   };
+
+  if (!isOpen || !opportunity) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">

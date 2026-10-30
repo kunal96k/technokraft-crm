@@ -20,6 +20,7 @@ import {
   fetchPerformanceReport,
   downloadReportFile,
 } from '../../services/reportService';
+import { useAuth } from '../../context/AuthContext';
 import { Loader2 } from 'lucide-react';
 
 export const PerformanceReportPage: React.FC = () => {
@@ -102,6 +103,7 @@ export const PerformanceReportPage: React.FC = () => {
     }
   };
 
+  const { user: authUser } = useAuth();
   const employees = performanceData?.employees || [];
   const teamSummary = performanceData?.teamSummary;
   const kpis = {
@@ -112,7 +114,19 @@ export const PerformanceReportPage: React.FC = () => {
     totalCallsLogged: teamSummary?.calls ?? 0,
     totalEmailsSent: teamSummary?.emails ?? 0,
     followUpsCompleted: teamSummary?.followUps ?? 0,
-    avgResponseTimeHours: 2.4,
+  };
+
+  const handleScopeChange = (scope: RoleScope) => {
+    setSelectedScope(scope);
+    if (scope === 'My Performance' && authUser?.name) {
+      setSelectedEmployee(authUser.name);
+    } else if (scope === 'My Team' && authUser?.department) {
+      setSelectedTeam(authUser.department);
+      setSelectedEmployee('All Employees');
+    } else if (scope === 'All Employees' || scope === 'Company Overview') {
+      setSelectedEmployee('All Employees');
+      setSelectedTeam('All Teams');
+    }
   };
 
   const handleResetFilters = () => {
@@ -150,7 +164,7 @@ export const PerformanceReportPage: React.FC = () => {
         selectedScope={selectedScope}
         onEmployeeChange={setSelectedEmployee}
         onTeamChange={setSelectedTeam}
-        onScopeChange={setSelectedScope}
+        onScopeChange={handleScopeChange}
         onReset={handleResetFilters}
       />
 
@@ -180,14 +194,14 @@ export const PerformanceReportPage: React.FC = () => {
 
           {/* Top Performers and Target Achievement */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-2 min-w-0">
               <TargetAchievementCard
                 employees={employees}
                 selectedEmployeeName={selectedEmployee}
                 onSelectEmployeeName={(name) => setSelectedEmployee(name)}
               />
             </div>
-            <div>
+            <div className="min-w-0">
               <TopPerformers
                 performers={performanceData?.topPerformers}
                 employees={employees}
@@ -197,23 +211,29 @@ export const PerformanceReportPage: React.FC = () => {
           </div>
 
           {/* Activity Breakdown & Conversion */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-            <EmployeeActivityChart
-              employees={employees}
-              employeeName={selectedEmployee}
-            />
-            <ActivityConversionAnalysis
-              employees={employees}
-              conversions={performanceData?.activityConversions}
-              onSelectEmployee={(emp) => setSelectedDetailEmployee(emp)}
-            />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-stretch">
+            <div className="min-w-0 h-full">
+              <EmployeeActivityChart
+                employees={employees}
+                employeeName={selectedEmployee}
+              />
+            </div>
+            <div className="min-w-0 h-full">
+              <ActivityConversionAnalysis
+                employees={employees}
+                conversions={performanceData?.activityConversions}
+                onSelectEmployee={(emp) => setSelectedDetailEmployee(emp)}
+              />
+            </div>
           </div>
 
           {/* Employee Performance Detailed Table */}
-          <EmployeePerformanceTable
-            employees={employees}
-            onSelectEmployee={(emp) => setSelectedDetailEmployee(emp)}
-          />
+          <div className="min-w-0">
+            <EmployeePerformanceTable
+              employees={employees}
+              onSelectEmployee={(emp) => setSelectedDetailEmployee(emp)}
+            />
+          </div>
         </>
       )}
 

@@ -13,7 +13,7 @@ export type RoleScope =
   | 'All Employees'
   | 'My Performance';
 
-export type TargetStatus = 'On Track' | 'At Risk' | 'Achieved' | 'Below Target';
+export type TargetStatus = 'On Track' | 'At Risk' | 'Achieved' | 'Below Target' | 'Not Set';
 
 export type EmployeeActivityStatus = 'Active' | 'Needs Attention' | 'Inactive';
 

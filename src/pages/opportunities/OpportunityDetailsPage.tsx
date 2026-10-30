@@ -24,6 +24,7 @@ import {
   Share2,
   Pencil,
   UserCheck,
+  X,
 } from 'lucide-react';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { OpportunityStageBadge } from '../../components/opportunities/OpportunityStageBadge';
@@ -36,6 +37,7 @@ import { MarkLostModal } from '../../components/opportunities/MarkLostModal';
 import { AddFollowUpModal } from '../../components/opportunities/AddFollowUpModal';
 import { ConfirmationModal } from '../../components/common/ConfirmationModal';
 import { EmployeeAvatar } from '../../components/common/EmployeeAvatar';
+import { EmployeeSelect } from '../../components/common/EmployeeSelect';
 import {
   OpportunityRecord,
   OpportunityStage,
@@ -46,6 +48,7 @@ import {
 import {
   fetchOpportunityById,
   updateOpportunityStage,
+  updateOpportunity as updateOpportunityApi,
   addOpportunityFollowUp,
   deleteOpportunity as deleteOpportunityApi,
 } from '../../services/opportunityService';
@@ -77,12 +80,60 @@ export const OpportunityDetailsPage: React.FC = () => {
   const [emailProposal, setEmailProposal] = useState<ProposalRecord | null>(null);
   const [deleteProposalTarget, setDeleteProposalTarget] = useState<ProposalRecord | null>(null);
   const [isDeleteOppOpen, setIsDeleteOppOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [teamOwner, setTeamOwner] = useState('');
+  const [teamBA, setTeamBA] = useState('');
+  const [teamReviewer, setTeamReviewer] = useState('');
+  const [isSavingTeam, setIsSavingTeam] = useState(false);
 
   // Toast
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 4000);
+  };
+
+  const handleOpenEditTeam = () => {
+    setTeamOwner(opportunity?.owner?.name || '');
+    setTeamBA(opportunity?.businessAnalyst?.name || '');
+    setTeamReviewer(opportunity?.technicalReviewer?.name || '');
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveTeam = async () => {
+    if (!opportunity) return;
+    setIsSavingTeam(true);
+    try {
+      const updated = await updateOpportunityApi(opportunity.id, {
+        owner: teamOwner ? {
+          name: teamOwner,
+          role: opportunity.owner?.role || 'Sales Owner',
+          avatar: teamOwner.split(' ').map((n) => n[0]).join('').substring(0, 2).toUpperCase(),
+          email: opportunity.owner?.email || '',
+        } : undefined,
+        businessAnalyst: teamBA ? {
+          name: teamBA,
+          role: 'Business Analyst',
+          avatar: teamBA.split(' ').map((n) => n[0]).join('').substring(0, 2).toUpperCase(),
+          email: '',
+        } : undefined,
+        technicalReviewer: teamReviewer ? {
+          name: teamReviewer,
+          role: 'Solutions Architect',
+          avatar: teamReviewer.split(' ').map((n) => n[0]).join('').substring(0, 2).toUpperCase(),
+          email: '',
+        } : undefined,
+      });
+      setOpportunity(updated);
+      showToast('Assigned Deal Team updated successfully.');
+      setIsEditModalOpen(false);
+      window.dispatchEvent(new Event('crm-opportunities-updated'));
+    } catch (err) {
+      console.error(err);
+      showToast('Failed to update deal team.');
+    } finally {
+      setIsSavingTeam(false);
+    }
   };
 
   const loadData = useCallback(async () => {
@@ -614,7 +665,7 @@ export const OpportunityDetailsPage: React.FC = () => {
                 </h3>
                 <button
                   type="button"
-                  onClick={() => setIsEditModalOpen(true)}
+                  onClick={handleOpenEditTeam}
                   className="text-[11px] font-semibold text-[#5B4DB7] dark:text-purple-400 hover:underline cursor-pointer"
                 >
                   Edit Team
@@ -995,6 +1046,83 @@ export const OpportunityDetailsPage: React.FC = () => {
         onConfirm={handleDeleteProposal}
         onCancel={() => setDeleteProposalTarget(null)}
       />
+
+      {/* EDIT DEAL TEAM MODAL */}
+      {isEditModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl max-w-md w-full p-6 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <UserCheck className="w-5 h-5 text-[#5B4DB7] dark:text-purple-400" />
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                  Edit Assigned Deal Team
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsEditModalOpen(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="py-4 space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Lead Sales Owner
+                </label>
+                <EmployeeSelect
+                  value={teamOwner}
+                  onChange={setTeamOwner}
+                  placeholder="Select Sales Owner"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Business Analyst (BA)
+                </label>
+                <EmployeeSelect
+                  value={teamBA}
+                  onChange={setTeamBA}
+                  placeholder="Select Business Analyst"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Solutions Architect / Reviewer
+                </label>
+                <EmployeeSelect
+                  value={teamReviewer}
+                  onChange={setTeamReviewer}
+                  placeholder="Select Solutions Architect"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-slate-100 dark:border-slate-800">
+              <button
+                type="button"
+                onClick={() => setIsEditModalOpen(false)}
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isSavingTeam}
+                onClick={handleSaveTeam}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white bg-[#5B4DB7] hover:bg-[#4d3ea3] dark:bg-purple-600 dark:hover:bg-purple-700 transition-colors shadow-2xs disabled:opacity-50 cursor-pointer"
+              >
+                {isSavingTeam ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
+                <span>Save Changes</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* DELETE OPPORTUNITY CONFIRMATION */}
       <ConfirmationModal

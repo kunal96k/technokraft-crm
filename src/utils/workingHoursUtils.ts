@@ -52,13 +52,45 @@ export function parseLoginTime(timeStr?: string | null): Date | null {
 }
 
 /**
- * Calculates live working duration between login time and now (or logout time)
+ * Parses duration strings like "1h 40m", "45m", "02:15", "1 hr 30 mins" into seconds.
+ */
+export function parseDurationToSeconds(durationStr?: string | null): number {
+  if (!durationStr || durationStr === '—' || durationStr === '---' || durationStr.trim() === '') return 0;
+  const str = durationStr.trim();
+
+  let totalSecs = 0;
+  const hMatch = str.match(/(\d+)\s*h(?:r|rs)?/i);
+  const mMatch = str.match(/(\d+)\s*m(?:in|ins)?/i);
+  const sMatch = str.match(/(\d+)\s*s(?:ec|ecs)?/i);
+
+  if (hMatch || mMatch || sMatch) {
+    if (hMatch) totalSecs += parseInt(hMatch[1], 10) * 3600;
+    if (mMatch) totalSecs += parseInt(mMatch[1], 10) * 60;
+    if (sMatch) totalSecs += parseInt(sMatch[1], 10);
+    return totalSecs;
+  }
+
+  const colonMatch = str.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+  if (colonMatch) {
+    const hrs = parseInt(colonMatch[1], 10);
+    const mins = parseInt(colonMatch[2], 10);
+    const secs = colonMatch[3] ? parseInt(colonMatch[3], 10) : 0;
+    return hrs * 3600 + mins * 60 + secs;
+  }
+
+  return 0;
+}
+
+/**
+ * Calculates live working duration between login time and now (or logout time),
+ * seamlessly incorporating baseWorkingMinutes from previous sessions today.
  */
 export function calculateWorkingDuration(
   loginTimeStr?: string | null,
   logoutTimeStr?: string | null,
   isWorking = true,
-  fallbackDuration?: string | null
+  fallbackDuration?: string | null,
+  baseWorkingMinutes?: number | null
 ): {
   formatted: string;
   fullText: string;
@@ -67,7 +99,43 @@ export function calculateWorkingDuration(
   seconds: number;
 } {
   const loginDate = parseLoginTime(loginTimeStr);
-  if (!loginDate) {
+
+  // If user is not actively working
+  if (!isWorking) {
+    if (fallbackDuration && fallbackDuration !== '—' && fallbackDuration !== '---' && fallbackDuration.trim() !== '') {
+      const fallbackSecs = parseDurationToSeconds(fallbackDuration);
+      if (fallbackSecs > 0) {
+        const hours = Math.floor(fallbackSecs / 3600);
+        const minutes = Math.floor((fallbackSecs % 3600) / 60);
+        const seconds = fallbackSecs % 60;
+        return {
+          formatted: `${hours}h ${String(minutes).padStart(2, '0')}m`,
+          fullText: `${hours} hr${hours !== 1 ? 's' : ''} ${minutes} min${minutes !== 1 ? 's' : ''}`,
+          hours,
+          minutes,
+          seconds,
+        };
+      }
+    }
+
+    if (loginDate && logoutTimeStr) {
+      const logoutDate = parseLoginTime(logoutTimeStr);
+      if (logoutDate) {
+        const diffMs = Math.max(0, logoutDate.getTime() - loginDate.getTime());
+        const totalSecs = Math.floor(diffMs / 1000);
+        const hours = Math.floor(totalSecs / 3600);
+        const minutes = Math.floor((totalSecs % 3600) / 60);
+        const seconds = totalSecs % 60;
+        return {
+          formatted: `${hours}h ${String(minutes).padStart(2, '0')}m`,
+          fullText: `${hours} hr${hours !== 1 ? 's' : ''} ${minutes} min${minutes !== 1 ? 's' : ''}`,
+          hours,
+          minutes,
+          seconds,
+        };
+      }
+    }
+
     const fallback = fallbackDuration && fallbackDuration !== '—' && fallbackDuration.trim() !== ''
       ? fallbackDuration
       : '0h 00m';
@@ -80,9 +148,39 @@ export function calculateWorkingDuration(
     };
   }
 
-  const endDate = (!isWorking && logoutTimeStr) ? (parseLoginTime(logoutTimeStr) || new Date()) : new Date();
-  const diffMs = Math.max(0, endDate.getTime() - loginDate.getTime());
-  const totalSeconds = Math.floor(diffMs / 1000);
+  // Actively Working:
+  let baseSeconds = 0;
+  if (baseWorkingMinutes !== undefined && baseWorkingMinutes !== null && baseWorkingMinutes > 0) {
+    baseSeconds = baseWorkingMinutes * 60;
+  }
+
+  let sessionSeconds = 0;
+  if (loginDate) {
+    const now = new Date();
+    const diffMs = Math.max(0, now.getTime() - loginDate.getTime());
+    sessionSeconds = Math.floor(diffMs / 1000);
+  }
+
+  let totalSeconds = baseSeconds + sessionSeconds;
+
+  // Fallback check if baseWorkingMinutes was not provided but fallbackDuration is greater than current session alone
+  if (baseSeconds === 0 && fallbackDuration) {
+    const fallbackSecs = parseDurationToSeconds(fallbackDuration);
+    if (fallbackSecs > totalSeconds) {
+      totalSeconds = fallbackSecs;
+    }
+  }
+
+  if (totalSeconds === 0 && fallbackDuration && fallbackDuration !== '—' && fallbackDuration.trim() !== '') {
+    return {
+      formatted: fallbackDuration,
+      fullText: fallbackDuration,
+      hours: 0,
+      minutes: 0,
+      seconds: 0,
+    };
+  }
+
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
@@ -94,7 +192,7 @@ export function calculateWorkingDuration(
 }
 
 /**
- * React hook that recalculates live working hours every 15 seconds
+ * React hook that recalculates live working hours periodically
  */
 export function useLiveWorkingTime(
   user?: {
@@ -104,6 +202,7 @@ export function useLiveWorkingTime(
     lastLogoutAt?: string | null;
     workStatus?: string | null;
     todayWorkingTime?: string | null;
+    baseWorkingMinutes?: number | null;
   } | null,
   intervalMs = 15000
 ) {
@@ -112,12 +211,12 @@ export function useLiveWorkingTime(
   const logoutRef = user?.lastLogoutAt || user?.logoutTime;
 
   const [workingTime, setWorkingTime] = useState(() =>
-    calculateWorkingDuration(loginRef, logoutRef, isWorking, user?.todayWorkingTime)
+    calculateWorkingDuration(loginRef, logoutRef, isWorking, user?.todayWorkingTime, user?.baseWorkingMinutes)
   );
 
   useEffect(() => {
     const update = () => {
-      setWorkingTime(calculateWorkingDuration(loginRef, logoutRef, isWorking, user?.todayWorkingTime));
+      setWorkingTime(calculateWorkingDuration(loginRef, logoutRef, isWorking, user?.todayWorkingTime, user?.baseWorkingMinutes));
     };
     update();
 
@@ -125,7 +224,7 @@ export function useLiveWorkingTime(
 
     const timer = setInterval(update, intervalMs);
     return () => clearInterval(timer);
-  }, [loginRef, logoutRef, isWorking, user?.todayWorkingTime, intervalMs]);
+  }, [loginRef, logoutRef, isWorking, user?.todayWorkingTime, user?.baseWorkingMinutes, intervalMs]);
 
   return workingTime;
 }

@@ -38,6 +38,7 @@ import { ScheduleEmailModal } from './ScheduleEmailModal';
 import { CreateTemplateModal } from './CreateTemplateModal';
 import { useAuth } from '../../context/AuthContext';
 import { EmployeeAvatar } from '../common/EmployeeAvatar';
+import { renderBrandedEmailHtml } from '../../utils/emailTemplateRenderer';
 import { EmployeeSelect } from '../common/EmployeeSelect';
 import { findCachedEmployee } from '../../services/employeeService';
 

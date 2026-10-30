@@ -7,7 +7,7 @@ import { Employee } from '../../types/employees';
 export interface EmployeeSelectProps
   extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>, 'children' | 'onChange'> {
   value?: any;
-  onChange: (e: React.ChangeEvent<HTMLSelectElement> | string) => void;
+  onChange?: (e: React.ChangeEvent<HTMLSelectElement> | string) => void;
   placeholder?: string;
   showAllOption?: string;
   valueField?: 'name' | 'id' | 'employeeCode' | string;
@@ -18,6 +18,9 @@ export interface EmployeeSelectProps
   showRoleInLabel?: boolean;
   className?: string;
   containerClassName?: string;
+  align?: 'left' | 'right' | 'auto' | 'full';
+  dropdownClassName?: string;
+  onSelectEmployee?: (employee: Employee | null) => void;
 }
 
 export const EmployeeSelect: React.FC<EmployeeSelectProps> = ({
@@ -33,6 +36,9 @@ export const EmployeeSelect: React.FC<EmployeeSelectProps> = ({
   showRoleInLabel = true,
   className = '',
   containerClassName = '',
+  align = 'auto',
+  dropdownClassName = '',
+  onSelectEmployee,
   disabled = false,
   name = '',
   id,
@@ -41,6 +47,8 @@ export const EmployeeSelect: React.FC<EmployeeSelectProps> = ({
 
   // Dropdown open state
   const [isOpen, setIsOpen] = useState(false);
+  const [dropdownAlign, setDropdownAlign] = useState<'left' | 'right' | 'full'>('full');
+  const [openUpward, setOpenUpward] = useState(false);
   // Real-time search query for the input
   const [searchQuery, setSearchQuery] = useState('');
   // Debounced search query (250ms debounce for responsive typing)
@@ -84,17 +92,47 @@ export const EmployeeSelect: React.FC<EmployeeSelectProps> = ({
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Focus search input when dropdown opens
+  // Auto-align, smart vertical flip, and focus search input when dropdown opens
   useEffect(() => {
     if (isOpen) {
+      if (align === 'full') {
+        setDropdownAlign('full');
+      } else if (align === 'right') {
+        setDropdownAlign('right');
+      } else if (align === 'left') {
+        setDropdownAlign('left');
+      } else if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        // If container width is wide enough (>= 260px) and align is auto, span full width to match trigger input
+        if (rect.width >= 260) {
+          setDropdownAlign('full');
+        } else {
+          const spaceOnRight = window.innerWidth - rect.left;
+          if (spaceOnRight < 300 || rect.right > window.innerWidth - 60 || rect.left > window.innerWidth / 2) {
+            setDropdownAlign('right');
+          } else {
+            setDropdownAlign('left');
+          }
+        }
+
+        // Smart vertical flip detection
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const spaceAbove = rect.top;
+        if (spaceBelow < 280 && spaceAbove > spaceBelow) {
+          setOpenUpward(true);
+        } else {
+          setOpenUpward(false);
+        }
+      }
+
       setSearchQuery('');
       setDebouncedQuery('');
       setHighlightedIndex(-1);
       setTimeout(() => {
-        searchInputRef.current?.focus();
+        searchInputRef.current?.focus({ preventScroll: true });
       }, 50);
     }
-  }, [isOpen]);
+  }, [isOpen, align]);
 
   // Handle outside click to close dropdown
   useEffect(() => {
@@ -169,6 +207,16 @@ export const EmployeeSelect: React.FC<EmployeeSelectProps> = ({
   // Emit synthetic event compatible with both HTML select listeners and raw string consumers
   const emitChange = useCallback(
     (newValue: string) => {
+      const matchedEmp = newValue
+        ? activeEmployees.find(
+            (e) =>
+              getOptionValue(e).toLowerCase() === newValue.toLowerCase() ||
+              e.name.toLowerCase() === newValue.toLowerCase() ||
+              String(e.id) === newValue ||
+              (e.employeeCode && e.employeeCode.toLowerCase() === newValue.toLowerCase())
+          ) || null
+        : null;
+
       const safeEvent: any = {
         target: {
           value: newValue,
@@ -179,14 +227,25 @@ export const EmployeeSelect: React.FC<EmployeeSelectProps> = ({
           name: name || '',
         },
         value: newValue,
+        id: matchedEmp ? matchedEmp.id : undefined,
+        name: matchedEmp ? matchedEmp.name : '',
+        role: matchedEmp ? matchedEmp.role : '',
+        avatar: matchedEmp ? (matchedEmp.avatar || '') : '',
+        employee: matchedEmp,
         toString: () => newValue,
         valueOf: () => newValue,
         toJSON: () => newValue,
         [Symbol.toPrimitive]: () => newValue,
       };
-      onChange(safeEvent);
+
+      if (onSelectEmployee) {
+        onSelectEmployee(matchedEmp);
+      }
+      if (typeof onChange === 'function') {
+        onChange(safeEvent);
+      }
     },
-    [onChange, name]
+    [onChange, onSelectEmployee, name, activeEmployees, getOptionValue]
   );
 
   const handleSelectOption = (optVal: string) => {
@@ -264,15 +323,14 @@ export const EmployeeSelect: React.FC<EmployeeSelectProps> = ({
         type="button"
         disabled={disabled || isLoading}
         onClick={() => !disabled && setIsOpen(!isOpen)}
-        className={`w-full flex items-center justify-between gap-2 px-3 py-2 text-left text-xs rounded-lg border transition-all cursor-pointer ${
-          disabled
-            ? 'bg-slate-100 dark:bg-slate-800/60 border-slate-200 dark:border-slate-800 text-slate-400 cursor-not-allowed'
-            : isOpen
+        className={`w-full flex items-center justify-between gap-2 px-3 py-2 text-left text-xs rounded-lg border transition-all cursor-pointer ${disabled
+          ? 'bg-slate-100 dark:bg-slate-800/60 border-slate-200 dark:border-slate-800 text-slate-400 cursor-not-allowed'
+          : isOpen
             ? 'bg-white dark:bg-slate-900 border-[#5B4DB7] dark:border-purple-500 ring-2 ring-[#5B4DB7]/20 text-slate-900 dark:text-slate-100 shadow-xs'
             : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-600 text-slate-900 dark:text-slate-100 shadow-2xs'
-        } ${className}`}
+          } ${className}`}
       >
-        <div className="flex items-center gap-2 min-w-0 flex-1">
+        <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
           {selectedEmployee ? (
             <>
               <EmployeeAvatar
@@ -282,17 +340,17 @@ export const EmployeeSelect: React.FC<EmployeeSelectProps> = ({
                 email={selectedEmployee.email}
                 size="xs"
               />
-              <div className="flex items-center gap-1.5 truncate">
-                <span className="font-semibold text-slate-900 dark:text-slate-100 truncate">
+              <div className="flex items-center gap-1.5 min-w-0 flex-1 overflow-hidden">
+                <span className="font-semibold text-slate-900 dark:text-slate-100 truncate min-w-0 shrink">
                   {selectedEmployee.name}
                 </span>
                 {selectedEmployee.employeeCode && (
-                  <span className="font-mono text-[10px] px-1.5 py-0.2 rounded bg-purple-50 dark:bg-purple-950/50 text-[#5B4DB7] dark:text-purple-300 border border-purple-200/60 dark:border-purple-800/60 shrink-0">
+                  <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-purple-50 dark:bg-purple-950/50 text-[#5B4DB7] dark:text-purple-300 border border-purple-200/60 dark:border-purple-800/60 shrink-0">
                     {selectedEmployee.employeeCode}
                   </span>
                 )}
                 {showRoleInLabel && selectedEmployee.role && (
-                  <span className="text-[11px] text-slate-400 dark:text-slate-500 truncate hidden sm:inline">
+                  <span className="text-[11px] text-slate-400 dark:text-slate-500 truncate min-w-0 shrink hidden md:inline">
                     • {selectedEmployee.role}
                   </span>
                 )}
@@ -343,7 +401,17 @@ export const EmployeeSelect: React.FC<EmployeeSelectProps> = ({
 
       {/* Floating Typeahead Dropdown */}
       {isOpen && (
-        <div className="absolute left-0 right-0 min-w-[260px] top-full mt-1.5 z-50 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+        <div
+          className={`absolute z-50 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150 ${
+            openUpward ? 'bottom-full mb-1.5' : 'top-full mt-1.5'
+          } ${
+            dropdownAlign === 'full'
+              ? 'left-0 right-0 w-full min-w-full'
+              : dropdownAlign === 'right'
+              ? 'right-0 left-auto min-w-[270px] sm:min-w-[300px] max-w-[min(380px,calc(100vw-1.5rem))]'
+              : 'left-0 right-auto min-w-[270px] sm:min-w-[300px] max-w-[min(380px,calc(100vw-1.5rem))]'
+          } ${dropdownClassName}`}
+        >
           {/* Debounced Search Input Header */}
           <div className="p-2 border-b border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/50">
             <div className="relative">
@@ -389,11 +457,10 @@ export const EmployeeSelect: React.FC<EmployeeSelectProps> = ({
               <button
                 type="button"
                 onClick={() => handleSelectOption('')}
-                className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs flex items-center justify-between transition-colors cursor-pointer ${
-                  !trimmedValue
-                    ? 'bg-purple-50 dark:bg-purple-950/40 text-[#5B4DB7] dark:text-purple-300 font-semibold'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-                }`}
+                className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs flex items-center justify-between transition-colors cursor-pointer ${!trimmedValue
+                  ? 'bg-purple-50 dark:bg-purple-950/40 text-[#5B4DB7] dark:text-purple-300 font-semibold'
+                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  }`}
               >
                 <span className="italic">{defaultLabel}</span>
                 {!trimmedValue && <Check className="w-3.5 h-3.5 text-[#5B4DB7] dark:text-purple-400" />}
@@ -408,11 +475,10 @@ export const EmployeeSelect: React.FC<EmployeeSelectProps> = ({
                   key={opt.value}
                   type="button"
                   onClick={() => handleSelectOption(opt.value)}
-                  className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs flex items-center justify-between transition-colors cursor-pointer ${
-                    isSelected
-                      ? 'bg-purple-50 dark:bg-purple-950/40 text-[#5B4DB7] dark:text-purple-300 font-semibold'
-                      : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
-                  }`}
+                  className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs flex items-center justify-between transition-colors cursor-pointer ${isSelected
+                    ? 'bg-purple-50 dark:bg-purple-950/40 text-[#5B4DB7] dark:text-purple-300 font-semibold'
+                    : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                    }`}
                 >
                   <span>{opt.label}</span>
                   {isSelected && <Check className="w-3.5 h-3.5 text-[#5B4DB7] dark:text-purple-400" />}
@@ -434,11 +500,10 @@ export const EmployeeSelect: React.FC<EmployeeSelectProps> = ({
                     key={emp.id || emp.employeeCode || emp.name}
                     type="button"
                     onClick={() => handleSelectOption(optVal)}
-                    className={`w-full text-left p-2 rounded-lg text-xs flex items-center justify-between gap-2.5 transition-colors cursor-pointer group ${
-                      isSelected
-                        ? 'bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/80 text-purple-900 dark:text-purple-100'
-                        : 'hover:bg-slate-100/80 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200'
-                    }`}
+                    className={`w-full text-left p-2 rounded-lg text-xs flex items-center justify-between gap-2.5 transition-colors cursor-pointer group ${isSelected
+                      ? 'bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/80 text-purple-900 dark:text-purple-100'
+                      : 'hover:bg-slate-100/80 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200'
+                      }`}
                   >
                     <div className="flex items-center gap-2.5 min-w-0 flex-1">
                       <EmployeeAvatar

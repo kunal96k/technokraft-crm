@@ -115,6 +115,11 @@ export async function downloadReportFile(
   reportType: 'Performance' | 'Analytics' | 'Complete Dossier' = 'Performance',
   params: PerformanceReportQueryParams = {}
 ): Promise<void> {
+  if (format === 'PDF') {
+    window.print();
+    return;
+  }
+
   const query = new URLSearchParams();
   query.append('format', format);
   query.append('reportType', reportType);
@@ -132,7 +137,9 @@ export async function downloadReportFile(
   const url = window.URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `crm_${reportType.toLowerCase().replace(/\s+/g, '_')}_${params.dateRange || 'report'}.${format === 'CSV' ? 'csv' : 'txt'}`;
+  const ext = format === 'Excel' || format === 'CSV' ? 'csv' : 'txt';
+  const cleanScope = params.scope ? `_${params.scope.toLowerCase().replace(/\s+/g, '_')}` : '';
+  a.download = `crm_${reportType.toLowerCase().replace(/\s+/g, '_')}${cleanScope}_${params.dateRange || 'report'}.${ext}`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);

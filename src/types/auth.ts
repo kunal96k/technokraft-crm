@@ -32,6 +32,7 @@ export interface AuthUser {
   employmentType?: string;
   todayAttendanceStatus?: string;
   todayWorkingTime?: string;
+  baseWorkingMinutes?: number;
   todayBreakTime?: string;
   permissions: string[];
   allowedModules?: string[];

@@ -232,7 +232,7 @@ export const AnalyticsPage: React.FC = () => {
           />
 
           {/* 2-Column Section 1: Lead Funnel & Lead Source Attribution */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
             <ConversionFunnel
               funnel={funnelData}
               title="Lead Funnel & Progression Velocity"
@@ -242,13 +242,13 @@ export const AnalyticsPage: React.FC = () => {
           </div>
 
           {/* 2-Column Section 2: Pipeline Analytics & Service Analytics */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
             <PipelineAnalytics stages={analyticsData?.pipelineStages || []} />
             <ServiceAnalytics services={analyticsData?.services || []} />
           </div>
 
           {/* 2-Column Section 3: Monthly Trends & Win/Loss Analysis */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
             <MonthlyTrendChart data={analyticsData?.monthlyTrends || []} />
             <WinLossAnalysis data={analyticsData?.winLoss || DEFAULT_WIN_LOSS} />
           </div>
@@ -257,7 +257,7 @@ export const AnalyticsPage: React.FC = () => {
           <CommunicationAnalytics stats={analyticsData?.communications || []} />
 
           {/* Operational Bottlenecks: Stale Leads & Overdue Follow-ups */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
             <StaleLeadAnalysis stats={analyticsData?.staleLeads || []} />
             <OverdueFollowupAnalysis stats={analyticsData?.overdueFollowUps || []} />
           </div>

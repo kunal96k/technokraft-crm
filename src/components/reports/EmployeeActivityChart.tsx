@@ -113,7 +113,7 @@ export const EmployeeActivityChart: React.FC<EmployeeActivityChartProps> = ({
   ];
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 sm:p-5 shadow-2xs space-y-4">
+    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 sm:p-5 shadow-2xs h-full flex flex-col justify-between space-y-4">
       {/* Card Header & Filter Tabs */}
       <div className="flex flex-col gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
         <div className="flex items-start justify-between gap-3">
@@ -161,7 +161,7 @@ export const EmployeeActivityChart: React.FC<EmployeeActivityChartProps> = ({
       </div>
 
       {/* Chart Canvas */}
-      <div className="w-full h-64 sm:h-72">
+      <div className="w-full flex-1 min-h-[260px] sm:min-h-[280px]">
         {!chartData || chartData.length === 0 ? (
           <div className="h-full flex items-center justify-center text-xs text-slate-400 font-medium">
             No activity logged during this time period.

@@ -392,6 +392,43 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
                     </p>
                   </div>
                 </div>
+
+                {/* Live Working Time */}
+                <div className="p-3.5 rounded-xl bg-gradient-to-br from-teal-500/10 via-teal-500/5 to-transparent border border-teal-200 dark:border-teal-900/50 flex items-start gap-3">
+                  <div className="p-2.5 rounded-lg bg-teal-100 dark:bg-teal-900/50 text-teal-600 dark:text-teal-400 shrink-0">
+                    <Clock className="w-5 h-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[11px] font-medium text-teal-800 dark:text-teal-300 flex items-center gap-1.5">
+                      Live Working Time Today
+                      <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse" />
+                    </p>
+                    <p className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white mt-0.5 font-mono">
+                      {liveWorking.formatted}
+                    </p>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
+                      Ticking live across daily sessions
+                    </p>
+                  </div>
+                </div>
+
+                {/* Total Break Time */}
+                <div className="p-3.5 rounded-xl bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent border border-amber-200 dark:border-amber-900/50 flex items-start gap-3">
+                  <div className="p-2.5 rounded-lg bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400 shrink-0">
+                    <Calendar className="w-5 h-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[11px] font-medium text-amber-800 dark:text-amber-300">
+                      Total Break Time Today
+                    </p>
+                    <p className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white mt-0.5 font-mono">
+                      {user?.todayBreakTime && user.todayBreakTime !== '---' ? user.todayBreakTime : '0m'}
+                    </p>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
+                      Accumulated between sessions
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
 

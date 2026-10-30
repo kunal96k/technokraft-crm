@@ -16,16 +16,15 @@ export const AddFollowUpModal: React.FC<AddFollowUpModalProps> = ({
   opportunity,
   onAddFollowUp,
 }) => {
-  if (!isOpen || !opportunity) return null;
-
   const [date, setDate] = useState<string>('2026-09-10');
   const [time, setTime] = useState<string>('03:00 PM');
   const [type, setType] = useState<'Call' | 'Meeting' | 'Demo' | 'Email'>('Call');
-  const [assignedTo, setAssignedTo] = useState<string>(opportunity.owner.name);
+  const [assignedTo, setAssignedTo] = useState<string>(opportunity?.owner?.name || '');
   const [notes, setNotes] = useState<string>('Follow up on commercial proposal and timeline.');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!opportunity) return;
     const newFu: OpportunityFollowUp = {
       id: `fu-${Date.now()}`,
       date,
@@ -38,6 +37,8 @@ export const AddFollowUpModal: React.FC<AddFollowUpModalProps> = ({
     onAddFollowUp(opportunity.id, newFu);
     onClose();
   };
+
+  if (!isOpen || !opportunity) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto">
