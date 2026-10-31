@@ -50,6 +50,8 @@ export const EmployeeCard: React.FC<EmployeeCardProps> = ({
 }) => {
   const { user } = useAuth();
   const isSuperAdmin = isSuperAdminRecord(employee);
+  const isOwnProfile = !!user && (String(user.id) === String(employee.id) || (!!user.employeeCode && user.employeeCode === employee.employeeCode));
+  const canModify = !isSuperAdmin || isOwnProfile;
   const isMasked = shouldMaskForSecurity(employee, user);
 
   const handleSelect = () => {
@@ -154,7 +156,7 @@ export const EmployeeCard: React.FC<EmployeeCardProps> = ({
             </button>
           ) : (
             <>
-              {onResetPassword && (
+              {onResetPassword && canModify && (
                 <button
                   type="button"
                   onClick={() => onResetPassword(employee)}
@@ -164,7 +166,7 @@ export const EmployeeCard: React.FC<EmployeeCardProps> = ({
                   <KeyRound className="w-3.5 h-3.5" />
                 </button>
               )}
-              {onEdit && (
+              {onEdit && canModify && (
                 <button
                   type="button"
                   onClick={() => onEdit(employee)}

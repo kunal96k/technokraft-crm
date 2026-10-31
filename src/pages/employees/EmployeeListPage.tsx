@@ -623,10 +623,20 @@ export const EmployeeListPage: React.FC = () => {
                 employees={employees}
                 onView={(emp) => setSelectedEmployee(emp)}
                 onEdit={(emp) => {
+                  if (isSuperAdminRecord(emp) && !(authUser && (String(authUser.id) === String(emp.id) || authUser.employeeCode === emp.employeeCode))) {
+                    showToast('Security Restriction: Super Admin profiles can only be updated by the account owner.');
+                    return;
+                  }
                   setEditingEmployee(emp);
                   setIsAddModalOpen(true);
                 }}
-                onResetPassword={(emp) => setResettingPasswordEmployee(emp)}
+                onResetPassword={(emp) => {
+                  if (isSuperAdminRecord(emp) && !(authUser && (String(authUser.id) === String(emp.id) || authUser.employeeCode === emp.employeeCode))) {
+                    showToast('Security Restriction: Super Admin passwords can only be reset by the account owner.');
+                    return;
+                  }
+                  setResettingPasswordEmployee(emp);
+                }}
                 onViewPerformance={(emp) => setSelectedEmployee(emp)}
                 onViewAttendance={(emp) => setSelectedEmployee(emp)}
                 onDeactivate={(emp) => setDeactivatingEmployee(emp)}
@@ -647,10 +657,20 @@ export const EmployeeListPage: React.FC = () => {
                 employee={emp}
                 onSelect={(e) => setSelectedEmployee(e)}
                 onEdit={(e) => {
+                  if (isSuperAdminRecord(e) && !(authUser && (String(authUser.id) === String(e.id) || authUser.employeeCode === e.employeeCode))) {
+                    showToast('Security Restriction: Super Admin profiles can only be updated by the account owner.');
+                    return;
+                  }
                   setEditingEmployee(e);
                   setIsAddModalOpen(true);
                 }}
-                onResetPassword={(e) => setResettingPasswordEmployee(e)}
+                onResetPassword={(e) => {
+                  if (isSuperAdminRecord(e) && !(authUser && (String(authUser.id) === String(e.id) || authUser.employeeCode === e.employeeCode))) {
+                    showToast('Security Restriction: Super Admin passwords can only be reset by the account owner.');
+                    return;
+                  }
+                  setResettingPasswordEmployee(e);
+                }}
                 onDeactivate={(e) => setDeactivatingEmployee(e)}
                 onActivate={handleActivate}
                 onDelete={(e) => setDeletingEmployee(e)}
@@ -774,10 +794,20 @@ export const EmployeeListPage: React.FC = () => {
               employee={selectedEmployee}
               onClose={() => setSelectedEmployee(null)}
               onEdit={(emp) => {
+                if (isSuperAdminRecord(emp) && !(authUser && (String(authUser.id) === String(emp.id) || authUser.employeeCode === emp.employeeCode))) {
+                  showToast('Security Restriction: Super Admin profiles can only be updated by the account owner.');
+                  return;
+                }
                 setEditingEmployee(emp);
                 setIsAddModalOpen(true);
               }}
-              onResetPassword={(emp) => setResettingPasswordEmployee(emp)}
+              onResetPassword={(emp) => {
+                if (isSuperAdminRecord(emp) && !(authUser && (String(authUser.id) === String(emp.id) || authUser.employeeCode === emp.employeeCode))) {
+                  showToast('Security Restriction: Super Admin passwords can only be reset by the account owner.');
+                  return;
+                }
+                setResettingPasswordEmployee(emp);
+              }}
               onDeactivate={(emp) => setDeactivatingEmployee(emp)}
               onActivate={handleActivate}
               onDelete={(emp) => setDeletingEmployee(emp)}

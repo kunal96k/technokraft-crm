@@ -22,6 +22,8 @@ import {
 import { Employee } from '../../types/employees';
 import { EmployeeStatusBadge, WorkStatusBadge } from './EmployeeStatusBadge';
 import { buildSafeApiUrl } from '../../utils/urlUtils';
+import { useAuth } from '../../context/AuthContext';
+import { isSuperAdminRecord } from '../../utils/securityUtils';
 import { EmployeeOverview } from './EmployeeOverview';
 import { EmployeeActivity } from './EmployeeActivity';
 import { EmployeeTargets } from './EmployeeTargets';
@@ -49,6 +51,11 @@ export const EmployeeDetails: React.FC<EmployeeDetailsProps> = ({
   isModalOrDrawer = true,
 }) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isSuperAdmin = isSuperAdminRecord(employee);
+  const isOwnProfile = !!user && (String(user.id) === String(employee.id) || (!!user.employeeCode && user.employeeCode === employee.employeeCode));
+  const canModify = !isSuperAdmin || isOwnProfile;
+
   const [activeTab, setActiveTab] = useState<'overview' | 'activity' | 'targets' | 'attendance'>('overview');
 
   const tabs = [
@@ -94,16 +101,18 @@ export const EmployeeDetails: React.FC<EmployeeDetailsProps> = ({
 
           {/* Quick Header Actions */}
           <div className="flex items-center gap-2 flex-wrap">
-            <button
-              type="button"
-              onClick={() => onEdit(employee)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-            >
-              <Edit2 className="w-3.5 h-3.5" />
-              <span>Edit</span>
-            </button>
+            {canModify && (
+              <button
+                type="button"
+                onClick={() => onEdit(employee)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+              >
+                <Edit2 className="w-3.5 h-3.5" />
+                <span>Edit</span>
+              </button>
+            )}
 
-            {onResetPassword && (
+            {onResetPassword && canModify && (
               <button
                 type="button"
                 onClick={() => onResetPassword(employee)}
@@ -123,24 +132,26 @@ export const EmployeeDetails: React.FC<EmployeeDetailsProps> = ({
               <span>View Performance</span>
             </button>
 
-            {employee.status === 'Active' ? (
-              <button
-                type="button"
-                onClick={() => onDeactivate(employee)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 border border-rose-200 dark:border-rose-900/40 transition-colors"
-              >
-                <UserX className="w-3.5 h-3.5" />
-                <span>Deactivate</span>
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => onActivate(employee)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/40 transition-colors"
-              >
-                <UserCheck className="w-3.5 h-3.5" />
-                <span>Activate</span>
-              </button>
+            {!isSuperAdmin && (
+              employee.status === 'Active' ? (
+                <button
+                  type="button"
+                  onClick={() => onDeactivate(employee)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 border border-rose-200 dark:border-rose-900/40 transition-colors"
+                >
+                  <UserX className="w-3.5 h-3.5" />
+                  <span>Deactivate</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => onActivate(employee)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/40 transition-colors"
+                >
+                  <UserCheck className="w-3.5 h-3.5" />
+                  <span>Activate</span>
+                </button>
+              )
             )}
 
             {onDelete && (
@@ -234,11 +245,10 @@ export const EmployeeDetails: React.FC<EmployeeDetailsProps> = ({
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
-                  isActive
+                className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${isActive
                     ? 'bg-purple-600 text-white shadow-xs'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
-                }`}
+                  }`}
               >
                 <Icon className="w-3.5 h-3.5" />
                 <span>{tab.label}</span>
@@ -253,7 +263,7 @@ export const EmployeeDetails: React.FC<EmployeeDetailsProps> = ({
         {activeTab === 'overview' && (
           <EmployeeOverview
             employee={employee}
-            onResetPassword={onResetPassword}
+            onResetPassword={canModify ? onResetPassword : undefined}
           />
         )}
         {activeTab === 'activity' && <EmployeeActivity employee={employee} />}

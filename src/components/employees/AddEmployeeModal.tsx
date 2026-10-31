@@ -151,7 +151,8 @@ const getInitialFormValues = (emp?: Employee | null) => {
 
   const cleanDob = cleanDateForInput(emp.dateOfBirth);
   const cleanJoinDate = cleanDateForInput(emp.joiningDate) || new Date().toISOString().split('T')[0];
-  const empAccessRole = (emp.accessRole || (emp.role as any) || 'Employee') as CrmAccessRole;
+  const isSuper = isSuperAdminRecord(emp);
+  const empAccessRole = isSuper ? ('Super Admin' as CrmAccessRole) : ((emp.accessRole || (emp.role as any) || 'Employee') as CrmAccessRole);
 
   return {
     firstName: fName,
@@ -162,13 +163,13 @@ const getInitialFormValues = (emp?: Employee | null) => {
     dob: cleanDob,
     employeeCode: emp.employeeCode || '',
     companyEmail: emp.email || '',
-    department: emp.department || 'Sales',
-    role: emp.role || 'Sales Executive',
+    department: emp.department || (isSuper ? 'Executive Management' : 'Sales'),
+    role: emp.role || (isSuper ? 'System Administrator' : 'Sales Executive'),
     reportingManager: emp.reportingManager || '',
     employmentType: (emp.employmentType || 'Full Time') as EmploymentType,
     joiningDate: cleanJoinDate,
-    status: (emp.status || 'Active') as EmployeeStatus,
-    crmAccess: emp.crmAccess ?? true,
+    status: (isSuper ? 'Active' : (emp.status || 'Active')) as EmployeeStatus,
+    crmAccess: isSuper ? true : (emp.crmAccess ?? true),
     accessRole: empAccessRole,
     allowedModules:
       emp.allowedModules !== undefined && emp.allowedModules !== null && Array.isArray(emp.allowedModules)
@@ -417,6 +418,16 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
         overallStatus: initialEmployee?.targets?.overallStatus || 'On Track',
       },
     };
+
+    if (isSuperAdminRecord(initialEmployee)) {
+      employeeData.accessRole = 'Super Admin' as CrmAccessRole;
+      employeeData.status = 'Active' as EmployeeStatus;
+      employeeData.crmAccess = true;
+      employeeData.isAccountLocked = false;
+      if (!employeeData.role) {
+        employeeData.role = initialEmployee?.role || 'System Administrator';
+      }
+    }
 
     try {
       setIsSubmitting(true);

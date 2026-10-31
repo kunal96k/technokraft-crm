@@ -387,6 +387,8 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
           {(() => {
             const isActionSuperAdmin = isSuperAdminRecord(openActionEmployee);
             const isActionMasked = shouldMaskForSecurity(openActionEmployee, user);
+            const isOwnProfile = !!user && (String(user.id) === String(openActionEmployee.id) || (!!user.employeeCode && user.employeeCode === openActionEmployee.employeeCode));
+            const canModify = !isActionSuperAdmin || isOwnProfile;
 
             if (isActionMasked) {
               return (
@@ -422,33 +424,37 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
                   <span>View Details</span>
                 </button>
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    const emp = openActionEmployee;
-                    setOpenActionEmployee(null);
-                    setMenuPosition(null);
-                    handleEdit(emp);
-                  }}
-                  className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 cursor-pointer"
-                >
-                  <Edit2 className="w-3.5 h-3.5 text-slate-400" />
-                  <span>Edit Employee</span>
-                </button>
+                {canModify && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const emp = openActionEmployee;
+                      setOpenActionEmployee(null);
+                      setMenuPosition(null);
+                      handleEdit(emp);
+                    }}
+                    className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 cursor-pointer"
+                  >
+                    <Edit2 className="w-3.5 h-3.5 text-slate-400" />
+                    <span>Edit Employee</span>
+                  </button>
+                )}
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    const emp = openActionEmployee;
-                    setOpenActionEmployee(null);
-                    setMenuPosition(null);
-                    onResetPassword?.(emp);
-                  }}
-                  className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 cursor-pointer"
-                >
-                  <KeyRound className="w-3.5 h-3.5 text-indigo-500" />
-                  <span>Reset Password</span>
-                </button>
+                {canModify && onResetPassword && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const emp = openActionEmployee;
+                      setOpenActionEmployee(null);
+                      setMenuPosition(null);
+                      onResetPassword?.(emp);
+                    }}
+                    className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 cursor-pointer"
+                  >
+                    <KeyRound className="w-3.5 h-3.5 text-indigo-500" />
+                    <span>Reset Password</span>
+                  </button>
+                )}
 
                 <button
                   type="button"
