@@ -260,6 +260,7 @@ export interface DailyAttendanceRecord {
   employeeRole: string;
   department: string;
   avatar: string;
+  profilePhoto?: string;
   date: string;
   loginTime: string;
   logoutTime: string;

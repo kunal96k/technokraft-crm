@@ -5,6 +5,7 @@ import { AttendanceStatusBadge, WorkStatusBadge } from '../employees/EmployeeSta
 import { useAuth } from '../../context/AuthContext';
 import { shouldMaskForSecurity } from '../../utils/securityUtils';
 import { calculateWorkingDuration } from '../../utils/workingHoursUtils';
+import { buildSafeApiUrl } from '../../utils/urlUtils';
 
 interface AttendanceTableProps {
   records: DailyAttendanceRecord[];
@@ -126,6 +127,19 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
         <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
           {records.map((rec) => {
             const isMasked = shouldMaskForSecurity(rec, user);
+            const photoUrl = rec.profilePhoto
+              ? buildSafeApiUrl(rec.profilePhoto)
+              : rec.avatar && (rec.avatar.startsWith('http') || rec.avatar.startsWith('/api') || rec.avatar.startsWith('data:'))
+              ? buildSafeApiUrl(rec.avatar)
+              : null;
+            const initials = rec.employeeName && rec.employeeName.trim()
+              ? (() => {
+                  const parts = rec.employeeName.trim().split(/\s+/);
+                  return parts.length > 1
+                    ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+                    : rec.employeeName.trim().slice(0, 2).toUpperCase();
+                })()
+              : (rec.avatar || 'TK');
 
             return (
               <tr
@@ -136,8 +150,21 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
                 {/* Employee */}
                 <td className="py-3.5 px-4 whitespace-nowrap">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 font-semibold text-xs flex items-center justify-center shrink-0 border border-purple-200 dark:border-purple-800/60">
-                      {isMasked ? <ShieldCheck className="w-4 h-4 text-[#5B4DB7] dark:text-purple-300" /> : rec.avatar}
+                    <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 font-semibold text-xs flex items-center justify-center shrink-0 border border-purple-200 dark:border-purple-800/60 overflow-hidden">
+                      {isMasked ? (
+                        <ShieldCheck className="w-4 h-4 text-[#5B4DB7] dark:text-purple-300" />
+                      ) : photoUrl ? (
+                        <img
+                          src={photoUrl}
+                          alt={rec.employeeName}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            (e.currentTarget as HTMLElement).style.display = 'none';
+                          }}
+                        />
+                      ) : (
+                        initials
+                      )}
                     </div>
                     <div>
                       <div className="flex items-center gap-1.5 font-semibold text-slate-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">

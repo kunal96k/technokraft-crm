@@ -69,15 +69,26 @@ export async function fetchAuditLogs(
   }
 
   const data = await res.json();
+  const pageMeta = data.page || data;
+  const content: AuditLogItem[] = Array.isArray(data.content)
+    ? data.content
+    : (Array.isArray(data) ? data : []);
+  const totalElements = typeof pageMeta.totalElements === 'number'
+    ? pageMeta.totalElements
+    : (typeof data.totalElements === 'number' ? data.totalElements : content.length);
+  const totalPages = typeof pageMeta.totalPages === 'number'
+    ? pageMeta.totalPages
+    : (typeof data.totalPages === 'number' ? data.totalPages : Math.max(1, Math.ceil(totalElements / (params.size || 50))));
+
   return {
-    content: data.content || [],
-    totalElements: data.totalElements ?? 0,
-    totalPages: data.totalPages ?? 0,
-    size: data.size ?? params.size ?? 50,
-    number: data.number ?? params.page ?? 0,
+    content,
+    totalElements,
+    totalPages,
+    size: typeof pageMeta.size === 'number' ? pageMeta.size : (params.size ?? 50),
+    number: typeof pageMeta.number === 'number' ? pageMeta.number : (params.page ?? 0),
     first: Boolean(data.first),
     last: Boolean(data.last),
-    empty: Boolean(data.empty),
+    empty: Boolean(data.empty ?? (content.length === 0)),
   };
 }
 

@@ -134,9 +134,16 @@ export const AuditLogsPage: React.FC = () => {
       };
 
       const res = await fetchAuditLogs(params);
-      setLogs(res.content);
-      setTotalElements(res.totalElements);
-      setTotalPages(res.totalPages || 1);
+      const items = res.content || [];
+      const totalElems = typeof res.totalElements === 'number' && res.totalElements >= 0
+        ? res.totalElements
+        : items.length;
+      const totalPgs = typeof res.totalPages === 'number' && res.totalPages > 0
+        ? res.totalPages
+        : Math.max(1, Math.ceil(totalElems / pageSize));
+      setLogs(items);
+      setTotalElements(totalElems);
+      setTotalPages(Math.max(1, totalPgs));
     } catch (err: any) {
       console.error('[AuditLogsPage] Fetch error:', err);
       setErrorMessage(err.message || 'Unable to load audit logs.');
@@ -156,6 +163,22 @@ export const AuditLogsPage: React.FC = () => {
     sortBy,
     sortDirection,
   ]);
+
+  const getPageNumbers = () => {
+    const pages: (number | string)[] = [];
+    if (totalPages <= 7) {
+      for (let i = 0; i < totalPages; i++) pages.push(i);
+    } else {
+      pages.push(0);
+      if (page > 2) pages.push('...');
+      const start = Math.max(1, page - 1);
+      const end = Math.min(totalPages - 2, page + 1);
+      for (let i = start; i <= end; i++) pages.push(i);
+      if (page < totalPages - 3) pages.push('...');
+      pages.push(totalPages - 1);
+    }
+    return pages;
+  };
 
   // Initial load
   useEffect(() => {
@@ -686,15 +709,15 @@ export const AuditLogsPage: React.FC = () => {
             <span>
               Showing{' '}
               <strong className="text-slate-900 dark:text-white font-semibold">
-                {totalElements === 0 ? 0 : page * pageSize + 1}
+                {totalElements === 0 ? (logs.length > 0 ? 1 : 0) : page * pageSize + 1}
               </strong>{' '}
               to{' '}
               <strong className="text-slate-900 dark:text-white font-semibold">
-                {Math.min((page + 1) * pageSize, totalElements)}
+                {totalElements === 0 ? logs.length : Math.min((page + 1) * pageSize, totalElements)}
               </strong>{' '}
               of{' '}
               <strong className="text-slate-900 dark:text-white font-semibold">
-                {totalElements.toLocaleString()}
+                {(totalElements === 0 ? logs.length : totalElements).toLocaleString()}
               </strong>{' '}
               events
             </span>
@@ -727,6 +750,7 @@ export const AuditLogsPage: React.FC = () => {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-slate-100 dark:border-slate-800/80 bg-slate-50/75 dark:bg-slate-800/40 text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                <th className="py-3 px-3 text-center w-14">#</th>
                 <th className="py-3 px-4">Timestamp</th>
                 <th className="py-3 px-4">Actor</th>
                 <th className="py-3 px-4">Action & Module</th>
@@ -742,6 +766,9 @@ export const AuditLogsPage: React.FC = () => {
                 // Skeletons
                 Array.from({ length: 8 }).map((_, i) => (
                   <tr key={i} className="animate-pulse">
+                    <td className="py-3.5 px-3 text-center">
+                      <div className="h-3.5 bg-slate-200 dark:bg-slate-800 rounded w-5 mx-auto" />
+                    </td>
                     <td className="py-3.5 px-4">
                       <div className="h-3.5 bg-slate-200 dark:bg-slate-800 rounded w-28" />
                       <div className="h-2.5 bg-slate-100 dark:bg-slate-800/60 rounded w-16 mt-1.5" />
@@ -772,7 +799,7 @@ export const AuditLogsPage: React.FC = () => {
                 ))
               ) : logs.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-16 text-center">
+                  <td colSpan={9} className="py-16 text-center">
                     <div className="max-w-sm mx-auto flex flex-col items-center">
                       <div className="w-12 h-12 rounded-2xl bg-purple-50 dark:bg-purple-950/50 border border-purple-200 dark:border-purple-800 flex items-center justify-center text-purple-600 dark:text-purple-400 mb-3">
                         <ShieldCheck className="w-6 h-6" />
@@ -798,7 +825,7 @@ export const AuditLogsPage: React.FC = () => {
                   </td>
                 </tr>
               ) : (
-                logs.map((item) => {
+                logs.map((item, index) => {
                   const relative = formatRelativeTime(item.createdAt);
                   const exact = formatDateTime(item.createdAt);
                   const actorInitials = (item.actorName || 'SU')
@@ -814,6 +841,11 @@ export const AuditLogsPage: React.FC = () => {
                       className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors group cursor-pointer"
                       onClick={() => setInspectedLog(item)}
                     >
+                      {/* Sr No. */}
+                      <td className="py-3.5 px-3 text-center whitespace-nowrap font-mono text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                        {page * pageSize + index + 1}
+                      </td>
+
                       {/* Timestamp */}
                       <td className="py-3.5 px-4 whitespace-nowrap">
                         <span className="font-semibold text-slate-900 dark:text-white block">
@@ -939,7 +971,7 @@ export const AuditLogsPage: React.FC = () => {
               type="button"
               onClick={() => setPage(0)}
               disabled={page === 0 || isLoading}
-              className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+              className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
               title="First page"
             >
               <ChevronsLeft className="w-4 h-4" />
@@ -949,23 +981,48 @@ export const AuditLogsPage: React.FC = () => {
               type="button"
               onClick={() => setPage((p) => Math.max(0, p - 1))}
               disabled={page === 0 || isLoading}
-              className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+              className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
               title="Previous page"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
 
-            {/* Current page indicator pill */}
-            <span className="px-3 py-1 font-semibold text-xs text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/60 rounded-lg border border-purple-200 dark:border-purple-800">
-              {page + 1}
-            </span>
+            {/* Page number buttons */}
+            <div className="flex items-center gap-1">
+              {getPageNumbers().map((p, idx) => {
+                if (p === '...') {
+                  return (
+                    <span key={`dots-${idx}`} className="px-1 text-slate-400 select-none text-xs">
+                      ...
+                    </span>
+                  );
+                }
+                const pageNum = Number(p);
+                const isActive = pageNum === page;
+                return (
+                  <button
+                    key={pageNum}
+                    type="button"
+                    onClick={() => setPage(pageNum)}
+                    disabled={isLoading}
+                    className={`min-w-[28px] h-7 px-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                      isActive
+                        ? 'bg-[#5B4DB7] text-white shadow-xs'
+                        : 'border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300'
+                    }`}
+                  >
+                    {pageNum + 1}
+                  </button>
+                );
+              })}
+            </div>
 
             {/* Next */}
             <button
               type="button"
               onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
               disabled={page >= totalPages - 1 || isLoading}
-              className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+              className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
               title="Next page"
             >
               <ChevronRight className="w-4 h-4" />
@@ -975,7 +1032,7 @@ export const AuditLogsPage: React.FC = () => {
               type="button"
               onClick={() => setPage(totalPages - 1)}
               disabled={page >= totalPages - 1 || isLoading}
-              className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+              className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
               title="Last page"
             >
               <ChevronsRight className="w-4 h-4" />

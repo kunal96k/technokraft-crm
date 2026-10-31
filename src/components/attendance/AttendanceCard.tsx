@@ -4,6 +4,7 @@ import { DailyAttendanceRecord } from '../../types/employees';
 import { AttendanceStatusBadge } from '../employees/EmployeeStatusBadge';
 import { useAuth } from '../../context/AuthContext';
 import { shouldMaskForSecurity } from '../../utils/securityUtils';
+import { buildSafeApiUrl } from '../../utils/urlUtils';
 
 interface AttendanceCardProps {
   record: DailyAttendanceRecord;
@@ -23,6 +24,20 @@ export const AttendanceCard: React.FC<AttendanceCardProps> = ({
   const displayHours = hasNotLoggedIn ? '0h 00m' : (record.workingHours || '0h 00m');
   const displayActivity = hasNotLoggedIn ? 'Offline' : (record.currentActivity || 'Offline');
 
+  const photoUrl = record.profilePhoto
+    ? buildSafeApiUrl(record.profilePhoto)
+    : record.avatar && (record.avatar.startsWith('http') || record.avatar.startsWith('/api') || record.avatar.startsWith('data:'))
+    ? buildSafeApiUrl(record.avatar)
+    : null;
+  const initials = record.employeeName && record.employeeName.trim()
+    ? (() => {
+        const parts = record.employeeName.trim().split(/\s+/);
+        return parts.length > 1
+          ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+          : record.employeeName.trim().slice(0, 2).toUpperCase();
+      })()
+    : (record.avatar || 'TK');
+
   return (
     <div
       onClick={() => onViewDetails(record)}
@@ -30,8 +45,21 @@ export const AttendanceCard: React.FC<AttendanceCardProps> = ({
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-full bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 font-bold text-xs flex items-center justify-center shrink-0 border border-purple-200 dark:border-purple-800/60">
-            {isMasked ? <ShieldCheck className="w-4 h-4 text-[#5B4DB7] dark:text-purple-300" /> : record.avatar}
+          <div className="w-9 h-9 rounded-full bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 font-bold text-xs flex items-center justify-center shrink-0 border border-purple-200 dark:border-purple-800/60 overflow-hidden">
+            {isMasked ? (
+              <ShieldCheck className="w-4 h-4 text-[#5B4DB7] dark:text-purple-300" />
+            ) : photoUrl ? (
+              <img
+                src={photoUrl}
+                alt={record.employeeName}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.currentTarget as HTMLElement).style.display = 'none';
+                }}
+              />
+            ) : (
+              initials
+            )}
           </div>
           <div>
             <div className="flex items-center gap-1.5 font-semibold text-xs text-slate-900 dark:text-white">
