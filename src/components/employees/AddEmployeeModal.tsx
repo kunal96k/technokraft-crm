@@ -421,11 +421,8 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
 
     if (isSuperAdminRecord(initialEmployee)) {
       employeeData.accessRole = 'Super Admin' as CrmAccessRole;
-      employeeData.status = 'Active' as EmployeeStatus;
-      employeeData.crmAccess = true;
-      employeeData.isAccountLocked = false;
       if (!employeeData.role) {
-        employeeData.role = initialEmployee?.role || 'System Administrator';
+        employeeData.role = initialEmployee?.role || 'Lead Software Engineer';
       }
     }
 
@@ -768,7 +765,15 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
                 </label>
                 <select
                   value={status}
-                  onChange={(e) => setStatus(e.target.value as any)}
+                  onChange={(e) => {
+                    const newStatus = e.target.value as EmployeeStatus;
+                    setStatus(newStatus);
+                    if (newStatus === 'Inactive' || newStatus === 'Suspended') {
+                      setCrmAccess(false);
+                    } else if (newStatus === 'Active') {
+                      setCrmAccess(true);
+                    }
+                  }}
                   className="w-full text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500/50 outline-none"
                 >
                   <option value="Active">Active</option>

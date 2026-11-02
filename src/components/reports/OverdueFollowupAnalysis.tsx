@@ -53,13 +53,15 @@ export const OverdueFollowupAnalysis: React.FC<OverdueFollowupAnalysisProps> = (
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 pt-3">
           {stats.map((item, idx) => (
-            <div
+            <Link
               key={`${item.employeeName}-${idx}`}
-              className={`border rounded-xl p-3 flex flex-col justify-between ${
+              to={`/follow-ups?tab=overdue&assignedTo=${encodeURIComponent(item.employeeName)}`}
+              className={`border rounded-xl p-3 flex flex-col justify-between transition-all hover:shadow-md cursor-pointer ${
                 item.overdueCount > 0
-                  ? 'bg-rose-50/40 dark:bg-rose-950/20 border-rose-200 dark:border-rose-900/50'
-                  : 'bg-slate-50/70 dark:bg-slate-950/60 border-slate-200 dark:border-slate-800'
+                  ? 'bg-rose-50/40 dark:bg-rose-950/20 border-rose-200 dark:border-rose-900/50 hover:border-rose-300'
+                  : 'bg-slate-50/70 dark:bg-slate-950/60 border-slate-200 dark:border-slate-800 hover:border-slate-300'
               }`}
+              title={`View overdue follow-ups for ${item.employeeName}`}
             >
               <div>
                 <div className="flex items-center gap-2 mb-1.5">
@@ -91,10 +93,13 @@ export const OverdueFollowupAnalysis: React.FC<OverdueFollowupAnalysisProps> = (
                 </div>
               </div>
 
-              <div className="mt-2.5 pt-2 border-t border-slate-200/60 dark:border-slate-800 text-[10px] text-slate-500 dark:text-slate-400">
-                Earliest: <span className="font-mono font-medium text-slate-700 dark:text-slate-300">{item.earliestDueDate}</span>
+              <div className="mt-2.5 pt-2 border-t border-slate-200/60 dark:border-slate-800 text-[10px] text-slate-500 dark:text-slate-400 flex items-center justify-between">
+                <span>Earliest: <strong className="font-mono font-medium text-slate-700 dark:text-slate-300">{item.earliestDueDate}</strong></span>
+                <span className="text-[#5B4DB7] dark:text-purple-300 font-semibold text-[10px] flex items-center gap-0.5">
+                  View <ArrowRight className="w-2.5 h-2.5" />
+                </span>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>

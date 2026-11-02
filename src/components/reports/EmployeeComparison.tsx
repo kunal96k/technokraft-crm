@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { GitCompare, Trophy, TrendingUp, DollarSign } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { GitCompare, Search, X, UserPlus, Check } from 'lucide-react';
 import { EmployeePerformanceRecord } from '../../types/reports';
 import { formatLakhsINR } from '../../utils/currencyFormatters';
 import { EmployeeAvatar } from '../common/EmployeeAvatar';
@@ -10,64 +10,172 @@ interface EmployeeComparisonProps {
 
 export const EmployeeComparison: React.FC<EmployeeComparisonProps> = ({ employees }) => {
   const [selectedIds, setSelectedIds] = useState<string[]>(() =>
-    employees && employees.length > 0 ? employees.slice(0, 2).map((e) => e.id) : []
+    employees && employees.length > 0 ? employees.slice(0, Math.min(2, employees.length)).map((e) => e.id) : []
   );
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   if (!employees || employees.length === 0) {
     return null;
   }
 
-  const toggleSelect = (id: string) => {
-    if (selectedIds.includes(id)) {
-      if (selectedIds.length > 1) {
-        setSelectedIds(selectedIds.filter((item) => item !== id));
-      }
-    } else {
-      if (selectedIds.length < 4) {
-        setSelectedIds([...selectedIds, id]);
-      }
+  const removeEmployee = (id: string) => {
+    if (selectedIds.length > 1) {
+      setSelectedIds(selectedIds.filter((item) => item !== id));
+    }
+  };
+
+  const addEmployee = (id: string) => {
+    if (!selectedIds.includes(id) && selectedIds.length < 4) {
+      setSelectedIds([...selectedIds, id]);
+      setSearchQuery('');
+      setIsDropdownOpen(false);
     }
   };
 
   const comparedList = employees.filter((e) => selectedIds.includes(e.id));
 
+  // Filtered candidate list for typeahead
+  const filteredCandidates = employees.filter((emp) => {
+    const matchesSearch =
+      emp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (emp.role && emp.role.toLowerCase().includes(searchQuery.toLowerCase()));
+    return matchesSearch;
+  });
+
   return (
     <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 sm:p-5 shadow-2xs space-y-4">
-      {/* Header & Rep Selection Chips */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-slate-100 dark:border-slate-800">
+      {/* Header & Rep Selection Typeahead */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 flex items-center justify-center shrink-0">
             <GitCompare className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-              Direct Head-to-Head Comparison
-            </h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                Direct Head-to-Head Comparison
+              </h3>
+              <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-purple-50 dark:bg-purple-950/50 text-[#5B4DB7] dark:text-purple-300 font-semibold border border-purple-200/60 dark:border-purple-800/60">
+                {selectedIds.length}/4 selected
+              </span>
+            </div>
             <p className="text-[11px] text-slate-500 dark:text-slate-400">
-              Benchmark up to 4 sales representatives side-by-side
+              Benchmark up to 4 representatives side-by-side using typeahead search
             </p>
           </div>
         </div>
 
-        {/* Rep Selection Badges */}
-        <div className="flex items-center gap-1.5 flex-wrap">
-          {employees.map((emp) => {
-            const isSelected = selectedIds.includes(emp.id);
-            return (
-              <button
+        {/* Selected Chips + Typeahead Search Input */}
+        <div className="flex flex-wrap items-center gap-2" ref={dropdownRef}>
+          {/* Selected Chips */}
+          <div className="flex flex-wrap items-center gap-1.5">
+            {comparedList.map((emp) => (
+              <div
                 key={emp.id}
-                type="button"
-                onClick={() => toggleSelect(emp.id)}
-                className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all cursor-pointer ${
-                  isSelected
-                    ? 'bg-[#5B4DB7] text-white shadow-2xs'
-                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-                }`}
+                className="inline-flex items-center gap-1.5 pl-1.5 pr-2 py-1 rounded-lg bg-[#5B4DB7] text-white text-xs font-semibold shadow-2xs group transition-all"
               >
-                {emp.name.split(' ')[0]}
-              </button>
-            );
-          })}
+                <EmployeeAvatar
+                  name={emp.name}
+                  avatar={emp.avatar}
+                  profilePhoto={emp.profilePhoto}
+                  size="xs"
+                />
+                <span className="truncate max-w-[110px]">{emp.name}</span>
+                {selectedIds.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removeEmployee(emp.id)}
+                    className="p-0.5 hover:bg-white/20 rounded-full cursor-pointer transition-colors"
+                    title="Remove from comparison"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Typeahead Dropdown */}
+          <div className="relative">
+            {selectedIds.length < 4 ? (
+              <div className="relative flex items-center">
+                <Search className="w-3.5 h-3.5 absolute left-2.5 text-slate-400 pointer-events-none" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setIsDropdownOpen(true);
+                  }}
+                  onFocus={() => setIsDropdownOpen(true)}
+                  placeholder="Search to add (max 4)..."
+                  className="w-48 sm:w-56 text-xs pl-8 pr-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                />
+              </div>
+            ) : (
+              <span className="text-[11px] font-medium text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800/60 px-2.5 py-1.5 rounded-lg">
+                Maximum 4 selected
+              </span>
+            )}
+
+            {isDropdownOpen && selectedIds.length < 4 && (
+              <div className="absolute right-0 mt-1 w-64 max-h-56 overflow-y-auto rounded-xl bg-white dark:bg-slate-850 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-xl z-50 p-1 divide-y divide-slate-100 dark:divide-slate-800/60">
+                {filteredCandidates.length === 0 ? (
+                  <div className="p-3 text-center text-xs text-slate-400">
+                    No employees matching "{searchQuery}"
+                  </div>
+                ) : (
+                  filteredCandidates.map((emp) => {
+                    const isAlreadySelected = selectedIds.includes(emp.id);
+                    return (
+                      <button
+                        key={emp.id}
+                        type="button"
+                        disabled={isAlreadySelected}
+                        onClick={() => addEmployee(emp.id)}
+                        className={`w-full flex items-center justify-between gap-2 p-2 rounded-lg text-left text-xs transition-colors cursor-pointer ${
+                          isAlreadySelected
+                            ? 'opacity-40 cursor-not-allowed bg-slate-50/50 dark:bg-slate-800/30'
+                            : 'hover:bg-purple-50 dark:hover:bg-purple-950/40 text-slate-800 dark:text-slate-200'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <EmployeeAvatar
+                            name={emp.name}
+                            avatar={emp.avatar}
+                            profilePhoto={emp.profilePhoto}
+                            size="xs"
+                          />
+                          <div className="min-w-0 truncate">
+                            <div className="font-semibold truncate">{emp.name}</div>
+                            <div className="text-[10px] text-slate-400 truncate">{emp.role}</div>
+                          </div>
+                        </div>
+
+                        {isAlreadySelected ? (
+                          <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                        ) : (
+                          <UserPlus className="w-3.5 h-3.5 text-[#5B4DB7] dark:text-purple-300 shrink-0" />
+                        )}
+                      </button>
+                    );
+                  })
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

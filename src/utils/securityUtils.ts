@@ -26,8 +26,6 @@ const SUPER_ADMIN_ROLES = new Set([
   'super admin',
   'superadmin',
   'super_admin',
-  'system administrator',
-  'system admin',
 ]);
 
 /**
@@ -42,12 +40,11 @@ export const isSuperAdminRecord = (entity?: SecurityUserLike | null): boolean =>
     return true;
   }
 
-  // 2. Exact role / accessRole matching against System Administrator & Super Admin.
-  // CRITICAL: Regular 'Admin' is NOT Super Admin! Do not use role.includes('admin').
+  // 2. Exact accessRole matching against Super Admin.
+  // CRITICAL: Regular 'Admin' is NOT Super Admin! Do not use job title role.
   const accessRole = (entity.accessRole || '').trim().toLowerCase();
-  const role = (entity.role || entity.employeeRole || '').trim().toLowerCase();
 
-  return SUPER_ADMIN_ROLES.has(accessRole) || SUPER_ADMIN_ROLES.has(role);
+  return SUPER_ADMIN_ROLES.has(accessRole);
 };
 
 /**

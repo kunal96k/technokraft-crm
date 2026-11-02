@@ -207,7 +207,8 @@ export const EmployeeListPage: React.FC = () => {
         // Edit existing
         const updated = await employeeService.updateEmployee(editingEmployee.id, empData);
         if (updated) {
-          showToast(`Updated employee profile for ${updated.name}`);
+          const statusNote = updated.status === 'Inactive' ? ' (account status set to Inactive, visible under Inactive tab)' : '';
+          showToast(`Updated employee profile for ${updated.name}${statusNote}`);
           if (selectedEmployee && (String(selectedEmployee.id) === String(editingEmployee.id) || selectedEmployee.employeeCode === editingEmployee.employeeCode)) {
             setSelectedEmployee(updated);
           }
@@ -250,7 +251,7 @@ export const EmployeeListPage: React.FC = () => {
     }
     try {
       await employeeService.updateEmployeeStatus(emp.id, 'Inactive');
-      showToast(`Deactivated ${emp.name}. Past CRM records preserved.`);
+      showToast(`Deactivated ${emp.name}. Record moved to Inactive tab.`);
       setDeactivatingEmployee(null);
       if (selectedEmployee?.id === emp.id) {
         setSelectedEmployee((prev) => (prev ? { ...prev, status: 'Inactive', workStatus: 'Logged Out' } : null));
