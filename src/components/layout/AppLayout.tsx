@@ -4,6 +4,7 @@ import { Sidebar } from './Sidebar';
 import { MobileSidebar } from './MobileSidebar';
 import { TopHeader } from './TopHeader';
 import { Footer } from './Footer';
+import { ErrorBoundary } from '../common/ErrorBoundary';
 import { useAuth } from '../../context/AuthContext';
 import { UserRole, UserProfile } from '../../types/navigation';
 
@@ -52,7 +53,9 @@ export const AppLayout: React.FC = () => {
 
           {/* Main Content Area - naturally scrollable on Y-axis without trap */}
           <main className="flex-1 px-3 sm:px-4 md:px-6 py-4 md:py-6">
-            <Outlet context={{ currentUser, sidebarTheme, setSidebarTheme }} />
+            <ErrorBoundary>
+              <Outlet context={{ currentUser, sidebarTheme, setSidebarTheme }} />
+            </ErrorBoundary>
           </main>
 
           {/* Footer */}

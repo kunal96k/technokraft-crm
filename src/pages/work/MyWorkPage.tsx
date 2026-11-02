@@ -124,7 +124,16 @@ export const MyWorkPage: React.FC = () => {
         t.status === 'CLIENT_REVIEW'
     ).length;
     const completed = tasks.filter((t) => t.status === 'COMPLETED').length;
-    const overdue = summary?.overdueTasks || 0;
+    const overdue =
+      typeof summary?.overdueCount === 'number'
+        ? summary.overdueCount
+        : Array.isArray(summary?.overdueTasks)
+        ? summary.overdueTasks.length
+        : tasks.filter(
+            (t) =>
+              Boolean(t.isOverdue) ||
+              (Boolean(t.dueDate) && new Date(t.dueDate!) < new Date() && t.status !== 'COMPLETED')
+          ).length;
     return { total, inProgress, todo, review, completed, overdue };
   }, [tasks, summary]);
 
