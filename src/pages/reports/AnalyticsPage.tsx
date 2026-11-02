@@ -39,6 +39,8 @@ const DEFAULT_WIN_LOSS: WinLossStat = {
 export const AnalyticsPage: React.FC = () => {
   // Global Analytics Filters
   const [dateRange, setDateRange] = useState<DateRangePreset>('This Year');
+  const [customStartDate, setCustomStartDate] = useState<string>('2026-09-01');
+  const [customEndDate, setCustomEndDate] = useState<string>(() => new Date().toISOString().split('T')[0]);
   const [selectedEmployee, setSelectedEmployee] = useState('All Employees');
   const [selectedTeam, setSelectedTeam] = useState('All Teams');
   const [selectedScope, setSelectedScope] = useState<RoleScope>('Company Overview');
@@ -55,9 +57,12 @@ export const AnalyticsPage: React.FC = () => {
   const loadAnalyticsData = useCallback(async () => {
     setIsLoading(true);
     try {
+      const isCustom = dateRange === 'Custom Range';
       const [analyticsRes, perfRes] = await Promise.all([
         fetchAnalyticsReport({
           dateRange,
+          startDate: isCustom ? customStartDate : undefined,
+          endDate: isCustom ? customEndDate : undefined,
           employee: selectedEmployee,
           team: selectedTeam,
           scope: selectedScope,
@@ -67,6 +72,8 @@ export const AnalyticsPage: React.FC = () => {
         }),
         fetchPerformanceReport({
           dateRange,
+          startDate: isCustom ? customStartDate : undefined,
+          endDate: isCustom ? customEndDate : undefined,
           employee: selectedEmployee,
           team: selectedTeam,
           scope: selectedScope,
@@ -82,6 +89,8 @@ export const AnalyticsPage: React.FC = () => {
     }
   }, [
     dateRange,
+    customStartDate,
+    customEndDate,
     selectedEmployee,
     selectedTeam,
     selectedScope,
@@ -96,6 +105,8 @@ export const AnalyticsPage: React.FC = () => {
 
   const handleResetFilters = () => {
     setDateRange('This Year');
+    setCustomStartDate('2026-09-01');
+    setCustomEndDate(new Date().toISOString().split('T')[0]);
     setSelectedEmployee('All Employees');
     setSelectedTeam('All Teams');
     setSelectedScope('Company Overview');
@@ -109,6 +120,8 @@ export const AnalyticsPage: React.FC = () => {
     try {
       await downloadReportFile(format, 'Analytics', {
         dateRange,
+        startDate: dateRange === 'Custom Range' ? customStartDate : undefined,
+        endDate: dateRange === 'Custom Range' ? customEndDate : undefined,
         employee: selectedEmployee,
         team: selectedTeam,
         scope: selectedScope,
@@ -186,7 +199,17 @@ export const AnalyticsPage: React.FC = () => {
             >
               <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-[#5B4DB7]' : ''}`} />
             </button>
-            <ReportDateRange selected={dateRange} onChange={setDateRange} />
+            <ReportDateRange
+              selected={dateRange}
+              onChange={setDateRange}
+              customStartDate={customStartDate}
+              customEndDate={customEndDate}
+              onCustomChange={(start, end) => {
+                setCustomStartDate(start);
+                setCustomEndDate(end);
+                setDateRange('Custom Range');
+              }}
+            />
           </div>
         }
         onExport={handleExport}

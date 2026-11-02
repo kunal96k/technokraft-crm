@@ -25,6 +25,8 @@ import { Loader2 } from 'lucide-react';
 
 export const PerformanceReportPage: React.FC = () => {
   const [dateRange, setDateRange] = useState<DateRangePreset>('This Year');
+  const [customStartDate, setCustomStartDate] = useState<string>('2026-09-01');
+  const [customEndDate, setCustomEndDate] = useState<string>(() => new Date().toISOString().split('T')[0]);
   const [selectedEmployee, setSelectedEmployee] = useState('All Employees');
   const [selectedTeam, setSelectedTeam] = useState('All Teams');
   const [selectedScope, setSelectedScope] = useState<RoleScope>('Company Overview');
@@ -37,8 +39,11 @@ export const PerformanceReportPage: React.FC = () => {
   const loadData = useCallback(async () => {
     setIsLoading(true);
     try {
+      const isCustom = dateRange === 'Custom Range';
       const data = await fetchPerformanceReport({
         dateRange,
+        startDate: isCustom ? customStartDate : undefined,
+        endDate: isCustom ? customEndDate : undefined,
         employee: selectedEmployee !== 'All Employees' ? selectedEmployee : undefined,
         team: selectedTeam !== 'All Teams' ? selectedTeam : undefined,
         scope: selectedScope,
@@ -81,7 +86,7 @@ export const PerformanceReportPage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [dateRange, selectedEmployee, selectedTeam, selectedScope]);
+  }, [dateRange, customStartDate, customEndDate, selectedEmployee, selectedTeam, selectedScope]);
 
   useEffect(() => {
     loadData();
@@ -91,6 +96,8 @@ export const PerformanceReportPage: React.FC = () => {
     try {
       await downloadReportFile(format, 'Performance', {
         dateRange,
+        startDate: dateRange === 'Custom Range' ? customStartDate : undefined,
+        endDate: dateRange === 'Custom Range' ? customEndDate : undefined,
         employee: selectedEmployee,
         team: selectedTeam,
         scope: selectedScope,
@@ -134,6 +141,8 @@ export const PerformanceReportPage: React.FC = () => {
     setSelectedTeam('All Teams');
     setSelectedScope('Company Overview');
     setDateRange('This Year');
+    setCustomStartDate('2026-09-01');
+    setCustomEndDate(new Date().toISOString().split('T')[0]);
   };
 
   return (
@@ -155,7 +164,17 @@ export const PerformanceReportPage: React.FC = () => {
       />
 
       {/* Date Range Selector */}
-      <ReportDateRange selected={dateRange} onChange={setDateRange} />
+      <ReportDateRange
+        selected={dateRange}
+        onChange={setDateRange}
+        customStartDate={customStartDate}
+        customEndDate={customEndDate}
+        onCustomChange={(start, end) => {
+          setCustomStartDate(start);
+          setCustomEndDate(end);
+          setDateRange('Custom Range');
+        }}
+      />
 
       {/* Filters Strip */}
       <ReportFilters

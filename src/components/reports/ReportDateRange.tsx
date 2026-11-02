@@ -10,30 +10,88 @@ interface ReportDateRangeProps {
   onCustomChange?: (start: string, end: string) => void;
 }
 
-const PRESETS: { id: DateRangePreset; label: string; periodText: string }[] = [
-  { id: 'Today', label: 'Today', periodText: 'Today' },
-  { id: 'This Week', label: 'This Week', periodText: 'Current Week' },
-  { id: 'This Month', label: 'This Month', periodText: 'Current Month' },
-  { id: 'Last Month', label: 'Last Month', periodText: 'Previous Month' },
-  { id: 'This Quarter', label: 'This Quarter', periodText: 'Current Quarter' },
-  { id: 'This Year', label: 'This Year', periodText: 'Full Financial Year' },
-  { id: 'All Time', label: 'All Time', periodText: 'All Historical Records' },
-  { id: 'Custom Range', label: 'Custom Range', periodText: 'Specific dates' },
-];
+const formatDayDisplay = (d: Date): string => {
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = d.toLocaleString('en-US', { month: 'short' });
+  const year = d.getFullYear();
+  return `${day} ${month} ${year}`;
+};
+
+const getDynamicPresets = (customStart?: string, customEnd?: string) => {
+  const now = new Date();
+
+  // Today
+  const todayStr = formatDayDisplay(now);
+
+  // This Week (Monday to Sunday)
+  const dayOfWeek = (now.getDay() + 6) % 7; // Monday = 0
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - dayOfWeek);
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+  const thisWeekStr = `${formatDayDisplay(monday)} – ${formatDayDisplay(sunday)}`;
+
+  // This Month (01 to end of month)
+  const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const lastOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  const thisMonthStr = `${formatDayDisplay(firstOfMonth)} – ${formatDayDisplay(lastOfMonth)}`;
+
+  // Last Month
+  const firstOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const lastOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+  const lastMonthStr = `${formatDayDisplay(firstOfLastMonth)} – ${formatDayDisplay(lastOfLastMonth)}`;
+
+  // This Quarter
+  const qMonth = Math.floor(now.getMonth() / 3) * 3;
+  const firstOfQuarter = new Date(now.getFullYear(), qMonth, 1);
+  const lastOfQuarter = new Date(now.getFullYear(), qMonth + 3, 0);
+  const quarterNum = Math.floor(now.getMonth() / 3) + 1;
+  const quarterStr = `Q${quarterNum} (${firstOfQuarter.toLocaleString('en-US', { month: 'short' })} – ${lastOfQuarter.toLocaleString('en-US', { month: 'short' })} ${now.getFullYear()})`;
+
+  // This Year
+  const thisYearStr = `01 Jan – 31 Dec ${now.getFullYear()}`;
+
+  // Custom Range
+  let customStr = 'Specific dates';
+  if (customStart && customEnd) {
+    try {
+      const s = new Date(customStart);
+      const e = new Date(customEnd);
+      if (!isNaN(s.getTime()) && !isNaN(e.getTime())) {
+        customStr = `${formatDayDisplay(s)} – ${formatDayDisplay(e)}`;
+      }
+    } catch {}
+  }
+
+  return [
+    { id: 'Today' as DateRangePreset, label: 'Today', periodText: todayStr },
+    { id: 'This Week' as DateRangePreset, label: 'This Week', periodText: thisWeekStr },
+    { id: 'This Month' as DateRangePreset, label: 'This Month', periodText: thisMonthStr },
+    { id: 'Last Month' as DateRangePreset, label: 'Last Month', periodText: lastMonthStr },
+    { id: 'This Quarter' as DateRangePreset, label: 'This Quarter', periodText: quarterStr },
+    { id: 'This Year' as DateRangePreset, label: 'This Year', periodText: thisYearStr },
+    { id: 'All Time' as DateRangePreset, label: 'All Time', periodText: 'All Historical Records' },
+    { id: 'Custom Range' as DateRangePreset, label: 'Custom Range', periodText: customStr },
+  ];
+};
 
 export const ReportDateRange: React.FC<ReportDateRangeProps> = ({
   selected,
   onChange,
-  customStartDate = '2026-09-01',
-  customEndDate = '2026-09-07',
+  customStartDate,
+  customEndDate,
   onCustomChange,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [startDate, setStartDate] = useState(customStartDate);
-  const [endDate, setEndDate] = useState(customEndDate);
+  const todayIso = new Date().toISOString().split('T')[0];
+  const [startDate, setStartDate] = useState(customStartDate || '2026-09-01');
+  const [endDate, setEndDate] = useState(customEndDate || todayIso);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const currentPreset = PRESETS.find((p) => p.id === selected) || PRESETS[2];
+  useEffect(() => {
+    if (customStartDate) setStartDate(customStartDate);
+    if (customEndDate) setEndDate(customEndDate);
+  }, [customStartDate, customEndDate]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -44,6 +102,9 @@ export const ReportDateRange: React.FC<ReportDateRangeProps> = ({
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  const presets = getDynamicPresets(startDate, endDate);
+  const currentPreset = presets.find((p) => p.id === selected) || presets[5]; // Default to This Year
 
   const handleApplyCustom = () => {
     if (onCustomChange) {
@@ -69,12 +130,12 @@ export const ReportDateRange: React.FC<ReportDateRangeProps> = ({
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 sm:right-0 sm:left-auto top-full mt-1.5 w-64 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xl py-2 z-40 animate-in fade-in zoom-in-95 duration-150 divide-y divide-slate-100 dark:divide-slate-700">
+        <div className="absolute left-0 sm:right-0 sm:left-auto top-full mt-1.5 w-72 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xl py-2 z-40 animate-in fade-in zoom-in-95 duration-150 divide-y divide-slate-100 dark:divide-slate-700">
           <div className="px-3 py-1 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
             Select Reporting Window
           </div>
           <div className="py-1">
-            {PRESETS.map((preset) => (
+            {presets.map((preset) => (
               <button
                 key={preset.id}
                 type="button"
