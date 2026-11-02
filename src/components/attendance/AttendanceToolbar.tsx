@@ -20,6 +20,23 @@ export const AttendanceToolbar: React.FC<AttendanceToolbarProps> = ({
   onExport,
 }) => {
   const { user } = useAuth();
+  const [localSearch, setLocalSearch] = React.useState(filters.searchQuery || '');
+
+  // Synchronize local search state if filters.searchQuery changes externally (e.g. on reset)
+  React.useEffect(() => {
+    setLocalSearch(filters.searchQuery || '');
+  }, [filters.searchQuery]);
+
+  // Debounce search query update by 350ms to prevent instant re-renders while typing
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      if (localSearch !== (filters.searchQuery || '')) {
+        onChange({ ...filters, searchQuery: localSearch });
+      }
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [localSearch]);
+
   const datePresets: ('Today' | 'This Week' | 'This Month' | 'Custom Range')[] = [
     'Today',
     'This Week',
@@ -141,15 +158,24 @@ export const AttendanceToolbar: React.FC<AttendanceToolbarProps> = ({
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
             <input
               type="text"
-              value={filters.searchQuery}
-              onChange={(e) => onChange({ ...filters, searchQuery: e.target.value })}
+              value={localSearch}
+              onChange={(e) => setLocalSearch(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  onChange({ ...filters, searchQuery: localSearch });
+                }
+              }}
               placeholder="Search employee by name, ID or role..."
               className="w-full text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 pl-9 pr-8 py-2 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
             />
-            {filters.searchQuery && (
+            {localSearch && (
               <button
                 type="button"
-                onClick={() => onChange({ ...filters, searchQuery: '' })}
+                onClick={() => {
+                  setLocalSearch('');
+                  onChange({ ...filters, searchQuery: '' });
+                }}
                 className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
               >
                 <X className="w-3.5 h-3.5" />

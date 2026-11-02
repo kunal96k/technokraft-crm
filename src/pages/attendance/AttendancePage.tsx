@@ -88,9 +88,12 @@ export const AttendancePage: React.FC = () => {
     }
   }, []);
 
+  // Initial load ref to prevent full page unmounting on filter changes
+  const isInitialMount = React.useRef(true);
+
   // Fetch Attendance Records from Spring Boot API with server-side pagination & filtering
   const loadAttendanceData = useCallback(async (isInitial = false) => {
-    if (isInitial) {
+    if (isInitial && records.length === 0) {
       setIsLoading(true);
     } else {
       setIsTableLoading(true);
@@ -145,13 +148,21 @@ export const AttendancePage: React.FC = () => {
       setIsLoading(false);
       setIsTableLoading(false);
     }
-  }, [page, pageSize, filters, sortBy, sortDirection]);
+  }, [page, pageSize, filters, sortBy, sortDirection, records.length]);
 
   // Initial load
   useEffect(() => {
     loadEmployeesRoster();
-    loadAttendanceData(true);
-  }, [loadEmployeesRoster, loadAttendanceData]);
+  }, [loadEmployeesRoster]);
+
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      loadAttendanceData(true);
+    } else {
+      loadAttendanceData(false);
+    }
+  }, [loadAttendanceData]);
 
   // Periodic background telemetry refresh (every 30 seconds)
   useEffect(() => {
@@ -356,8 +367,31 @@ export const AttendancePage: React.FC = () => {
         </button>
       </div>
 
-      {/* Loading State */}
-      {isLoading ? (
+      {/* Summary Cards */}
+      <AttendanceSummaryCards
+        employees={employees}
+        summary={summary}
+        selectedFilter={filters.status}
+        onSelectFilter={handleSummaryCardFilter}
+      />
+
+      {/* Currently Working Live Telemetry Section */}
+      <CurrentlyWorking
+        employees={employees}
+        onSelectEmployee={(emp) => setSelectedEmployeeForModal(emp)}
+      />
+
+      {/* Attendance Toolbar - ALWAYS Mounted so Search Input never loses focus */}
+      <AttendanceToolbar
+        filters={filters}
+        onChange={handleFilterChange}
+        onReset={() => handleFilterChange(INITIAL_ATTENDANCE_FILTERS)}
+        employees={employees}
+        onExport={handleExport}
+      />
+
+      {/* Attendance Content Table: Initial Loading or Active Table */}
+      {isLoading && records.length === 0 ? (
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-16 text-center text-xs text-slate-500 dark:text-slate-400">
           <Loader2 className="w-8 h-8 text-[#5B4DB7] animate-spin mx-auto mb-2" />
           <p className="font-semibold text-slate-800 dark:text-slate-100 text-sm">
@@ -365,58 +399,33 @@ export const AttendancePage: React.FC = () => {
           </p>
         </div>
       ) : (
-        <>
-          {/* Summary Cards */}
-          <AttendanceSummaryCards
-            employees={employees}
-            summary={summary}
-            selectedFilter={filters.status}
-            onSelectFilter={handleSummaryCardFilter}
-          />
+        <div className="relative">
+          {isTableLoading && (
+            <div className="absolute inset-0 bg-white/60 dark:bg-slate-900/60 backdrop-blur-2xs flex items-center justify-center z-10 rounded-xl">
+              <Loader2 className="w-6 h-6 text-[#5B4DB7] animate-spin" />
+            </div>
+          )}
 
-          {/* Currently Working Live Telemetry Section */}
-          <CurrentlyWorking
-            employees={employees}
-            onSelectEmployee={(emp) => setSelectedEmployeeForModal(emp)}
-          />
+          <div className="hidden md:block">
+            <AttendanceTable
+              records={records}
+              onViewDetails={handleViewDetails}
+              sortBy={sortBy}
+              sortDirection={sortDirection}
+              onSort={handleSort}
+            />
+          </div>
 
-          {/* Attendance Toolbar */}
-          <AttendanceToolbar
-            filters={filters}
-            onChange={handleFilterChange}
-            onReset={() => handleFilterChange(INITIAL_ATTENDANCE_FILTERS)}
-            employees={employees}
-            onExport={handleExport}
-          />
-
-          {/* Attendance Table (Desktop) */}
-          <div className="relative">
-            {isTableLoading && (
-              <div className="absolute inset-0 bg-white/60 dark:bg-slate-900/60 backdrop-blur-2xs flex items-center justify-center z-10 rounded-xl">
-                <Loader2 className="w-6 h-6 text-[#5B4DB7] animate-spin" />
-              </div>
-            )}
-
-            <div className="hidden md:block">
-              <AttendanceTable
-                records={records}
+          {/* Attendance Cards (Mobile) */}
+          <div className="md:hidden grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {records.map((rec) => (
+              <AttendanceCard
+                key={rec.id}
+                record={rec}
                 onViewDetails={handleViewDetails}
-                sortBy={sortBy}
-                sortDirection={sortDirection}
-                onSort={handleSort}
               />
-            </div>
-
-            {/* Attendance Cards (Mobile) */}
-            <div className="md:hidden grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {records.map((rec) => (
-                <AttendanceCard
-                  key={rec.id}
-                  record={rec}
-                  onViewDetails={handleViewDetails}
-                />
-              ))}
-            </div>
+            ))}
+          </div>
 
             {/* Server-Side Pagination Bar */}
             {totalElements > 0 && (
@@ -497,8 +506,7 @@ export const AttendancePage: React.FC = () => {
               </div>
             )}
           </div>
-        </>
-      )}
+        )}
 
       {/* Attendance Details Modal */}
       <AttendanceDetailsModal
