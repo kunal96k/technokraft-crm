@@ -11,12 +11,13 @@ interface ReportDateRangeProps {
 }
 
 const PRESETS: { id: DateRangePreset; label: string; periodText: string }[] = [
-  { id: 'Today', label: 'Today', periodText: '07 Sep 2026' },
-  { id: 'This Week', label: 'This Week', periodText: '01 Sep – 07 Sep 2026' },
-  { id: 'This Month', label: 'This Month', periodText: '01 Sep – 30 Sep 2026' },
-  { id: 'Last Month', label: 'Last Month', periodText: '01 Aug – 31 Aug 2026' },
-  { id: 'This Quarter', label: 'This Quarter', periodText: 'Q3 (Jul – Sep 2026)' },
-  { id: 'This Year', label: 'This Year', periodText: 'FY 2026–27' },
+  { id: 'Today', label: 'Today', periodText: 'Today' },
+  { id: 'This Week', label: 'This Week', periodText: 'Current Week' },
+  { id: 'This Month', label: 'This Month', periodText: 'Current Month' },
+  { id: 'Last Month', label: 'Last Month', periodText: 'Previous Month' },
+  { id: 'This Quarter', label: 'This Quarter', periodText: 'Current Quarter' },
+  { id: 'This Year', label: 'This Year', periodText: 'Full Financial Year' },
+  { id: 'All Time', label: 'All Time', periodText: 'All Historical Records' },
   { id: 'Custom Range', label: 'Custom Range', periodText: 'Specific dates' },
 ];
 

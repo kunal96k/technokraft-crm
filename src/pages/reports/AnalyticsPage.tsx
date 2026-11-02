@@ -38,7 +38,7 @@ const DEFAULT_WIN_LOSS: WinLossStat = {
 
 export const AnalyticsPage: React.FC = () => {
   // Global Analytics Filters
-  const [dateRange, setDateRange] = useState<DateRangePreset>('This Month');
+  const [dateRange, setDateRange] = useState<DateRangePreset>('This Year');
   const [selectedEmployee, setSelectedEmployee] = useState('All Employees');
   const [selectedTeam, setSelectedTeam] = useState('All Teams');
   const [selectedScope, setSelectedScope] = useState<RoleScope>('Company Overview');
@@ -95,7 +95,7 @@ export const AnalyticsPage: React.FC = () => {
   }, [loadAnalyticsData]);
 
   const handleResetFilters = () => {
-    setDateRange('This Month');
+    setDateRange('This Year');
     setSelectedEmployee('All Employees');
     setSelectedTeam('All Teams');
     setSelectedScope('Company Overview');

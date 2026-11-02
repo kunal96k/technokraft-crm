@@ -5,6 +5,7 @@ export type DateRangePreset =
   | 'Last Month'
   | 'This Quarter'
   | 'This Year'
+  | 'All Time'
   | 'Custom Range';
 
 export type RoleScope =

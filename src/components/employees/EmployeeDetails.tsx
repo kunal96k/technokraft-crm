@@ -23,7 +23,7 @@ import { Employee } from '../../types/employees';
 import { EmployeeStatusBadge, WorkStatusBadge } from './EmployeeStatusBadge';
 import { buildSafeApiUrl } from '../../utils/urlUtils';
 import { useAuth } from '../../context/AuthContext';
-import { isSuperAdminRecord } from '../../utils/securityUtils';
+import { isSuperAdminRecord, isSuperiorSuperAdmin } from '../../utils/securityUtils';
 import { EmployeeOverview } from './EmployeeOverview';
 import { EmployeeActivity } from './EmployeeActivity';
 import { EmployeeTargets } from './EmployeeTargets';
@@ -53,8 +53,12 @@ export const EmployeeDetails: React.FC<EmployeeDetailsProps> = ({
   const navigate = useNavigate();
   const { user } = useAuth();
   const isSuperAdmin = isSuperAdminRecord(employee);
+  const isSuperiorTarget = isSuperiorSuperAdmin(employee);
+  const isCallerSuperior = isSuperiorSuperAdmin(user);
   const isOwnProfile = !!user && (String(user.id) === String(employee.id) || (!!user.employeeCode && user.employeeCode === employee.employeeCode));
-  const canModify = !isSuperAdmin || isOwnProfile;
+  const canModify = isCallerSuperior || !isSuperAdmin || isOwnProfile;
+  const canDeactivate = isCallerSuperior ? !isSuperiorTarget : !isSuperAdmin;
+  const canDelete = isCallerSuperior ? !isSuperiorTarget : !isSuperAdmin;
 
   const [activeTab, setActiveTab] = useState<'overview' | 'activity' | 'targets' | 'attendance'>('overview');
 
@@ -132,7 +136,7 @@ export const EmployeeDetails: React.FC<EmployeeDetailsProps> = ({
               <span>View Performance</span>
             </button>
 
-            {!isSuperAdmin && (
+            {canDeactivate && (
               employee.status === 'Active' ? (
                 <button
                   type="button"
@@ -154,7 +158,7 @@ export const EmployeeDetails: React.FC<EmployeeDetailsProps> = ({
               )
             )}
 
-            {onDelete && (
+            {onDelete && canDelete && (
               <button
                 type="button"
                 onClick={() => onDelete(employee)}

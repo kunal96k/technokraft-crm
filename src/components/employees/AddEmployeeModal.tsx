@@ -42,7 +42,8 @@ import {
   saveCustomRole,
 } from '../../utils/customEmployeeFields';
 import { EmployeeSelect } from '../common/EmployeeSelect';
-import { isSuperAdminRecord } from '../../utils/securityUtils';
+import { isSuperAdminRecord, isSuperiorSuperAdmin } from '../../utils/securityUtils';
+import { useAuth } from '../../context/AuthContext';
 
 export const SIDEBAR_MODULE_OPTIONS = [
   { id: 'dashboard', label: 'CRM Dashboard', desc: 'KPI metrics, live team workload & conversion charts', defaultFor: ['Admin', 'Manager', 'Sales Manager', 'Sales Executive', 'Business Analyst', 'Software Developer', 'DevOps / AWS Cloud Engineer', 'QA / Test Automation Engineer', 'UI/UX Designer', 'Technical Intern', 'Project Manager', 'Tech Lead / Solutions Architect', 'Employee'] },
@@ -195,7 +196,10 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
   onSave,
   initialEmployee,
 }) => {
+  const { user } = useAuth();
   const isEditing = !!initialEmployee;
+  const isSuperiorCaller = isSuperiorSuperAdmin(user);
+  const isSuperiorTarget = isSuperiorSuperAdmin(initialEmployee);
   const initialValues = useMemo(() => getInitialFormValues(initialEmployee), [initialEmployee]);
 
   // Form State
@@ -419,10 +423,10 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
       },
     };
 
-    if (isSuperAdminRecord(initialEmployee)) {
+    if (isSuperiorSuperAdmin(initialEmployee)) {
       employeeData.accessRole = 'Super Admin' as CrmAccessRole;
       if (!employeeData.role) {
-        employeeData.role = initialEmployee?.role || 'Lead Software Engineer';
+        employeeData.role = initialEmployee?.role || 'System Administrator';
       }
     }
 
@@ -874,7 +878,7 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
                   </label>
                   <select
                     value={accessRole}
-                    disabled={isSuperAdminRecord(initialEmployee)}
+                    disabled={isSuperiorTarget}
                     onChange={(e) => {
                       const newRole = e.target.value as CrmAccessRole;
                       setAccessRole(newRole);
@@ -887,11 +891,14 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
                     }}
                     className="w-full text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500/50 outline-none disabled:opacity-60 disabled:cursor-not-allowed"
                   >
-                    {isSuperAdminRecord(initialEmployee) ? (
-                      <option value="Super Admin">Super Admin (Primary System Role)</option>
+                    {isSuperiorTarget ? (
+                      <option value="Super Admin">Super Admin (Primary Superior Role)</option>
                     ) : (
                       <>
                         <optgroup label="Management & Administration">
+                          {isSuperiorCaller && (
+                            <option value="Super Admin">Super Admin</option>
+                          )}
                           <option value="Admin">Admin (Full System Access)</option>
                           <option value="Manager">Manager (General / Operations)</option>
                           <option value="Sales Manager">Sales Manager</option>

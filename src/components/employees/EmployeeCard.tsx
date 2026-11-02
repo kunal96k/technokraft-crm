@@ -21,7 +21,7 @@ import {
 } from './EmployeeStatusBadge';
 import { buildSafeApiUrl } from '../../utils/urlUtils';
 import { useAuth } from '../../context/AuthContext';
-import { isSuperAdminRecord, shouldMaskForSecurity } from '../../utils/securityUtils';
+import { isSuperAdminRecord, isSuperiorSuperAdmin, shouldMaskForSecurity } from '../../utils/securityUtils';
 
 interface EmployeeCardProps {
   employee: Employee;
@@ -50,8 +50,11 @@ export const EmployeeCard: React.FC<EmployeeCardProps> = ({
 }) => {
   const { user } = useAuth();
   const isSuperAdmin = isSuperAdminRecord(employee);
+  const isSuperiorTarget = isSuperiorSuperAdmin(employee);
+  const isCallerSuperior = isSuperiorSuperAdmin(user);
   const isOwnProfile = !!user && (String(user.id) === String(employee.id) || (!!user.employeeCode && user.employeeCode === employee.employeeCode));
-  const canModify = !isSuperAdmin || isOwnProfile;
+  const canModify = isCallerSuperior || !isSuperAdmin || isOwnProfile;
+  const canDelete = isCallerSuperior ? !isSuperiorTarget : !isSuperAdmin;
   const isMasked = shouldMaskForSecurity(employee, user);
 
   const handleSelect = () => {
@@ -176,8 +179,8 @@ export const EmployeeCard: React.FC<EmployeeCardProps> = ({
                   <Edit2 className="w-3.5 h-3.5" />
                 </button>
               )}
-              {/* Primary Super Admin can NEVER be deleted */}
-              {onDelete && !isSuperAdmin && (
+              {/* Superior Super Admin can delete anyone except themselves; non-superior cannot delete Super Admins */}
+              {onDelete && canDelete && (
                 <button
                   type="button"
                   onClick={(e) => {

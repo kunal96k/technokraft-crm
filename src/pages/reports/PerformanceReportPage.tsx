@@ -24,7 +24,7 @@ import { useAuth } from '../../context/AuthContext';
 import { Loader2 } from 'lucide-react';
 
 export const PerformanceReportPage: React.FC = () => {
-  const [dateRange, setDateRange] = useState<DateRangePreset>('This Month');
+  const [dateRange, setDateRange] = useState<DateRangePreset>('This Year');
   const [selectedEmployee, setSelectedEmployee] = useState('All Employees');
   const [selectedTeam, setSelectedTeam] = useState('All Teams');
   const [selectedScope, setSelectedScope] = useState<RoleScope>('Company Overview');
@@ -133,7 +133,7 @@ export const PerformanceReportPage: React.FC = () => {
     setSelectedEmployee('All Employees');
     setSelectedTeam('All Teams');
     setSelectedScope('Company Overview');
-    setDateRange('This Month');
+    setDateRange('This Year');
   };
 
   return (

@@ -23,7 +23,7 @@ import {
 } from './EmployeeStatusBadge';
 import { buildSafeApiUrl } from '../../utils/urlUtils';
 import { useAuth } from '../../context/AuthContext';
-import { isSuperAdminRecord, shouldMaskForSecurity } from '../../utils/securityUtils';
+import { isSuperAdminRecord, isSuperiorSuperAdmin, shouldMaskForSecurity } from '../../utils/securityUtils';
 
 export type SortField = 'name' | 'employeeCode' | 'department' | 'role' | 'joiningDate' | 'status';
 export type SortOrder = 'asc' | 'desc';
@@ -386,9 +386,13 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
         >
           {(() => {
             const isActionSuperAdmin = isSuperAdminRecord(openActionEmployee);
+            const isActionSuperior = isSuperiorSuperAdmin(openActionEmployee);
+            const isCallerSuperior = isSuperiorSuperAdmin(user);
             const isActionMasked = shouldMaskForSecurity(openActionEmployee, user);
             const isOwnProfile = !!user && (String(user.id) === String(openActionEmployee.id) || (!!user.employeeCode && user.employeeCode === openActionEmployee.employeeCode));
-            const canModify = !isActionSuperAdmin || isOwnProfile;
+            const canModify = isCallerSuperior || !isActionSuperAdmin || isOwnProfile;
+            const canDeactivate = isCallerSuperior ? !isActionSuperior : (!isActionSuperAdmin);
+            const canDelete = isCallerSuperior ? !isActionSuperior : (!isActionSuperAdmin);
 
             if (isActionMasked) {
               return (
@@ -484,8 +488,8 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
                   <span>View Attendance</span>
                 </button>
 
-                {/* Primary Super Admin can never be deactivated */}
-                {!isActionSuperAdmin && (
+                {/* Superior Super Admin can deactivate anyone except themselves; non-superior cannot deactivate any Super Admin */}
+                {canDeactivate && (
                   <>
                     <div className="my-1 border-t border-slate-100 dark:border-slate-700/80" />
                     {openActionEmployee.status === 'Active' ? (
@@ -520,8 +524,8 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
                   </>
                 )}
 
-                {/* Primary Super Admin can NEVER be deleted */}
-                {onDelete && !isActionSuperAdmin && (
+                {/* Superior Super Admin can delete anyone except themselves; non-superior cannot delete Super Admins */}
+                {onDelete && canDelete && (
                   <>
                     <div className="my-1 border-t border-slate-100 dark:border-slate-700/80" />
                     <button
