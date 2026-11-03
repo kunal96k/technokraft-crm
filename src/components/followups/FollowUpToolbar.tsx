@@ -252,7 +252,7 @@ export const FollowUpToolbar: React.FC<FollowUpToolbarProps> = ({
           </select>
 
           {/* Assigned Employee Filter with Typeahead Search */}
-          <div className="w-[180px]">
+          <div className="w-[190px]">
             <EmployeeSelect
               value={filters.assignedTo}
               onChange={(e) => {
@@ -261,6 +261,8 @@ export const FollowUpToolbar: React.FC<FollowUpToolbarProps> = ({
               }}
               placeholder="Assigned: All"
               showAllOption="Assigned: All"
+              showRoleInLabel={false}
+              showCodeInLabel={false}
               className="w-full text-xs"
             />
           </div>

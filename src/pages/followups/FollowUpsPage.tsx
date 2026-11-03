@@ -62,7 +62,7 @@ export const FollowUpsPage: React.FC = () => {
     onConfirm: () => void;
   } | null>(null);
   const [viewMode, setViewMode] = React.useState<'list' | 'calendar' | 'timeline'>('list');
-  const [scope, setScope] = React.useState<'my' | 'team'>('my');
+  const [scope, setScope] = React.useState<'my' | 'team'>('team');
   const [selectedIds, setSelectedIds] = React.useState<string[]>([]);
   const [toastMessage, setToastMessage] = React.useState<string | null>(null);
   const [isLoading, setIsLoading] = React.useState<boolean>(true);
@@ -98,6 +98,7 @@ export const FollowUpsPage: React.FC = () => {
     const assignedParam = searchParams.get('assignedTo');
     const startParam = searchParams.get('startDate');
     const endParam = searchParams.get('endDate');
+    const scopeParam = searchParams.get('scope');
 
     if (tabParam && ['all', 'today', 'upcoming', 'overdue', 'completed'].includes(tabParam.toLowerCase())) {
       setActiveTab(tabParam.toLowerCase() as FollowUpTab);
@@ -105,6 +106,8 @@ export const FollowUpsPage: React.FC = () => {
     if (assignedParam) {
       setFilters((prev) => ({ ...prev, assignedTo: assignedParam }));
       setScope('team');
+    } else if (scopeParam === 'my' || scopeParam === 'team') {
+      setScope(scopeParam);
     }
     if (startParam) {
       setFilters((prev) => ({ ...prev, startDate: startParam }));

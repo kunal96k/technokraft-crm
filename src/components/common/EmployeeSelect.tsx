@@ -16,6 +16,7 @@ export interface EmployeeSelectProps
   departmentFilter?: string;
   customOptions?: Array<{ value: string; label: string }>;
   showRoleInLabel?: boolean;
+  showCodeInLabel?: boolean;
   className?: string;
   containerClassName?: string;
   align?: 'left' | 'right' | 'auto' | 'full';
@@ -34,6 +35,7 @@ export const EmployeeSelect: React.FC<EmployeeSelectProps> = ({
   departmentFilter,
   customOptions = [],
   showRoleInLabel = true,
+  showCodeInLabel = false,
   className = '',
   containerClassName = '',
   align = 'auto',
@@ -341,10 +343,10 @@ export const EmployeeSelect: React.FC<EmployeeSelectProps> = ({
                 size="xs"
               />
               <div className="flex items-center gap-1.5 min-w-0 flex-1 overflow-hidden">
-                <span className="font-semibold text-slate-900 dark:text-slate-100 truncate min-w-0 shrink">
+                <span className="font-semibold text-slate-900 dark:text-slate-100 truncate min-w-0 flex-1">
                   {selectedEmployee.name}
                 </span>
-                {selectedEmployee.employeeCode && (
+                {showCodeInLabel && selectedEmployee.employeeCode && (
                   <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-purple-50 dark:bg-purple-950/50 text-[#5B4DB7] dark:text-purple-300 border border-purple-200/60 dark:border-purple-800/60 shrink-0">
                     {selectedEmployee.employeeCode}
                   </span>
