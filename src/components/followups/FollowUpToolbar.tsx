@@ -4,6 +4,7 @@ import {
   Filter,
   X,
   List,
+  Calendar,
   CalendarDays,
   Users,
   Clock,
@@ -11,6 +12,7 @@ import {
   SlidersHorizontal,
 } from 'lucide-react';
 import { FollowUpTab, FollowUpStats } from '../../types/followUps';
+import { EmployeeSelect } from '../common/EmployeeSelect';
 
 export interface FollowUpFilters {
   search: string;
@@ -19,6 +21,8 @@ export interface FollowUpFilters {
   priority: string;
   type: string;
   service: string;
+  startDate?: string;
+  endDate?: string;
 }
 
 interface FollowUpToolbarProps {
@@ -247,19 +251,53 @@ export const FollowUpToolbar: React.FC<FollowUpToolbarProps> = ({
             <option value="LOW">Low</option>
           </select>
 
-          {/* Assigned To Filter */}
-          <select
-            value={filters.assignedTo}
-            onChange={(e) => onFilterChange('assignedTo', e.target.value)}
-            className="px-2.5 py-2 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]/30"
-          >
-            <option value="">All Assignees</option>
-            {employees.map((emp, idx) => (
-              <option key={`${emp}-${idx}`} value={emp}>
-                {emp}
-              </option>
-            ))}
-          </select>
+          {/* Assigned Employee Filter with Typeahead Search */}
+          <div className="w-[180px]">
+            <EmployeeSelect
+              value={filters.assignedTo}
+              onChange={(e) => {
+                const val = typeof e === 'string' ? e : e.target.value;
+                onFilterChange('assignedTo', val);
+              }}
+              placeholder="Assigned: All"
+              showAllOption="Assigned: All"
+              className="w-full text-xs"
+            />
+          </div>
+
+          {/* From - To Date Range Filter */}
+          <div className="flex items-center gap-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 dark:text-slate-200">
+            <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+            <span className="text-slate-400 text-[11px] font-medium">From:</span>
+            <input
+              type="date"
+              value={filters.startDate || ''}
+              max={filters.endDate || undefined}
+              onChange={(e) => onFilterChange('startDate', e.target.value)}
+              className="bg-transparent text-xs text-slate-800 dark:text-slate-200 focus:outline-none cursor-pointer"
+            />
+            <span className="text-slate-400 text-[11px] font-medium">To:</span>
+            <input
+              type="date"
+              value={filters.endDate || ''}
+              min={filters.startDate || undefined}
+              onChange={(e) => onFilterChange('endDate', e.target.value)}
+              className="bg-transparent text-xs text-slate-800 dark:text-slate-200 focus:outline-none cursor-pointer"
+            />
+            {(filters.startDate || filters.endDate) && (
+              <button
+                type="button"
+                onClick={() => {
+                  onFilterChange('startDate', '');
+                  onFilterChange('endDate', '');
+                }}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 ml-0.5 cursor-pointer"
+                title="Clear date filter"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
 
           {/* Reset button */}
           {hasActiveFilters && (
@@ -363,18 +401,42 @@ export const FollowUpToolbar: React.FC<FollowUpToolbarProps> = ({
               <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-1">
                 Assigned To
               </label>
-              <select
+              <EmployeeSelect
                 value={filters.assignedTo}
-                onChange={(e) => onFilterChange('assignedTo', e.target.value)}
-                className="w-full px-2.5 py-1.5 text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200"
-              >
-                <option value="">All Assignees</option>
-                {employees.map((emp, idx) => (
-                  <option key={`${emp}-${idx}`} value={emp}>
-                    {emp}
-                  </option>
-                ))}
-              </select>
+                onChange={(e) => {
+                  const val = typeof e === 'string' ? e : e.target.value;
+                  onFilterChange('assignedTo', val);
+                }}
+                placeholder="Assigned: All"
+                showAllOption="Assigned: All"
+                className="w-full text-xs"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-1">
+                From Date
+              </label>
+              <input
+                type="date"
+                value={filters.startDate || ''}
+                max={filters.endDate || undefined}
+                onChange={(e) => onFilterChange('startDate', e.target.value)}
+                className="w-full px-2.5 py-1.5 text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 cursor-pointer"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-1">
+                To Date
+              </label>
+              <input
+                type="date"
+                value={filters.endDate || ''}
+                min={filters.startDate || undefined}
+                onChange={(e) => onFilterChange('endDate', e.target.value)}
+                className="w-full px-2.5 py-1.5 text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 cursor-pointer"
+              />
             </div>
           </div>
         </div>

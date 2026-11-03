@@ -19,6 +19,8 @@ export interface FollowUpQueryParams {
   assignedTo?: string;
   service?: string;
   search?: string;
+  startDate?: string;
+  endDate?: string;
   page?: number;
   size?: number;
   sortBy?: string;
@@ -52,6 +54,8 @@ export async function fetchFollowUps(params: FollowUpQueryParams = {}): Promise<
   if (params.assignedTo && params.assignedTo !== 'all') query.append('assignedTo', params.assignedTo);
   if (params.service && params.service !== 'all') query.append('service', params.service);
   if (params.search?.trim()) query.append('search', params.search.trim());
+  if (params.startDate?.trim()) query.append('startDate', params.startDate.trim());
+  if (params.endDate?.trim()) query.append('endDate', params.endDate.trim());
   query.append('page', String(params.page ?? 0));
   query.append('size', String(params.size ?? 100));
 

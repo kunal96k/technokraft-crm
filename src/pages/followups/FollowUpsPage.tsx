@@ -1,4 +1,5 @@
 import React from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   Plus,
   CalendarClock,
@@ -44,6 +45,7 @@ import {
 export const FollowUpsPage: React.FC = () => {
   const { user: authUser } = useAuth();
   const currentUserName = authUser?.name || 'Kunal Patil';
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [followUps, setFollowUps] = React.useState<FollowUpRecord[]>([]);
   const [teamPerformance, setTeamPerformance] = React.useState<EmployeePerformance[]>([]);
@@ -86,7 +88,31 @@ export const FollowUpsPage: React.FC = () => {
     priority: '',
     type: '',
     service: '',
+    startDate: '',
+    endDate: '',
   });
+
+  // Read URL query parameters (e.g. from Overdue Bottlenecks "View ->")
+  React.useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    const assignedParam = searchParams.get('assignedTo');
+    const startParam = searchParams.get('startDate');
+    const endParam = searchParams.get('endDate');
+
+    if (tabParam && ['all', 'today', 'upcoming', 'overdue', 'completed'].includes(tabParam.toLowerCase())) {
+      setActiveTab(tabParam.toLowerCase() as FollowUpTab);
+    }
+    if (assignedParam) {
+      setFilters((prev) => ({ ...prev, assignedTo: assignedParam }));
+      setScope('team');
+    }
+    if (startParam) {
+      setFilters((prev) => ({ ...prev, startDate: startParam }));
+    }
+    if (endParam) {
+      setFilters((prev) => ({ ...prev, endDate: endParam }));
+    }
+  }, [searchParams]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -112,6 +138,8 @@ export const FollowUpsPage: React.FC = () => {
           assignedTo: effectiveAssignee,
           service: filters.service || undefined,
           search: filters.search || undefined,
+          startDate: filters.startDate || undefined,
+          endDate: filters.endDate || undefined,
           size: 200,
         }),
         followUpService.fetchFollowUpStats(),
@@ -155,7 +183,6 @@ export const FollowUpsPage: React.FC = () => {
     }
   }, [activeTab, filters, scope, currentUserName]);
 
-
   React.useEffect(() => {
     loadData();
   }, [loadData]);
@@ -172,10 +199,13 @@ export const FollowUpsPage: React.FC = () => {
       priority: '',
       type: '',
       service: '',
+      startDate: '',
+      endDate: '',
     });
+    setSearchParams({});
   };
 
-  const hasActiveFilters = Object.values(filters).some((val) => val !== '');
+  const hasActiveFilters = Object.values(filters).some((val) => Boolean(val && val.trim()));
 
   const { employees: activeEmployeesList } = useActiveEmployees();
 
