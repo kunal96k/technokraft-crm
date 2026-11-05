@@ -56,7 +56,41 @@ export async function fetchProjectsPaginated(params: ProjectQueryParams = {}): P
       empty: data.length === 0,
     };
   }
-  return data;
+
+  const pageMeta = data.page || data;
+  const content: DeliveryProjectRecord[] = Array.isArray(data.content)
+    ? data.content
+    : (Array.isArray(data) ? data : []);
+
+  const totalElements = typeof pageMeta.totalElements === 'number'
+    ? pageMeta.totalElements
+    : (typeof data.totalElements === 'number' ? data.totalElements : content.length);
+
+  const requestedSize = params.size || 9;
+  const totalPages = typeof pageMeta.totalPages === 'number'
+    ? pageMeta.totalPages
+    : (typeof data.totalPages === 'number'
+        ? data.totalPages
+        : Math.max(1, Math.ceil(totalElements / requestedSize)));
+
+  const pageNumber = typeof pageMeta.number === 'number'
+    ? pageMeta.number
+    : (typeof data.number === 'number' ? data.number : (params.page ?? 0));
+
+  const pageSize = typeof pageMeta.size === 'number'
+    ? pageMeta.size
+    : (typeof data.size === 'number' ? data.size : requestedSize);
+
+  return {
+    content,
+    totalElements,
+    totalPages: Math.max(1, totalPages),
+    number: pageNumber,
+    size: pageSize,
+    first: pageNumber === 0,
+    last: pageNumber >= totalPages - 1,
+    empty: content.length === 0,
+  };
 }
 
 export async function fetchProjectSummary(): Promise<ProjectSummaryRecord> {

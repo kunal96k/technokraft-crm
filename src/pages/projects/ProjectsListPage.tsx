@@ -118,9 +118,17 @@ export const ProjectsListPage: React.FC = () => {
         fetchProjectSummary().catch(() => null),
       ]);
 
-      setProjects(pagedRes.content || []);
-      setTotalElements(pagedRes.totalElements || 0);
-      setTotalPages(Math.max(1, pagedRes.totalPages || 1));
+      const items = pagedRes?.content || [];
+      const total = typeof pagedRes?.totalElements === 'number' && pagedRes.totalElements >= 0
+        ? pagedRes.totalElements
+        : items.length;
+      const pages = typeof pagedRes?.totalPages === 'number' && pagedRes.totalPages > 0
+        ? pagedRes.totalPages
+        : Math.max(1, Math.ceil(total / pageSize));
+
+      setProjects(items);
+      setTotalElements(total);
+      setTotalPages(pages);
       if (summaryRes) {
         setSummary(summaryRes);
       }
@@ -178,8 +186,9 @@ export const ProjectsListPage: React.FC = () => {
   const kpiCompleted = summary?.completed ?? projects.filter((p) => p.status === 'COMPLETED').length;
 
   // Pagination display counters
-  const fromRecord = totalElements === 0 ? 0 : currentPage * pageSize + 1;
-  const toRecord = Math.min((currentPage + 1) * pageSize, totalElements);
+  const effectiveTotal = Math.max(totalElements, projects.length);
+  const fromRecord = effectiveTotal === 0 ? 0 : currentPage * pageSize + 1;
+  const toRecord = Math.min((currentPage + 1) * pageSize, effectiveTotal);
 
   // Generate numbered pages with ellipses (...)
   const getPageNumbers = () => {
@@ -665,7 +674,7 @@ export const ProjectsListPage: React.FC = () => {
               <span>
                 Showing <strong className="font-semibold text-slate-900 dark:text-white font-mono">{fromRecord}</strong> to{' '}
                 <strong className="font-semibold text-slate-900 dark:text-white font-mono">{toRecord}</strong> of{' '}
-                <strong className="font-semibold text-slate-900 dark:text-white font-mono">{totalElements}</strong> projects
+                <strong className="font-semibold text-slate-900 dark:text-white font-mono">{effectiveTotal}</strong> projects
               </span>
             </div>
 
