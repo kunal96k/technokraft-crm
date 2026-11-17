@@ -217,9 +217,11 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
           </button>
         </div>
 
-        {/* Form Body - Scrollable */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 text-xs overflow-y-auto">
-          {error && (
+        {/* Form Wrap */}
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+          {/* Scrollable Form Body */}
+          <div className="p-6 space-y-4 text-xs overflow-y-auto flex-1">
+            {error && (
             <div className="p-3 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900/60 rounded-xl text-rose-700 dark:text-rose-300 flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
               <span>{error}</span>
@@ -567,8 +569,10 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
             )}
           </div>
 
-          {/* Footer Actions */}
-          <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end gap-2.5">
+          </div>
+
+          {/* Fixed Footer Actions */}
+          <div className="flex-shrink-0 px-6 py-3.5 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur-xs border-t border-slate-200 dark:border-slate-800 flex items-center justify-end gap-2.5">
             <button
               type="button"
               onClick={onClose}

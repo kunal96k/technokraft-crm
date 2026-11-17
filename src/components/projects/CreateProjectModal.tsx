@@ -105,9 +105,9 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 overflow-y-auto">
-      <div className="bg-white dark:bg-[#1E293B] w-full max-w-2xl rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden my-8 animate-in fade-in zoom-in-95 duration-150">
+      <div className="bg-white dark:bg-[#1E293B] w-full max-w-2xl rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden my-6 animate-in fade-in zoom-in-95 duration-150 flex flex-col max-h-[92vh]">
         {/* Header */}
-        <div className="px-6 py-4 bg-purple-50/60 dark:bg-purple-950/40 border-b border-purple-100 dark:border-purple-900/50 flex items-center justify-between">
+        <div className="px-6 py-4 bg-purple-50/60 dark:bg-purple-950/40 border-b border-purple-100 dark:border-purple-900/50 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-900/60 text-[#5B4DB7] dark:text-purple-300 flex items-center justify-center shadow-xs">
               <FolderKanban className="w-5 h-5" />
@@ -128,8 +128,10 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
           </button>
         </div>
 
-        {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 text-xs">
+        {/* Form Wrap */}
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+          {/* Scrollable Form Body */}
+          <div className="p-6 space-y-4 text-xs overflow-y-auto flex-1">
           {error && (
             <div className="p-3 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900/60 rounded-xl text-rose-700 dark:text-rose-300">
               {error}
@@ -323,8 +325,10 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
             />
           </div>
 
-          {/* Footer Actions */}
-          <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end gap-2.5">
+          </div>
+
+          {/* Fixed Footer Actions */}
+          <div className="flex-shrink-0 px-6 py-3.5 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur-xs border-t border-slate-200 dark:border-slate-800 flex items-center justify-end gap-2.5">
             <button
               type="button"
               onClick={onClose}

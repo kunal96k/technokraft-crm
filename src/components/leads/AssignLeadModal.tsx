@@ -169,8 +169,10 @@ export const AssignLeadModal: React.FC<AssignLeadModalProps> = ({
           )}
         </div>
 
-        {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-5 space-y-4 overflow-y-auto text-xs">
+        {/* Form Wrap */}
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+          {/* Scrollable Form Body */}
+          <div className="p-5 space-y-4 overflow-y-auto text-xs flex-1">
           {/* Primary Sales Executive Typeahead */}
           <div>
             <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
@@ -226,8 +228,10 @@ export const AssignLeadModal: React.FC<AssignLeadModalProps> = ({
             />
           </div>
 
-          {/* Footer Actions */}
-          <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-2.5">
+          </div>
+
+          {/* Fixed Footer Actions */}
+          <div className="flex-shrink-0 px-5 py-3.5 bg-slate-50/90 dark:bg-slate-950/70 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-2.5">
             <button
               type="button"
               onClick={onClose}

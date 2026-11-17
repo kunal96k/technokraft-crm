@@ -177,9 +177,11 @@ export const EditProjectModal: React.FC<EditProjectModalProps> = ({
           </button>
         </div>
 
-        {/* Form Body */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-6">
-          {error && (
+        {/* Form Wrap */}
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+          {/* Scrollable Form Body */}
+          <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            {error && (
             <div className="p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 rounded-xl flex items-center gap-2.5 text-xs text-rose-700 dark:text-rose-300">
               <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
               <span>{error}</span>
@@ -483,8 +485,10 @@ export const EditProjectModal: React.FC<EditProjectModalProps> = ({
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end gap-3">
+          </div>
+
+          {/* Fixed Action Buttons */}
+          <div className="flex-shrink-0 px-6 py-3.5 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur-xs border-t border-slate-200 dark:border-slate-800 flex items-center justify-end gap-3">
             <button
               type="button"
               onClick={onClose}
