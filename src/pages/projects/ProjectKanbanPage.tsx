@@ -478,13 +478,39 @@ export const ProjectKanbanPage: React.FC = () => {
                     className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 cursor-pointer transition-colors"
                   >
                     <td className="px-4 py-3 font-mono font-bold text-[#5B4DB7] dark:text-purple-300">
-                      {task.taskKey}
+                      <div className="flex items-center gap-1.5">
+                        <span>{task.taskKey}</span>
+                        {task.isPostDelivery && (
+                          <span
+                            className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${
+                              task.billingType === 'BILLABLE_CR'
+                                ? 'text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 border-indigo-200 dark:border-indigo-800'
+                                : 'text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/60 border-rose-200 dark:border-rose-800'
+                            }`}
+                          >
+                            {task.billingType === 'BILLABLE_CR' ? '⚡ CR' : '🐞 Hotfix'}
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-4 py-3 text-slate-900 dark:text-white font-semibold">
                       {task.title}
                     </td>
                     <td className="px-4 py-3 text-slate-500 font-medium">
-                      {task.projectName || '—'}
+                      {task.projectName ? (
+                        <div className="flex items-center gap-1.5">
+                          <span className="truncate max-w-[160px]">{task.projectName}</span>
+                          {task.projectStatus === 'MAINTENANCE' && (
+                            <span className="text-[9px] font-bold text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-950/60 px-1 py-0.2 rounded border border-teal-200 dark:border-teal-800 shrink-0">
+                              AMC
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-purple-600 dark:text-purple-400 text-[11px] font-medium">
+                          General / Intern
+                        </span>
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       {task.leadName ? (

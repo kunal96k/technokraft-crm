@@ -89,6 +89,7 @@ export interface ProjectTaskRecord {
   projectId?: number;
   projectName?: string;
   projectCode?: string;
+  projectStatus?: ProjectStatus;
   companyName?: string;
   title: string;
   description?: string;

@@ -17,6 +17,7 @@ import {
   Send,
   Check,
   UserCheck,
+  Zap,
 } from 'lucide-react';
 import { ProjectTaskRecord, TaskStatus, TaskPriority, TaskType } from '../../types/projects';
 import { EmployeeAvatar } from '../common/EmployeeAvatar';
@@ -70,6 +71,8 @@ export const ProjectTaskCard: React.FC<ProjectTaskCardProps> = ({
     switch (type) {
       case 'BUG':
         return <Bug className="w-3.5 h-3.5 text-rose-500 shrink-0" />;
+      case 'CHANGE_REQUEST':
+        return <Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-500/20 shrink-0" />;
       case 'FEATURE':
         return <Sparkles className="w-3.5 h-3.5 text-purple-500 shrink-0" />;
       case 'SPIKE':
@@ -129,15 +132,27 @@ export const ProjectTaskCard: React.FC<ProjectTaskCardProps> = ({
     }
   };
 
+  // Left border accent for high-visibility categorization
+  let cardAccentClass = 'border-slate-200/90 dark:border-slate-700/80';
+  if (task.isPostDelivery) {
+    if (task.billingType === 'BILLABLE_CR') {
+      cardAccentClass = 'border-slate-200/90 dark:border-slate-700/80 border-l-[3.5px] border-l-indigo-600';
+    } else {
+      cardAccentClass = 'border-slate-200/90 dark:border-slate-700/80 border-l-[3.5px] border-l-rose-500';
+    }
+  } else if (!task.projectName && !task.projectId) {
+    cardAccentClass = 'border-slate-200/90 dark:border-slate-700/80 border-l-[3.5px] border-l-purple-500';
+  }
+
   return (
     <div
       onClick={() => onSelectTask?.(task)}
-      className={`group relative rounded-xl p-3.5 border transition-all duration-200 select-none cursor-pointer ${
+      className={`group relative rounded-xl p-3.5 border transition-all duration-200 select-none cursor-pointer ${cardAccentClass} ${
         isDragOverlay
           ? 'bg-white dark:bg-slate-800 border-[#5B4DB7] shadow-2xl rotate-1 ring-2 ring-[#5B4DB7]/40'
           : isDragging
           ? 'opacity-30 border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/40'
-          : 'bg-white dark:bg-slate-800/90 border-slate-200/90 dark:border-slate-700/80 shadow-2xs hover:shadow-md hover:border-[#5B4DB7]/50 dark:hover:border-[#5B4DB7]/60'
+          : 'bg-white dark:bg-slate-800/90 shadow-2xs hover:shadow-md hover:border-[#5B4DB7]/50 dark:hover:border-[#5B4DB7]/60'
       }`}
     >
       {/* Top Bar: Drag Handle, Type & Key, Priority, 3-dot Menu */}
@@ -262,9 +277,17 @@ export const ProjectTaskCard: React.FC<ProjectTaskCardProps> = ({
       {/* Project, Linked Lead & Defect tags */}
       <div className="flex flex-wrap items-center gap-1.5 mb-2">
         {task.projectName ? (
-          <div className="flex items-center gap-1 text-[10px] text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-700/50 px-1.5 py-0.5 rounded border border-slate-200/60 dark:border-slate-700 max-w-[170px] truncate">
+          <div className="flex items-center gap-1 text-[10px] text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-700/50 px-1.5 py-0.5 rounded border border-slate-200/60 dark:border-slate-700 max-w-[180px] truncate">
             <Briefcase className="w-2.5 h-2.5 text-slate-400 shrink-0" />
             <span className="truncate">{task.projectName}</span>
+            {task.projectStatus === 'MAINTENANCE' && (
+              <span
+                className="ml-0.5 text-[9px] font-bold text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-950/60 px-1 py-0.2 rounded border border-teal-200 dark:border-teal-800 shrink-0"
+                title="Live Support / AMC Contract"
+              >
+                AMC
+              </span>
+            )}
           </div>
         ) : (
           <div className="flex items-center gap-1 text-[10px] text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/50 px-1.5 py-0.5 rounded border border-purple-200/60 dark:border-purple-900/60">
@@ -272,12 +295,26 @@ export const ProjectTaskCard: React.FC<ProjectTaskCardProps> = ({
           </div>
         )}
         {task.isPostDelivery && (
-          <div className={`flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded border ${
-            task.billingType === 'BILLABLE_CR'
-              ? 'text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/50 border-indigo-200 dark:border-indigo-900'
-              : 'text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/50 border-rose-200 dark:border-rose-900'
-          }`}>
-            <span>{task.billingType === 'BILLABLE_CR' ? '⚡ Change Request' : '🐞 Warranty Hotfix'}</span>
+          <div
+            className={`flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded border ${
+              task.billingType === 'BILLABLE_CR'
+                ? 'text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/50 border-indigo-200 dark:border-indigo-900'
+                : 'text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/50 border-rose-200 dark:border-rose-900'
+            }`}
+          >
+            {task.billingType === 'BILLABLE_CR' ? (
+              <>
+                <Zap className="w-2.5 h-2.5 fill-indigo-500/30" />
+                <span>
+                  CR{(task.crBudget ?? 0) > 0 ? ` • ₹${(task.crBudget || 0).toLocaleString('en-IN')}` : ''}
+                </span>
+              </>
+            ) : (
+              <>
+                <Bug className="w-2.5 h-2.5" />
+                <span>Warranty SLA</span>
+              </>
+            )}
           </div>
         )}
         {task.leadName && (
