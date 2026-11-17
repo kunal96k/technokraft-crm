@@ -4,6 +4,7 @@ export type ProjectStatus =
   | 'ON_HOLD'
   | 'CLIENT_REVIEW'
   | 'COMPLETED'
+  | 'MAINTENANCE'
   | 'CANCELLED';
 
 export type ProjectPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
@@ -20,7 +21,7 @@ export type TaskStatus =
   | 'DEPLOYMENT'
   | 'COMPLETED';
 
-export type TaskType = 'TASK' | 'BUG' | 'FEATURE' | 'REQUIREMENT' | 'IMPROVEMENT' | 'SPIKE' | 'SUBTASK';
+export type TaskType = 'TASK' | 'BUG' | 'FEATURE' | 'REQUIREMENT' | 'IMPROVEMENT' | 'SPIKE' | 'SUBTASK' | 'CHANGE_REQUEST';
 
 export type TaskPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT' | 'CRITICAL';
 
@@ -85,7 +86,7 @@ export interface TaskActivityRecord {
 export interface ProjectTaskRecord {
   id: number;
   taskKey: string;
-  projectId: number;
+  projectId?: number;
   projectName?: string;
   projectCode?: string;
   companyName?: string;
@@ -111,6 +112,9 @@ export interface ProjectTaskRecord {
   leadName?: string;
   defectNotes?: string;
   isOverdue?: boolean;
+  isPostDelivery?: boolean;
+  billingType?: 'STANDARD' | 'WARRANTY' | 'BILLABLE_CR' | 'INTERNAL';
+  crBudget?: number;
   createdAt: string;
   updatedAt?: string;
   comments?: TaskCommentRecord[];

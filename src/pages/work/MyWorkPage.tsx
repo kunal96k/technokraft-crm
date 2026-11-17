@@ -371,10 +371,26 @@ export const MyWorkPage: React.FC = () => {
                     {task.taskKey}
                   </span>
 
-                  {task.projectName && (
+                  {task.projectName ? (
                     <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-300 flex items-center gap-1">
                       <Briefcase className="w-3 h-3 text-slate-400" />
                       <span>{task.projectName}</span>
+                    </span>
+                  ) : (
+                    <span className="text-[11px] font-semibold text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/60 px-2 py-0.5 rounded border border-purple-200 dark:border-purple-800 flex items-center gap-1">
+                      <span>Internal Assignment</span>
+                    </span>
+                  )}
+
+                  {task.isPostDelivery && (
+                    <span
+                      className={`text-[10px] font-bold px-2 py-0.5 rounded flex items-center gap-1 border ${
+                        task.billingType === 'BILLABLE_CR'
+                          ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800'
+                          : 'bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800'
+                      }`}
+                    >
+                      {task.billingType === 'BILLABLE_CR' ? '⚡ CR' : '🐞 Hotfix'}
                     </span>
                   )}
 

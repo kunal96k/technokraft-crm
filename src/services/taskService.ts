@@ -11,11 +11,37 @@ const PROJECTS_URL = '/api/projects';
 const TASKS_URL = '/api/tasks';
 
 export interface TaskQueryParams {
+  projectId?: number | string;
   status?: string;
   assigneeId?: number;
   taskType?: string;
   priority?: string;
+  isPostDelivery?: boolean;
   search?: string;
+}
+
+export async function fetchAllTasks(params: TaskQueryParams = {}): Promise<ProjectTaskRecord[]> {
+  const q = new URLSearchParams();
+  if (params.projectId !== undefined && params.projectId !== 'ALL') {
+    if (params.projectId === 'NONE' || params.projectId === 'GENERAL') {
+      q.append('projectId', '-1');
+    } else {
+      q.append('projectId', String(params.projectId));
+    }
+  }
+  if (params.status && params.status !== 'ALL') q.append('status', params.status);
+  if (params.assigneeId) q.append('assigneeId', String(params.assigneeId));
+  if (params.taskType && params.taskType !== 'ALL') q.append('taskType', params.taskType);
+  if (params.priority && params.priority !== 'ALL') q.append('priority', params.priority);
+  if (params.isPostDelivery !== undefined) q.append('isPostDelivery', String(params.isPostDelivery));
+  if (params.search && params.search.trim()) q.append('search', params.search.trim());
+
+  const url = q.toString() ? `${TASKS_URL}?${q.toString()}` : TASKS_URL;
+  const res = await authFetch(url);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch tasks (HTTP ${res.status})`);
+  }
+  return res.json();
 }
 
 export async function fetchProjectTasks(
@@ -46,13 +72,24 @@ export async function fetchTaskById(taskId: number | string): Promise<ProjectTas
 }
 
 export async function createTask(
-  projectId: number | string,
-  data: Partial<ProjectTaskRecord>
+  projectIdOrData: number | string | undefined | Partial<ProjectTaskRecord>,
+  optionalData?: Partial<ProjectTaskRecord>
 ): Promise<ProjectTaskRecord> {
-  const res = await authFetch(`${PROJECTS_URL}/${projectId}/tasks`, {
+  let payload: Partial<ProjectTaskRecord>;
+
+  if (typeof projectIdOrData === 'object' && projectIdOrData !== null) {
+    payload = { ...projectIdOrData };
+  } else {
+    payload = { ...optionalData };
+    if (projectIdOrData !== undefined && projectIdOrData !== null && projectIdOrData !== '') {
+      payload.projectId = Number(projectIdOrData);
+    }
+  }
+
+  const res = await authFetch(TASKS_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
+    body: JSON.stringify(payload),
   });
   if (!res.ok) {
     const err = await res.text();

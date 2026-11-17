@@ -261,10 +261,23 @@ export const ProjectTaskCard: React.FC<ProjectTaskCardProps> = ({
 
       {/* Project, Linked Lead & Defect tags */}
       <div className="flex flex-wrap items-center gap-1.5 mb-2">
-        {task.projectName && (
+        {task.projectName ? (
           <div className="flex items-center gap-1 text-[10px] text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-700/50 px-1.5 py-0.5 rounded border border-slate-200/60 dark:border-slate-700 max-w-[170px] truncate">
             <Briefcase className="w-2.5 h-2.5 text-slate-400 shrink-0" />
             <span className="truncate">{task.projectName}</span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-1 text-[10px] text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/50 px-1.5 py-0.5 rounded border border-purple-200/60 dark:border-purple-900/60">
+            <span>General / Intern Work</span>
+          </div>
+        )}
+        {task.isPostDelivery && (
+          <div className={`flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded border ${
+            task.billingType === 'BILLABLE_CR'
+              ? 'text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/50 border-indigo-200 dark:border-indigo-900'
+              : 'text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/50 border-rose-200 dark:border-rose-900'
+          }`}>
+            <span>{task.billingType === 'BILLABLE_CR' ? '⚡ Change Request' : '🐞 Warranty Hotfix'}</span>
           </div>
         )}
         {task.leadName && (

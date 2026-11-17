@@ -237,6 +237,13 @@ export const ProjectsListPage: React.FC = () => {
             Delivered / Live
           </span>
         );
+      case 'MAINTENANCE':
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800">
+            <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse" />
+            Live Support / AMC
+          </span>
+        );
       case 'ON_HOLD':
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-700">
@@ -416,6 +423,7 @@ export const ProjectsListPage: React.FC = () => {
               <option value="ACTIVE">In Development</option>
               <option value="CLIENT_REVIEW">Client Review / QA</option>
               <option value="COMPLETED">Delivered / Live</option>
+              <option value="MAINTENANCE">Live Support / AMC</option>
               <option value="ON_HOLD">On Hold</option>
             </select>
           </div>

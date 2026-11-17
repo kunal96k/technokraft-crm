@@ -23,6 +23,7 @@ import {
 import { fetchProjects } from '../../services/projectService';
 import {
   fetchProjectTasks,
+  fetchAllTasks,
   updateTaskStatus,
   deleteTask as deleteTaskApi,
 } from '../../services/taskService';
@@ -120,29 +121,21 @@ export const ProjectKanbanPage: React.FC = () => {
     setIsLoading(true);
     setError(null);
     try {
-      if (filters.projectId === 'ALL') {
-        // Aggregate tasks from active projects
-        const projList = projects.length > 0 ? projects : await fetchProjects();
-        if (projList.length > 0) {
-          const promises = projList.slice(0, 10).map((p) =>
-            fetchProjectTasks(p.id).catch(() => [])
-          );
-          const results = await Promise.all(promises);
-          setTasks(results.flat());
-        } else {
-          setTasks([]);
-        }
-      } else {
-        const data = await fetchProjectTasks(filters.projectId);
-        setTasks(data);
-      }
+      const data = await fetchAllTasks({
+        projectId: filters.projectId,
+        assigneeId: filters.assigneeId !== 'ALL' ? Number(filters.assigneeId) : undefined,
+        taskType: filters.taskType !== 'ALL' ? filters.taskType : undefined,
+        priority: filters.priority !== 'ALL' ? filters.priority : undefined,
+        search: filters.search.trim() || undefined,
+      });
+      setTasks(data);
     } catch (err: any) {
       console.error('Failed to load project tasks:', err);
       setError(err?.message || 'Failed to load tasks');
     } finally {
       setIsLoading(false);
     }
-  }, [filters.projectId, projects]);
+  }, [filters.projectId, filters.assigneeId, filters.taskType, filters.priority, filters.search]);
 
   useEffect(() => {
     loadTasks();

@@ -51,6 +51,10 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   const [projects, setProjects] = useState<DeliveryProjectRecord[]>([]);
   const [isLoadingProjects, setIsLoadingProjects] = useState(false);
 
+  // Post-delivery & Billing Classification
+  const [billingType, setBillingType] = useState<'STANDARD' | 'WARRANTY' | 'BILLABLE_CR' | 'INTERNAL'>('STANDARD');
+  const [crBudget, setCrBudget] = useState<string>('0');
+
   // Form Fields
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -95,8 +99,8 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
     fetchProjects()
       .then((data) => {
         setProjects(data);
-        if (!selectedProjectId && data.length > 0) {
-          setSelectedProjectId(initialProjectId || data[0].id);
+        if (initialProjectId) {
+          setSelectedProjectId(initialProjectId);
         }
       })
       .catch((err) => {
@@ -128,6 +132,9 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
     }
   };
 
+  const selectedProject = projects.find((p) => p.id === selectedProjectId);
+  const isDeliveredProject = !!(selectedProject && (selectedProject.status === 'COMPLETED' || selectedProject.status === 'MAINTENANCE'));
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) {
@@ -135,11 +142,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
       return;
     }
 
-    const targetProjId = selectedProjectId || propProjectId || defaultProjectId;
-    if (!targetProjId) {
-      setError('Please select a project to link this task to');
-      return;
-    }
+    const targetProjId = selectedProjectId || propProjectId || defaultProjectId || undefined;
 
     try {
       setIsSubmitting(true);
@@ -163,12 +166,15 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
         leadCode: linkedLeadCode || undefined,
         leadName: linkedLeadName || undefined,
         defectNotes: defectNotes.trim() || undefined,
+        isPostDelivery: isDeliveredProject,
+        billingType: !targetProjId ? 'INTERNAL' : (isDeliveredProject ? billingType : 'STANDARD'),
+        crBudget: (isDeliveredProject && billingType === 'BILLABLE_CR' && crBudget) ? parseFloat(crBudget) : 0,
       };
 
       if (onSubmit) {
         await onSubmit(payload);
       } else {
-        const created = await createTask(targetProjId, payload);
+        const created = await createTask(payload);
         if (onTaskCreated) {
           onTaskCreated(created);
         }
@@ -220,12 +226,12 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
             </div>
           )}
 
-          {/* 1. Target Project (Always visible & selectable) */}
+          {/* 1. Target Project (Optional for General / Intern Work) */}
           <div>
             <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1 flex items-center justify-between">
               <span className="flex items-center gap-1.5">
                 <Briefcase className="w-3.5 h-3.5 text-[#5B4DB7]" />
-                Target Project <span className="text-rose-500">*</span>
+                Target Project <span className="text-[11px] font-normal text-slate-400 dark:text-slate-500">(Optional for General / Intern Work)</span>
               </span>
               {propProjectCode && (
                 <span className="text-[10px] font-mono text-purple-600 dark:text-purple-400 font-semibold">
@@ -234,23 +240,83 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
               )}
             </label>
             <select
-              required
-              value={selectedProjectId || ''}
-              onChange={(e) => setSelectedProjectId(Number(e.target.value))}
+              value={selectedProjectId ?? ''}
+              onChange={(e) => {
+                const val = e.target.value;
+                setSelectedProjectId(val ? Number(val) : undefined);
+              }}
               disabled={isLoadingProjects}
               className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#5B4DB7] cursor-pointer"
             >
-              {projects.length === 0 ? (
-                <option value="">Loading projects...</option>
-              ) : (
-                projects.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    [{p.projectCode}] {p.name} {p.companyName ? `• ${p.companyName}` : ''}
-                  </option>
-                ))
-              )}
+              <option value="">None (General / Internal Task — Intern & Ad-hoc Work)</option>
+              {projects.map((p) => (
+                <option key={p.id} value={p.id}>
+                  [{p.projectCode}] {p.name} {p.companyName ? `• ${p.companyName}` : ''} {p.status === 'COMPLETED' ? '✓ (Delivered)' : p.status === 'MAINTENANCE' ? '⚙ (Support/AMC)' : ''}
+                </option>
+              ))}
             </select>
           </div>
+
+          {/* Post-Delivery Support Banner (when a Delivered/Maintenance project is selected) */}
+          {isDeliveredProject && (
+            <div className="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 rounded-xl space-y-2 text-xs">
+              <div className="flex items-center gap-2 text-amber-800 dark:text-amber-300 font-bold">
+                <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                <span>Post-Delivery Support & Maintenance Item</span>
+              </div>
+              <p className="text-[11px] text-amber-700 dark:text-amber-400 leading-relaxed">
+                [{selectedProject?.projectCode}] is marked as Delivered. Categorize whether this task is a warranty hotfix or a billable change request.
+              </p>
+              <div className="grid grid-cols-2 gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setBillingType('WARRANTY');
+                    setTaskType('BUG');
+                  }}
+                  className={`p-2 rounded-lg border text-center transition-all cursor-pointer ${
+                    billingType === 'WARRANTY'
+                      ? 'bg-rose-50 dark:bg-rose-950/60 border-rose-300 dark:border-rose-700 text-rose-800 dark:text-rose-200 font-bold shadow-2xs'
+                      : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50'
+                  }`}
+                >
+                  <div className="text-xs">🐞 Warranty Hotfix</div>
+                  <div className="text-[10px] opacity-75">Included / Free SLA</div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setBillingType('BILLABLE_CR');
+                    setTaskType('CHANGE_REQUEST');
+                  }}
+                  className={`p-2 rounded-lg border text-center transition-all cursor-pointer ${
+                    billingType === 'BILLABLE_CR'
+                      ? 'bg-indigo-50 dark:bg-indigo-950/60 border-indigo-300 dark:border-indigo-700 text-indigo-800 dark:text-indigo-200 font-bold shadow-2xs'
+                      : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50'
+                  }`}
+                >
+                  <div className="text-xs">⚡ Change Request (CR)</div>
+                  <div className="text-[10px] opacity-75">New Scope / Billable</div>
+                </button>
+              </div>
+              {billingType === 'BILLABLE_CR' && (
+                <div className="pt-1.5 flex items-center gap-2">
+                  <span className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">
+                    CR Budget (₹):
+                  </span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="500"
+                    placeholder="e.g. 15000"
+                    value={crBudget}
+                    onChange={(e) => setCrBudget(e.target.value)}
+                    className="w-full px-2.5 py-1 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-xs"
+                  />
+                </div>
+              )}
+            </div>
+          )}
 
           {/* 2. Task Title */}
           <div>
@@ -279,6 +345,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
                 <option value="TASK">Task (Standard Work)</option>
                 <option value="BUG">Bug / Defect</option>
                 <option value="FEATURE">New Feature</option>
+                <option value="CHANGE_REQUEST">Change Request (CR / Add-on)</option>
                 <option value="REQUIREMENT">System Requirement</option>
                 <option value="IMPROVEMENT">Improvement / Refactor</option>
               </select>

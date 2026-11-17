@@ -224,8 +224,19 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
             </span>
             <span className="text-xs text-slate-400">|</span>
             <span className="text-xs font-semibold text-slate-600 dark:text-slate-300 truncate max-w-sm">
-              {task.projectName || 'Delivery Project'}
+              {task.projectName || (task.projectId ? `Project #${task.projectId}` : 'General / Intern Work (Standalone)')}
             </span>
+            {task.isPostDelivery && (
+              <span
+                className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
+                  task.billingType === 'BILLABLE_CR'
+                    ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800'
+                    : 'bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800'
+                }`}
+              >
+                {task.billingType === 'BILLABLE_CR' ? '⚡ Change Request' : '🐞 Warranty Hotfix'}
+              </span>
+            )}
           </div>
 
           <div className="flex items-center gap-3">
@@ -597,14 +608,49 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
                 Project:
               </span>
               <p className="font-semibold text-slate-900 dark:text-white">
-                {task.projectName || `Project #${task.projectId}`}
-                {task.projectCode && (
-                  <span className="ml-1.5 text-[10px] font-mono font-bold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/60 px-1 py-0.5 rounded border border-purple-200 dark:border-purple-900">
-                    {task.projectCode}
+                {task.projectId ? (
+                  <>
+                    {task.projectName || `Project #${task.projectId}`}
+                    {task.projectCode && (
+                      <span className="ml-1.5 text-[10px] font-mono font-bold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/60 px-1 py-0.5 rounded border border-purple-200 dark:border-purple-900">
+                        {task.projectCode}
+                      </span>
+                    )}
+                  </>
+                ) : (
+                  <span className="text-purple-700 dark:text-purple-300 font-medium italic">
+                    None (General / Internal Task)
                   </span>
                 )}
               </p>
             </div>
+
+            {/* Post Delivery / Maintenance Information */}
+            {task.isPostDelivery && (
+              <div className="space-y-1.5 pt-2 border-t border-slate-200 dark:border-slate-800">
+                <span className="font-bold text-slate-700 dark:text-slate-300">
+                  Post-Delivery Support:
+                </span>
+                <div className="flex flex-col gap-1">
+                  <span
+                    className={`inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded border w-fit ${
+                      task.billingType === 'BILLABLE_CR'
+                        ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800'
+                        : 'bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800'
+                    }`}
+                  >
+                    {task.billingType === 'BILLABLE_CR'
+                      ? '⚡ Billable Change Request (CR)'
+                      : '🐞 Warranty Hotfix (Included SLA)'}
+                  </span>
+                  {task.billingType === 'BILLABLE_CR' && (task.crBudget ?? 0) > 0 && (
+                    <span className="text-[11px] font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                      Approved CR Budget: ₹{(task.crBudget || 0).toLocaleString('en-IN')}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Linked Lead / Deal */}
             {task.leadName && (
