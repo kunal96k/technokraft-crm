@@ -51,7 +51,12 @@ export const AttendanceAlertSettingsModal: React.FC<AttendanceAlertSettingsModal
         setIsEnabled(Boolean(settings.isAutoEmailEnabled));
         setMaxLates(settings.maxLatesPerMonth ?? 4);
         setSuperAdminEmail(settings.superAdminEmail || 'kunalpatil192001@gmail.com');
-        setExtraRecipients(settings.extraRecipientsList || []);
+        const loadedRecipients = settings.extraRecipientsList || [];
+        setExtraRecipients(
+          loadedRecipients.length > 0
+            ? loadedRecipients
+            : ['mr.dreamchaser11@gmail.com', 'ktm.lover0123@gmail.com']
+        );
       })
       .catch((err) => {
         console.error('[AttendanceAlertSettings] Load failed:', err);
