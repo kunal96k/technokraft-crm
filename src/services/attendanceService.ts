@@ -152,7 +152,8 @@ export async function updateAttendanceRecord(
 export async function fetchAttendanceAlertSettings(): Promise<AttendanceAlertSettings> {
   const res = await authFetch('/api/attendance/alert-settings');
   if (!res.ok) {
-    throw new Error(`Failed to fetch alert settings: HTTP ${res.status}`);
+    const errorBody = await res.json().catch(() => ({}));
+    throw new Error(errorBody.message || `Failed to fetch alert settings: HTTP ${res.status}`);
   }
   return res.json();
 }
@@ -169,7 +170,8 @@ export async function updateAttendanceAlertSettings(
     body: JSON.stringify(data),
   });
   if (!res.ok) {
-    throw new Error(`Failed to update alert settings: HTTP ${res.status}`);
+    const errorBody = await res.json().catch(() => ({}));
+    throw new Error(errorBody.message || `Failed to update alert settings: HTTP ${res.status}`);
   }
   return res.json();
 }
