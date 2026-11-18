@@ -104,7 +104,7 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
       setMenuPosition(null);
     } else {
       const rect = e.currentTarget.getBoundingClientRect();
-      const menuHeight = 250;
+      const menuHeight = 320;
       const spaceBelow = window.innerHeight - rect.bottom;
 
       let top: number;
@@ -388,7 +388,7 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
             zIndex: 9999,
           }}
           onClick={(e) => e.stopPropagation()}
-          className="w-48 rounded-xl shadow-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 py-1.5 text-left animate-in fade-in zoom-in-95 duration-100"
+          className="w-56 rounded-xl shadow-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 py-1.5 text-left animate-in fade-in zoom-in-95 duration-100"
         >
           {(() => {
             const isActionSuperAdmin = isSuperAdminRecord(openActionEmployee);

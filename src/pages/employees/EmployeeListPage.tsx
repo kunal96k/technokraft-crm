@@ -647,6 +647,8 @@ export const EmployeeListPage: React.FC = () => {
                 onDeactivate={(emp) => setDeactivatingEmployee(emp)}
                 onActivate={handleActivate}
                 onDelete={(emp) => setDeletingEmployee(emp)}
+                onSendWarning={(emp) => setWarningEmployee(emp)}
+                onTerminate={(emp) => setTerminatingEmployee(emp)}
                 sortField={sortField}
                 sortOrder={sortOrder}
                 onSort={handleSort}
@@ -679,6 +681,8 @@ export const EmployeeListPage: React.FC = () => {
                 onDeactivate={(e) => setDeactivatingEmployee(e)}
                 onActivate={handleActivate}
                 onDelete={(e) => setDeletingEmployee(e)}
+                onSendWarning={(e) => setWarningEmployee(e)}
+                onTerminate={(e) => setTerminatingEmployee(e)}
               />
             ))}
           </div>

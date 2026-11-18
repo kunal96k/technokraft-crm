@@ -18,6 +18,8 @@ import {
   ExternalLink,
   KeyRound,
   Trash2,
+  AlertTriangle,
+  UserMinus,
 } from 'lucide-react';
 import { Employee } from '../../types/employees';
 import { EmployeeStatusBadge, WorkStatusBadge } from './EmployeeStatusBadge';
@@ -37,6 +39,8 @@ interface EmployeeDetailsProps {
   onActivate: (employee: Employee) => void;
   onResetPassword?: (employee: Employee) => void;
   onDelete?: (employee: Employee) => void;
+  onSendWarning?: (employee: Employee) => void;
+  onTerminate?: (employee: Employee) => void;
   isModalOrDrawer?: boolean;
 }
 
@@ -48,6 +52,8 @@ export const EmployeeDetails: React.FC<EmployeeDetailsProps> = ({
   onActivate,
   onResetPassword,
   onDelete,
+  onSendWarning,
+  onTerminate,
   isModalOrDrawer = true,
 }) => {
   const navigate = useNavigate();
@@ -156,6 +162,30 @@ export const EmployeeDetails: React.FC<EmployeeDetailsProps> = ({
                   <span>Activate</span>
                 </button>
               )
+            )}
+
+            {onSendWarning && canDeactivate && (
+              <button
+                type="button"
+                onClick={() => onSendWarning(employee)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-amber-700 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40 transition-colors"
+                title="Send disciplinary warning of termination notice"
+              >
+                <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
+                <span>Send Warning</span>
+              </button>
+            )}
+
+            {onTerminate && canDeactivate && (
+              <button
+                type="button"
+                onClick={() => onTerminate(employee)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 border border-rose-200 dark:border-rose-900/40 transition-colors"
+                title="Formally terminate employee with reason"
+              >
+                <UserMinus className="w-3.5 h-3.5 text-rose-500" />
+                <span>Terminate</span>
+              </button>
             )}
 
             {onDelete && canDelete && (

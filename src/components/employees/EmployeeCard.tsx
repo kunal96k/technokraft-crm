@@ -12,6 +12,8 @@ import {
   Edit2,
   Trash2,
   ShieldCheck,
+  AlertTriangle,
+  UserMinus,
 } from 'lucide-react';
 import { Employee } from '../../types/employees';
 import {
@@ -34,6 +36,8 @@ interface EmployeeCardProps {
   onDelete?: (employee: Employee) => void;
   onViewPerformance?: (employee: Employee) => void;
   onViewAttendance?: (employee: Employee) => void;
+  onSendWarning?: (employee: Employee) => void;
+  onTerminate?: (employee: Employee) => void;
 }
 
 export const EmployeeCard: React.FC<EmployeeCardProps> = ({
@@ -47,6 +51,8 @@ export const EmployeeCard: React.FC<EmployeeCardProps> = ({
   onDelete,
   onViewPerformance,
   onViewAttendance,
+  onSendWarning,
+  onTerminate,
 }) => {
   const { user } = useAuth();
   const isSuperAdmin = isSuperAdminRecord(employee);
@@ -191,6 +197,32 @@ export const EmployeeCard: React.FC<EmployeeCardProps> = ({
                   className="p-1.5 rounded-lg text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              )}
+              {onSendWarning && canDelete && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onSendWarning(employee);
+                  }}
+                  title="Send Disciplinary Warning Notice"
+                  className="p-1.5 rounded-lg text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/40 cursor-pointer"
+                >
+                  <AlertTriangle className="w-3.5 h-3.5" />
+                </button>
+              )}
+              {onTerminate && canDelete && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onTerminate(employee);
+                  }}
+                  title="Terminate with Reason"
+                  className="p-1.5 rounded-lg text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer"
+                >
+                  <UserMinus className="w-3.5 h-3.5" />
                 </button>
               )}
               {onViewPerformance && (
