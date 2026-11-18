@@ -1,4 +1,11 @@
-import { Employee, EmployeeFiltersState, DailyAttendanceRecord, EmployeeFilterOptions } from '../types/employees';
+import {
+  Employee,
+  EmployeeFiltersState,
+  DailyAttendanceRecord,
+  EmployeeFilterOptions,
+  DisciplinaryWarningPayload,
+  EmployeeTerminationPayload,
+} from '../types/employees';
 import { authFetch } from './apiClient';
 import { getAllDepartments, getAllRoles } from '../utils/customEmployeeFields';
 
@@ -461,3 +468,41 @@ export const getTodayAttendanceRecords = (sourceEmployees: Employee[] = []): Dai
     };
   });
 };
+
+/**
+ * Send disciplinary warning email (Template 2) to employee & CC list
+ */
+export async function sendDisciplinaryWarning(
+  employeeId: string | number,
+  payload?: DisciplinaryWarningPayload
+): Promise<{ success: boolean; message: string; monthlyLates: number }> {
+  const res = await authFetch(`${EMPLOYEES_API_URL}/${employeeId}/send-warning`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload || {}),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || `Failed to send warning email: HTTP ${res.status}`);
+  }
+  return res.json();
+}
+
+/**
+ * Terminate employee with reason & send official termination notice (Template 3)
+ */
+export async function terminateEmployee(
+  employeeId: string | number,
+  payload: EmployeeTerminationPayload
+): Promise<{ success: boolean; message: string; id: number; status: string }> {
+  const res = await authFetch(`${EMPLOYEES_API_URL}/${employeeId}/terminate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || `Failed to terminate employee: HTTP ${res.status}`);
+  }
+  return res.json();
+}

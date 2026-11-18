@@ -4,11 +4,13 @@ import {
   Employee,
   AttendanceFiltersState,
   DailyAttendanceRecord,
+  AttendanceAlertSettings,
 } from '../../types/employees';
 import * as employeeService from '../../services/employeeService';
 import {
   fetchAttendanceRecords,
   fetchAttendanceSummary,
+  fetchAttendanceAlertSettings,
   AttendanceSummaryData,
 } from '../../services/attendanceService';
 import { AttendanceSummaryCards } from '../../components/attendance/AttendanceSummaryCards';
@@ -17,7 +19,9 @@ import { AttendanceToolbar } from '../../components/attendance/AttendanceToolbar
 import { AttendanceTable } from '../../components/attendance/AttendanceTable';
 import { AttendanceCard } from '../../components/attendance/AttendanceCard';
 import { AttendanceDetailsModal } from '../../components/attendance/AttendanceDetailsModal';
+import { AttendanceAlertSettingsModal } from '../../components/attendance/AttendanceAlertSettingsModal';
 import {
+  BellRing,
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
@@ -71,12 +75,29 @@ export const AttendancePage: React.FC = () => {
   // Selected Employee for Attendance Details Modal
   const [selectedEmployeeForModal, setSelectedEmployeeForModal] = useState<Employee | null>(null);
 
+  // Attendance Alert Settings Modal state
+  const [isAlertSettingsOpen, setIsAlertSettingsOpen] = useState<boolean>(false);
+  const [alertSettings, setAlertSettings] = useState<AttendanceAlertSettings | null>(null);
+
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 4000);
   };
+
+  const loadAlertSettings = useCallback(async () => {
+    try {
+      const res = await fetchAttendanceAlertSettings();
+      setAlertSettings(res);
+    } catch (err) {
+      console.warn('[AttendancePage] Could not load alert settings:', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadAlertSettings();
+  }, [loadAlertSettings]);
 
   // Load employee roster for telemetry & detail lookups
   const loadEmployeesRoster = useCallback(async () => {
@@ -352,19 +373,43 @@ export const AttendancePage: React.FC = () => {
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={() => {
-            loadEmployeesRoster();
-            loadAttendanceData(false);
-          }}
-          disabled={isLoading || isTableLoading}
-          className="self-start sm:self-auto flex items-center gap-1.5 px-3 py-2 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 font-semibold text-xs rounded-xl shadow-xs transition-colors cursor-pointer"
-          title="Refresh attendance telemetry"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${(isLoading || isTableLoading) ? 'animate-spin' : ''}`} />
-          <span>Refresh</span>
-        </button>
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          <button
+            type="button"
+            onClick={() => setIsAlertSettingsOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-2 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 font-semibold text-xs rounded-xl shadow-xs transition-colors cursor-pointer"
+            title="Configure automated late emails and 4th late termination rules"
+          >
+            <BellRing className="w-3.5 h-3.5 text-[#5B4DB7] dark:text-purple-400" />
+            <span>Late Rules & Alerts</span>
+            {alertSettings && (
+              <span
+                className={`ml-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                  alertSettings.isAutoEmailEnabled
+                    ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300'
+                    : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400'
+                }`}
+              >
+                {alertSettings.isAutoEmailEnabled ? `Active (${alertSettings.maxLatesPerMonth}/mo)` : 'Off'}
+              </span>
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              loadEmployeesRoster();
+              loadAttendanceData(false);
+              loadAlertSettings();
+            }}
+            disabled={isLoading || isTableLoading}
+            className="flex items-center gap-1.5 px-3 py-2 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 font-semibold text-xs rounded-xl shadow-xs transition-colors cursor-pointer"
+            title="Refresh attendance telemetry"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${(isLoading || isTableLoading) ? 'animate-spin' : ''}`} />
+            <span>Refresh</span>
+          </button>
+        </div>
       </div>
 
       {/* Summary Cards */}
@@ -513,6 +558,16 @@ export const AttendancePage: React.FC = () => {
         isOpen={!!selectedEmployeeForModal}
         employee={selectedEmployeeForModal}
         onClose={() => setSelectedEmployeeForModal(null)}
+      />
+
+      {/* Attendance Late Rules & Alert Settings Modal */}
+      <AttendanceAlertSettingsModal
+        isOpen={isAlertSettingsOpen}
+        onClose={() => setIsAlertSettingsOpen(false)}
+        onSaved={(saved) => {
+          setAlertSettings(saved);
+          showToast('Attendance late disciplinary rules updated successfully');
+        }}
       />
     </div>
   );

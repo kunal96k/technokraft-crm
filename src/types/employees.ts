@@ -274,6 +274,7 @@ export interface DailyAttendanceRecord {
   workStatus: WorkStatus;
   shiftStartTime?: string;
   shiftEndTime?: string;
+  isLateEmailSent?: boolean;
   isSuperAdmin?: boolean;
 }
 
@@ -316,4 +317,28 @@ export interface AttendanceFiltersState {
   employeeId: string;
   department: string;
   status: string;
+}
+
+export interface AttendanceAlertSettings {
+  id?: number;
+  isAutoEmailEnabled: boolean;
+  maxLatesPerMonth: number;
+  superAdminEmail: string;
+  extraRecipients?: string;
+  extraRecipientsList: string[];
+  updatedAt?: string;
+  updatedBy?: string;
+}
+
+export interface DisciplinaryWarningPayload {
+  reason?: string;
+  notes?: string;
+}
+
+export interface EmployeeTerminationPayload {
+  reason: string;
+  effectiveDate?: string;
+  exitNotes?: string;
+  revokeAccess?: boolean;
+  sendEmail?: boolean;
 }

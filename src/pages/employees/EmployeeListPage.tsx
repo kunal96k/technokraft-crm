@@ -11,6 +11,8 @@ import { AddEmployeeModal } from '../../components/employees/AddEmployeeModal';
 import { DeactivateEmployeeModal } from '../../components/employees/DeactivateEmployeeModal';
 import { ResetPasswordModal } from '../../components/employees/ResetPasswordModal';
 import { ConfirmationModal } from '../../components/common/ConfirmationModal';
+import { SendWarningNoticeModal } from '../../components/employees/SendWarningNoticeModal';
+import { TerminateEmployeeModal } from '../../components/employees/TerminateEmployeeModal';
 import {
   Users,
   CheckCircle2,
@@ -67,6 +69,8 @@ export const EmployeeListPage: React.FC = () => {
   const [deactivatingEmployee, setDeactivatingEmployee] = useState<Employee | null>(null);
   const [resettingPasswordEmployee, setResettingPasswordEmployee] = useState<Employee | null>(null);
   const [deletingEmployee, setDeletingEmployee] = useState<Employee | null>(null);
+  const [warningEmployee, setWarningEmployee] = useState<Employee | null>(null);
+  const [terminatingEmployee, setTerminatingEmployee] = useState<Employee | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
@@ -812,6 +816,8 @@ export const EmployeeListPage: React.FC = () => {
               onDeactivate={(emp) => setDeactivatingEmployee(emp)}
               onActivate={handleActivate}
               onDelete={(emp) => setDeletingEmployee(emp)}
+              onSendWarning={(emp) => setWarningEmployee(emp)}
+              onTerminate={(emp) => setTerminatingEmployee(emp)}
             />
           </div>
         </div>
@@ -872,6 +878,30 @@ export const EmployeeListPage: React.FC = () => {
           onCancel={() => setDeletingEmployee(null)}
         />
       )}
+
+      {/* Disciplinary Warning Modal (Template 2) */}
+      <SendWarningNoticeModal
+        isOpen={!!warningEmployee}
+        employee={warningEmployee}
+        onClose={() => setWarningEmployee(null)}
+        onSuccess={(msg) => {
+          showToast(msg);
+          loadEmployees();
+          loadSummary();
+        }}
+      />
+
+      {/* Formal Termination Modal (Template 3) */}
+      <TerminateEmployeeModal
+        isOpen={!!terminatingEmployee}
+        employee={terminatingEmployee}
+        onClose={() => setTerminatingEmployee(null)}
+        onSuccess={(msg) => {
+          showToast(msg);
+          loadEmployees();
+          loadSummary();
+        }}
+      />
     </div>
   );
 };

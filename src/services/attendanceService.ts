@@ -1,5 +1,5 @@
 import { authFetch } from './apiClient';
-import { DailyAttendanceRecord } from '../types/employees';
+import { DailyAttendanceRecord, AttendanceAlertSettings } from '../types/employees';
 
 export interface AttendanceQueryParams {
   search?: string;
@@ -142,6 +142,34 @@ export async function updateAttendanceRecord(
   });
   if (!res.ok) {
     throw new Error(`Update attendance failed: HTTP ${res.status}`);
+  }
+  return res.json();
+}
+
+/**
+ * Fetch attendance alert & disciplinary email settings
+ */
+export async function fetchAttendanceAlertSettings(): Promise<AttendanceAlertSettings> {
+  const res = await authFetch('/api/attendance/alert-settings');
+  if (!res.ok) {
+    throw new Error(`Failed to fetch alert settings: HTTP ${res.status}`);
+  }
+  return res.json();
+}
+
+/**
+ * Update attendance alert & disciplinary email settings
+ */
+export async function updateAttendanceAlertSettings(
+  data: Partial<AttendanceAlertSettings>
+): Promise<AttendanceAlertSettings> {
+  const res = await authFetch('/api/attendance/alert-settings', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to update alert settings: HTTP ${res.status}`);
   }
   return res.json();
 }

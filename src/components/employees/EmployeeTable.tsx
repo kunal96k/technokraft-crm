@@ -14,6 +14,8 @@ import {
   KeyRound,
   Trash2,
   ShieldCheck,
+  AlertTriangle,
+  UserMinus,
 } from 'lucide-react';
 import { Employee } from '../../types/employees';
 import {
@@ -42,6 +44,8 @@ interface EmployeeTableProps {
   onEditEmployee?: (employee: Employee) => void;
   onDeactivateEmployee?: (employee: Employee) => void;
   onActivateEmployee?: (employee: Employee) => void;
+  onSendWarning?: (employee: Employee) => void;
+  onTerminate?: (employee: Employee) => void;
   sortField?: SortField;
   sortOrder?: SortOrder;
   onSort?: (field: SortField) => void;
@@ -61,6 +65,8 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
   onEditEmployee,
   onDeactivateEmployee,
   onActivateEmployee,
+  onSendWarning,
+  onTerminate,
   sortField = 'name',
   sortOrder = 'asc',
   onSort,
@@ -519,6 +525,43 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
                       >
                         <UserCheck className="w-3.5 h-3.5" />
                         <span>Activate</span>
+                      </button>
+                    )}
+                  </>
+                )}
+
+                {/* Disciplinary Notice & Termination Actions */}
+                {canDeactivate && (
+                  <>
+                    <div className="my-1 border-t border-slate-100 dark:border-slate-700/80" />
+                    {onSendWarning && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const emp = openActionEmployee;
+                          setOpenActionEmployee(null);
+                          setMenuPosition(null);
+                          onSendWarning(emp);
+                        }}
+                        className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30 cursor-pointer"
+                      >
+                        <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
+                        <span>Send Termination Warning</span>
+                      </button>
+                    )}
+                    {onTerminate && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const emp = openActionEmployee;
+                          setOpenActionEmployee(null);
+                          setMenuPosition(null);
+                          onTerminate(emp);
+                        }}
+                        className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer font-medium"
+                      >
+                        <UserMinus className="w-3.5 h-3.5 text-rose-500" />
+                        <span>Terminate with Reason</span>
                       </button>
                     )}
                   </>
