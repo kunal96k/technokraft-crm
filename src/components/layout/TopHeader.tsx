@@ -7,7 +7,6 @@ import {
   Sun,
   Moon,
   PanelLeftClose,
-  PanelLeftOpen,
   Sparkles,
   X,
   Download,
@@ -96,21 +95,6 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
             className="lg:hidden p-1.5 rounded-lg transition-colors cursor-pointer text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
           >
             <PanelLeftClose className="w-4 h-4" />
-          </button>
-
-          {/* Desktop Sidebar Toggle (>=1024px) */}
-          <button
-            type="button"
-            onClick={onToggleDesktopSidebar}
-            aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            title={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            className="hidden lg:flex p-1.5 rounded-lg transition-colors cursor-pointer text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
-          >
-            {isSidebarCollapsed ? (
-              <PanelLeftOpen className="w-4 h-4" />
-            ) : (
-              <PanelLeftClose className="w-4 h-4" />
-            )}
           </button>
 
           {/* Mobile Brand Logo snippet shown only on small screens */}
