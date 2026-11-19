@@ -103,7 +103,6 @@ export const AttendanceReportModal: React.FC<AttendanceReportModalProps> = ({
   const [recipients, setRecipients] = useState<string[]>(['siddhantdadel10@gmail.com']);
   const [ccList, setCcList] = useState<string[]>([
     'siddhant@tts.net.in',
-    'kunalpatil192001@gmail.com',
     'hr@technokraftservices.com',
   ]);
   const [newCcInput, setNewCcInput] = useState<string>('');
@@ -150,22 +149,28 @@ export const AttendanceReportModal: React.FC<AttendanceReportModalProps> = ({
     return map;
   }, [internalEmployees]);
 
-  // Load HR / Super Admin emails on open
+  // Load HR email on open (Excluding Kunal's emails as requested)
   useEffect(() => {
     if (!isOpen) return;
 
     fetchAttendanceAlertSettings()
       .then((settings) => {
+        const excluded = ['kunalpatil192001@gmail.com', 'kunal@technokraftservices.com'];
         const ccs: string[] = ['siddhant@tts.net.in'];
-        if (settings.superAdminEmail && !ccs.includes(settings.superAdminEmail.trim())) {
+
+        if (
+          settings.superAdminEmail &&
+          !excluded.includes(settings.superAdminEmail.trim().toLowerCase()) &&
+          !ccs.includes(settings.superAdminEmail.trim())
+        ) {
           ccs.push(settings.superAdminEmail.trim());
-        } else if (!ccs.includes('kunalpatil192001@gmail.com')) {
-          ccs.push('kunalpatil192001@gmail.com');
         }
 
-        if (settings.hrEmail && !ccs.includes(settings.hrEmail.trim())) {
-          ccs.push(settings.hrEmail.trim());
+        const hrEmail = settings.hrEmail ? settings.hrEmail.trim() : 'hr@technokraftservices.com';
+        if (!excluded.includes(hrEmail.toLowerCase()) && !ccs.includes(hrEmail)) {
+          ccs.push(hrEmail);
         }
+
         setCcList(ccs);
       })
       .catch((err) => {
