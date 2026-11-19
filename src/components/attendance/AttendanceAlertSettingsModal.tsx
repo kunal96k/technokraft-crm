@@ -7,7 +7,6 @@ import {
   Trash2,
   Mail,
   ShieldAlert,
-  AlertCircle,
   HelpCircle,
   Users,
   Send,
@@ -22,6 +21,7 @@ import {
   updateAttendanceAlertSettings,
   sendTestAlertEmail,
 } from '../../services/attendanceService';
+import { useToast } from '../../context/ToastContext';
 
 interface AttendanceAlertSettingsModalProps {
   isOpen: boolean;
@@ -34,6 +34,7 @@ export const AttendanceAlertSettingsModal: React.FC<AttendanceAlertSettingsModal
   onClose,
   onSaved,
 }) => {
+  const { toast } = useToast();
   const [isEnabled, setIsEnabled] = useState<boolean>(false);
   const [maxLates, setMaxLates] = useState<number>(4);
   const [superAdminEmail, setSuperAdminEmail] = useState<string>('kunalpatil192001@gmail.com');
@@ -46,15 +47,10 @@ export const AttendanceAlertSettingsModal: React.FC<AttendanceAlertSettingsModal
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isSendingTest, setIsSendingTest] = useState<boolean>(false);
-  const [testFeedback, setTestFeedback] = useState<{ success: boolean; message: string } | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [inputError, setInputError] = useState<string | null>(null);
 
   // Load existing settings when modal opens
   useEffect(() => {
     if (!isOpen) return;
-    setError(null);
-    setInputError(null);
     setIsLoading(true);
 
     fetchAttendanceAlertSettings()
@@ -69,7 +65,7 @@ export const AttendanceAlertSettingsModal: React.FC<AttendanceAlertSettingsModal
       })
       .catch((err) => {
         console.error('[AttendanceAlertSettings] Load failed:', err);
-        setError('Could not load current settings. You can still modify and save.');
+        toast.warning('Could not load current settings from server. You can still modify and save.', 'Load Warning');
       })
       .finally(() => setIsLoading(false));
   }, [isOpen]);
@@ -77,19 +73,18 @@ export const AttendanceAlertSettingsModal: React.FC<AttendanceAlertSettingsModal
   if (!isOpen) return null;
 
   const handleAddRecipient = () => {
-    setInputError(null);
     const email = newRecipientInput.trim().toLowerCase();
     if (!email) return;
 
     // Simple email regex check
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      setInputError('Please enter a valid email address.');
+      toast.warning('Please enter a valid email address.', 'Invalid Email');
       return;
     }
 
     if (extraRecipients.includes(email) || email === superAdminEmail.toLowerCase()) {
-      setInputError('This email is already in the recipient or CC list.');
+      toast.warning('This email is already in the recipient or CC list.', 'Duplicate Email');
       return;
     }
 
@@ -110,7 +105,6 @@ export const AttendanceAlertSettingsModal: React.FC<AttendanceAlertSettingsModal
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
     setIsSaving(true);
 
     try {
@@ -125,27 +119,26 @@ export const AttendanceAlertSettingsModal: React.FC<AttendanceAlertSettingsModal
       };
 
       const saved = await updateAttendanceAlertSettings(payload);
+      toast.success('Attendance alert rules and HR contact details saved successfully.', 'Rules Saved');
       onSaved?.(saved);
       onClose();
     } catch (err: any) {
       console.error('[AttendanceAlertSettings] Save error:', err);
-      setError(err?.message || 'Failed to save attendance alert settings.');
+      toast.error(err?.message || 'Failed to save attendance alert settings.', 'Save Failed');
     } finally {
       setIsSaving(false);
     }
   };
 
   const handleSendTestEmail = async () => {
-    setTestFeedback(null);
-    setError(null);
     setIsSendingTest(true);
     try {
       const target = superAdminEmail.trim() || 'kunalpatil192001@gmail.com';
       const res = await sendTestAlertEmail(target);
-      setTestFeedback({ success: true, message: res.message || `Test late email sent to ${target}` });
+      toast.success(res.message || `Test late email dispatched to ${target}`, 'Test Email Sent');
     } catch (err: any) {
       console.error('[AttendanceAlertSettings] Test email error:', err);
-      setTestFeedback({ success: false, message: err?.message || 'Failed to send test email via SMTP.' });
+      toast.error(err?.message || 'Failed to send test email via SMTP server.', 'Email Delivery Failed');
     } finally {
       setIsSendingTest(false);
     }
@@ -181,13 +174,6 @@ export const AttendanceAlertSettingsModal: React.FC<AttendanceAlertSettingsModal
         {/* Scrollable Form Body */}
         <form onSubmit={handleSave} className="flex flex-col flex-1 min-h-0 overflow-hidden">
           <div className="p-6 space-y-5 text-xs overflow-y-auto flex-1">
-            {error && (
-              <div className="p-3 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900/60 rounded-xl text-rose-700 dark:text-rose-300 flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
-                <span>{error}</span>
-              </div>
-            )}
-
             {/* 1. Master Toggle Switch */}
             <div className="p-4 bg-slate-50 dark:bg-slate-900/40 rounded-xl border border-slate-200 dark:border-slate-800/80 flex items-center justify-between gap-4">
               <div className="space-y-0.5">
@@ -310,13 +296,6 @@ export const AttendanceAlertSettingsModal: React.FC<AttendanceAlertSettingsModal
                 </button>
               </div>
 
-              {inputError && (
-                <p className="text-[11px] text-rose-500 mt-1 flex items-center gap-1">
-                  <AlertCircle className="w-3 h-3" />
-                  {inputError}
-                </p>
-              )}
-
               {/* Tag Chips for Added Recipients */}
               <div className="mt-3 flex flex-wrap gap-2 min-h-[36px] p-2.5 bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800/80 rounded-xl">
                 {extraRecipients.length === 0 ? (
@@ -422,23 +401,6 @@ export const AttendanceAlertSettingsModal: React.FC<AttendanceAlertSettingsModal
               </div>
             </div>
           </div>
-
-          {testFeedback && (
-            <div
-              className={`mx-6 mb-2 p-2.5 rounded-xl text-xs flex items-center gap-2 ${
-                testFeedback.success
-                  ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
-                  : 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800'
-              }`}
-            >
-              {testFeedback.success ? (
-                <Check className="w-4 h-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
-              ) : (
-                <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400" />
-              )}
-              <span className="flex-1">{testFeedback.message}</span>
-            </div>
-          )}
 
           {/* Footer - Fixed Pinned Actions */}
           <div className="flex-shrink-0 px-6 py-3.5 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur-xs border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2.5">

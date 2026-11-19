@@ -158,12 +158,6 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({ user, onRoleChange }
                 <span className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
                   {user.department}
                 </span>
-                {authUser?.todayAttendanceStatus && (
-                  <>
-                    <span className="text-[10px] text-slate-400">•</span>
-                    <AttendanceStatusBadge status={authUser.todayAttendanceStatus} size="sm" />
-                  </>
-                )}
               </div>
 
               {/* Attendance Status & Live Work Duration snippet */}

@@ -20,9 +20,9 @@ import { AttendanceTable } from '../../components/attendance/AttendanceTable';
 import { AttendanceCard } from '../../components/attendance/AttendanceCard';
 import { AttendanceDetailsModal } from '../../components/attendance/AttendanceDetailsModal';
 import { AttendanceAlertSettingsModal } from '../../components/attendance/AttendanceAlertSettingsModal';
+import { useToast } from '../../context/ToastContext';
 import {
   BellRing,
-  CheckCircle2,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
@@ -78,13 +78,7 @@ export const AttendancePage: React.FC = () => {
   // Attendance Alert Settings Modal state
   const [isAlertSettingsOpen, setIsAlertSettingsOpen] = useState<boolean>(false);
   const [alertSettings, setAlertSettings] = useState<AttendanceAlertSettings | null>(null);
-
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 4000);
-  };
+  const { toast } = useToast();
 
   const loadAlertSettings = useCallback(async () => {
     try {
@@ -164,7 +158,7 @@ export const AttendancePage: React.FC = () => {
       setSummary(summaryRes);
     } catch (err) {
       console.error('[AttendancePage] Failed to fetch server attendance:', err);
-      showToast('Failed to load attendance records from server');
+      toast.error('Failed to load attendance records from server', 'Load Error');
     } finally {
       setIsLoading(false);
       setIsTableLoading(false);
@@ -341,7 +335,7 @@ export const AttendancePage: React.FC = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    showToast(`Exported ${records.length} records to CSV`);
+    toast.success(`Exported ${records.length} records to CSV`, 'Export Completed');
   };
 
   const startItem = totalElements === 0 ? 0 : page * pageSize + 1;
@@ -349,14 +343,6 @@ export const AttendancePage: React.FC = () => {
 
   return (
     <div className="space-y-6 pb-12">
-      {/* Toast Notification */}
-      {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-medium shadow-2xl animate-in fade-in slide-in-from-bottom-3 duration-200">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400 dark:text-emerald-600 shrink-0" />
-          <span>{toastMessage}</span>
-        </div>
-      )}
-
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -566,7 +552,6 @@ export const AttendancePage: React.FC = () => {
         onClose={() => setIsAlertSettingsOpen(false)}
         onSaved={(saved) => {
           setAlertSettings(saved);
-          showToast('Attendance late disciplinary rules updated successfully');
         }}
       />
     </div>
