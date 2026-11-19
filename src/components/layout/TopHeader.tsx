@@ -221,7 +221,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                         Official Android APK
                       </span>
                       <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900/60 text-[#5B4DB7] dark:text-purple-300">
-                        v1.0.0
+                        v2.1 beta
                       </span>
                     </div>
                     <h3 className="text-lg font-bold text-slate-900 dark:text-white leading-tight mt-1">

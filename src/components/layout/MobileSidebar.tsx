@@ -158,7 +158,7 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
                   : 'bg-purple-50 text-[#5B4DB7] border border-purple-200'
               }`}
             >
-              v1.0.0
+              v2.1 beta
             </span>
           </div>
 

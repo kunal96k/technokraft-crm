@@ -41,7 +41,7 @@ export const Footer: React.FC = () => {
           </button>
           <span className="text-slate-300 dark:text-slate-700 hidden sm:inline">•</span>
           <span className="font-mono text-[11px] font-medium px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-            v1.0.0
+            v2.1 beta
           </span>
         </div>
       </div>
