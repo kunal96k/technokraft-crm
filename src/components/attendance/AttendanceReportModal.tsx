@@ -439,13 +439,12 @@ export const AttendanceReportModal: React.FC<AttendanceReportModalProps> = ({
               Please find attached the official attendance report for <strong>${dateRangeLabel}</strong>.
             </p>
 
-            ${
-              emailNote
-                ? `<div style="background: #f8fafc; border-left: 4px solid #5B4DB7; padding: 12px 16px; margin: 16px 0; font-size: 13px; color: #334155; border-radius: 4px;">
+            ${emailNote
+          ? `<div style="background: #f8fafc; border-left: 4px solid #5B4DB7; padding: 12px 16px; margin: 16px 0; font-size: 13px; color: #334155; border-radius: 4px;">
                     <strong>Sender Note:</strong><br />${emailNote.replace(/\n/g, '<br/>')}
                    </div>`
-                : ''
-            }
+          : ''
+        }
 
             <div style="margin: 20px 0; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
               <table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: left;">
@@ -601,11 +600,10 @@ export const AttendanceReportModal: React.FC<AttendanceReportModalProps> = ({
               <button
                 type="button"
                 onClick={() => setDatePreset('today')}
-                className={`py-2 px-3 rounded-lg text-xs font-semibold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                  datePreset === 'today'
-                    ? 'bg-[#5B4DB7] text-white border-[#5B4DB7] shadow-xs'
-                    : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-purple-300'
-                }`}
+                className={`py-2 px-3 rounded-lg text-xs font-semibold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${datePreset === 'today'
+                  ? 'bg-[#5B4DB7] text-white border-[#5B4DB7] shadow-xs'
+                  : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-purple-300'
+                  }`}
               >
                 <span>Today</span>
               </button>
@@ -613,11 +611,10 @@ export const AttendanceReportModal: React.FC<AttendanceReportModalProps> = ({
               <button
                 type="button"
                 onClick={() => setDatePreset('month')}
-                className={`py-2 px-3 rounded-lg text-xs font-semibold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                  datePreset === 'month'
-                    ? 'bg-[#5B4DB7] text-white border-[#5B4DB7] shadow-xs'
-                    : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-purple-300'
-                }`}
+                className={`py-2 px-3 rounded-lg text-xs font-semibold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${datePreset === 'month'
+                  ? 'bg-[#5B4DB7] text-white border-[#5B4DB7] shadow-xs'
+                  : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-purple-300'
+                  }`}
               >
                 <span>This Month</span>
               </button>
@@ -625,11 +622,10 @@ export const AttendanceReportModal: React.FC<AttendanceReportModalProps> = ({
               <button
                 type="button"
                 onClick={() => setDatePreset('custom')}
-                className={`py-2 px-3 rounded-lg text-xs font-semibold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                  datePreset === 'custom'
-                    ? 'bg-[#5B4DB7] text-white border-[#5B4DB7] shadow-xs'
-                    : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-purple-300'
-                }`}
+                className={`py-2 px-3 rounded-lg text-xs font-semibold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${datePreset === 'custom'
+                  ? 'bg-[#5B4DB7] text-white border-[#5B4DB7] shadow-xs'
+                  : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-purple-300'
+                  }`}
               >
                 <span>Custom Range</span>
               </button>
@@ -695,11 +691,10 @@ export const AttendanceReportModal: React.FC<AttendanceReportModalProps> = ({
                       key={item.id}
                       type="button"
                       onClick={() => setAccountStatusFilter(item.id)}
-                      className={`px-3 py-1 text-xs rounded-lg font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
-                        isSelected
-                          ? 'bg-[#5B4DB7] text-white border border-[#5B4DB7] font-bold shadow-xs'
-                          : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
-                      }`}
+                      className={`px-3 py-1 text-xs rounded-lg font-medium transition-all cursor-pointer flex items-center gap-1.5 ${isSelected
+                        ? 'bg-[#5B4DB7] text-white border border-[#5B4DB7] font-bold shadow-xs'
+                        : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
+                        }`}
                     >
                       <span>{item.label}</span>
                       {item.tag && !isSelected && (
@@ -734,11 +729,10 @@ export const AttendanceReportModal: React.FC<AttendanceReportModalProps> = ({
                       key={item.id}
                       type="button"
                       onClick={() => setStatusFilter(item.id)}
-                      className={`px-3 py-1 text-xs rounded-lg font-medium transition-all cursor-pointer ${
-                        isSelected
-                          ? 'bg-purple-100 dark:bg-purple-900/50 text-[#5B4DB7] dark:text-purple-300 border border-purple-300 dark:border-purple-600 font-bold'
-                          : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
-                      }`}
+                      className={`px-3 py-1 text-xs rounded-lg font-medium transition-all cursor-pointer ${isSelected
+                        ? 'bg-purple-100 dark:bg-purple-900/50 text-[#5B4DB7] dark:text-purple-300 border border-purple-300 dark:border-purple-600 font-bold'
+                        : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
+                        }`}
                     >
                       {item.label}
                     </button>
@@ -860,11 +854,10 @@ export const AttendanceReportModal: React.FC<AttendanceReportModalProps> = ({
               <button
                 type="button"
                 onClick={() => setShowEmailSection(!showEmailSection)}
-                className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-semibold shadow-xs transition-all cursor-pointer border ${
-                  showEmailSection
-                    ? 'bg-[#5B4DB7] text-white border-[#5B4DB7]'
-                    : 'bg-purple-50 dark:bg-purple-950/40 text-[#5B4DB7] dark:text-purple-300 border-purple-200 dark:border-purple-800/50 hover:bg-purple-100'
-                }`}
+                className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-semibold shadow-xs transition-all cursor-pointer border ${showEmailSection
+                  ? 'bg-[#5B4DB7] text-white border-[#5B4DB7]'
+                  : 'bg-purple-50 dark:bg-purple-950/40 text-[#5B4DB7] dark:text-purple-300 border-purple-200 dark:border-purple-800/50 hover:bg-purple-100'
+                  }`}
                 title="Send Excel report via email with CC to Super Admin and HR"
               >
                 <Mail className="w-4 h-4" />
@@ -1050,7 +1043,7 @@ export const AttendanceReportModal: React.FC<AttendanceReportModalProps> = ({
         {/* Modal Footer */}
         <div className="flex items-center justify-between px-5 py-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/40 text-xs">
           <span className="text-slate-500 dark:text-slate-400">
-            TechnoKraft Services LLP • Attendance Reporting Engine
+            TechnoKraft Services LLP • Attendance Reports
           </span>
           <button
             type="button"

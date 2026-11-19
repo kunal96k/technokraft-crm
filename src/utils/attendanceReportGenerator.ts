@@ -176,58 +176,63 @@ export function generateAttendancePdf(
 
   // 1. Corporate Header Background Bar
   doc.setFillColor(91, 77, 183); // #5B4DB7 Brand Purple
-  doc.rect(0, 0, pageWidth, 4, 'F');
+  doc.rect(0, 0, pageWidth, 3.5, 'F');
 
   // Try adding Brand Logo
   let logoOffset = margin;
   try {
     if (TECHNOKRAFT_LOGO_BASE64) {
-      doc.addImage(TECHNOKRAFT_LOGO_BASE64, 'PNG', margin, 9, 32, 11);
-      logoOffset = margin + 35;
+      doc.addImage(TECHNOKRAFT_LOGO_BASE64, 'PNG', margin, 7.5, 28, 12);
+      logoOffset = margin + 31;
     }
   } catch (err) {
     console.debug('[PDF] Could not render base64 logo:', err);
   }
 
-  // Company Name & Report Header
+  // Left Block: Company Name & Office Address (Bounded width prevents any horizontal overlap)
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(14);
+  doc.setFontSize(13);
   doc.setTextColor(30, 41, 59); // slate-800
-  doc.text(COMPANY_DETAILS.name, logoOffset, 14);
+  doc.text(COMPANY_DETAILS.name, logoOffset, 12.5);
 
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
+  doc.setFontSize(7.5);
   doc.setTextColor(100, 116, 139); // slate-500
+  doc.text(COMPANY_DETAILS.address, logoOffset, 16.5, { maxWidth: 125 });
   doc.text(
-    `${COMPANY_DETAILS.address} | Tel: ${COMPANY_DETAILS.mobile} | Email: ${COMPANY_DETAILS.email}`,
+    `Mobile: ${COMPANY_DETAILS.mobile}  •  Email: ${COMPANY_DETAILS.email}`,
     logoOffset,
-    18.5
+    20.5
   );
 
-  // Report Title & Metadata (Right-aligned)
+  // Right Block: Report Title & Period Metadata (Right-aligned, beautifully spaced)
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(12);
-  doc.setTextColor(91, 77, 183); // #5B4DB7
-  doc.text('ATTENDANCE REPORT', pageWidth - margin, 13, { align: 'right' });
+  doc.setFontSize(13);
+  doc.setTextColor(91, 77, 183); // #5B4DB7 Brand Purple
+  doc.text('ATTENDANCE REPORT', pageWidth - margin, 12.5, { align: 'right' });
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8);
+  doc.setTextColor(51, 65, 85); // slate-700
+  doc.text(`Period: ${metadata.dateRangeLabel}`, pageWidth - margin, 16.5, { align: 'right' });
 
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-  doc.setTextColor(100, 116, 139);
-  doc.text(`Period: ${metadata.dateRangeLabel}`, pageWidth - margin, 17.5, { align: 'right' });
+  doc.setFontSize(7.5);
+  doc.setTextColor(100, 116, 139); // slate-500
   doc.text(
-    `Account: ${metadata.accountStatusFilter || 'Active'} | Status: ${metadata.statusFilter} | Generated: ${metadata.generatedAt || new Date().toLocaleDateString('en-IN')}`,
+    `Staff: ${metadata.accountStatusFilter || 'Active'}  •  Status: ${metadata.statusFilter}  •  Generated: ${metadata.generatedAt || new Date().toLocaleDateString('en-IN')}`,
     pageWidth - margin,
-    21.5,
+    20.5,
     { align: 'right' }
   );
 
   // Subtle separator line
   doc.setDrawColor(226, 232, 240); // slate-200
   doc.setLineWidth(0.4);
-  doc.line(margin, 25, pageWidth - margin, 25);
+  doc.line(margin, 23.5, pageWidth - margin, 23.5);
 
   // 2. Summary Metric Badges Box
-  const summaryY = 28;
+  const summaryY = 26.5;
   const cardWidth = (pageWidth - margin * 2 - 20) / 5;
   const cardHeight = 13;
 
@@ -349,7 +354,7 @@ export function generateAttendancePdf(
     },
     didDrawPage: (data) => {
       // Page Numbering Footer on every page
-      const str = `Page ${data.pageNumber} of ${doc.getNumberOfPages()} • Confidential Corporate Attendance Record • © 2026 TechnoKraft Services LLP`;
+      const str = `Page ${data.pageNumber} of ${doc.getNumberOfPages()} • © 2026 TechnoKraft Services LLP`;
       doc.setFontSize(7);
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(148, 163, 184); // slate-400
