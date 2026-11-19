@@ -3,7 +3,11 @@ import { Paperclip, Building, User, ArrowRight } from 'lucide-react';
 import { EmailRecord } from '../../types/communication';
 import { CommunicationStatusBadge } from './CommunicationStatusBadge';
 import { EmployeeAvatar } from '../common/EmployeeAvatar';
-import { getEmailTemplateMeta } from '../../utils/emailTemplateRenderer';
+import {
+  getEmailTemplateMeta,
+  resolveCompanyDisplayName,
+  resolveRecipientDisplayName,
+} from '../../utils/emailTemplateRenderer';
 
 interface EmailListItemProps {
   email: EmailRecord;
@@ -22,9 +26,8 @@ export const EmailListItem: React.FC<EmailListItemProps> = ({
 }) => {
   const meta = getEmailTemplateMeta(email);
   const hasRealLead = !meta.isInternal && Boolean(email.leadId && email.leadId !== 'LD-CRM' && email.leadId !== 'lead-custom');
-  const companyDisplayName = email.companyName && email.companyName !== 'Client Company'
-    ? email.companyName
-    : 'TechnoKraft Services LLP';
+  const companyDisplayName = resolveCompanyDisplayName(email);
+  const recipientDisplayName = resolveRecipientDisplayName(email);
 
   return (
     <div
@@ -49,13 +52,13 @@ export const EmailListItem: React.FC<EmailListItemProps> = ({
             checked={isSelected}
             onChange={() => {}}
             className="w-4 h-4 text-[#5B4DB7] rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-[#5B4DB7]/40 cursor-pointer"
-            aria-label={`Select email to ${email.recipientName}`}
+            aria-label={`Select email to ${recipientDisplayName}`}
           />
         </div>
 
         {/* Client / Employee Avatar */}
         <EmployeeAvatar
-          name={email.recipientName}
+          name={recipientDisplayName}
           email={email.recipientEmail}
           size="sm"
           showRing={true}
@@ -68,7 +71,7 @@ export const EmailListItem: React.FC<EmailListItemProps> = ({
           {/* Top row: Recipient & Company + Lead Code / Template Badge */}
           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
             <span className="text-xs font-bold text-slate-900 dark:text-white truncate">
-              {email.recipientName}
+              {recipientDisplayName}
             </span>
             <span className="text-slate-300 dark:text-slate-600 hidden sm:inline">•</span>
             <span className="text-xs text-slate-600 dark:text-slate-400 truncate flex items-center gap-1">

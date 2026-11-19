@@ -274,7 +274,13 @@ export function getEmailTemplateMeta(email?: {
   }
 
   // 2. Late Punch Notice
-  if (cat === 'LATE_NOTICE' || sub.includes('late punch')) {
+  if (
+    cat === 'LATE_NOTICE' ||
+    sub.includes('late punch') ||
+    sub.includes('late punch-in') ||
+    sub.includes('late attendance') ||
+    sub.includes('attendance notice: late')
+  ) {
     return {
       label: 'Late Notice',
       badgeClass: 'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800',
@@ -286,7 +292,9 @@ export function getEmailTemplateMeta(email?: {
   if (
     cat === 'WARNING_NOTICE' ||
     cat === 'WARNING_TERMINATION' ||
+    cat === 'FIRST_WARNING' ||
     sub.includes('1st attendance warning') ||
+    sub.includes('first attendance warning') ||
     (sub.includes('warning of termination') && !sub.includes('final')) ||
     (sub.includes('notice of warning') && !sub.includes('final'))
   ) {
@@ -300,8 +308,10 @@ export function getEmailTemplateMeta(email?: {
   // 4. Final Warning Notice
   if (
     cat === 'FINAL_WARNING' ||
+    cat === 'FINAL_NOTICE' ||
     sub.includes('final notice') ||
-    sub.includes('repeated attendance')
+    sub.includes('repeated attendance') ||
+    sub.includes('final warning')
   ) {
     return {
       label: 'Final Notice',
@@ -314,12 +324,29 @@ export function getEmailTemplateMeta(email?: {
   if (
     cat === 'TERMINATION_NOTICE' ||
     cat === 'TERMINATION_OFFICIAL' ||
+    cat === 'TERMINATION' ||
     sub.includes('official notice of termination') ||
-    sub.includes('termination of employment')
+    sub.includes('termination of employment') ||
+    sub.includes('notice of termination')
   ) {
     return {
       label: 'Termination',
       badgeClass: 'bg-red-50 text-red-700 dark:bg-red-950/60 dark:text-red-300 border border-red-200 dark:border-red-800',
+      isInternal: true,
+    };
+  }
+
+  // Additional check: any attendance or disciplinary notices
+  if (
+    cat.includes('ATTENDANCE') ||
+    cat.includes('DISCIPLINARY') ||
+    cat.includes('INTERNAL') ||
+    sub.includes('attendance notice') ||
+    sub.includes('punch-in recorded')
+  ) {
+    return {
+      label: 'Attendance Notice',
+      badgeClass: 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800',
       isInternal: true,
     };
   }
@@ -330,7 +357,8 @@ export function getEmailTemplateMeta(email?: {
     email.leadId !== 'LD-CRM' &&
     email.leadId !== 'lead-custom' &&
     email.leadCode &&
-    email.leadCode !== 'LD-CRM'
+    email.leadCode !== 'LD-CRM' &&
+    email.leadCode !== 'lead-custom'
   );
 
   if (hasValidLead) {
@@ -355,4 +383,79 @@ export function isInternalEmail(email?: {
   leadCode?: string;
 } | null): boolean {
   return getEmailTemplateMeta(email).isInternal;
+}
+
+/**
+ * Resolves the appropriate company name for display:
+ * Always "TechnoKraft Services LLP" for internal employee/HR emails or fallback
+ */
+export function resolveCompanyDisplayName(email?: {
+  category?: string;
+  subject?: string;
+  leadId?: string;
+  leadCode?: string;
+  companyName?: string;
+} | null): string {
+  if (!email) return 'TechnoKraft Services LLP';
+  const meta = getEmailTemplateMeta(email);
+  if (meta.isInternal) {
+    return 'TechnoKraft Services LLP';
+  }
+  if (email.companyName && email.companyName !== 'Client Company' && email.companyName.trim() !== '') {
+    return email.companyName.trim();
+  }
+  return 'TechnoKraft Services LLP';
+}
+
+/**
+ * Resolves the proper recipient display name:
+ * Prevents client contact names (like Yogesh Gore) or dummy strings from showing up on employee notices
+ */
+export function resolveRecipientDisplayName(email?: {
+  category?: string;
+  subject?: string;
+  leadId?: string;
+  leadCode?: string;
+  recipientName?: string;
+  recipientEmail?: string;
+} | null): string {
+  if (!email) return 'Recipient';
+  const meta = getEmailTemplateMeta(email);
+  const rawName = (email.recipientName || '').trim();
+  const rawEmail = (email.recipientEmail || '').trim().toLowerCase();
+
+  if (meta.isInternal) {
+    // Check known employee emails
+    if (rawEmail === 'siddhantdadel10@gmail.com' || rawEmail.includes('siddhant')) {
+      return 'Siddhant Dadel';
+    }
+    if (rawEmail === 'sanskrutivsole@gmail.com' || rawEmail.includes('sanskruti')) {
+      return 'Sanskruti Sole';
+    }
+    if (rawEmail === 'kunalpatil192001@gmail.com' || rawEmail.includes('kunal')) {
+      return 'Kunal Patil';
+    }
+
+    // If wrongly assigned to a CRM client contact name or dummy placeholders
+    const isBadName =
+      !rawName ||
+      rawName.toLowerCase() === rawEmail ||
+      rawName.toLowerCase() === 'yogesh gore' ||
+      rawName.toLowerCase() === 'valued client' ||
+      rawName.toLowerCase() === 'recipient';
+
+    if (isBadName) {
+      if (email.subject && email.subject.toLowerCase().includes('attendance report')) {
+        return 'TechnoKraft Management';
+      }
+      if (rawEmail.includes('@')) {
+        const username = rawEmail.split('@')[0];
+        return username.charAt(0).toUpperCase() + username.slice(1);
+      }
+      return 'TechnoKraft Team';
+    }
+    return rawName;
+  }
+
+  return rawName || 'Valued Client';
 }

@@ -20,7 +20,12 @@ import {
 } from 'lucide-react';
 import { EmailRecord } from '../../types/communication';
 import { CommunicationStatusBadge } from './CommunicationStatusBadge';
-import { renderBrandedEmailHtml, getEmailTemplateMeta } from '../../utils/emailTemplateRenderer';
+import {
+  renderBrandedEmailHtml,
+  getEmailTemplateMeta,
+  resolveCompanyDisplayName,
+  resolveRecipientDisplayName,
+} from '../../utils/emailTemplateRenderer';
 import { EmployeeAvatar } from '../common/EmployeeAvatar';
 
 interface EmailPreviewProps {
@@ -57,9 +62,8 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({
   const tracking = email.tracking || { sent: true, delivered: false, opened: false, replied: false };
   const meta = getEmailTemplateMeta(email);
   const hasRealLead = !meta.isInternal && Boolean(email.leadId && email.leadId !== 'LD-CRM' && email.leadId !== 'lead-custom');
-  const companyDisplayName = email.companyName && email.companyName !== 'Client Company'
-    ? email.companyName
-    : 'TechnoKraft Services LLP';
+  const companyDisplayName = resolveCompanyDisplayName(email);
+  const recipientDisplayName = resolveRecipientDisplayName(email);
 
   return (
     <div className={`flex flex-col h-full bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs ${className}`}>
@@ -193,7 +197,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="flex items-center gap-2.5">
             <EmployeeAvatar
-              name={email.recipientName}
+              name={recipientDisplayName}
               email={email.recipientEmail}
               size="sm"
               showRing={true}
@@ -201,7 +205,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({
             />
             <div>
               <span className="font-semibold text-slate-800 dark:text-slate-200">To: </span>
-              <span className="text-slate-900 dark:text-white font-medium">{email.recipientName}</span>
+              <span className="text-slate-900 dark:text-white font-medium">{recipientDisplayName}</span>
               <span className="text-slate-500 dark:text-slate-400"> &lt;{email.recipientEmail}&gt;</span>
             </div>
           </div>
