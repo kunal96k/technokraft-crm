@@ -19,6 +19,7 @@ import {
   BookmarkPlus,
   Sparkles,
   Lock,
+  Plus,
 } from 'lucide-react';
 import {
   resolveTemplateText,
