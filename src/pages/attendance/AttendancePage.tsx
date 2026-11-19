@@ -20,6 +20,7 @@ import { AttendanceTable } from '../../components/attendance/AttendanceTable';
 import { AttendanceCard } from '../../components/attendance/AttendanceCard';
 import { AttendanceDetailsModal } from '../../components/attendance/AttendanceDetailsModal';
 import { AttendanceAlertSettingsModal } from '../../components/attendance/AttendanceAlertSettingsModal';
+import { AttendanceReportModal } from '../../components/attendance/AttendanceReportModal';
 import { useToast } from '../../context/ToastContext';
 import {
   BellRing,
@@ -29,6 +30,7 @@ import {
   ChevronsRight,
   Loader2,
   RefreshCw,
+  FileSpreadsheet,
 } from 'lucide-react';
 
 const INITIAL_ATTENDANCE_FILTERS: AttendanceFiltersState = {
@@ -77,6 +79,7 @@ export const AttendancePage: React.FC = () => {
 
   // Attendance Alert Settings Modal state
   const [isAlertSettingsOpen, setIsAlertSettingsOpen] = useState<boolean>(false);
+  const [isReportModalOpen, setIsReportModalOpen] = useState<boolean>(false);
   const [alertSettings, setAlertSettings] = useState<AttendanceAlertSettings | null>(null);
   const { toast } = useToast();
 
@@ -383,6 +386,16 @@ export const AttendancePage: React.FC = () => {
 
           <button
             type="button"
+            onClick={() => setIsReportModalOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-[#5B4DB7] to-[#7963E0] hover:from-[#4D3FA3] hover:to-[#6852D6] text-white font-semibold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
+            title="Generate custom date attendance reports, export to Excel/PDF or email"
+          >
+            <FileSpreadsheet className="w-3.5 h-3.5" />
+            <span>Attendance Reports</span>
+          </button>
+
+          <button
+            type="button"
             onClick={() => {
               loadEmployeesRoster();
               loadAttendanceData(false);
@@ -553,6 +566,13 @@ export const AttendancePage: React.FC = () => {
         onSaved={(saved) => {
           setAlertSettings(saved);
         }}
+      />
+
+      {/* Attendance Telemetry & Reports Feature Modal */}
+      <AttendanceReportModal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        initialRecords={records}
       />
     </div>
   );
