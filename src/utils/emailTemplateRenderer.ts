@@ -179,21 +179,21 @@ export function renderBrandedEmailHtml(options: RenderEmailOptions): string {
                 style="background-color: #f8fafc; border-top: 1px solid #e2e8f0; padding: 26px 36px; text-align: left; color: #64748b; font-size: 12px; line-height: 19px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
 
               <div style="font-size: 13.5px; font-weight: 700; color: #0f172a; margin-bottom: 3px;">
-                TechnoKraft Services LLP
+                TechnoKraft Services LLP.
               </div>
 
               <div style="font-size: 11.5px; color: #64748b; margin-bottom: 8px;">
                 Empowering professionals through innovative technical education and skill development.
               </div>
 
-              <div style="margin-bottom: 12px; color: #64748b; font-size: 12px;">
-                3rd Floor, Kanchwala Avenue, Thatte Nagar Marg, College Road, Nashik, Maharashtra 422005
+              <div style="margin-bottom: 12px; color: #64748b; font-size: 12px; line-height: 18px;">
+                <strong>Address:</strong> 3rd Floor, Kanchwala Avenue, Above Viju's Dabeli,Thatte Nagar Marg, College Road, Nashik, Maharashtra 422005
               </div>
 
               <!-- CONTACT LINKS -->
               <div style="margin-bottom: 12px;">
                 <span style="display: inline-block; margin-right: 14px;">
-                  <strong>Phone:</strong> <a href="tel:+919370174424"
+                  <strong>Mobile:</strong> <a href="tel:+919370174424"
                     style="color: #2563eb; text-decoration: none; font-weight: 600;">+91 93701 74424</a>
                 </span>
                 <span style="display: inline-block; margin-right: 14px;">

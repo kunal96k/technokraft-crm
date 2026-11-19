@@ -87,28 +87,26 @@ export function buildHrContactBoxHtml(contact?: DisciplinaryHrContact): string {
 /**
  * Builds the official TechnoKraft corporate footer block.
  */
-function buildCorporateFooterHtml(recipientEmail?: string): string {
-  const cleanEmail = escapeHtml(recipientEmail || 'employee@technokraftservices.com');
-
+function buildCorporateFooterHtml(): string {
   return `
     <!-- FOOTER SECTION -->
     <tr>
       <td class="footer-pad"
-        style="background-color: #F8FAFC; border-top: 1px solid #E2E8F0; padding: 26px 36px; text-align: left; color: #64748B; font-size: 12px; line-height: 19px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-        <div style="font-size: 13.5px; font-weight: 700; color: #0F172A; margin-bottom: 3px;">
-          TechnoKraft Services LLP
+        style="background-color: #F8FAFC; border-top: 1px solid #E2E8F0; padding: 24px 36px; text-align: left; color: #64748B; font-size: 12px; line-height: 19px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+        <div style="font-size: 14px; font-weight: 700; color: #0F172A; margin-bottom: 4px;">
+          TechnoKraft Services LLP.
         </div>
         <div style="font-size: 11.5px; color: #64748B; margin-bottom: 8px;">
           Empowering professionals through innovative technical education and skill development.
         </div>
-        <div style="margin-bottom: 12px; color: #64748B; font-size: 12px;">
-          3rd Floor, Kanchwala Avenue, Thatte Nagar Marg, College Road, Nashik, Maharashtra 422005
+        <div style="margin-bottom: 12px; color: #64748B; font-size: 12px; line-height: 18px;">
+          <strong>Address:</strong> 3rd Floor, Kanchwala Avenue, Above Viju's Dabeli,Thatte Nagar Marg, College Road, Nashik, Maharashtra 422005
         </div>
         <div style="margin-bottom: 12px;">
-          <span style="display: inline-block; margin-right: 14px;">
-            <strong>Phone:</strong> <a href="tel:+919370174424" style="color: #2563EB; text-decoration: none; font-weight: 600;">+91 93701 74424</a>
+          <span style="display: inline-block; margin-right: 16px;">
+            <strong>Mobile:</strong> <a href="tel:+919370174424" style="color: #2563EB; text-decoration: none; font-weight: 600;">+91 93701 74424</a>
           </span>
-          <span style="display: inline-block; margin-right: 14px;">
+          <span style="display: inline-block; margin-right: 16px;">
             <strong>Email:</strong> <a href="mailto:info@technokraftservices.com" style="color: #2563EB; text-decoration: none; font-weight: 600;">info@technokraftservices.com</a>
           </span>
           <span style="display: inline-block;">
@@ -117,8 +115,7 @@ function buildCorporateFooterHtml(recipientEmail?: string): string {
         </div>
         <div style="height: 1px; background-color: #E2E8F0; margin: 12px 0;"></div>
         <p style="margin: 0; font-size: 11px; line-height: 17px; color: #94A3B8;">
-          &copy; ${new Date().getFullYear()} TechnoKraft Services LLP. All rights reserved.<br />
-          This communication was dispatched to <strong style="color: #64748B;">${cleanEmail}</strong>. Confidential HR notice intended solely for the named recipient.
+          &copy; 2026 TechnoKraft Services LLP. All rights reserved.
         </p>
       </td>
     </tr>
@@ -322,7 +319,7 @@ export function buildDailyLateNoticeEmailHtml(
             </td>
           </tr>
 
-          ${buildCorporateFooterHtml(employee.email)}
+          ${buildCorporateFooterHtml()}
         </table>
       </td>
     </tr>
@@ -486,7 +483,7 @@ export function buildTerminationWarningEmailHtml(
             </td>
           </tr>
 
-          ${buildCorporateFooterHtml(employee.email)}
+          ${buildCorporateFooterHtml()}
         </table>
       </td>
     </tr>
@@ -650,7 +647,7 @@ export function buildOfficialTerminationEmailHtml(
             </td>
           </tr>
 
-          ${buildCorporateFooterHtml(employee.email)}
+          ${buildCorporateFooterHtml()}
         </table>
       </td>
     </tr>
