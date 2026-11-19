@@ -10,9 +10,13 @@ import {
   AlertCircle,
   CheckCircle2,
   ShieldAlert,
+  Eye,
+  Smartphone,
+  Monitor,
 } from 'lucide-react';
 import { Employee } from '../../types/employees';
 import { terminateEmployee } from '../../services/employeeService';
+import { buildOfficialTerminationEmailHtml } from '../../utils/disciplinaryEmailTemplates';
 
 interface TerminateEmployeeModalProps {
   isOpen: boolean;
@@ -37,6 +41,8 @@ export const TerminateEmployeeModal: React.FC<TerminateEmployeeModalProps> = ({
   const [revokeAccess, setRevokeAccess] = useState<boolean>(true);
   const [sendEmail, setSendEmail] = useState<boolean>(true);
   const [confirmUnderstood, setConfirmUnderstood] = useState<boolean>(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
+  const [previewDevice, setPreviewDevice] = useState<'desktop' | 'mobile'>('mobile');
 
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -211,22 +217,34 @@ export const TerminateEmployeeModal: React.FC<TerminateEmployeeModalProps> = ({
                 </div>
               </label>
 
-              <label className="flex items-start gap-2.5 cursor-pointer pt-2 border-t border-slate-200 dark:border-slate-800">
-                <input
-                  type="checkbox"
-                  checked={sendEmail}
-                  onChange={(e) => setSendEmail(e.target.checked)}
-                  className="mt-0.5 rounded border-slate-300 text-rose-600 focus:ring-rose-500 cursor-pointer"
-                />
-                <div>
-                  <span className="font-bold text-slate-800 dark:text-slate-200 block">
-                    Dispatch Template 3: Official Notice of Termination Email
-                  </span>
-                  <span className="text-[11px] text-slate-500 dark:text-slate-400 block">
-                    Sends branded termination letter to employee with CC to Super Admin (kunalpatil192001@gmail.com) and HR compliance.
-                  </span>
-                </div>
-              </label>
+              <div className="pt-2 border-t border-slate-200 dark:border-slate-800 flex items-start justify-between gap-2">
+                <label className="flex items-start gap-2.5 cursor-pointer flex-1">
+                  <input
+                    type="checkbox"
+                    checked={sendEmail}
+                    onChange={(e) => setSendEmail(e.target.checked)}
+                    className="mt-0.5 rounded border-slate-300 text-rose-600 focus:ring-rose-500 cursor-pointer"
+                  />
+                  <div>
+                    <span className="font-bold text-slate-800 dark:text-slate-200 block">
+                      Dispatch Template 3: Official Notice of Termination Email
+                    </span>
+                    <span className="text-[11px] text-slate-500 dark:text-slate-400 block">
+                      Sends branded termination letter to employee with CC to Super Admin (kunalpatil192001@gmail.com) and HR compliance.
+                    </span>
+                  </div>
+                </label>
+                {sendEmail && (
+                  <button
+                    type="button"
+                    onClick={() => setIsPreviewOpen(true)}
+                    className="shrink-0 px-2.5 py-1 text-[11px] font-semibold text-rose-700 dark:text-rose-300 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/50 dark:hover:bg-rose-900/50 rounded-lg transition-colors flex items-center gap-1 cursor-pointer border border-rose-200 dark:border-rose-800"
+                  >
+                    <Eye className="w-3 h-3" />
+                    <span>Preview Letter</span>
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Mandatory Confirmation Checkbox */}
@@ -266,6 +284,117 @@ export const TerminateEmployeeModal: React.FC<TerminateEmployeeModalProps> = ({
           </div>
         </form>
       </div>
+
+      {/* Interactive Email Letter Preview Modal */}
+      {isPreviewOpen && (
+        <div
+          className="fixed inset-0 z-60 flex items-center justify-center bg-black/70 backdrop-blur-xs p-3 sm:p-5 animate-in fade-in duration-150"
+          onClick={() => setIsPreviewOpen(false)}
+        >
+          <div
+            className="bg-white dark:bg-[#0F172A] w-full max-w-3xl rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col h-[90vh] max-h-[850px] animate-in zoom-in-95 duration-150"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="px-5 py-3.5 bg-slate-50 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-rose-100 dark:bg-rose-900/60 text-rose-700 dark:text-rose-300 flex items-center justify-center shrink-0">
+                  <Eye className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-slate-900 dark:text-white">
+                    Preview: Official Notice of Termination
+                  </h4>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                    Live HTML preview as it will appear in the employee&apos;s email inbox
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <div className="flex items-center p-0.5 bg-slate-200 dark:bg-slate-800 rounded-lg text-xs">
+                  <button
+                    type="button"
+                    onClick={() => setPreviewDevice('mobile')}
+                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all cursor-pointer ${
+                      previewDevice === 'mobile'
+                        ? 'bg-white dark:bg-[#1E293B] text-slate-900 dark:text-white shadow-2xs'
+                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                    }`}
+                  >
+                    <Smartphone className="w-3.5 h-3.5" />
+                    <span>Mobile (380px)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPreviewDevice('desktop')}
+                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all cursor-pointer ${
+                      previewDevice === 'desktop'
+                        ? 'bg-white dark:bg-[#1E293B] text-slate-900 dark:text-white shadow-2xs'
+                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                    }`}
+                  >
+                    <Monitor className="w-3.5 h-3.5" />
+                    <span>Desktop (620px)</span>
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setIsPreviewOpen(false)}
+                  className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer shrink-0"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Live Preview Container */}
+            <div className="flex-1 bg-slate-100 dark:bg-[#070D18] p-4 overflow-y-auto flex items-start justify-center">
+              <div
+                className={`bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 w-full ${
+                  previewDevice === 'mobile' ? 'max-w-[400px]' : 'max-w-[640px]'
+                }`}
+              >
+                <div
+                  className="email-preview-frame"
+                  dangerouslySetInnerHTML={{
+                    __html: buildOfficialTerminationEmailHtml(
+                      {
+                        name: employee.name,
+                        employeeCode: employee.employeeCode || `TK-${employee.id}`,
+                        role: employee.role,
+                        department: employee.department,
+                        email: employee.email || employee.personalEmail,
+                      },
+                      reason.trim() || 'Unsatisfactory performance / policy violation.',
+                      effectiveDate,
+                      exitNotes.trim(),
+                      {
+                        hrName: 'HR Department',
+                        hrEmail: 'hr@technokraftservices.com',
+                        hrPhone: '+91 98765 43210',
+                      }
+                    ),
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="px-5 py-2.5 bg-slate-50 dark:bg-slate-900/60 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500 shrink-0">
+              <span>Recipient: <strong>{employee.email || employee.personalEmail || employee.name}</strong></span>
+              <button
+                type="button"
+                onClick={() => setIsPreviewOpen(false)}
+                className="px-3 py-1 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg font-semibold transition-colors cursor-pointer text-xs"
+              >
+                Close Preview
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

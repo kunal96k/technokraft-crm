@@ -14,6 +14,9 @@ import {
   User,
   Phone,
   Building2,
+  Eye,
+  Smartphone,
+  Monitor,
 } from 'lucide-react';
 import { AttendanceAlertSettings } from '../../types/employees';
 import {
@@ -22,6 +25,11 @@ import {
   sendTestAlertEmail,
 } from '../../services/attendanceService';
 import { useToast } from '../../context/ToastContext';
+import {
+  buildDailyLateNoticeEmailHtml,
+  buildTerminationWarningEmailHtml,
+  buildOfficialTerminationEmailHtml,
+} from '../../utils/disciplinaryEmailTemplates';
 
 interface AttendanceAlertSettingsModalProps {
   isOpen: boolean;
@@ -47,6 +55,77 @@ export const AttendanceAlertSettingsModal: React.FC<AttendanceAlertSettingsModal
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isSendingTest, setIsSendingTest] = useState<boolean>(false);
+
+  const [previewTemplate, setPreviewTemplate] = useState<'late' | 'warning' | 'termination' | null>(null);
+  const [previewDevice, setPreviewDevice] = useState<'desktop' | 'mobile'>('mobile');
+
+  const getPreviewHtml = (): string => {
+    const hrContact = {
+      hrName: hrName.trim() || 'HR Department',
+      hrEmail: hrEmail.trim() || 'hr@technokraftservices.com',
+      hrPhone: hrPhone.trim() || '+91 98765 43210',
+    };
+
+    if (previewTemplate === 'late') {
+      return buildDailyLateNoticeEmailHtml(
+        {
+          name: 'Amol Patil',
+          employeeCode: 'EMP-0062',
+          role: 'Sales Executive',
+          department: 'Sales',
+          email: 'amol.patil@technokraftservices.com',
+        },
+        {
+          date: new Date().toLocaleDateString('en-GB'),
+          loginTime: '10:45 AM',
+          shiftStartTime: '10:00 AM',
+          shiftEndTime: '07:00 PM',
+        },
+        1,
+        Math.max(1, maxLates),
+        hrContact
+      );
+    }
+
+    if (previewTemplate === 'warning') {
+      return buildTerminationWarningEmailHtml(
+        {
+          name: 'Amol Patil',
+          employeeCode: 'EMP-0062',
+          role: 'Sales Executive',
+          employmentType: 'Full-Time',
+          department: 'Sales',
+          email: 'amol.patil@technokraftservices.com',
+        },
+        {
+          date: new Date().toLocaleDateString('en-GB'),
+          loginTime: '10:52 AM',
+        },
+        Math.max(1, maxLates),
+        Math.max(1, maxLates),
+        'Repeated tardiness past grace period without prior written approval from reporting head.',
+        hrContact
+      );
+    }
+
+    if (previewTemplate === 'termination') {
+      return buildOfficialTerminationEmailHtml(
+        {
+          name: 'Amol Patil',
+          employeeCode: 'EMP-0062',
+          role: 'Sales Executive',
+          department: 'Sales',
+          email: 'amol.patil@technokraftservices.com',
+        },
+        'Unsatisfactory attendance compliance following final written warning notice.',
+        new Date().toLocaleDateString('en-GB'),
+        'Please return your company laptop, biometric RFID card, and deliver sprint handover to Project Lead by 5:00 PM.',
+        hrContact
+      );
+    }
+
+    return '';
+  };
 
   // Load existing settings when modal opens
   useEffect(() => {
@@ -380,22 +459,51 @@ export const AttendanceAlertSettingsModal: React.FC<AttendanceAlertSettingsModal
               </div>
             </div>
 
-            {/* Template Summary Cards */}
+            {/* Template Summary Cards with Interactive Live Previews */}
             <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80">
-              <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider block mb-2">
-                Active Email Disciplinary Templates
-              </span>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider block">
+                  Active Disciplinary Email Templates
+                </span>
+                <span className="text-[10px] text-slate-400">Click card to preview live layout</span>
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px]">
-                <div className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30">
-                  <div className="font-bold text-slate-800 dark:text-slate-200">1. Daily Late Notice</div>
+                <div
+                  onClick={() => setPreviewTemplate('late')}
+                  className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30 hover:border-[#5B4DB7]/60 hover:bg-purple-50/20 dark:hover:bg-purple-950/20 transition-all cursor-pointer group shadow-2xs"
+                >
+                  <div className="flex items-center justify-between mb-0.5">
+                    <div className="font-bold text-slate-800 dark:text-slate-200">1. Daily Late Notice</div>
+                    <span className="text-[10px] text-[#5B4DB7] dark:text-purple-400 font-semibold group-hover:underline flex items-center gap-0.5">
+                      <Eye className="w-3 h-3" /> Preview
+                    </span>
+                  </div>
                   <div className="text-[10px] text-slate-500 mt-0.5">Fires on late punch. Shows shift start, recorded time & monthly ratio.</div>
                 </div>
-                <div className="p-2.5 rounded-xl border border-amber-200 dark:border-amber-900/60 bg-amber-50/40 dark:bg-amber-950/20">
-                  <div className="font-bold text-amber-800 dark:text-amber-300">2. 4th Late Escalation</div>
+
+                <div
+                  onClick={() => setPreviewTemplate('warning')}
+                  className="p-2.5 rounded-xl border border-amber-200 dark:border-amber-900/60 bg-amber-50/40 dark:bg-amber-950/20 hover:border-amber-400 transition-all cursor-pointer group shadow-2xs"
+                >
+                  <div className="flex items-center justify-between mb-0.5">
+                    <div className="font-bold text-amber-800 dark:text-amber-300">2. 4th Late Escalation</div>
+                    <span className="text-[10px] text-amber-700 dark:text-amber-400 font-semibold group-hover:underline flex items-center gap-0.5">
+                      <Eye className="w-3 h-3" /> Preview
+                    </span>
+                  </div>
                   <div className="text-[10px] text-amber-700 dark:text-amber-400 mt-0.5">Warning of termination when limit {maxLates} reached. 24h explanation required.</div>
                 </div>
-                <div className="p-2.5 rounded-xl border border-rose-200 dark:border-rose-900/60 bg-rose-50/40 dark:bg-rose-950/20">
-                  <div className="font-bold text-rose-800 dark:text-rose-300">3. Official Termination</div>
+
+                <div
+                  onClick={() => setPreviewTemplate('termination')}
+                  className="p-2.5 rounded-xl border border-rose-200 dark:border-rose-900/60 bg-rose-50/40 dark:bg-rose-950/20 hover:border-rose-400 transition-all cursor-pointer group shadow-2xs"
+                >
+                  <div className="flex items-center justify-between mb-0.5">
+                    <div className="font-bold text-rose-800 dark:text-rose-300">3. Official Termination</div>
+                    <span className="text-[10px] text-rose-700 dark:text-rose-400 font-semibold group-hover:underline flex items-center gap-0.5">
+                      <Eye className="w-3 h-3" /> Preview
+                    </span>
+                  </div>
                   <div className="text-[10px] text-rose-700 dark:text-rose-400 mt-0.5">Triggered via Employee directory action button with custom reason & exit checklist.</div>
                 </div>
               </div>
@@ -435,6 +543,104 @@ export const AttendanceAlertSettingsModal: React.FC<AttendanceAlertSettingsModal
           </div>
         </form>
       </div>
+
+      {/* Interactive Email Template Preview Modal */}
+      {previewTemplate && (
+        <div
+          className="fixed inset-0 z-60 flex items-center justify-center bg-black/70 backdrop-blur-xs p-3 sm:p-5 animate-in fade-in duration-150"
+          onClick={() => setPreviewTemplate(null)}
+        >
+          <div
+            className="bg-white dark:bg-[#0F172A] w-full max-w-3xl rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col h-[90vh] max-h-[850px] animate-in zoom-in-95 duration-150"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header with Device Switcher + Close */}
+            <div className="px-5 py-3.5 bg-slate-50 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/60 text-[#5B4DB7] dark:text-purple-300 flex items-center justify-center shrink-0">
+                  <Eye className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-slate-900 dark:text-white">
+                    {previewTemplate === 'late'
+                      ? 'Template 1: Daily Late Punch-in Intimation'
+                      : previewTemplate === 'warning'
+                      ? 'Template 2: Notice of Warning of Termination (4th Late)'
+                      : 'Template 3: Official Notice of Termination'}
+                  </h4>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                    Live HTML preview styled with TechnoKraft brand identity &amp; mobile responsiveness
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                {/* Viewport switch: Mobile vs Desktop */}
+                <div className="flex items-center p-0.5 bg-slate-200 dark:bg-slate-800 rounded-lg text-xs">
+                  <button
+                    type="button"
+                    onClick={() => setPreviewDevice('mobile')}
+                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all cursor-pointer ${
+                      previewDevice === 'mobile'
+                        ? 'bg-white dark:bg-[#1E293B] text-slate-900 dark:text-white shadow-2xs'
+                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                    }`}
+                  >
+                    <Smartphone className="w-3.5 h-3.5" />
+                    <span>Mobile (380px)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPreviewDevice('desktop')}
+                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all cursor-pointer ${
+                      previewDevice === 'desktop'
+                        ? 'bg-white dark:bg-[#1E293B] text-slate-900 dark:text-white shadow-2xs'
+                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                    }`}
+                  >
+                    <Monitor className="w-3.5 h-3.5" />
+                    <span>Desktop (620px)</span>
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setPreviewTemplate(null)}
+                  className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer shrink-0"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Live Preview Container */}
+            <div className="flex-1 bg-slate-100 dark:bg-[#070D18] p-4 overflow-y-auto flex items-start justify-center">
+              <div
+                className={`bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 w-full ${
+                  previewDevice === 'mobile' ? 'max-w-[400px]' : 'max-w-[640px]'
+                }`}
+              >
+                <div
+                  className="email-preview-frame"
+                  dangerouslySetInnerHTML={{ __html: getPreviewHtml() }}
+                />
+              </div>
+            </div>
+
+            {/* Preview Footer note */}
+            <div className="px-5 py-2.5 bg-slate-50 dark:bg-slate-900/60 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500 shrink-0">
+              <span>Dynamic HR Desk: <strong>{hrName}</strong> &bull; {hrEmail} &bull; {hrPhone}</span>
+              <button
+                type="button"
+                onClick={() => setPreviewTemplate(null)}
+                className="px-3 py-1 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg font-semibold transition-colors cursor-pointer text-xs"
+              >
+                Close Preview
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
