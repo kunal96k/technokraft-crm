@@ -12,6 +12,9 @@ import {
   Users,
   Send,
   Sparkles,
+  User,
+  Phone,
+  Building2,
 } from 'lucide-react';
 import { AttendanceAlertSettings } from '../../types/employees';
 import {
@@ -36,6 +39,9 @@ export const AttendanceAlertSettingsModal: React.FC<AttendanceAlertSettingsModal
   const [superAdminEmail, setSuperAdminEmail] = useState<string>('kunalpatil192001@gmail.com');
   const [extraRecipients, setExtraRecipients] = useState<string[]>([]);
   const [newRecipientInput, setNewRecipientInput] = useState<string>('');
+  const [hrName, setHrName] = useState<string>('HR Department');
+  const [hrEmail, setHrEmail] = useState<string>('hr@technokraftservices.com');
+  const [hrPhone, setHrPhone] = useState<string>('+91 98765 43210');
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -57,6 +63,9 @@ export const AttendanceAlertSettingsModal: React.FC<AttendanceAlertSettingsModal
         setMaxLates(settings.maxLatesPerMonth ?? 4);
         setSuperAdminEmail(settings.superAdminEmail || 'kunalpatil192001@gmail.com');
         setExtraRecipients(settings.extraRecipientsList || []);
+        setHrName(settings.hrName || 'HR Department');
+        setHrEmail(settings.hrEmail || 'hr@technokraftservices.com');
+        setHrPhone(settings.hrPhone || '+91 98765 43210');
       })
       .catch((err) => {
         console.error('[AttendanceAlertSettings] Load failed:', err);
@@ -110,6 +119,9 @@ export const AttendanceAlertSettingsModal: React.FC<AttendanceAlertSettingsModal
         maxLatesPerMonth: Math.max(1, maxLates),
         superAdminEmail: superAdminEmail.trim() || 'kunalpatil192001@gmail.com',
         extraRecipientsList: extraRecipients,
+        hrName: hrName.trim() || 'HR Department',
+        hrEmail: hrEmail.trim() || 'hr@technokraftservices.com',
+        hrPhone: hrPhone.trim() || '+91 98765 43210',
       };
 
       const saved = await updateAttendanceAlertSettings(payload);
@@ -331,6 +343,61 @@ export const AttendanceAlertSettingsModal: React.FC<AttendanceAlertSettingsModal
                     </span>
                   ))
                 )}
+              </div>
+            </div>
+
+            {/* 5. HR Department Contact Desk (Used in all Email Templates) */}
+            <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80">
+              <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1 flex items-center gap-1.5">
+                <Building2 className="w-3.5 h-3.5 text-indigo-500" />
+                HR Department Contact Details (Included in All Email Templates)
+              </label>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mb-3">
+                These contact details are automatically formatted into the assistance & regularization card in all 3 disciplinary email templates.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1 flex items-center gap-1">
+                    <User className="w-3 h-3 text-[#5B4DB7]" />
+                    HR Coordinator / Name
+                  </label>
+                  <input
+                    type="text"
+                    value={hrName}
+                    onChange={(e) => setHrName(e.target.value)}
+                    placeholder="e.g. HR Department"
+                    className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1 flex items-center gap-1">
+                    <Mail className="w-3 h-3 text-[#5B4DB7]" />
+                    HR Official Email
+                  </label>
+                  <input
+                    type="email"
+                    value={hrEmail}
+                    onChange={(e) => setHrEmail(e.target.value)}
+                    placeholder="e.g. hr@technokraftservices.com"
+                    className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1 flex items-center gap-1">
+                    <Phone className="w-3 h-3 text-[#5B4DB7]" />
+                    HR Contact No. / Helpline
+                  </label>
+                  <input
+                    type="text"
+                    value={hrPhone}
+                    onChange={(e) => setHrPhone(e.target.value)}
+                    placeholder="e.g. +91 98765 43210"
+                    className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
+                  />
+                </div>
               </div>
             </div>
 

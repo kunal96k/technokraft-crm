@@ -326,6 +326,9 @@ export interface AttendanceAlertSettings {
   superAdminEmail: string;
   extraRecipients?: string;
   extraRecipientsList: string[];
+  hrName?: string;
+  hrEmail?: string;
+  hrPhone?: string;
   updatedAt?: string;
   updatedBy?: string;
 }
