@@ -100,8 +100,9 @@ export const AttendanceReportModal: React.FC<AttendanceReportModalProps> = ({
   // Email panel states
   const [showEmailSection, setShowEmailSection] = useState<boolean>(false);
   const [recipientInput, setRecipientInput] = useState<string>('');
-  const [recipients, setRecipients] = useState<string[]>([]);
+  const [recipients, setRecipients] = useState<string[]>(['siddhantdadel10@gmail.com']);
   const [ccList, setCcList] = useState<string[]>([
+    'siddhant@tts.net.in',
     'kunalpatil192001@gmail.com',
     'hr@technokraftservices.com',
   ]);
@@ -155,9 +156,12 @@ export const AttendanceReportModal: React.FC<AttendanceReportModalProps> = ({
 
     fetchAttendanceAlertSettings()
       .then((settings) => {
-        const ccs: string[] = [];
-        if (settings.superAdminEmail) ccs.push(settings.superAdminEmail.trim());
-        else ccs.push('kunalpatil192001@gmail.com');
+        const ccs: string[] = ['siddhant@tts.net.in'];
+        if (settings.superAdminEmail && !ccs.includes(settings.superAdminEmail.trim())) {
+          ccs.push(settings.superAdminEmail.trim());
+        } else if (!ccs.includes('kunalpatil192001@gmail.com')) {
+          ccs.push('kunalpatil192001@gmail.com');
+        }
 
         if (settings.hrEmail && !ccs.includes(settings.hrEmail.trim())) {
           ccs.push(settings.hrEmail.trim());
@@ -936,13 +940,12 @@ export const AttendanceReportModal: React.FC<AttendanceReportModalProps> = ({
                 )}
               </div>
 
-              {/* CC Chips (Default Super Admin & HR) */}
+              {/* CC Chips */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300">
-                    CC Addresses (Pre-filled Default)
+                    CC Addresses
                   </label>
-                  <span className="text-[10px] text-slate-400">Super Admin & HR auto-included</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <input
