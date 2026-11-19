@@ -46,7 +46,7 @@ export const AppRoutes: React.FC = () => {
       {/* 2. Protected CRM Application Routes */}
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
-          <Route index element={<Navigate to="/dashboard" replace />} />
+          <Route index element={<Navigate to="/work/my-tasks" replace />} />
           <Route path="/dashboard" element={<DashboardPage />} />
 
         {/* 2. Leads Module — all authenticated users */}
@@ -145,7 +145,7 @@ export const AppRoutes: React.FC = () => {
         <Route path="/notifications" element={<NotificationsPage />} />
 
         {/* Fallback Catch-all */}
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        <Route path="*" element={<Navigate to="/work/my-tasks" replace />} />
       </Route>
     </Route>
   </Routes>

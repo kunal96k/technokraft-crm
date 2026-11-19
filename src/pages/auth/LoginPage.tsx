@@ -46,14 +46,18 @@ export const LoginPage: React.FC = () => {
   const [resetError, setResetError] = useState<string | null>(null);
   const [isResetting, setIsResetting] = useState(false);
 
-  // Redirect if already authenticated
-  const from = (location.state as any)?.from?.pathname || '/dashboard';
+  // Redirect to /work/my-tasks on login or if already authenticated
+  const rawFrom = (location.state as any)?.from?.pathname;
+  const redirectDestination =
+    rawFrom && rawFrom !== '/login' && rawFrom !== '/dashboard'
+      ? rawFrom
+      : '/work/my-tasks';
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate(from, { replace: true });
+      navigate(redirectDestination, { replace: true });
     }
-  }, [isAuthenticated, navigate, from]);
+  }, [isAuthenticated, navigate, redirectDestination]);
 
   // Notify user if session ended due to Indian Time Zone End-of-Day auto-logout
   useEffect(() => {
@@ -95,7 +99,7 @@ export const LoginPage: React.FC = () => {
         setShowForceResetModal(true);
       } else {
         toast.success(`Welcome back, ${response.user?.name || 'Super Admin'}! Access granted.`, 'Authentication Successful');
-        navigate(from, { replace: true });
+        navigate(redirectDestination, { replace: true });
       }
     } catch (err: any) {
       console.error('[LoginPage] Login failed:', err);
@@ -133,7 +137,7 @@ export const LoginPage: React.FC = () => {
       });
       setShowForceResetModal(false);
       toast.success('Password updated successfully. Accessing CRM...', 'Password Changed');
-      navigate(from, { replace: true });
+      navigate(redirectDestination, { replace: true });
     } catch (err: any) {
       const errMsg = err.message || 'Failed to update password.';
       setResetError(errMsg);
