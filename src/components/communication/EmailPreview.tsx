@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import { EmailRecord } from '../../types/communication';
 import { CommunicationStatusBadge } from './CommunicationStatusBadge';
-import { renderBrandedEmailHtml } from '../../utils/emailTemplateRenderer';
+import { renderBrandedEmailHtml, getEmailTemplateMeta } from '../../utils/emailTemplateRenderer';
 import { EmployeeAvatar } from '../common/EmployeeAvatar';
 
 interface EmailPreviewProps {
@@ -55,6 +55,11 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({
   }
 
   const tracking = email.tracking || { sent: true, delivered: false, opened: false, replied: false };
+  const meta = getEmailTemplateMeta(email);
+  const hasRealLead = !meta.isInternal && Boolean(email.leadId && email.leadId !== 'LD-CRM' && email.leadId !== 'lead-custom');
+  const companyDisplayName = email.companyName && email.companyName !== 'Client Company'
+    ? email.companyName
+    : 'TechnoKraft Services LLP';
 
   return (
     <div className={`flex flex-col h-full bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs ${className}`}>
@@ -78,9 +83,23 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({
               </h3>
             </div>
             <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              <span>Ref: {email.leadCode}</span>
-              <span>•</span>
-              <span className="truncate">{email.companyName}</span>
+              {hasRealLead ? (
+                <>
+                  <span>Ref: {email.leadCode}</span>
+                  <span>•</span>
+                  <span className="truncate">{companyDisplayName}</span>
+                </>
+              ) : (
+                <>
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold ${meta.badgeClass}`}>
+                    {meta.label}
+                  </span>
+                  <span>•</span>
+                  <span className="truncate font-medium text-slate-700 dark:text-slate-300">
+                    {companyDisplayName}
+                  </span>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -88,16 +107,18 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({
         <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
           <CommunicationStatusBadge status={email.status} type="email" />
 
-          {/* View Lead Button */}
-          <button
-            type="button"
-            onClick={() => navigate(`/leads/${email.leadId}`)}
-            className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg transition-colors shadow-2xs cursor-pointer"
-            title="Open lead details"
-          >
-            <span>View Lead</span>
-            <ExternalLink className="w-3 h-3 text-slate-400" />
-          </button>
+          {/* View Lead Button (ONLY rendered for authentic CRM leads) */}
+          {hasRealLead && (
+            <button
+              type="button"
+              onClick={() => navigate(`/leads/${email.leadId}`)}
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg transition-colors shadow-2xs cursor-pointer"
+              title="Open lead details"
+            >
+              <span>View Lead</span>
+              <ExternalLink className="w-3 h-3 text-slate-400" />
+            </button>
+          )}
         </div>
       </div>
 
@@ -176,7 +197,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({
               email={email.recipientEmail}
               size="sm"
               showRing={true}
-              isClient={true}
+              isClient={hasRealLead}
             />
             <div>
               <span className="font-semibold text-slate-800 dark:text-slate-200">To: </span>
@@ -200,7 +221,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({
           <div className="flex items-center gap-1">
             <Building className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
             <span>Company: </span>
-            <strong className="text-slate-700 dark:text-slate-200 font-semibold">{email.companyName}</strong>
+            <strong className="text-slate-700 dark:text-slate-200 font-semibold">{companyDisplayName}</strong>
           </div>
 
           <div className="flex items-center gap-1.5">

@@ -240,3 +240,119 @@ function escapeHtml(text: string): string {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
 }
+
+export interface EmailTemplateMeta {
+  label: string;
+  badgeClass: string;
+  isInternal: boolean;
+}
+
+export function getEmailTemplateMeta(email?: {
+  category?: string;
+  subject?: string;
+  leadId?: string;
+  leadCode?: string;
+} | null): EmailTemplateMeta {
+  if (!email) {
+    return {
+      label: 'General Notice',
+      badgeClass: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700',
+      isInternal: true,
+    };
+  }
+
+  const cat = (email.category || '').toUpperCase();
+  const sub = (email.subject || '').toLowerCase();
+
+  // 1. Attendance Report
+  if (cat === 'ATTENDANCE_REPORT' || sub.includes('attendance report')) {
+    return {
+      label: 'Attendance Report',
+      badgeClass: 'bg-purple-50 text-[#5B4DB7] dark:bg-purple-950/60 dark:text-purple-300 border border-purple-200 dark:border-purple-800',
+      isInternal: true,
+    };
+  }
+
+  // 2. Late Punch Notice
+  if (cat === 'LATE_NOTICE' || sub.includes('late punch')) {
+    return {
+      label: 'Late Notice',
+      badgeClass: 'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800',
+      isInternal: true,
+    };
+  }
+
+  // 3. 1st Warning Notice
+  if (
+    cat === 'WARNING_NOTICE' ||
+    cat === 'WARNING_TERMINATION' ||
+    sub.includes('1st attendance warning') ||
+    (sub.includes('warning of termination') && !sub.includes('final')) ||
+    (sub.includes('notice of warning') && !sub.includes('final'))
+  ) {
+    return {
+      label: '1st Warning',
+      badgeClass: 'bg-orange-50 text-orange-700 dark:bg-orange-950/60 dark:text-orange-300 border border-orange-200 dark:border-orange-800',
+      isInternal: true,
+    };
+  }
+
+  // 4. Final Warning Notice
+  if (
+    cat === 'FINAL_WARNING' ||
+    sub.includes('final notice') ||
+    sub.includes('repeated attendance')
+  ) {
+    return {
+      label: 'Final Notice',
+      badgeClass: 'bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200 dark:border-rose-800',
+      isInternal: true,
+    };
+  }
+
+  // 5. Termination Notice
+  if (
+    cat === 'TERMINATION_NOTICE' ||
+    cat === 'TERMINATION_OFFICIAL' ||
+    sub.includes('official notice of termination') ||
+    sub.includes('termination of employment')
+  ) {
+    return {
+      label: 'Termination',
+      badgeClass: 'bg-red-50 text-red-700 dark:bg-red-950/60 dark:text-red-300 border border-red-200 dark:border-red-800',
+      isInternal: true,
+    };
+  }
+
+  // 6. Real B2B Lead Check
+  const hasValidLead = Boolean(
+    email.leadId &&
+    email.leadId !== 'LD-CRM' &&
+    email.leadId !== 'lead-custom' &&
+    email.leadCode &&
+    email.leadCode !== 'LD-CRM'
+  );
+
+  if (hasValidLead) {
+    return {
+      label: email.leadCode || 'Lead',
+      badgeClass: 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700',
+      isInternal: false,
+    };
+  }
+
+  return {
+    label: 'Internal Notice',
+    badgeClass: 'bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-800',
+    isInternal: true,
+  };
+}
+
+export function isInternalEmail(email?: {
+  category?: string;
+  subject?: string;
+  leadId?: string;
+  leadCode?: string;
+} | null): boolean {
+  return getEmailTemplateMeta(email).isInternal;
+}

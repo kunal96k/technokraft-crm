@@ -513,8 +513,17 @@ export const AttendanceReportModal: React.FC<AttendanceReportModalProps> = ({
       const additionalRecipients = recipients.slice(1);
       const combinedCc = [...ccList, ...additionalRecipients];
 
+      // Resolve recipient employee name if matching internal roster
+      const matchedEmp = internalEmployees.find(
+        (e) => e.email?.trim().toLowerCase() === primaryRecipient?.trim().toLowerCase()
+      );
+      const recipientName = matchedEmp?.name || (primaryRecipient?.toLowerCase().includes('siddhant') ? 'Siddhant Dadel' : 'TechnoKraft Management & HR Team');
+
       const res = await sendB2BEmail({
         recipientEmail: primaryRecipient,
+        recipientName: recipientName,
+        companyName: 'TechnoKraft Services LLP',
+        category: 'ATTENDANCE_REPORT',
         subject: emailSubject,
         body: `TechnoKraft Services LLP Attendance Report for ${dateRangeLabel}. Attached: ${cleanFileName}`,
         htmlBody,

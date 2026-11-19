@@ -3,6 +3,7 @@ import { Paperclip, Building, User, ArrowRight } from 'lucide-react';
 import { EmailRecord } from '../../types/communication';
 import { CommunicationStatusBadge } from './CommunicationStatusBadge';
 import { EmployeeAvatar } from '../common/EmployeeAvatar';
+import { getEmailTemplateMeta } from '../../utils/emailTemplateRenderer';
 
 interface EmailListItemProps {
   email: EmailRecord;
@@ -19,6 +20,12 @@ export const EmailListItem: React.FC<EmailListItemProps> = ({
   onSelect,
   onClick,
 }) => {
+  const meta = getEmailTemplateMeta(email);
+  const hasRealLead = !meta.isInternal && Boolean(email.leadId && email.leadId !== 'LD-CRM' && email.leadId !== 'lead-custom');
+  const companyDisplayName = email.companyName && email.companyName !== 'Client Company'
+    ? email.companyName
+    : 'TechnoKraft Services LLP';
+
   return (
     <div
       onClick={() => onClick(email)}
@@ -46,19 +53,19 @@ export const EmailListItem: React.FC<EmailListItemProps> = ({
           />
         </div>
 
-        {/* Client API Avatar as per Name */}
+        {/* Client / Employee Avatar */}
         <EmployeeAvatar
           name={email.recipientName}
           email={email.recipientEmail}
           size="sm"
           showRing={true}
-          isClient={true}
+          isClient={hasRealLead}
           className="flex-shrink-0 hidden sm:inline-flex"
         />
 
         {/* Core Email Metadata */}
         <div className="min-w-0 flex-1 space-y-1">
-          {/* Top row: Recipient & Company + Lead Code */}
+          {/* Top row: Recipient & Company + Lead Code / Template Badge */}
           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
             <span className="text-xs font-bold text-slate-900 dark:text-white truncate">
               {email.recipientName}
@@ -66,11 +73,17 @@ export const EmailListItem: React.FC<EmailListItemProps> = ({
             <span className="text-slate-300 dark:text-slate-600 hidden sm:inline">•</span>
             <span className="text-xs text-slate-600 dark:text-slate-400 truncate flex items-center gap-1">
               <Building className="w-3 h-3 text-slate-400 dark:text-slate-500 flex-shrink-0" />
-              <span className="truncate max-w-[160px] sm:max-w-[200px]">{email.companyName}</span>
+              <span className="truncate max-w-[150px] sm:max-w-[190px]">{companyDisplayName}</span>
             </span>
-            <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-              {email.leadCode}
-            </span>
+            {hasRealLead ? (
+              <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                {email.leadCode}
+              </span>
+            ) : (
+              <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${meta.badgeClass}`}>
+                {meta.label}
+              </span>
+            )}
           </div>
 
           {/* Subject & snippet */}

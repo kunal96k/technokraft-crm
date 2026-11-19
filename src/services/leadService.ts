@@ -128,6 +128,8 @@ export interface BulkImportResponse {
 export interface SendEmailPayload {
   leadId?: string | number;
   leadCode?: string;
+  companyName?: string;
+  category?: string;
   recipientEmail: string;
   recipientName?: string;
   senderName?: string;

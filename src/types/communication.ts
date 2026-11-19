@@ -33,6 +33,7 @@ export interface EmailRecord {
   leadId: string;
   leadCode: string;
   companyName: string;
+  category?: string;
   recipientName: string;
   recipientEmail: string;
   recipientAvatar?: string;
