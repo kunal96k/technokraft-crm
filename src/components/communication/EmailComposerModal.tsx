@@ -18,6 +18,7 @@ import {
   Edit3,
   BookmarkPlus,
   Sparkles,
+  Lock,
 } from 'lucide-react';
 import {
   resolveTemplateText,
@@ -39,8 +40,9 @@ import { CreateTemplateModal } from './CreateTemplateModal';
 import { useAuth } from '../../context/AuthContext';
 import { EmployeeAvatar } from '../common/EmployeeAvatar';
 import { renderBrandedEmailHtml } from '../../utils/emailTemplateRenderer';
-import { EmployeeSelect } from '../common/EmployeeSelect';
-import { findCachedEmployee } from '../../services/employeeService';
+
+const DEFAULT_SMTP_EMAIL = (import.meta.env?.VITE_SMTP_FROM_EMAIL as string) || 'info@technokraftservices.com';
+const DEFAULT_SMTP_NAME = (import.meta.env?.VITE_SMTP_FROM_NAME as string) || 'TechnoKraft Services';
 
 interface EmailComposerModalProps {
   isOpen: boolean;
@@ -134,9 +136,6 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
   };
   const [subject, setSubject] = useState(defaultSubject || '');
   const [body, setBody] = useState(defaultBody || '');
-  const [senderEmployeeName, setSenderEmployeeName] = useState<string>(
-    initialLead?.assignedEmployee?.name || user?.name || ''
-  );
 
   // Template state
   const [availableTemplates, setAvailableTemplates] = useState<EmailTemplate[]>([]);
@@ -172,11 +171,6 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
       setSelectedLeadId(String(initialLead.id));
       setRecipientEmail(defaultRecipientEmail || initialLead.contact?.email || '');
       setRecipientName(initialLead.contact?.name || '');
-      if (initialLead.assignedEmployee?.name) {
-        setSenderEmployeeName(initialLead.assignedEmployee.name);
-      }
-    } else if (user?.name && !senderEmployeeName) {
-      setSenderEmployeeName(user.name);
     }
   }, [initialLead, defaultRecipientEmail, user]);
 
@@ -255,11 +249,10 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
         base64Content: att.base64Content,
       }));
 
-      const senderEmp = findCachedEmployee(senderEmployeeName);
-      const senderName = senderEmployeeName || user?.name || 'TechnoKraft Services';
-      const senderEmail = senderEmp?.email || (senderEmployeeName === user?.name ? user?.email : undefined) || 'info@technokraftservices.com';
-      const senderAvatar = senderEmp?.avatar || user?.avatar;
-      const senderProfilePhoto = senderEmp?.profilePhoto || user?.profilePhoto;
+      const senderName = DEFAULT_SMTP_NAME;
+      const senderEmail = DEFAULT_SMTP_EMAIL;
+      const senderAvatar = 'TS';
+      const senderProfilePhoto = undefined;
 
       const finalCc = getFinalCcList();
       const finalBcc = getFinalBccList();
@@ -349,11 +342,10 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
         base64Content: att.base64Content,
       }));
 
-      const senderEmp = findCachedEmployee(senderEmployeeName);
-      const senderName = senderEmployeeName || user?.name || 'TechnoKraft Services';
-      const senderEmail = senderEmp?.email || (senderEmployeeName === user?.name ? user?.email : undefined) || 'info@technokraftservices.com';
-      const senderAvatar = senderEmp?.avatar || user?.avatar;
-      const senderProfilePhoto = senderEmp?.profilePhoto || user?.profilePhoto;
+      const senderName = DEFAULT_SMTP_NAME;
+      const senderEmail = DEFAULT_SMTP_EMAIL;
+      const senderAvatar = 'TS';
+      const senderProfilePhoto = undefined;
 
       const finalCc = getFinalCcList();
       const finalBcc = getFinalBccList();
@@ -438,11 +430,10 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
         base64Content: att.base64Content,
       }));
 
-      const senderEmp = findCachedEmployee(senderEmployeeName);
-      const senderName = senderEmployeeName || user?.name || 'TechnoKraft Services';
-      const senderEmail = senderEmp?.email || (senderEmployeeName === user?.name ? user?.email : undefined) || 'info@technokraftservices.com';
-      const senderAvatar = senderEmp?.avatar || user?.avatar;
-      const senderProfilePhoto = senderEmp?.profilePhoto || user?.profilePhoto;
+      const senderName = DEFAULT_SMTP_NAME;
+      const senderEmail = DEFAULT_SMTP_EMAIL;
+      const senderAvatar = 'TS';
+      const senderProfilePhoto = undefined;
 
       const finalCc = getFinalCcList();
       const finalBcc = getFinalBccList();
@@ -613,19 +604,25 @@ export const EmailComposerModal: React.FC<EmailComposerModalProps> = ({
 
           {/* Recipient inputs */}
           <div className="space-y-2">
-            {/* Active Sender Account with Typeahead Debounced Search */}
+            {/* Fixed Production SMTP Sender (Read-only, non-editable) */}
             <div className="flex flex-col sm:flex-row sm:items-center gap-2">
               <span className="text-xs font-semibold text-slate-600 dark:text-slate-300 sm:w-12 sm:text-right">From:</span>
-              <div className="flex-1">
-                <EmployeeSelect
-                  value={senderEmployeeName}
-                  onChange={(e) => {
-                    const val = typeof e === 'string' ? e : e.target.value;
-                    setSenderEmployeeName(val);
-                  }}
-                  placeholder="Select Sender Employee (Active only)"
-                  className="w-full text-xs"
-                />
+              <div className="flex-1 flex items-center justify-between px-3 py-2 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-lg text-xs cursor-default select-none shadow-2xs">
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="w-5 h-5 rounded-full bg-[#0A2558] text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0">
+                    TS
+                  </div>
+                  <span className="font-semibold text-slate-800 dark:text-slate-100 truncate">
+                    {DEFAULT_SMTP_NAME}
+                  </span>
+                  <span className="text-slate-500 dark:text-slate-400 font-mono text-[11px] truncate">
+                    &lt;{DEFAULT_SMTP_EMAIL}&gt;
+                  </span>
+                </div>
+                <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 flex-shrink-0">
+                  <Lock className="w-2.5 h-2.5 text-blue-600 dark:text-blue-400" />
+                  <span>Production SMTP</span>
+                </span>
               </div>
             </div>
 
