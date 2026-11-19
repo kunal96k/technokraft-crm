@@ -17,11 +17,12 @@ import {
   RefreshCw,
   Sparkles,
 } from 'lucide-react';
-import { DailyAttendanceRecord } from '../../types/employees';
+import { DailyAttendanceRecord, Employee } from '../../types/employees';
 import {
   fetchAttendanceRecords,
   fetchAttendanceAlertSettings,
 } from '../../services/attendanceService';
+import { fetchEmployees } from '../../services/employeeService';
 import { sendB2BEmail } from '../../services/leadService';
 import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
@@ -38,6 +39,7 @@ interface AttendanceReportModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialRecords?: DailyAttendanceRecord[];
+  employees?: Employee[];
 }
 
 type DatePreset = 'today' | 'month' | 'custom';
@@ -69,6 +71,7 @@ export const AttendanceReportModal: React.FC<AttendanceReportModalProps> = ({
   isOpen,
   onClose,
   initialRecords,
+  employees: propEmployees,
 }) => {
   const { toast } = useToast();
   const { user: authUser } = useAuth();
@@ -85,11 +88,13 @@ export const AttendanceReportModal: React.FC<AttendanceReportModalProps> = ({
   const [startDate, setStartDate] = useState<string>(todayStr);
   const [endDate, setEndDate] = useState<string>(todayStr);
 
-  // Status Filter
+  // Filters
   const [statusFilter, setStatusFilter] = useState<string>('All');
+  const [accountStatusFilter, setAccountStatusFilter] = useState<string>('Active'); // Default: Active only
 
   // Data state
-  const [records, setRecords] = useState<DailyAttendanceRecord[]>([]);
+  const [rawRecords, setRawRecords] = useState<DailyAttendanceRecord[]>([]);
+  const [internalEmployees, setInternalEmployees] = useState<Employee[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   // Email panel states
@@ -116,6 +121,34 @@ export const AttendanceReportModal: React.FC<AttendanceReportModalProps> = ({
     }
   }, [datePreset, todayStr, monthStartStr]);
 
+  // Load employee roster for account status mapping
+  useEffect(() => {
+    if (!isOpen) return;
+
+    if (propEmployees && propEmployees.length > 0) {
+      setInternalEmployees(propEmployees);
+    } else {
+      fetchEmployees({ size: 200 })
+        .then((res) => {
+          setInternalEmployees(res.content || []);
+        })
+        .catch((err) => {
+          console.debug('[ReportModal] Could not fetch employee roster for status map:', err);
+        });
+    }
+  }, [isOpen, propEmployees]);
+
+  // Build employee status lookup map
+  const employeeStatusMap = useMemo(() => {
+    const map = new Map<string, string>();
+    internalEmployees.forEach((emp) => {
+      const st = emp.status || 'Active';
+      if (emp.id) map.set(String(emp.id), st);
+      if (emp.employeeCode) map.set(emp.employeeCode, st);
+    });
+    return map;
+  }, [internalEmployees]);
+
   // Load HR / Super Admin emails on open
   useEffect(() => {
     if (!isOpen) return;
@@ -136,7 +169,7 @@ export const AttendanceReportModal: React.FC<AttendanceReportModalProps> = ({
       });
   }, [isOpen]);
 
-  // Load records whenever dates or status filters change
+  // Load records whenever dates or attendance status filters change
   const loadReportData = async () => {
     setIsLoading(true);
     try {
@@ -170,9 +203,9 @@ export const AttendanceReportModal: React.FC<AttendanceReportModalProps> = ({
         if (statusFilter && statusFilter !== 'All') {
           filtered = filtered.filter((r) => r.status === statusFilter);
         }
-        setRecords(filtered);
+        setRawRecords(filtered);
       } else {
-        setRecords(fetchedContent);
+        setRawRecords(fetchedContent);
       }
     } catch (err: any) {
       console.warn('[ReportModal] Error fetching attendance records:', err);
@@ -182,7 +215,7 @@ export const AttendanceReportModal: React.FC<AttendanceReportModalProps> = ({
         if (statusFilter && statusFilter !== 'All') {
           filtered = filtered.filter((r) => r.status === statusFilter);
         }
-        setRecords(filtered);
+        setRawRecords(filtered);
       }
     } finally {
       setIsLoading(false);
@@ -194,6 +227,31 @@ export const AttendanceReportModal: React.FC<AttendanceReportModalProps> = ({
       loadReportData();
     }
   }, [isOpen, datePreset, startDate, endDate, statusFilter]);
+
+  // Filter raw records by Staff Account Status (Active by default, Inactive, Suspended, All)
+  const records: DailyAttendanceRecord[] = useMemo(() => {
+    const list = rawRecords.map((r) => {
+      const empStatus =
+        employeeStatusMap.get(String(r.employeeId)) ||
+        employeeStatusMap.get(r.employeeCode) ||
+        r.employeeStatus ||
+        'Active';
+      return { ...r, employeeStatus: empStatus };
+    });
+
+    if (!accountStatusFilter || accountStatusFilter === 'All') {
+      return list;
+    }
+
+    return list.filter((r) => {
+      const st = (r.employeeStatus || 'Active').toLowerCase();
+      const target = accountStatusFilter.toLowerCase();
+      if (target === 'inactive') {
+        return st === 'inactive' || st === 'deactivated';
+      }
+      return st === target;
+    });
+  }, [rawRecords, employeeStatusMap, accountStatusFilter]);
 
   // Compute live summary statistics
   const summaryStats: ReportSummaryStats = useMemo(() => {
@@ -305,6 +363,7 @@ export const AttendanceReportModal: React.FC<AttendanceReportModalProps> = ({
     startDate,
     endDate,
     statusFilter,
+    accountStatusFilter,
     generatedBy: authUser?.name || 'CRM Administrator',
     generatedAt: new Date().toLocaleString('en-IN', {
       day: '2-digit',
@@ -391,30 +450,38 @@ export const AttendanceReportModal: React.FC<AttendanceReportModalProps> = ({
             <div style="margin: 20px 0; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
               <table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: left;">
                 <tr style="background: #f1f5f9; font-weight: 600; color: #475569;">
-                  <th style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0;">Metric</th>
-                  <th style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0; text-align: right;">Count</th>
+                  <th style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0;">Filter / Metric</th>
+                  <th style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0; text-align: right;">Value</th>
                 </tr>
                 <tr>
-                  <td style="padding: 10px 14px; border-bottom: 1px solid #f1f5f9;">Total Filtered Records</td>
-                  <td style="padding: 10px 14px; border-bottom: 1px solid #f1f5f9; text-align: right; font-weight: 700;">${summaryStats.total}</td>
+                  <td style="padding: 10px 14px; border-bottom: 1px solid #f1f5f9;">Staff Account Status</td>
+                  <td style="padding: 10px 14px; border-bottom: 1px solid #f1f5f9; text-align: right; font-weight: 700; color: #5B4DB7;">${accountStatusFilter === 'Active' ? 'Active Staff (Default)' : accountStatusFilter}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 14px; border-bottom: 1px solid #f1f5f9;">Attendance Status Filter</td>
+                  <td style="padding: 10px 14px; border-bottom: 1px solid #f1f5f9; text-align: right; font-weight: 700;">${statusFilter}</td>
                 </tr>
                 <tr style="background: #fafafa;">
+                  <td style="padding: 10px 14px; border-bottom: 1px solid #f1f5f9; font-weight: 600;">Total Records</td>
+                  <td style="padding: 10px 14px; border-bottom: 1px solid #f1f5f9; text-align: right; font-weight: 700;">${summaryStats.total}</td>
+                </tr>
+                <tr>
                   <td style="padding: 10px 14px; border-bottom: 1px solid #f1f5f9; color: #059669;">✔ Present</td>
                   <td style="padding: 10px 14px; border-bottom: 1px solid #f1f5f9; text-align: right; font-weight: 700; color: #059669;">${summaryStats.present}</td>
                 </tr>
-                <tr>
+                <tr style="background: #fafafa;">
                   <td style="padding: 10px 14px; border-bottom: 1px solid #f1f5f9; color: #d97706;">⏰ Late Arrivals</td>
                   <td style="padding: 10px 14px; border-bottom: 1px solid #f1f5f9; text-align: right; font-weight: 700; color: #d97706;">${summaryStats.late}</td>
                 </tr>
-                <tr style="background: #fafafa;">
+                <tr>
                   <td style="padding: 10px 14px; border-bottom: 1px solid #f1f5f9; color: #4f46e5;">⏳ Half Day</td>
                   <td style="padding: 10px 14px; border-bottom: 1px solid #f1f5f9; text-align: right; font-weight: 700; color: #4f46e5;">${summaryStats.halfDay}</td>
                 </tr>
-                <tr>
+                <tr style="background: #fafafa;">
                   <td style="padding: 10px 14px; border-bottom: 1px solid #f1f5f9; color: #dc2626;">✖ Absent</td>
                   <td style="padding: 10px 14px; border-bottom: 1px solid #f1f5f9; text-align: right; font-weight: 700; color: #dc2626;">${summaryStats.absent}</td>
                 </tr>
-                <tr style="background: #fafafa;">
+                <tr>
                   <td style="padding: 10px 14px; color: #7c3aed;">🌴 On Leave</td>
                   <td style="padding: 10px 14px; text-align: right; font-weight: 700; color: #7c3aed;">${summaryStats.onLeave}</td>
                 </tr>
@@ -422,7 +489,7 @@ export const AttendanceReportModal: React.FC<AttendanceReportModalProps> = ({
             </div>
 
             <p style="font-size: 13px; color: #64748b;">
-              The full breakdown with employee punches, shifts, and working hours is attached as <strong>${cleanFileName}</strong>.
+              The complete attendance sheet with punches, shifts, and working hours is attached as <strong>${cleanFileName}</strong>.
             </p>
           </div>
 
@@ -516,9 +583,9 @@ export const AttendanceReportModal: React.FC<AttendanceReportModalProps> = ({
         </div>
 
         {/* Scrollable Body */}
-        <div className="flex-1 overflow-y-auto p-5 space-y-5">
-          {/* 1. Date Range & Status Filters Box */}
-          <div className="p-4 rounded-xl bg-slate-50/80 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/60 space-y-3.5">
+        <div className="flex-1 overflow-y-auto p-5 space-y-4">
+          {/* 1. Date Range & Filters Box */}
+          <div className="p-4 rounded-xl bg-slate-50/80 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/60 space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
                 <Calendar className="w-3.5 h-3.5 text-[#5B4DB7] dark:text-purple-400" />
@@ -541,7 +608,6 @@ export const AttendanceReportModal: React.FC<AttendanceReportModalProps> = ({
                 }`}
               >
                 <span>Today</span>
-                <span className="text-[10px] opacity-75">(Default)</span>
               </button>
 
               <button
@@ -569,7 +635,7 @@ export const AttendanceReportModal: React.FC<AttendanceReportModalProps> = ({
               </button>
             </div>
 
-            {/* Custom Range Date Pickers (Shown if preset is custom or month) */}
+            {/* Custom Range Date Pickers */}
             {datePreset === 'custom' && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-200/60 dark:border-slate-700/40">
                 <div>
@@ -605,7 +671,49 @@ export const AttendanceReportModal: React.FC<AttendanceReportModalProps> = ({
               </div>
             )}
 
-            {/* Status Filter Selector */}
+            {/* Staff Account Status Filter (Active by Default, Inactive, Suspended, All) */}
+            <div className="pt-2 border-t border-slate-200/60 dark:border-slate-700/40">
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
+                  <UserCheck className="w-3 h-3 text-[#5B4DB7] dark:text-purple-400" />
+                  Staff Account Status Filter
+                </label>
+                <span className="text-[10px] font-mono font-medium text-slate-400">
+                  {accountStatusFilter === 'Active' ? 'Active Staff Only (Default)' : `${accountStatusFilter} Staff`}
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {[
+                  { id: 'Active', label: 'Active', tag: 'Default' },
+                  { id: 'Inactive', label: 'Deactivated / Inactive' },
+                  { id: 'Suspended', label: 'Suspended' },
+                  { id: 'All', label: 'All Accounts' },
+                ].map((item) => {
+                  const isSelected = accountStatusFilter === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => setAccountStatusFilter(item.id)}
+                      className={`px-3 py-1 text-xs rounded-lg font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
+                        isSelected
+                          ? 'bg-[#5B4DB7] text-white border border-[#5B4DB7] font-bold shadow-xs'
+                          : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
+                      }`}
+                    >
+                      <span>{item.label}</span>
+                      {item.tag && !isSelected && (
+                        <span className="text-[9px] opacity-75 bg-slate-100 dark:bg-slate-700 px-1 py-0.2 rounded">
+                          {item.tag}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Attendance Status Filter Selector */}
             <div className="pt-2 border-t border-slate-200/60 dark:border-slate-700/40">
               <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
                 <Filter className="w-3 h-3 text-[#5B4DB7] dark:text-purple-400" />
@@ -646,11 +754,11 @@ export const AttendanceReportModal: React.FC<AttendanceReportModalProps> = ({
               <span>Telemetry Breakdown</span>
               {isLoading ? (
                 <span className="flex items-center gap-1 text-[#5B4DB7] dark:text-purple-400">
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" /> Fetching latest records...
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" /> Fetching records...
                 </span>
               ) : (
                 <span className="font-mono text-slate-500">
-                  Showing {records.length} records matching criteria
+                  Showing {records.length} records matching filters
                 </span>
               )}
             </div>

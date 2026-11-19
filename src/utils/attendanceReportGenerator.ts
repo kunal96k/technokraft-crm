@@ -9,6 +9,7 @@ export interface ReportMetadata {
   startDate: string;
   endDate: string;
   statusFilter: string;
+  accountStatusFilter?: string;
   departmentFilter?: string;
   generatedBy?: string;
   generatedAt?: string;
@@ -55,7 +56,9 @@ export function buildAttendanceWorkbook(
     [COMPANY_DETAILS.name],
     ['OFFICIAL ATTENDANCE & TELEMETRY REPORT'],
     [`Report Period: ${metadata.dateRangeLabel} (${metadata.startDate} to ${metadata.endDate})`],
-    [`Status Filter: ${metadata.statusFilter} | Total Records: ${records.length} | Generated: ${generatedTimestamp}`],
+    [
+      `Account Filter: ${metadata.accountStatusFilter || 'Active'} | Attendance Status Filter: ${metadata.statusFilter} | Total Records: ${records.length} | Generated: ${generatedTimestamp}`,
+    ],
     [], // Blank spacing row
     [
       'S.No',
@@ -64,6 +67,7 @@ export function buildAttendanceWorkbook(
       'Employee Name',
       'Department',
       'Designation / Role',
+      'Account Status',
       'Shift Schedule',
       'Punch In Time',
       'Punch Out Time',
@@ -88,6 +92,7 @@ export function buildAttendanceWorkbook(
       rec.employeeName || '—',
       rec.department || 'General',
       rec.employeeRole || 'Employee',
+      rec.employeeStatus || 'Active',
       shift,
       rec.loginTime || '—',
       rec.logoutTime || '—',
@@ -109,6 +114,7 @@ export function buildAttendanceWorkbook(
     { wch: 22 }, // Emp Name
     { wch: 18 }, // Department
     { wch: 20 }, // Designation
+    { wch: 16 }, // Account Status
     { wch: 24 }, // Shift Schedule
     { wch: 16 }, // Punch In
     { wch: 16 }, // Punch Out
@@ -208,7 +214,12 @@ export function generateAttendancePdf(
   doc.setFontSize(8);
   doc.setTextColor(100, 116, 139);
   doc.text(`Period: ${metadata.dateRangeLabel}`, pageWidth - margin, 17.5, { align: 'right' });
-  doc.text(`Generated: ${metadata.generatedAt || new Date().toLocaleDateString('en-IN')}`, pageWidth - margin, 21.5, { align: 'right' });
+  doc.text(
+    `Account: ${metadata.accountStatusFilter || 'Active'} | Status: ${metadata.statusFilter} | Generated: ${metadata.generatedAt || new Date().toLocaleDateString('en-IN')}`,
+    pageWidth - margin,
+    21.5,
+    { align: 'right' }
+  );
 
   // Subtle separator line
   doc.setDrawColor(226, 232, 240); // slate-200
@@ -253,6 +264,7 @@ export function generateAttendancePdf(
     'Name',
     'Department',
     'Role',
+    'Account',
     'Shift',
     'Punch In',
     'Punch Out',
@@ -268,6 +280,7 @@ export function generateAttendancePdf(
     rec.employeeName || '—',
     rec.department || 'General',
     rec.employeeRole || '—',
+    rec.employeeStatus || 'Active',
     rec.shiftStartTime && rec.shiftEndTime ? `${rec.shiftStartTime}-${rec.shiftEndTime}` : '10AM-7PM',
     rec.loginTime || '—',
     rec.logoutTime || '—',
@@ -283,8 +296,8 @@ export function generateAttendancePdf(
     margin: { left: margin, right: margin, bottom: 14 },
     theme: 'grid',
     styles: {
-      fontSize: 7.5,
-      cellPadding: 2,
+      fontSize: 7,
+      cellPadding: 1.8,
       font: 'helvetica',
       textColor: [51, 65, 85], // slate-700
       lineColor: [226, 232, 240],
@@ -295,28 +308,29 @@ export function generateAttendancePdf(
       textColor: [255, 255, 255],
       fontStyle: 'bold',
       halign: 'left',
-      cellPadding: 2.5,
+      cellPadding: 2.2,
     },
     alternateRowStyles: {
       fillColor: [248, 250, 252], // slate-50
     },
     columnStyles: {
-      0: { cellWidth: 10, halign: 'center' }, // S.No
-      1: { cellWidth: 20 },                  // Date
-      2: { cellWidth: 20 },                  // Emp Code
-      3: { cellWidth: 35, fontStyle: 'bold' }, // Name
-      4: { cellWidth: 25 },                  // Department
-      5: { cellWidth: 25 },                  // Role
-      6: { cellWidth: 25 },                  // Shift
-      7: { cellWidth: 22 },                  // Punch In
-      8: { cellWidth: 22 },                  // Punch Out
-      9: { cellWidth: 20, halign: 'center' }, // Working
-      10: { cellWidth: 18, halign: 'center' }, // Break
-      11: { cellWidth: 25, halign: 'center', fontStyle: 'bold' }, // Status
+      0: { cellWidth: 8, halign: 'center' },  // S.No
+      1: { cellWidth: 18 },                  // Date
+      2: { cellWidth: 18 },                  // Emp Code
+      3: { cellWidth: 32, fontStyle: 'bold' }, // Name
+      4: { cellWidth: 22 },                  // Department
+      5: { cellWidth: 22 },                  // Role
+      6: { cellWidth: 16, halign: 'center' }, // Account Status
+      7: { cellWidth: 24 },                  // Shift
+      8: { cellWidth: 18 },                  // Punch In
+      9: { cellWidth: 18 },                  // Punch Out
+      10: { cellWidth: 16, halign: 'center' }, // Working
+      11: { cellWidth: 15, halign: 'center' }, // Break
+      12: { cellWidth: 20, halign: 'center', fontStyle: 'bold' }, // Status
     },
     didParseCell: (data) => {
       // Highlight Attendance Status cell
-      if (data.section === 'body' && data.column.index === 11) {
+      if (data.section === 'body' && data.column.index === 12) {
         const statusVal = String(data.cell.raw).trim();
         if (statusVal === 'Late') {
           data.cell.styles.textColor = [180, 83, 9]; // amber-700

@@ -573,6 +573,7 @@ export const AttendancePage: React.FC = () => {
         isOpen={isReportModalOpen}
         onClose={() => setIsReportModalOpen(false)}
         initialRecords={records}
+        employees={employees}
       />
     </div>
   );

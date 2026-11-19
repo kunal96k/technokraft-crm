@@ -276,6 +276,7 @@ export interface DailyAttendanceRecord {
   shiftEndTime?: string;
   isLateEmailSent?: boolean;
   isSuperAdmin?: boolean;
+  employeeStatus?: string;
 }
 
 export interface ManagerOption {
