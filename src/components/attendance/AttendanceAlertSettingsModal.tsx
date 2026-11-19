@@ -27,7 +27,9 @@ import {
   updateAttendanceAlertSettings,
   sendTestAlertEmail,
 } from '../../services/attendanceService';
-import { fetchEmployees } from '../../services/employeeService';
+import { EmployeeSelect } from '../common/EmployeeSelect';
+import { EmployeeAvatar } from '../common/EmployeeAvatar';
+import { useActiveEmployees } from '../../hooks/useActiveEmployees';
 import { useToast } from '../../context/ToastContext';
 import {
   buildDailyLateNoticeEmailHtml,
@@ -47,6 +49,9 @@ export const AttendanceAlertSettingsModal: React.FC<AttendanceAlertSettingsModal
   onSaved,
 }) => {
   const { toast } = useToast();
+  // Hook guaranteeing only active, non-deleted employees are retrieved
+  const { employees: activeEmployees } = useActiveEmployees();
+
   const [isEnabled, setIsEnabled] = useState<boolean>(false);
   const [maxLates, setMaxLates] = useState<number>(4);
   const [superAdminEmail, setSuperAdminEmail] = useState<string>('kunalpatil192001@gmail.com');
@@ -60,8 +65,7 @@ export const AttendanceAlertSettingsModal: React.FC<AttendanceAlertSettingsModal
   const [excludedRoles, setExcludedRoles] = useState<string[]>(['System Administrator']);
   const [newRoleInput, setNewRoleInput] = useState<string>('');
   const [excludedEmployeeIds, setExcludedEmployeeIds] = useState<string[]>([]);
-  const [selectedEmployeeToAdd, setSelectedEmployeeToAdd] = useState<string>('');
-  const [employeeList, setEmployeeList] = useState<Employee[]>([]);
+  const [selectedEmployeeToAdd, setSelectedEmployeeToAdd] = useState<Employee | null>(null);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -138,21 +142,10 @@ export const AttendanceAlertSettingsModal: React.FC<AttendanceAlertSettingsModal
     return '';
   };
 
-  // Load existing settings and employee roster when modal opens
+  // Load existing settings when modal opens
   useEffect(() => {
     if (!isOpen) return;
     setIsLoading(true);
-
-    // Fetch employee roster for exclusion selection
-    fetchEmployees({ size: 1000, sortBy: 'name', sortDirection: 'asc' })
-      .then((res) => {
-        if (res && res.content) {
-          setEmployeeList(res.content);
-        }
-      })
-      .catch((err) => {
-        console.warn('[AttendanceAlertSettings] Could not load employee roster:', err);
-      });
 
     fetchAttendanceAlertSettings()
       .then((settings) => {
@@ -219,15 +212,26 @@ export const AttendanceAlertSettingsModal: React.FC<AttendanceAlertSettingsModal
   };
 
   const handleAddExcludedEmployee = () => {
-    if (!selectedEmployeeToAdd) return;
-
-    if (excludedEmployeeIds.some((id) => String(id) === String(selectedEmployeeToAdd))) {
-      toast.warning('This employee is already in the exclusion list.', 'Already Excluded');
+    if (!selectedEmployeeToAdd || !selectedEmployeeToAdd.id) {
+      toast.warning('Please search and select an active employee first.', 'Selection Required');
       return;
     }
 
-    setExcludedEmployeeIds([...excludedEmployeeIds, selectedEmployeeToAdd]);
-    setSelectedEmployeeToAdd('');
+    const empIdStr = String(selectedEmployeeToAdd.id);
+    const empCodeStr = selectedEmployeeToAdd.employeeCode?.trim();
+
+    if (
+      excludedEmployeeIds.some(
+        (id) => String(id) === empIdStr || (empCodeStr && id.toLowerCase() === empCodeStr.toLowerCase())
+      )
+    ) {
+      toast.warning(`"${selectedEmployeeToAdd.name}" is already in the exclusion list.`, 'Already Excluded');
+      return;
+    }
+
+    setExcludedEmployeeIds([...excludedEmployeeIds, empIdStr]);
+    setSelectedEmployeeToAdd(null);
+    toast.success(`Exempted "${selectedEmployeeToAdd.name}" from automated late emails.`, 'Employee Added');
   };
 
   const handleRemoveExcludedEmployee = (idToRemove: string) => {
@@ -487,39 +491,42 @@ export const AttendanceAlertSettingsModal: React.FC<AttendanceAlertSettingsModal
                 </div>
               </div>
 
-              {/* B. Specific Employee Exclusions with + Button */}
-              <div className="space-y-1.5 pt-2 border-t border-purple-200/50 dark:border-purple-900/40">
-                <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
-                  <span>Exempt Specific Employees</span>
-                  <span className="text-[10px] text-slate-400 font-normal">
-                    {excludedEmployeeIds.length} Individual(s) Exempted
+              {/* B. Specific Employee Exclusions with Typeahead Search (Only Active Employees) */}
+              <div className="space-y-2 pt-2.5 border-t border-purple-200/60 dark:border-purple-900/40">
+                <div className="flex items-center justify-between">
+                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                    <UserCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                    <span>Exempt Specific Active Employees</span>
+                  </label>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
+                    {excludedEmployeeIds.length} Active Employee(s) Exempted
                   </span>
-                </label>
-                <div className="flex gap-2">
-                  <select
-                    value={selectedEmployeeToAdd}
-                    onChange={(e) => setSelectedEmployeeToAdd(e.target.value)}
-                    className="flex-1 px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
-                  >
-                    <option value="">-- Select employee to exempt from late emails --</option>
-                    {employeeList
-                      .filter(
-                        (emp) =>
-                          !excludedEmployeeIds.some(
-                            (id) => String(id) === String(emp.id) || (emp.employeeCode && id === emp.employeeCode)
-                          )
-                      )
-                      .map((emp) => (
-                        <option key={emp.id} value={String(emp.id)}>
-                          {emp.name} ({emp.employeeCode || `ID: ${emp.id}`}) — {emp.role || emp.department || 'Employee'}
-                        </option>
-                      ))}
-                  </select>
+                </div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                  Search and type ahead to select active employees (only active staff are listed; inactive/suspended accounts are excluded).
+                </p>
+
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 min-w-0">
+                    <EmployeeSelect
+                      value={selectedEmployeeToAdd ? String(selectedEmployeeToAdd.id) : ''}
+                      valueField="id"
+                      onSelectEmployee={(emp) => setSelectedEmployeeToAdd(emp)}
+                      placeholder="Type ahead to search active employees by name, code, or role..."
+                      showCodeInLabel={true}
+                      showRoleInLabel={true}
+                      allowEmpty={true}
+                      showAllOption="-- Select an active employee --"
+                      align="full"
+                      className="w-full text-xs"
+                    />
+                  </div>
                   <button
                     type="button"
                     onClick={handleAddExcludedEmployee}
                     disabled={!selectedEmployeeToAdd}
-                    className="inline-flex items-center gap-1 px-3.5 py-2 bg-[#5B4DB7] hover:bg-[#4d409e] text-white rounded-xl font-bold text-xs transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shrink-0"
+                    className="inline-flex items-center gap-1 px-3.5 py-2.5 bg-[#5B4DB7] hover:bg-[#4d409e] text-white rounded-xl font-bold text-xs transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shrink-0 shadow-xs"
+                    title={selectedEmployeeToAdd ? `Add ${selectedEmployeeToAdd.name}` : 'Select an employee to add'}
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>Add Employee</span>
@@ -527,26 +534,40 @@ export const AttendanceAlertSettingsModal: React.FC<AttendanceAlertSettingsModal
                 </div>
 
                 {/* Excluded Employees Badges */}
-                <div className="flex flex-wrap gap-1.5 pt-1 min-h-[30px] p-2 bg-white/70 dark:bg-slate-900/40 rounded-lg border border-purple-100 dark:border-purple-900/30">
+                <div className="flex flex-wrap gap-1.5 pt-1 min-h-[36px] p-2 bg-white/80 dark:bg-slate-900/40 rounded-xl border border-purple-100 dark:border-purple-900/30">
                   {excludedEmployeeIds.map((empId) => {
-                    const matchedEmp = employeeList.find(
-                      (e) => String(e.id) === String(empId) || e.employeeCode === empId
+                    const matchedEmp = activeEmployees.find(
+                      (e) =>
+                        String(e.id) === String(empId) ||
+                        (e.employeeCode && e.employeeCode.toLowerCase() === empId.toLowerCase())
                     );
                     const displayName = matchedEmp
-                      ? `${matchedEmp.name} (${matchedEmp.employeeCode || `ID: ${empId}`})`
+                      ? `${matchedEmp.name} (${matchedEmp.employeeCode || `ID:${empId}`})`
                       : `Employee ID: ${empId}`;
+                    const displayRole = matchedEmp?.role || matchedEmp?.department || '';
 
                     return (
                       <span
                         key={empId}
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 rounded-lg text-xs font-medium shadow-2xs"
+                        className="inline-flex items-center gap-2 px-2.5 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 rounded-lg text-xs font-medium shadow-2xs group"
                       >
-                        <UserCheck className="w-3 h-3 text-emerald-500" />
-                        <span>{displayName}</span>
+                        {matchedEmp ? (
+                          <EmployeeAvatar employee={matchedEmp} size="xs" />
+                        ) : (
+                          <UserCheck className="w-3.5 h-3.5 text-emerald-500" />
+                        )}
+                        <div className="flex flex-col text-left">
+                          <span className="font-semibold leading-tight">{displayName}</span>
+                          {displayRole && (
+                            <span className="text-[10px] text-slate-400 dark:text-slate-500 leading-tight">
+                              {displayRole}
+                            </span>
+                          )}
+                        </div>
                         <button
                           type="button"
                           onClick={() => handleRemoveExcludedEmployee(empId)}
-                          className="text-slate-400 hover:text-rose-500 rounded p-0.5 transition-colors cursor-pointer"
+                          className="text-slate-400 hover:text-rose-500 rounded p-1 transition-colors cursor-pointer ml-1"
                           title="Remove employee from exclusion"
                         >
                           <X className="w-3 h-3" />
@@ -555,7 +576,9 @@ export const AttendanceAlertSettingsModal: React.FC<AttendanceAlertSettingsModal
                     );
                   })}
                   {excludedEmployeeIds.length === 0 && (
-                    <span className="text-[11px] text-slate-400 italic">No specific employees exempted. Select an employee above and click Add Employee.</span>
+                    <span className="text-[11px] text-slate-400 italic py-1 px-1">
+                      No specific employees exempted. Use the typeahead search above to add active staff members.
+                    </span>
                   )}
                 </div>
               </div>
