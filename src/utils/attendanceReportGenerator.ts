@@ -182,57 +182,76 @@ export function generateAttendancePdf(
   let logoOffset = margin;
   try {
     if (TECHNOKRAFT_LOGO_BASE64) {
-      doc.addImage(TECHNOKRAFT_LOGO_BASE64, 'PNG', margin, 7.5, 28, 12);
-      logoOffset = margin + 31;
+      doc.addImage(TECHNOKRAFT_LOGO_BASE64, 'PNG', margin, 7.5, 26, 12);
+      logoOffset = margin + 29;
     }
   } catch (err) {
     console.debug('[PDF] Could not render base64 logo:', err);
   }
 
-  // Left Block: Company Name & Office Address (Bounded width prevents any horizontal overlap)
+  // Left Block: Company Name & Office Address (Stacked dynamically with splitTextToSize to guarantee zero overlap)
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(13);
   doc.setTextColor(30, 41, 59); // slate-800
-  doc.text(COMPANY_DETAILS.name, logoOffset, 12.5);
+  doc.text(COMPANY_DETAILS.name, logoOffset, 12);
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7.5);
   doc.setTextColor(100, 116, 139); // slate-500
-  doc.text(COMPANY_DETAILS.address, logoOffset, 16.5, { maxWidth: 125 });
+
+  // Word-wrap address strictly within 125mm so it never breaches center whitespace
+  const addressLines: string[] = doc.splitTextToSize(COMPANY_DETAILS.address, 125);
+  let leftY = 16.2;
+  addressLines.forEach((line: string) => {
+    doc.text(line, logoOffset, leftY);
+    leftY += 3.6;
+  });
   doc.text(
     `Mobile: ${COMPANY_DETAILS.mobile}  •  Email: ${COMPANY_DETAILS.email}`,
     logoOffset,
-    20.5
+    leftY
   );
 
-  // Right Block: Report Title & Period Metadata (Right-aligned, beautifully spaced)
+  // Right Block: Report Title & Period Metadata (Right-aligned, cleanly stacked)
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(13);
   doc.setTextColor(91, 77, 183); // #5B4DB7 Brand Purple
-  doc.text('ATTENDANCE REPORT', pageWidth - margin, 12.5, { align: 'right' });
+  doc.text('ATTENDANCE REPORT', pageWidth - margin, 12, { align: 'right' });
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(8);
   doc.setTextColor(51, 65, 85); // slate-700
-  doc.text(`Period: ${metadata.dateRangeLabel}`, pageWidth - margin, 16.5, { align: 'right' });
+  doc.text(`Period: ${metadata.dateRangeLabel}`, pageWidth - margin, 16.2, { align: 'right' });
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7.5);
   doc.setTextColor(100, 116, 139); // slate-500
   doc.text(
-    `Staff: ${metadata.accountStatusFilter || 'Active'}  •  Status: ${metadata.statusFilter}  •  Generated: ${metadata.generatedAt || new Date().toLocaleDateString('en-IN')}`,
+    `Staff: ${metadata.accountStatusFilter || 'Active'}  •  Status: ${metadata.statusFilter}`,
     pageWidth - margin,
-    20.5,
+    19.8,
     { align: 'right' }
   );
 
-  // Subtle separator line
+  const timestampStr = metadata.generatedAt || new Date().toLocaleString('en-IN', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  });
+  doc.setFontSize(7);
+  doc.setTextColor(148, 163, 184); // slate-400
+  doc.text(`Generated: ${timestampStr}`, pageWidth - margin, 23.4, { align: 'right' });
+
+  // Subtle separator line below header blocks
   doc.setDrawColor(226, 232, 240); // slate-200
   doc.setLineWidth(0.4);
-  doc.line(margin, 23.5, pageWidth - margin, 23.5);
+  doc.line(margin, 26.5, pageWidth - margin, 26.5);
 
   // 2. Summary Metric Badges Box
-  const summaryY = 26.5;
+  const summaryY = 29.5;
   const cardWidth = (pageWidth - margin * 2 - 20) / 5;
   const cardHeight = 13;
 
