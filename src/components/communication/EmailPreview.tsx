@@ -217,6 +217,13 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({
           </div>
         )}
 
+        {email.bcc && email.bcc.length > 0 && (
+          <div>
+            <span className="font-semibold text-slate-700 dark:text-slate-300">BCC: </span>
+            <span className="text-slate-500 dark:text-slate-400">{email.bcc.join(', ')}</span>
+          </div>
+        )}
+
         <div className="flex flex-wrap items-center gap-4 text-[11px] pt-1 text-slate-500 dark:text-slate-400">
           <div className="flex items-center gap-1">
             <Building className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
