@@ -7,6 +7,9 @@ import {
   Trash2,
   Mail,
   ShieldAlert,
+  ShieldOff,
+  UserCheck,
+  UserX,
   HelpCircle,
   Users,
   Send,
@@ -18,12 +21,13 @@ import {
   Smartphone,
   Monitor,
 } from 'lucide-react';
-import { AttendanceAlertSettings } from '../../types/employees';
+import { Employee, AttendanceAlertSettings } from '../../types/employees';
 import {
   fetchAttendanceAlertSettings,
   updateAttendanceAlertSettings,
   sendTestAlertEmail,
 } from '../../services/attendanceService';
+import { fetchEmployees } from '../../services/employeeService';
 import { useToast } from '../../context/ToastContext';
 import {
   buildDailyLateNoticeEmailHtml,
@@ -51,6 +55,13 @@ export const AttendanceAlertSettingsModal: React.FC<AttendanceAlertSettingsModal
   const [hrName, setHrName] = useState<string>('HR Department');
   const [hrEmail, setHrEmail] = useState<string>('hr@technokraftservices.com');
   const [hrPhone, setHrPhone] = useState<string>('+91 98765 43210');
+
+  // Exclusion Rules State (Skip automated late emails)
+  const [excludedRoles, setExcludedRoles] = useState<string[]>(['System Administrator']);
+  const [newRoleInput, setNewRoleInput] = useState<string>('');
+  const [excludedEmployeeIds, setExcludedEmployeeIds] = useState<string[]>([]);
+  const [selectedEmployeeToAdd, setSelectedEmployeeToAdd] = useState<string>('');
+  const [employeeList, setEmployeeList] = useState<Employee[]>([]);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -127,10 +138,21 @@ export const AttendanceAlertSettingsModal: React.FC<AttendanceAlertSettingsModal
     return '';
   };
 
-  // Load existing settings when modal opens
+  // Load existing settings and employee roster when modal opens
   useEffect(() => {
     if (!isOpen) return;
     setIsLoading(true);
+
+    // Fetch employee roster for exclusion selection
+    fetchEmployees({ size: 1000, sortBy: 'name', sortDirection: 'asc' })
+      .then((res) => {
+        if (res && res.content) {
+          setEmployeeList(res.content);
+        }
+      })
+      .catch((err) => {
+        console.warn('[AttendanceAlertSettings] Could not load employee roster:', err);
+      });
 
     fetchAttendanceAlertSettings()
       .then((settings) => {
@@ -141,6 +163,34 @@ export const AttendanceAlertSettingsModal: React.FC<AttendanceAlertSettingsModal
         setHrName(settings.hrName || 'HR Department');
         setHrEmail(settings.hrEmail || 'hr@technokraftservices.com');
         setHrPhone(settings.hrPhone || '+91 98765 43210');
+
+        // Populate Excluded Roles (Defaults to System Administrator)
+        if (settings.excludedRolesList && settings.excludedRolesList.length > 0) {
+          setExcludedRoles(settings.excludedRolesList);
+        } else if (settings.excludedRoles && settings.excludedRoles.trim()) {
+          setExcludedRoles(
+            settings.excludedRoles
+              .split(',')
+              .map((s) => s.trim())
+              .filter(Boolean)
+          );
+        } else {
+          setExcludedRoles(['System Administrator']);
+        }
+
+        // Populate Excluded Employee IDs
+        if (settings.excludedEmployeeIdsList && settings.excludedEmployeeIdsList.length > 0) {
+          setExcludedEmployeeIds(settings.excludedEmployeeIdsList);
+        } else if (settings.excludedEmployeeIds && settings.excludedEmployeeIds.trim()) {
+          setExcludedEmployeeIds(
+            settings.excludedEmployeeIds
+              .split(',')
+              .map((s) => s.trim())
+              .filter(Boolean)
+          );
+        } else {
+          setExcludedEmployeeIds([]);
+        }
       })
       .catch((err) => {
         console.error('[AttendanceAlertSettings] Load failed:', err);
@@ -150,6 +200,39 @@ export const AttendanceAlertSettingsModal: React.FC<AttendanceAlertSettingsModal
   }, [isOpen]);
 
   if (!isOpen) return null;
+
+  const handleAddExcludedRole = () => {
+    const role = newRoleInput.trim();
+    if (!role) return;
+
+    if (excludedRoles.some((r) => r.toLowerCase() === role.toLowerCase())) {
+      toast.warning(`Role "${role}" is already in the exclusion list.`, 'Duplicate Role');
+      return;
+    }
+
+    setExcludedRoles([...excludedRoles, role]);
+    setNewRoleInput('');
+  };
+
+  const handleRemoveExcludedRole = (roleToRemove: string) => {
+    setExcludedRoles(excludedRoles.filter((r) => r.toLowerCase() !== roleToRemove.toLowerCase()));
+  };
+
+  const handleAddExcludedEmployee = () => {
+    if (!selectedEmployeeToAdd) return;
+
+    if (excludedEmployeeIds.some((id) => String(id) === String(selectedEmployeeToAdd))) {
+      toast.warning('This employee is already in the exclusion list.', 'Already Excluded');
+      return;
+    }
+
+    setExcludedEmployeeIds([...excludedEmployeeIds, selectedEmployeeToAdd]);
+    setSelectedEmployeeToAdd('');
+  };
+
+  const handleRemoveExcludedEmployee = (idToRemove: string) => {
+    setExcludedEmployeeIds(excludedEmployeeIds.filter((id) => String(id) !== String(idToRemove)));
+  };
 
   const handleAddRecipient = () => {
     const email = newRecipientInput.trim().toLowerCase();
@@ -195,10 +278,14 @@ export const AttendanceAlertSettingsModal: React.FC<AttendanceAlertSettingsModal
         hrName: hrName.trim() || 'HR Department',
         hrEmail: hrEmail.trim() || 'hr@technokraftservices.com',
         hrPhone: hrPhone.trim() || '+91 98765 43210',
+        excludedRoles: excludedRoles.join(','),
+        excludedRolesList: excludedRoles,
+        excludedEmployeeIds: excludedEmployeeIds.join(','),
+        excludedEmployeeIdsList: excludedEmployeeIds,
       };
 
       const saved = await updateAttendanceAlertSettings(payload);
-      toast.success('Attendance alert rules and HR contact details saved successfully.', 'Rules Saved');
+      toast.success('Attendance alert rules, exclusions & contact details saved successfully.', 'Rules Saved');
       onSaved?.(saved);
       onClose();
     } catch (err: any) {
@@ -320,6 +407,158 @@ export const AttendanceAlertSettingsModal: React.FC<AttendanceAlertSettingsModal
               <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
                 Lates #1 through #{maxLates - 1} send the <strong>Daily Late Notice</strong>. On the #{maxLates} late mark, <strong>Template 2: Warning of Termination</strong> is automatically escalated.
               </p>
+            </div>
+
+            {/* 3. Automated Late Email Exclusion Rules (Skip automated late notice emails) */}
+            <div className="p-4 bg-purple-50/50 dark:bg-purple-950/20 rounded-xl border border-purple-200/90 dark:border-purple-800/60 space-y-3.5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-lg bg-[#5B4DB7]/10 dark:bg-purple-900/40 text-[#5B4DB7] dark:text-purple-300 flex items-center justify-center">
+                    <ShieldOff className="w-3.5 h-3.5" />
+                  </div>
+                  <div>
+                    <span className="font-bold text-slate-900 dark:text-white text-xs">
+                      Late Email Exclusion Rules
+                    </span>
+                    <span className="text-[10px] text-purple-700 dark:text-purple-300 font-semibold ml-2">
+                      (Skip Automated Late Notices)
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                Employees matching the exempt <strong>Designations / Roles</strong> below, or individually added staff members, will be <strong>skipped</strong> from receiving automated late punch emails.
+              </p>
+
+              {/* A. Role / Designation Exclusions (Prefilled with System Administrator) */}
+              <div className="space-y-1.5">
+                <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
+                  <span>Exempt Designations / Roles</span>
+                  <span className="text-[10px] text-[#5B4DB7] dark:text-purple-300 font-semibold">
+                    Prefilled Default: System Administrator
+                  </span>
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newRoleInput}
+                    onChange={(e) => setNewRoleInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleAddExcludedRole();
+                      }
+                    }}
+                    placeholder="Enter designation / role (e.g. System Administrator, Director)"
+                    className="flex-1 px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddExcludedRole}
+                    className="inline-flex items-center gap-1 px-3.5 py-2 bg-[#5B4DB7] hover:bg-[#4d409e] text-white rounded-xl font-bold text-xs transition-colors cursor-pointer shrink-0"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Add Role</span>
+                  </button>
+                </div>
+
+                {/* Excluded Roles Badges */}
+                <div className="flex flex-wrap gap-1.5 pt-1 min-h-[30px] p-2 bg-white/70 dark:bg-slate-900/40 rounded-lg border border-purple-100 dark:border-purple-900/30">
+                  {excludedRoles.map((role) => (
+                    <span
+                      key={role}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-purple-50 dark:bg-purple-950/60 border border-purple-200 dark:border-purple-800 text-[#5B4DB7] dark:text-purple-300 rounded-lg text-xs font-semibold shadow-2xs"
+                    >
+                      <ShieldOff className="w-3 h-3 text-[#5B4DB7] dark:text-purple-400" />
+                      <span>{role}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveExcludedRole(role)}
+                        className="text-slate-400 hover:text-rose-500 rounded p-0.5 transition-colors cursor-pointer"
+                        title="Remove role from exclusion"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </span>
+                  ))}
+                  {excludedRoles.length === 0 && (
+                    <span className="text-[11px] text-slate-400 italic">No roles excluded. Enter a role name above to exclude.</span>
+                  )}
+                </div>
+              </div>
+
+              {/* B. Specific Employee Exclusions with + Button */}
+              <div className="space-y-1.5 pt-2 border-t border-purple-200/50 dark:border-purple-900/40">
+                <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
+                  <span>Exempt Specific Employees</span>
+                  <span className="text-[10px] text-slate-400 font-normal">
+                    {excludedEmployeeIds.length} Individual(s) Exempted
+                  </span>
+                </label>
+                <div className="flex gap-2">
+                  <select
+                    value={selectedEmployeeToAdd}
+                    onChange={(e) => setSelectedEmployeeToAdd(e.target.value)}
+                    className="flex-1 px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
+                  >
+                    <option value="">-- Select employee to exempt from late emails --</option>
+                    {employeeList
+                      .filter(
+                        (emp) =>
+                          !excludedEmployeeIds.some(
+                            (id) => String(id) === String(emp.id) || (emp.employeeCode && id === emp.employeeCode)
+                          )
+                      )
+                      .map((emp) => (
+                        <option key={emp.id} value={String(emp.id)}>
+                          {emp.name} ({emp.employeeCode || `ID: ${emp.id}`}) — {emp.role || emp.department || 'Employee'}
+                        </option>
+                      ))}
+                  </select>
+                  <button
+                    type="button"
+                    onClick={handleAddExcludedEmployee}
+                    disabled={!selectedEmployeeToAdd}
+                    className="inline-flex items-center gap-1 px-3.5 py-2 bg-[#5B4DB7] hover:bg-[#4d409e] text-white rounded-xl font-bold text-xs transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shrink-0"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Add Employee</span>
+                  </button>
+                </div>
+
+                {/* Excluded Employees Badges */}
+                <div className="flex flex-wrap gap-1.5 pt-1 min-h-[30px] p-2 bg-white/70 dark:bg-slate-900/40 rounded-lg border border-purple-100 dark:border-purple-900/30">
+                  {excludedEmployeeIds.map((empId) => {
+                    const matchedEmp = employeeList.find(
+                      (e) => String(e.id) === String(empId) || e.employeeCode === empId
+                    );
+                    const displayName = matchedEmp
+                      ? `${matchedEmp.name} (${matchedEmp.employeeCode || `ID: ${empId}`})`
+                      : `Employee ID: ${empId}`;
+
+                    return (
+                      <span
+                        key={empId}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 rounded-lg text-xs font-medium shadow-2xs"
+                      >
+                        <UserCheck className="w-3 h-3 text-emerald-500" />
+                        <span>{displayName}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveExcludedEmployee(empId)}
+                          className="text-slate-400 hover:text-rose-500 rounded p-0.5 transition-colors cursor-pointer"
+                          title="Remove employee from exclusion"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </span>
+                    );
+                  })}
+                  {excludedEmployeeIds.length === 0 && (
+                    <span className="text-[11px] text-slate-400 italic">No specific employees exempted. Select an employee above and click Add Employee.</span>
+                  )}
+                </div>
+              </div>
             </div>
 
             {/* 3. Primary Super Admin Recipient */}

@@ -330,6 +330,10 @@ export interface AttendanceAlertSettings {
   hrName?: string;
   hrEmail?: string;
   hrPhone?: string;
+  excludedRoles?: string;
+  excludedRolesList?: string[];
+  excludedEmployeeIds?: string;
+  excludedEmployeeIdsList?: string[];
   updatedAt?: string;
   updatedBy?: string;
 }
