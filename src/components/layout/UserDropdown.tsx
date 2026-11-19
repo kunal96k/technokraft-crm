@@ -22,6 +22,7 @@ import { ChangePasswordModal } from '../profile/ChangePasswordModal';
 import { LogoutConfirmModal } from './LogoutConfirmModal';
 import { useLiveWorkingTime } from '../../utils/workingHoursUtils';
 import { buildSafeApiUrl } from '../../utils/urlUtils';
+import { AttendanceStatusBadge } from '../employees/EmployeeStatusBadge';
 
 interface UserDropdownProps {
   user: UserProfile;
@@ -157,36 +158,53 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({ user, onRoleChange }
                 <span className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
                   {user.department}
                 </span>
+                {authUser?.todayAttendanceStatus && (
+                  <>
+                    <span className="text-[10px] text-slate-400">•</span>
+                    <AttendanceStatusBadge status={authUser.todayAttendanceStatus} size="sm" />
+                  </>
+                )}
               </div>
 
-              {/* Live Last Login Time & Live Working Duration snippet */}
-              {authUser?.lastLoginAt && (
-                <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-700/40 space-y-1.5">
-                  <div className="flex items-center gap-1.5 text-[10px] text-emerald-600 dark:text-emerald-400 font-medium truncate">
-                    <LogIn className="w-3 h-3 shrink-0" />
-                    <span className="truncate">Last login: {authUser.lastLoginAt}</span>
+              {/* Attendance Status & Live Work Duration snippet */}
+              <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-700/40 space-y-1.5">
+                {authUser?.lastLoginAt ? (
+                  <div className="flex items-center justify-between gap-1.5 text-[10px]">
+                    <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-medium truncate">
+                      <LogIn className="w-3 h-3 shrink-0" />
+                      <span className="truncate">Last login: {authUser.lastLoginAt}</span>
+                    </div>
+                    {authUser?.todayAttendanceStatus && (
+                      <AttendanceStatusBadge status={authUser.todayAttendanceStatus} size="sm" />
+                    )}
                   </div>
-                  <div className="flex items-center justify-between text-[10px] bg-emerald-50/70 dark:bg-emerald-950/40 px-2 py-1 rounded-md border border-emerald-200/60 dark:border-emerald-800/50">
-                    <span className="flex items-center gap-1 text-emerald-700 dark:text-emerald-300 font-semibold">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                      Live Work Today:
+                ) : authUser?.todayAttendanceStatus ? (
+                  <div className="flex items-center justify-between text-[10px] py-0.5">
+                    <span className="text-slate-500 dark:text-slate-400 font-medium">Status:</span>
+                    <AttendanceStatusBadge status={authUser.todayAttendanceStatus} size="sm" />
+                  </div>
+                ) : null}
+
+                <div className="flex items-center justify-between text-[10px] bg-emerald-50/70 dark:bg-emerald-950/40 px-2 py-1 rounded-md border border-emerald-200/60 dark:border-emerald-800/50">
+                  <span className="flex items-center gap-1 text-emerald-700 dark:text-emerald-300 font-semibold">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    Live Work Today:
+                  </span>
+                  <span className="font-mono font-bold text-slate-800 dark:text-slate-100">
+                    {liveWorking.formatted}
+                  </span>
+                </div>
+                {authUser?.todayBreakTime && authUser.todayBreakTime !== '0m' && authUser.todayBreakTime !== '---' && (
+                  <div className="flex items-center justify-between text-[10px] bg-amber-50/70 dark:bg-amber-950/40 px-2 py-1 rounded-md border border-amber-200/60 dark:border-amber-800/50">
+                    <span className="flex items-center gap-1 text-amber-700 dark:text-amber-400 font-semibold">
+                      Break Today:
                     </span>
                     <span className="font-mono font-bold text-slate-800 dark:text-slate-100">
-                      {liveWorking.formatted}
+                      {authUser.todayBreakTime}
                     </span>
                   </div>
-                  {authUser?.todayBreakTime && authUser.todayBreakTime !== '0m' && authUser.todayBreakTime !== '---' && (
-                    <div className="flex items-center justify-between text-[10px] bg-amber-50/70 dark:bg-amber-950/40 px-2 py-1 rounded-md border border-amber-200/60 dark:border-amber-800/50">
-                      <span className="flex items-center gap-1 text-amber-700 dark:text-amber-400 font-semibold">
-                        Break Today:
-                      </span>
-                      <span className="font-mono font-bold text-slate-800 dark:text-slate-100">
-                        {authUser.todayBreakTime}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              )}
+                )}
+              </div>
             </div>
 
             {/* Theme Selector (Light / Dark / System) */}

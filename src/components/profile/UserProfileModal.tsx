@@ -25,6 +25,7 @@ import { useAuth } from '../../context/AuthContext';
 import { ChangePasswordModal } from './ChangePasswordModal';
 import { buildSafeApiUrl } from '../../utils/urlUtils';
 import { useLiveWorkingTime } from '../../utils/workingHoursUtils';
+import { AttendanceStatusBadge } from '../employees/EmployeeStatusBadge';
 
 interface UserProfileModalProps {
   isOpen: boolean;
@@ -638,10 +639,8 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
                         <CheckCircle2 className="w-4 h-4" />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-[10px] text-slate-400">Today Attendance Status</p>
-                        <p className="font-semibold text-emerald-600 dark:text-emerald-400 truncate">
-                          {user.todayAttendanceStatus || 'Present / Active'}
-                        </p>
+                        <p className="text-[10px] text-slate-400 mb-0.5">Today Attendance Status</p>
+                        <AttendanceStatusBadge status={user.todayAttendanceStatus || 'Present'} size="sm" />
                       </div>
                     </div>
 

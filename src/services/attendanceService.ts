@@ -175,3 +175,18 @@ export async function updateAttendanceAlertSettings(
   }
   return res.json();
 }
+
+/**
+ * Dispatch a test late alert email to verify SMTP configuration
+ */
+export async function sendTestAlertEmail(email?: string): Promise<{ success: boolean; message: string }> {
+  const query = email ? `?email=${encodeURIComponent(email)}` : '';
+  const res = await authFetch(`/api/attendance/alert-settings/test-email${query}`, {
+    method: 'POST',
+  });
+  if (!res.ok) {
+    const errorBody = await res.json().catch(() => ({}));
+    throw new Error(errorBody.message || `Failed to send test email: HTTP ${res.status}`);
+  }
+  return res.json();
+}

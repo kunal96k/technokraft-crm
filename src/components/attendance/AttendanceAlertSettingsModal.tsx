@@ -10,11 +10,14 @@ import {
   AlertCircle,
   HelpCircle,
   Users,
+  Send,
+  Sparkles,
 } from 'lucide-react';
 import { AttendanceAlertSettings } from '../../types/employees';
 import {
   fetchAttendanceAlertSettings,
   updateAttendanceAlertSettings,
+  sendTestAlertEmail,
 } from '../../services/attendanceService';
 
 interface AttendanceAlertSettingsModalProps {
@@ -36,6 +39,8 @@ export const AttendanceAlertSettingsModal: React.FC<AttendanceAlertSettingsModal
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [isSendingTest, setIsSendingTest] = useState<boolean>(false);
+  const [testFeedback, setTestFeedback] = useState<{ success: boolean; message: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [inputError, setInputError] = useState<string | null>(null);
 
@@ -115,6 +120,22 @@ export const AttendanceAlertSettingsModal: React.FC<AttendanceAlertSettingsModal
       setError(err?.message || 'Failed to save attendance alert settings.');
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleSendTestEmail = async () => {
+    setTestFeedback(null);
+    setError(null);
+    setIsSendingTest(true);
+    try {
+      const target = superAdminEmail.trim() || 'kunalpatil192001@gmail.com';
+      const res = await sendTestAlertEmail(target);
+      setTestFeedback({ success: true, message: res.message || `Test late email sent to ${target}` });
+    } catch (err: any) {
+      console.error('[AttendanceAlertSettings] Test email error:', err);
+      setTestFeedback({ success: false, message: err?.message || 'Failed to send test email via SMTP.' });
+    } finally {
+      setIsSendingTest(false);
     }
   };
 
@@ -335,24 +356,53 @@ export const AttendanceAlertSettingsModal: React.FC<AttendanceAlertSettingsModal
             </div>
           </div>
 
+          {testFeedback && (
+            <div
+              className={`mx-6 mb-2 p-2.5 rounded-xl text-xs flex items-center gap-2 ${
+                testFeedback.success
+                  ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
+                  : 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800'
+              }`}
+            >
+              {testFeedback.success ? (
+                <Check className="w-4 h-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+              ) : (
+                <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400" />
+              )}
+              <span className="flex-1">{testFeedback.message}</span>
+            </div>
+          )}
+
           {/* Footer - Fixed Pinned Actions */}
-          <div className="flex-shrink-0 px-6 py-3.5 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur-xs border-t border-slate-200 dark:border-slate-800 flex items-center justify-end gap-2.5">
+          <div className="flex-shrink-0 px-6 py-3.5 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur-xs border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2.5">
             <button
               type="button"
-              onClick={onClose}
-              disabled={isSaving}
-              className="px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer"
+              onClick={handleSendTestEmail}
+              disabled={isSendingTest || isSaving}
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/30 hover:bg-purple-100 dark:hover:bg-purple-900/50 rounded-xl transition-colors border border-purple-200 dark:border-purple-800 disabled:opacity-50 cursor-pointer"
             >
-              Cancel
+              <Send className="w-3.5 h-3.5" />
+              <span>{isSendingTest ? 'Sending Test...' : 'Send Test Alert Email'}</span>
             </button>
-            <button
-              type="submit"
-              disabled={isSaving || isLoading}
-              className="inline-flex items-center gap-1.5 px-5 py-2 text-xs font-bold text-white bg-[#5B4DB7] hover:bg-[#4E41A2] rounded-xl transition-all shadow-xs disabled:opacity-50 cursor-pointer"
-            >
-              <Check className="w-4 h-4" />
-              <span>{isSaving ? 'Saving Rules...' : 'Save Settings'}</span>
-            </button>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={isSaving}
+                className="px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isSaving || isLoading}
+                className="inline-flex items-center gap-1.5 px-5 py-2 text-xs font-bold text-white bg-[#5B4DB7] hover:bg-[#4E41A2] rounded-xl transition-all shadow-xs disabled:opacity-50 cursor-pointer"
+              >
+                <Check className="w-4 h-4" />
+                <span>{isSaving ? 'Saving Rules...' : 'Save Settings'}</span>
+              </button>
+            </div>
           </div>
         </form>
       </div>
