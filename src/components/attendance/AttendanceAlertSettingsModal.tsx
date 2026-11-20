@@ -20,6 +20,9 @@ import {
   Eye,
   Smartphone,
   Monitor,
+  Briefcase,
+  ChevronDown,
+  CheckCircle2,
 } from 'lucide-react';
 import { Employee, AttendanceAlertSettings } from '../../types/employees';
 import {
@@ -27,6 +30,7 @@ import {
   updateAttendanceAlertSettings,
   sendTestAlertEmail,
 } from '../../services/attendanceService';
+import { fetchEmployeeRoles } from '../../services/employeeService';
 import { EmployeeSelect } from '../common/EmployeeSelect';
 import { EmployeeAvatar } from '../common/EmployeeAvatar';
 import { useActiveEmployees } from '../../hooks/useActiveEmployees';
@@ -66,6 +70,12 @@ export const AttendanceAlertSettingsModal: React.FC<AttendanceAlertSettingsModal
   const [newRoleInput, setNewRoleInput] = useState<string>('');
   const [excludedEmployeeIds, setExcludedEmployeeIds] = useState<string[]>([]);
   const [selectedEmployeeToAdd, setSelectedEmployeeToAdd] = useState<Employee | null>(null);
+
+  // Dynamic Database Roles State (rendered from Employee.role in DB)
+  const [dbRoles, setDbRoles] = useState<string[]>([]);
+  const [selectedRoleFromSelect, setSelectedRoleFromSelect] = useState<string>('');
+  const [isCustomRoleOpen, setIsCustomRoleOpen] = useState<boolean>(false);
+  const [isLoadingRoles, setIsLoadingRoles] = useState<boolean>(false);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -192,10 +202,43 @@ export const AttendanceAlertSettingsModal: React.FC<AttendanceAlertSettingsModal
       .finally(() => setIsLoading(false));
   }, [isOpen]);
 
+  // Load dynamic roles from Database (Employee.role) whenever modal opens
+  useEffect(() => {
+    if (!isOpen) return;
+    setIsLoadingRoles(true);
+
+    fetchEmployeeRoles()
+      .then((roles) => {
+        // Collect any roles present on loaded active employees as well
+        const empRoles = (activeEmployees || [])
+          .map((e) => e.role?.trim())
+          .filter((r): r is string => Boolean(r && r.length > 0));
+
+        // Merge, deduplicate, and sort alphabetically
+        const merged = Array.from(new Set([...roles, ...empRoles]))
+          .filter((r): r is string => Boolean(r && r.trim().length > 0))
+          .sort((a, b) => a.localeCompare(b));
+
+        setDbRoles(merged);
+      })
+      .catch((err) => {
+        console.warn('[AttendanceAlertSettings] Failed to fetch database roles:', err);
+        const empRoles = Array.from(
+          new Set(
+            (activeEmployees || [])
+              .map((e) => e.role?.trim())
+              .filter((r): r is string => Boolean(r && r.length > 0))
+          )
+        ).sort((a, b) => a.localeCompare(b));
+        setDbRoles(empRoles);
+      })
+      .finally(() => setIsLoadingRoles(false));
+  }, [isOpen, activeEmployees]);
+
   if (!isOpen) return null;
 
-  const handleAddExcludedRole = () => {
-    const role = newRoleInput.trim();
+  const handleAddExcludedRole = (roleToAdd?: string) => {
+    const role = (roleToAdd !== undefined ? roleToAdd : newRoleInput).trim();
     if (!role) return;
 
     if (excludedRoles.some((r) => r.toLowerCase() === role.toLowerCase())) {
@@ -204,7 +247,10 @@ export const AttendanceAlertSettingsModal: React.FC<AttendanceAlertSettingsModal
     }
 
     setExcludedRoles([...excludedRoles, role]);
-    setNewRoleInput('');
+    if (roleToAdd === undefined) {
+      setNewRoleInput('');
+    }
+    toast.success(`Exempted role "${role}" from automated late emails.`, 'Role Exempted');
   };
 
   const handleRemoveExcludedRole = (roleToRemove: string) => {
@@ -434,40 +480,131 @@ export const AttendanceAlertSettingsModal: React.FC<AttendanceAlertSettingsModal
                 Employees matching the exempt <strong>Designations / Roles</strong> below, or individually added staff members, will be <strong>skipped</strong> from receiving automated late punch emails.
               </p>
 
-              {/* A. Role / Designation Exclusions (Prefilled with System Administrator) */}
-              <div className="space-y-1.5">
-                <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
-                  <span>Exempt Designations / Roles</span>
-                  <span className="text-[10px] text-[#5B4DB7] dark:text-purple-300 font-semibold">
-                    Prefilled Default: System Administrator
-                  </span>
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={newRoleInput}
-                    onChange={(e) => setNewRoleInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        handleAddExcludedRole();
-                      }
-                    }}
-                    placeholder="Enter designation / role (e.g. System Administrator, Director)"
-                    className="flex-1 px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
-                  />
+              {/* A. Role / Designation Exclusions (Dynamically loaded from Database Employee.role) */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                    <Briefcase className="w-3.5 h-3.5 text-[#5B4DB7] dark:text-purple-400" />
+                    <span>Exempt Designations / Roles</span>
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
+                      {isLoadingRoles ? 'Loading database roles...' : `${dbRoles.length} Roles in Database`}
+                    </span>
+                    <span className="text-[10px] text-[#5B4DB7] dark:text-purple-300 font-semibold bg-purple-50 dark:bg-purple-950/60 px-2 py-0.5 rounded-md border border-purple-200 dark:border-purple-800">
+                      Default: System Administrator
+                    </span>
+                  </div>
+                </div>
+
+                {/* Dynamic Selector Field from Database Employee Roles */}
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <div className="relative flex-1">
+                    <select
+                      value={selectedRoleFromSelect}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val) {
+                          handleAddExcludedRole(val);
+                          setSelectedRoleFromSelect('');
+                        }
+                      }}
+                      className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#5B4DB7] appearance-none cursor-pointer pr-9 shadow-2xs font-medium"
+                    >
+                      <option value="">
+                        -- Select Role from Database ({dbRoles.length} roles available) --
+                      </option>
+                      {dbRoles.map((role) => {
+                        const isAlreadyExempt = excludedRoles.some(
+                          (r) => r.toLowerCase() === role.toLowerCase()
+                        );
+                        return (
+                          <option
+                            key={role}
+                            value={role}
+                            disabled={isAlreadyExempt}
+                          >
+                            {role} {isAlreadyExempt ? '✓ (Already Exempted)' : ''}
+                          </option>
+                        );
+                      })}
+                    </select>
+                    <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  </div>
+
                   <button
                     type="button"
-                    onClick={handleAddExcludedRole}
-                    className="inline-flex items-center gap-1 px-3.5 py-2 bg-[#5B4DB7] hover:bg-[#4d409e] text-white rounded-xl font-bold text-xs transition-colors cursor-pointer shrink-0"
+                    onClick={() => setIsCustomRoleOpen((prev) => !prev)}
+                    className="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold text-[#5B4DB7] dark:text-purple-300 bg-purple-50 dark:bg-purple-950/60 hover:bg-purple-100 dark:hover:bg-purple-900/50 border border-purple-200 dark:border-purple-800 rounded-xl transition-colors cursor-pointer shrink-0"
+                    title="Toggle manual input to type an unlisted custom designation"
                   >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>Add Role</span>
+                    {isCustomRoleOpen ? <X className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
+                    <span>{isCustomRoleOpen ? 'Close Custom' : 'Custom Role'}</span>
                   </button>
                 </div>
 
+                {/* Optional Custom Role Input (if user wants to type a role not in DB) */}
+                {isCustomRoleOpen && (
+                  <div className="flex gap-2 p-2 bg-slate-50 dark:bg-slate-800/60 border border-dashed border-slate-300 dark:border-slate-700 rounded-xl animate-in fade-in slide-in-from-top-1 duration-150">
+                    <input
+                      type="text"
+                      value={newRoleInput}
+                      onChange={(e) => setNewRoleInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleAddExcludedRole();
+                        }
+                      }}
+                      placeholder="Type custom designation / role (e.g. Managing Director)..."
+                      className="flex-1 px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#5B4DB7]"
+                      autoFocus
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleAddExcludedRole()}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 bg-[#5B4DB7] hover:bg-[#4d409e] text-white rounded-lg font-bold text-xs transition-colors cursor-pointer shrink-0"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Add</span>
+                    </button>
+                  </div>
+                )}
+
+                {/* Quick-add chips for available database roles that aren't yet exempted */}
+                {dbRoles.length > 0 && (
+                  <div className="space-y-1 pt-0.5">
+                    <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400">
+                      <span>Quick select role from database:</span>
+                      <span>
+                        {excludedRoles.length} / {dbRoles.length} exempted
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-1 max-h-20 overflow-y-auto pr-1">
+                      {dbRoles.map((role) => {
+                        const isExempt = excludedRoles.some(
+                          (r) => r.toLowerCase() === role.toLowerCase()
+                        );
+                        if (isExempt) return null;
+                        return (
+                          <button
+                            key={role}
+                            type="button"
+                            onClick={() => handleAddExcludedRole(role)}
+                            className="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-100 hover:bg-purple-100 dark:bg-slate-800 dark:hover:bg-purple-950/70 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:text-[#5B4DB7] dark:hover:text-purple-300 rounded-md text-[11px] font-medium transition-colors cursor-pointer"
+                            title={`Click to exempt ${role}`}
+                          >
+                            <Plus className="w-2.5 h-2.5 text-slate-400 hover:text-[#5B4DB7]" />
+                            <span>{role}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
                 {/* Excluded Roles Badges */}
-                <div className="flex flex-wrap gap-1.5 pt-1 min-h-[30px] p-2 bg-white/70 dark:bg-slate-900/40 rounded-lg border border-purple-100 dark:border-purple-900/30">
+                <div className="flex flex-wrap gap-1.5 pt-1 min-h-[32px] p-2 bg-white/70 dark:bg-slate-900/40 rounded-lg border border-purple-100 dark:border-purple-900/30">
                   {excludedRoles.map((role) => (
                     <span
                       key={role}
@@ -486,7 +623,7 @@ export const AttendanceAlertSettingsModal: React.FC<AttendanceAlertSettingsModal
                     </span>
                   ))}
                   {excludedRoles.length === 0 && (
-                    <span className="text-[11px] text-slate-400 italic">No roles excluded. Enter a role name above to exclude.</span>
+                    <span className="text-[11px] text-slate-400 italic">No roles excluded. Select a role above from database.</span>
                   )}
                 </div>
               </div>

@@ -89,6 +89,38 @@ export async function fetchEmployeeFilterOptions(): Promise<EmployeeFilterOption
 }
 
 /**
+ * Fetch distinct employee roles/designations dynamically from the database
+ */
+export async function fetchEmployeeRoles(): Promise<string[]> {
+  try {
+    const res = await authFetch(`${EMPLOYEES_API_URL}/roles`, {
+      method: 'GET',
+      headers: { Accept: 'application/json' },
+    });
+    if (res.ok) {
+      const data: string[] = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        return data.filter(Boolean);
+      }
+    }
+  } catch (err) {
+    console.warn('[EmployeeService] Failed to fetch /roles from server, falling back:', err);
+  }
+
+  // Fallback to filter-options
+  try {
+    const filterOptions = await fetchEmployeeFilterOptions();
+    if (filterOptions?.roles?.length) {
+      return filterOptions.roles;
+    }
+  } catch (err) {
+    console.warn('[EmployeeService] Fallback filterOptions failed:', err);
+  }
+
+  return [];
+}
+
+/**
  * Fetch paginated, filtered, sorted employees from Spring Boot backend
  */
 export async function fetchEmployees(params: EmployeeQueryParams = {}): Promise<EmployeesPageResponse> {
